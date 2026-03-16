@@ -76,13 +76,13 @@ export default function PortalLayout({
               <>
                 <button
                   onClick={handleSignInClick}
-                  className="px-4 py-2 text-sm font-medium text-[#374151] border border-[#E5E7EB] rounded-lg hover:bg-[#F9FAFB] transition-colors"
+                  className="px-4 py-2 text-sm font-bold text-[#3538CD] border-2 border-[#3538CD] rounded-lg hover:bg-[#3538CD]/5 transition-colors uppercase tracking-widest text-[11px]"
                 >
                   Sign In
                 </button>
                 <button
                   onClick={handleRegisterClick}
-                  className="px-4 py-2 text-sm font-medium text-white bg-[#3538CD] rounded-lg hover:bg-[#292bb0] transition-colors"
+                  className="px-4 py-2 text-sm font-bold text-white bg-[#3538CD] border-2 border-[#3538CD] rounded-lg hover:bg-[#292bb0] transition-colors uppercase tracking-widest text-[11px] shadow-sm"
                 >
                   Register
                 </button>

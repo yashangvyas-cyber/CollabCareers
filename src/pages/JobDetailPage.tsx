@@ -7,7 +7,6 @@ import {
   ArrowRight, Bookmark, ChevronRight, TrendingUp, ArrowLeft, Calendar, Share2 
 } from 'lucide-react';
 import { useApp } from '../store/AppContext';
-import { Job } from '../store/types';
 
 export default function JobDetailPage() {
   const { jobId } = useParams();
@@ -17,25 +16,21 @@ export default function JobDetailPage() {
   const [authTab, setAuthTab] = useState<'register' | 'signin'>('register');
 
   // Find job from state, or fallback to first job
-  const job = jobs.find(j => j.id === jobId) || jobs[0] || {
-    id: 'd1', title: 'React Developer', location: 'Ahmedabad', jobType: 'On-site',
-    employmentType: 'Full-time', experience: '2-4 Years', salaryRange: { min: '6', max: '10', currency: 'INR', type: 'Annual' },
-    skills: ['React', 'JavaScript', 'TypeScript', 'Redux', 'Tailwind CSS'],
-    description: "As a React Developer at Yopmails, you will be at the forefront of building high-performance web applications that serve millions of users. You will collaborate closely with product managers, UX designers, and senior engineers to translate complex requirements into elegant, scalable front-end solutions.\n\nWe prioritize clean code, performance optimization, and accessibility. You'll spend your day working with React, TypeScript, and modern state management libraries, while contributing to our shared component library and ensuring a seamless experience across all device types. Your input will directly influence our architectural decisions and development best practices.\n\nWe am a fast-paced team that values innovation and continuous learning. If you thrive in an environment where you can take ownership of features from conception to deployment, and if you are passionate about staying up-to-date with the latest developments in the React ecosystem, we would love to have you on board.",
-    evaluationCriteria: [
-      "Proven experience in building and maintaining large-scale React applications with a focus on component-driven architecture.",
-      "Deep understanding of modern JavaScript (ES6+), TypeScript, and core web technologies like HTML5 and CSS3/Tailwind.",
-      "Expertise in state management (Redux/Zustand) and asynchronous data fetching patterns (React Query/SWR).",
-      "Strong problem-solving skills and the ability to optimize application performance for a smooth user experience."
-    ],
-    customFields: [
-      { id: '1', label: 'Portfolio URL', type: 'Text', required: true },
-      { id: '2', label: 'Are you open to relocate?', type: 'Yes/No', required: false }
-    ],
-    businessUnit: 'Yopmails',
-    createdAt: new Date().toISOString(),
-    targetDate: '2026-03-30'
-  } as any as Job;
+  const job = jobs.find(j => j.id === jobId) || jobs[0];
+
+  if (!job) {
+    return (
+      <PortalLayout>
+        <div className="max-w-7xl mx-auto px-6 py-24 text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Job Not Found</h1>
+          <p className="text-gray-500 mb-8">The job you're looking for might have been moved or removed.</p>
+          <Link to="/portal/yopmails" className="px-6 py-3 bg-[#3538CD] text-white font-bold rounded-xl uppercase tracking-widest text-xs">
+            Back to All Jobs
+          </Link>
+        </div>
+      </PortalLayout>
+    );
+  }
 
   const handleApplyClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -53,42 +48,8 @@ export default function JobDetailPage() {
     setShowAuthModal(true);
   };
 
-  // Similar jobs data (Only Yopmails)
-  const similarJobs = [
-    {
-      id: 'd2',
-      title: 'UI/UX Designer',
-      company: 'Yopmails',
-      location: 'Ahmedabad',
-      type: 'Full-time',
-      experience: '3-5 Years',
-      salary: '8 – 12 LPA',
-      skills: ['Figma', 'Adobe XD', 'Prototyping'],
-      posted: '2 days ago'
-    },
-    {
-      id: 'd3',
-      title: 'Backend Engineer',
-      company: 'Yopmails',
-      location: 'Remote',
-      type: 'Contract',
-      experience: '4-6 Years',
-      salary: '12 – 18 LPA',
-      skills: ['Node.js', 'PostgreSQL', 'Redis'],
-      posted: '5 days ago'
-    },
-    {
-      id: 'd4',
-      title: 'Project Manager',
-      company: 'Yopmails',
-      location: 'Ahmedabad',
-      type: 'Full-time',
-      experience: '5-8 Years',
-      salary: '15 – 22 LPA',
-      skills: ['Agile', 'Jira', 'Stakeholder Management'],
-      posted: '1 day ago'
-    }
-  ];
+  // Dynamic similar jobs (excluding current)
+  const similarJobs = jobs.filter(j => j.id !== job.id).slice(0, 3);
 
   return (
     <PortalLayout>
@@ -262,29 +223,23 @@ export default function JobDetailPage() {
             {similarJobs.map((js) => (
               <div key={js.id} className="bg-white rounded-2xl border border-[#E5E7EB] p-6 shadow-sm hover:border-[#3538CD]/30 hover:shadow-md transition-all group">
                 <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-base font-black text-[#111827] group-hover:text-[#3538CD] transition-colors">{js.title}</h3>
-                  <span className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-wider">{js.posted}</span>
+                  <h3 className="text-base font-black text-[#111827] group-hover:text-[#3538CD] transition-colors line-clamp-1">{js.title}</h3>
+                  <span className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-wider whitespace-nowrap">Posted Today</span>
                 </div>
                 
-                <p className="text-xs font-bold text-[#6B7280] mb-4">{js.company}</p>
+                <p className="text-xs font-bold text-[#6B7280] mb-4">{js.businessUnit}</p>
                 
                 <div className="flex flex-wrap gap-2 mb-6">
                   <span className="px-2 py-1 bg-[#F9FAFB] text-[#6B7280] text-[10px] font-black rounded uppercase">{js.location}</span>
-                  <span className="px-2 py-1 bg-[#F9FAFB] text-[#6B7280] text-[10px] font-black rounded uppercase">{js.type}</span>
+                  <span className="px-2 py-1 bg-[#F9FAFB] text-[#6B7280] text-[10px] font-black rounded uppercase">{js.employmentType}</span>
                   <span className="px-2 py-1 bg-[#F9FAFB] text-[#6B7280] text-[10px] font-black rounded uppercase">{js.experience}</span>
                 </div>
-
-                <div className="flex flex-wrap gap-2 mb-8">
-                  {js.skills.map(skill => (
-                    <span key={skill} className="text-[10px] text-[#9CA3AF] font-bold">#{skill.toLowerCase()}</span>
-                  ))}
-                </div>
-
+                
                 <div className="flex items-center justify-between pt-6 border-t border-[#F3F4F6]">
-                  <span className="text-sm font-black text-[#111827]">{js.salary}</span>
+                  <span className="text-sm font-black text-[#111827]">{js.salaryRange.currency}{js.salaryRange.min} – {js.salaryRange.max} LPA</span>
                   <Link
                     to={`/portal/yopmails/job/${js.id}`}
-                    className="text-xs font-black text-[#3538CD] hover:underline flex items-center gap-1"
+                    className="text-xs font-black text-[#3538CD] hover:underline flex items-center gap-1 uppercase tracking-widest"
                   >
                     View & Apply <ChevronRight className="w-3.5 h-3.5" />
                   </Link>
