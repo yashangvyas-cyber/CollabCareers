@@ -35,6 +35,7 @@ export interface Job {
   customFields: CustomField[];
   evaluationCriteria: string[];
   createdAt: string;
+  targetDate?: string;
 }
 
 export interface Candidate {

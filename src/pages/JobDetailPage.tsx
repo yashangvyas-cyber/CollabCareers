@@ -4,7 +4,7 @@ import PortalLayout from '../components/PortalLayout';
 import AuthModal from '../components/AuthModal';
 import { 
   MapPin, Briefcase, Building2, Clock, IndianRupee, 
-  ArrowRight, Bookmark, ChevronRight, TrendingUp 
+  ArrowRight, Bookmark, ChevronRight, TrendingUp, ArrowLeft, Calendar, Share2 
 } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 import { Job } from '../store/types';
@@ -33,7 +33,8 @@ export default function JobDetailPage() {
       { id: '2', label: 'Are you open to relocate?', type: 'Yes/No', required: false }
     ],
     businessUnit: 'Yopmails',
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    targetDate: '2026-03-30'
   } as any as Job;
 
   const handleApplyClick = (e: React.MouseEvent) => {
@@ -91,14 +92,22 @@ export default function JobDetailPage() {
 
   return (
     <PortalLayout>
-      {/* Breadcrumb */}
+      {/* Top Navigation & Breadcrumb */}
       <div className="bg-white border-b border-[#E5E7EB]">
-        <div className="max-w-7xl mx-auto px-6 py-3">
-          <nav className="flex items-center gap-1.5 text-sm">
-            <Link to="/portal/yopmails" className="text-[#6B7280] hover:text-[#3538CD] transition-colors">{job.businessUnit} Jobs</Link>
-            <ChevronRight className="w-3.5 h-3.5 text-[#D1D5DB]" />
-            <span className="text-[#111827] font-medium">{job.title}</span>
-          </nav>
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex items-center justify-between py-3">
+            <div className="flex items-center gap-6">
+              <Link to="/portal/yopmails" className="flex items-center gap-2 text-xs font-black text-[#3538CD] uppercase tracking-widest hover:underline">
+                <ArrowLeft className="w-4 h-4" /> Back to all jobs
+              </Link>
+              <div className="w-[1px] h-4 bg-[#E5E7EB]" />
+              <nav className="flex items-center gap-1.5 text-sm">
+                <Link to="/portal/yopmails" className="text-[#6B7280] hover:text-[#3538CD] transition-colors">{job.businessUnit} Jobs</Link>
+                <ChevronRight className="w-3.5 h-3.5 text-[#D1D5DB]" />
+                <span className="text-[#111827] font-medium">{job.title}</span>
+              </nav>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -146,17 +155,17 @@ export default function JobDetailPage() {
               <div className="border-t border-[#F3F4F6] my-10" />
 
               {/* About This Role */}
-              <div className="mb-12">
+              <div className="mb-12 border-l-2 border-[#3538CD] pl-8">
                 <h2 className="text-xl font-black text-[#111827] mb-6">About This Role</h2>
                 <div className="text-[15px] text-[#374151] leading-relaxed space-y-6 font-medium whitespace-pre-wrap">
                   {job.description}
                 </div>
               </div>
 
-              {/* What We're Looking For */}
+              {/* Evaluation Criteria */}
               {job.evaluationCriteria && job.evaluationCriteria.length > 0 && (
-                <div className="mb-12">
-                  <h2 className="text-xl font-black text-[#111827] mb-6">What We're Looking For</h2>
+                <div className="mb-12 border-l-2 border-[#3538CD] pl-8">
+                  <h2 className="text-xl font-black text-[#111827] mb-6">Evaluation Criteria</h2>
                   <ul className="space-y-4">
                     {job.evaluationCriteria.map((item, i) => (
                       <li key={i} className="flex items-start gap-4 text-[15px] text-[#374151] font-medium leading-relaxed">
@@ -168,40 +177,75 @@ export default function JobDetailPage() {
                 </div>
               )}
 
+              {/* Additional Information Required */}
+              {job.customFields && job.customFields.length > 0 && (
+                <div className="p-8 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
+                  <h3 className="text-sm font-black text-[#111827] uppercase tracking-widest mb-6">Additional Information Required</h3>
+                  <div className="grid grid-cols-2 gap-6">
+                    {job.customFields.map((field: any) => (
+                      <div key={field.id} className="flex items-center gap-3">
+                        <div className="w-2 h-2 rounded-full bg-[#3538CD]/30" />
+                        <span className="text-sm font-bold text-[#374151]">{field.label} {field.required && <span className="text-[#3538CD] font-black text-xs">*</span>}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
             </div>
           </div>
 
           {/* RIGHT COLUMN — Sticky Apply Card */}
           <div className="w-full lg:w-[380px] shrink-0">
             <div className="sticky top-24">
-              <div className="bg-white rounded-2xl border border-[#3538CD]/10 shadow-2xl p-8 transition-all hover:shadow-[#3538CD]/5 text-center">
-                <div className="mb-8 text-left">
-                  <h3 className="text-xl font-black text-[#111827] mb-2">Apply for this role</h3>
-                  <div className="flex items-center gap-2 text-[#6B7280] text-xs font-semibold">
-                    <TrendingUp className="w-4 h-4 text-[#3538CD]" />
-                    <span>124 candidates applied</span>
-                  </div>
+              <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-2xl overflow-hidden shadow-[#3538CD]/5">
+                {/* Visual Header */}
+                <div className="px-8 py-6 bg-[#F9FAFB] border-b border-[#E5E7EB] flex items-center justify-between">
+                   <div className="space-y-1">
+                      <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">Posted 3 days ago</p>
+                      <p className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest">Job ID: <span className="text-[#111827]">JB-9921</span></p>
+                   </div>
+                   <TrendingUp className="w-5 h-5 text-[#3538CD]" />
                 </div>
 
-                <button
-                  onClick={handleApplyClick}
-                  className="flex items-center justify-center gap-2 w-full py-4 bg-[#3538CD] text-white text-base font-bold rounded-xl hover:bg-[#292bb0] transition-all transform hover:translate-y-[-2px] shadow-lg shadow-[#3538CD]/20 mb-4"
-                >
-                  Apply Now <ArrowRight className="w-5 h-5" />
-                </button>
+                <div className="p-8">
+                  <div className="mb-8">
+                    <h3 className="text-xl font-black text-[#111827] mb-2">Apply for this role</h3>
+                  </div>
 
-                <button className="flex items-center justify-center gap-2 w-full py-4 border-2 border-[#E5E7EB] text-[#374151] text-base font-bold rounded-xl hover:bg-[#F9FAFB] hover:border-[#D1D5DB] transition-all mb-8 group">
-                  <Bookmark className="w-5 h-5 group-hover:fill-[#111827]" /> Save Job
-                </button>
+                  {job.targetDate && (
+                    <div className="mb-6 p-4 bg-[#D97706]/5 border border-[#D97706]/20 rounded-xl flex items-center gap-3">
+                      <Calendar className="w-5 h-5 text-[#D97706] shrink-0" />
+                      <span className="text-xs font-black text-[#D97706] uppercase tracking-widest">Apply before 30 Mar 2026</span>
+                    </div>
+                  )}
 
-                <div className="pt-8 border-t border-[#F3F4F6] text-center space-y-4">
-                  <p className="text-[11px] text-[#9CA3AF] font-bold uppercase tracking-widest">Already applied here before?</p>
+
                   <button
-                    onClick={handleSignInClick}
-                    className="inline-block text-sm font-black text-[#3538CD] hover:text-[#292bb0] hover:underline"
+                    onClick={handleApplyClick}
+                    className="flex items-center justify-center gap-2 w-full py-4 bg-[#3538CD] text-white text-base font-bold rounded-xl hover:bg-[#292bb0] transition-all transform hover:translate-y-[-2px] shadow-lg shadow-[#3538CD]/20 mb-6"
                   >
-                    Sign in to apply in one click →
+                    Apply Now <ArrowRight className="w-5 h-5" />
                   </button>
+
+                  <div className="text-center mb-6">
+                    <p className="text-[11px] text-[#9CA3AF] font-bold uppercase tracking-widest mb-3">Already applied here before?</p>
+                    <button
+                      onClick={handleSignInClick}
+                      className="text-[13px] font-black text-[#3538CD] hover:underline"
+                    >
+                      Sign in for one-click apply →
+                    </button>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button className="flex-1 flex items-center justify-center gap-2 py-3.5 border-2 border-[#E5E7EB] text-[#374151] text-xs font-black rounded-xl hover:bg-[#F9FAFB] hover:border-[#D1D5DB] transition-all uppercase tracking-widest group">
+                      <Bookmark className="w-4 h-4 group-hover:fill-[#111827]" /> Save
+                    </button>
+                    <button className="p-3.5 border-2 border-[#E5E7EB] text-[#6B7280] rounded-xl hover:bg-[#F9FAFB] hover:border-[#D1D5DB] transition-all">
+                      <Share2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

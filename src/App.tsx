@@ -7,7 +7,6 @@ import RegisterPage from './pages/RegisterPage';
 import ApplicationFormPage from './pages/ApplicationFormPage';
 import ConfirmationPage from './pages/ConfirmationPage';
 import CandidateProfilePage from './pages/CandidateProfilePage';
-import AlumniVerificationPage from './pages/AlumniVerificationPage';
 import AlumniApplicationPage from './pages/AlumniApplicationPage';
 import CandidateListingPage from './pages/CandidateListingPage';
 import FlowMapPage from './pages/FlowMapPage';
@@ -30,7 +29,6 @@ function App() {
         <Route path="/portal/:slug/apply/:jobId" element={<ApplicationFormPage />} />
         <Route path="/portal/:slug/confirmation/:jobId" element={<ConfirmationPage />} />
         <Route path="/portal/:slug/profile" element={<CandidateProfilePage />} />
-        <Route path="/portal/:slug/alumni-verify" element={<AlumniVerificationPage />} />
         <Route path="/portal/:slug/alumni/apply/:jobId" element={<AlumniApplicationPage />} />
         {/* Flow 5: Stitching */}
         <Route path="/flow-map" element={<FlowMapPage />} />

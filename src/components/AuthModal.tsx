@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { 
-  X, Eye, EyeOff, Zap, ArrowRight 
+  X, Eye, EyeOff, Zap, ArrowRight, ShieldCheck, Mail, Lock, ArrowLeft
 } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 
@@ -15,11 +15,16 @@ interface AuthModalProps {
 }
 
 export default function AuthModal({ isOpen, onClose, jobTitle, businessUnit, jobId, initialTab = 'register' }: AuthModalProps) {
-  const { registerCandidate, loginCandidate } = useApp();
+  const { registerCandidate, loginCandidate, setAlumniVerified } = useApp();
   const navigate = useNavigate();
+  
+  // States: 'auth' | 'alumni-verify' | 'alumni-success'
+  const [modalState, setModalState] = useState<'auth' | 'alumni-verify' | 'alumni-success'>('auth');
   const [activeTab, setActiveTab] = useState<'register' | 'signin'>(initialTab);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -53,6 +58,39 @@ export default function AuthModal({ isOpen, onClose, jobTitle, businessUnit, job
   const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault();
     loginCandidate(formData.email);
+    onClose();
+    navigate(`/portal/yopmails/apply/${jobId}`);
+  };
+
+  const handleAlumniVerify = (e: React.FormEvent) => {
+    e.preventDefault();
+    setVerifying(true);
+    setError(null);
+    setTimeout(() => {
+      if (formData.email.toLowerCase().includes('yopmails')) {
+        setAlumniVerified(true, formData.email);
+        setModalState('alumni-success');
+      } else {
+        setError("We couldn't match this email with our employee records.");
+      }
+      setVerifying(false);
+    }, 2000);
+  };
+
+  const handleAlumniFinalize = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords do not match.");
+      return;
+    }
+    registerCandidate({
+      id: Date.now().toString(),
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      phone: '',
+      isAlumni: true,
+    });
     onClose();
     navigate(`/portal/yopmails/apply/${jobId}`);
   };
@@ -118,158 +156,327 @@ export default function AuthModal({ isOpen, onClose, jobTitle, businessUnit, job
         </div>
 
         <div className="p-8">
-          {activeTab === 'register' ? (
-            <form onSubmit={handleRegister} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">First Name *</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.firstName}
-                    onChange={e => setFormData({...formData, firstName: e.target.value})}
-                    className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Last Name *</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.lastName}
-                    onChange={e => setFormData({...formData, lastName: e.target.value})}
-                    className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
-                  />
-                </div>
-              </div>
+          {modalState === 'auth' ? (
+            <>
+              {activeTab === 'register' ? (
+                <form onSubmit={handleRegister} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">First Name *</label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.firstName}
+                        onChange={e => setFormData({...formData, firstName: e.target.value})}
+                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Last Name *</label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.lastName}
+                        onChange={e => setFormData({...formData, lastName: e.target.value})}
+                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
+                      />
+                    </div>
+                  </div>
 
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Email Address *</label>
-                <input
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={e => setFormData({...formData, email: e.target.value})}
-                  className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
-                />
-              </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Email Address *</label>
+                    <input
+                      type="email"
+                      required
+                      value={formData.email}
+                      onChange={e => setFormData({...formData, email: e.target.value})}
+                      className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
+                    />
+                  </div>
 
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Password *</label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    value={formData.password}
-                    onChange={e => setFormData({...formData, password: e.target.value})}
-                    className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] pr-12"
-                  />
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Password *</label>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        required
+                        value={formData.password}
+                        onChange={e => setFormData({...formData, password: e.target.value})}
+                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] pr-12"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#3538CD]"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Confirm Password *</label>
+                    <div className="relative">
+                      <input
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        required
+                        value={formData.confirmPassword}
+                        onChange={e => setFormData({...formData, confirmPassword: e.target.value})}
+                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] pr-12"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#3538CD]"
+                      >
+                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="pt-2">
+                    <label className="flex items-center gap-2.5 cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        required
+                        checked={formData.agreeToTerms}
+                        onChange={e => setFormData({...formData, agreeToTerms: e.target.checked})}
+                        className="w-4 h-4 border-2 border-[#D1D5DB] rounded accent-[#3538CD]" 
+                      />
+                      <span className="text-[11px] font-black text-[#6B7280] uppercase tracking-tight">I agree to the <span className="text-[#3538CD] hover:underline">Terms of Service</span> and <span className="text-[#3538CD] hover:underline">Privacy Policy</span></span>
+                    </label>
+                  </div>
+
                   <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#3538CD]"
+                    type="submit"
+                    className="w-full py-4 bg-[#3538CD] text-white text-sm font-black rounded-xl hover:bg-[#292bb0] transition-all shadow-lg shadow-[#3538CD]/20 uppercase tracking-widest flex items-center justify-center gap-2"
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    Create Account & Continue <ArrowRight className="w-4 h-4" />
                   </button>
-                </div>
-              </div>
+                </form>
+              ) : (
+                <form onSubmit={handleSignIn} className="space-y-5">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Email Address *</label>
+                    <input
+                      type="email"
+                      required
+                      value={formData.email}
+                      onChange={e => setFormData({...formData, email: e.target.value})}
+                      className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
+                    />
+                  </div>
 
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Confirm Password *</label>
-                <div className="relative">
-                  <input
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    required
-                    value={formData.confirmPassword}
-                    onChange={e => setFormData({...formData, confirmPassword: e.target.value})}
-                    className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] pr-12"
-                  />
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between">
+                      <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Password *</label>
+                      <button type="button" className="text-[10px] font-black text-[#3538CD] uppercase hover:underline">Forgot password?</button>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        required
+                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] pr-12"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#3538CD]"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+
                   <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#3538CD]"
+                    type="submit"
+                    className="w-full py-4 bg-[#3538CD] text-white text-sm font-black rounded-xl hover:bg-[#292bb0] transition-all shadow-lg shadow-[#3538CD]/20 uppercase tracking-widest flex items-center justify-center gap-2"
                   >
-                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    Sign In & Continue <ArrowRight className="w-4 h-4" />
                   </button>
-                </div>
-              </div>
+                </form>
+              )}
 
-              <div className="pt-2">
-                <label className="flex items-center gap-2.5 cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    required
-                    checked={formData.agreeToTerms}
-                    onChange={e => setFormData({...formData, agreeToTerms: e.target.checked})}
-                    className="w-4 h-4 border-2 border-[#D1D5DB] rounded accent-[#3538CD]" 
-                  />
-                  <span className="text-[11px] font-black text-[#6B7280] uppercase tracking-tight">I agree to the <span className="text-[#3538CD] hover:underline">Terms of Service</span> and <span className="text-[#3538CD] hover:underline">Privacy Policy</span></span>
-                </label>
+              <div className="mt-8 flex flex-col items-center gap-2 pt-6 border-t border-[#E5E7EB]">
+                 <div className="flex items-center gap-2 text-[#3538CD]">
+                    <ShieldCheck className="w-4 h-4" />
+                    <span className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Previously worked here?</span>
+                 </div>
+                 <button
+                    onClick={() => setModalState('alumni-verify')}
+                    className="text-xs font-black text-[#3538CD] hover:underline"
+                  >
+                    Fast-track your application →
+                  </button>
               </div>
-
-              <button
-                type="submit"
-                className="w-full py-4 bg-[#3538CD] text-white text-sm font-black rounded-xl hover:bg-[#292bb0] transition-all shadow-lg shadow-[#3538CD]/20 uppercase tracking-widest flex items-center justify-center gap-2"
+            </>
+          ) : modalState === 'alumni-verify' ? (
+            <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+              <button 
+                onClick={() => setModalState('auth')}
+                className="flex items-center gap-1.5 text-[10px] font-black text-[#6B7280] uppercase tracking-widest hover:text-[#3538CD] mb-8 transition-colors"
               >
-                Create Account & Continue <ArrowRight className="w-4 h-4" />
+                <ArrowLeft className="w-3.5 h-3.5" /> Back to Register
               </button>
-            </form>
+
+              <div className="text-center mb-8">
+                <div className="w-16 h-16 rounded-2xl bg-[#3538CD]/5 text-[#3538CD] flex items-center justify-center mx-auto mb-4">
+                  <ShieldCheck className="w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-black text-[#111827] mb-2">Alumni Verification</h3>
+                <p className="text-sm text-[#6B7280] font-medium leading-relaxed px-4">
+                  Enter your previous company email. Your application will be flagged with an Alumni badge so the recruiter knows your background.
+                </p>
+              </div>
+
+              <form onSubmit={handleAlumniVerify} className="space-y-6">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1 flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5" /> Enter your old company email
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={e => {
+                      setFormData({...formData, email: e.target.value});
+                      setError(null);
+                    }}
+                    placeholder="e.g. name@yopmails.com"
+                    className={`w-full border ${error ? 'border-red-500' : 'border-[#E5E7EB]'} rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] transition-all`}
+                  />
+                  {error && (
+                    <p className="text-[10px] font-black text-red-500 uppercase tracking-widest ml-1 mt-2">{error}</p>
+                  )}
+                  <div className="flex items-center gap-1.5 ml-1 mt-3">
+                    <Lock className="w-3 h-3 text-[#9CA3AF]" />
+                    <p className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-tight">
+                      We'll check this against our employee records. Your data stays private.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-5 bg-[#3538CD]/5 border border-[#3538CD]/10 rounded-2xl mb-2">
+                  <div className="flex items-start gap-3">
+                    <ShieldCheck className="w-5 h-5 text-[#3538CD] mt-0.5 shrink-0" />
+                    <div>
+                      <h4 className="text-xs font-black text-[#111827] uppercase tracking-widest mb-1">How it works</h4>
+                      <p className="text-[11px] text-[#6B7280] font-bold leading-relaxed">
+                        If matched, your application gets priority status. No separate application needed.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={verifying}
+                  className="w-full py-4 bg-[#3538CD] text-white text-sm font-black rounded-xl hover:bg-[#292bb0] transition-all shadow-lg shadow-[#3538CD]/20 uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {verifying ? (
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <>Verify Alumni Status <ArrowRight className="w-4 h-4" /></>
+                  )}
+                </button>
+              </form>
+            </div>
           ) : (
-            <form onSubmit={handleSignIn} className="space-y-5">
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Email Address *</label>
-                <input
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={e => setFormData({...formData, email: e.target.value})}
-                  className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <div className="flex justify-between">
-                  <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Password *</label>
-                  <button type="button" className="text-[10px] font-black text-[#3538CD] uppercase hover:underline">Forgot password?</button>
-                </div>
-                <div className="relative">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] pr-12"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#3538CD]"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                className="w-full py-4 bg-[#3538CD] text-white text-sm font-black rounded-xl hover:bg-[#292bb0] transition-all shadow-lg shadow-[#3538CD]/20 uppercase tracking-widest flex items-center justify-center gap-2"
+            <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+               <button 
+                onClick={() => setModalState('alumni-verify')}
+                className="flex items-center gap-1.5 text-[10px] font-black text-[#6B7280] uppercase tracking-widest hover:text-[#3538CD] mb-8 transition-colors"
               >
-                Sign In & Continue <ArrowRight className="w-4 h-4" />
+                <ArrowLeft className="w-3.5 h-3.5" /> Back
               </button>
-            </form>
+
+              <div className="text-center mb-10">
+                <div className="w-16 h-16 rounded-full bg-[#10b981]/10 text-[#10b981] flex items-center justify-center mx-auto mb-4 border border-[#10b981]/20">
+                  <ShieldCheck className="w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-black text-[#111827] mb-2">Verified! ✨</h3>
+                <p className="text-sm text-[#6B7280] font-medium leading-relaxed mb-6">
+                  You've been verified as a former employee. Complete your profile setup to continue.
+                </p>
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#3538CD]/10 text-[#3538CD] rounded-full border border-[#3538CD]/20">
+                  <Zap className="w-3.5 h-3.5 fill-[#3538CD]" />
+                  <span className="text-[10px] font-black uppercase tracking-widest italic">Alumni Status Applied</span>
+                </div>
+              </div>
+
+              <form onSubmit={handleAlumniFinalize} className="space-y-4">
+                 <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5 text-left">
+                       <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">First Name *</label>
+                       <input
+                        type="text"
+                        required
+                        value={formData.firstName}
+                        onChange={e => setFormData({...formData, firstName: e.target.value})}
+                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
+                      />
+                    </div>
+                    <div className="space-y-1.5 text-left">
+                       <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Last Name *</label>
+                       <input
+                        type="text"
+                        required
+                        value={formData.lastName}
+                        onChange={e => setFormData({...formData, lastName: e.target.value})}
+                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
+                      />
+                    </div>
+                 </div>
+
+                 <div className="space-y-1.5 text-left">
+                    <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Setup Password *</label>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        required
+                        value={formData.password}
+                        onChange={e => setFormData({...formData, password: e.target.value})}
+                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] pr-12"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#3538CD]"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5 text-left">
+                    <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Confirm Password *</label>
+                    <div className="relative">
+                      <input
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        required
+                        value={formData.confirmPassword}
+                        onChange={e => setFormData({...formData, confirmPassword: e.target.value})}
+                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] pr-12"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#3538CD]"
+                      >
+                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full py-4 bg-[#3538CD] text-white text-sm font-black rounded-xl hover:bg-[#292bb0] transition-all shadow-lg shadow-[#3538CD]/20 uppercase tracking-widest flex items-center justify-center gap-2 mt-4"
+                  >
+                    Setup Account & Apply <ArrowRight className="w-4 h-4" />
+                  </button>
+              </form>
+            </div>
           )}
-
-
-          <div className="mt-8 flex flex-col items-center gap-2 pt-6 border-t border-[#E5E7EB]">
-             <div className="flex items-center gap-2 text-[#3538CD]">
-                <Zap className="w-4 h-4 fill-[#3538CD]" />
-                <span className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Previously worked here?</span>
-             </div>
-             <Link
-                to="/portal/yopmails/alumni-verify"
-                className="text-xs font-black text-[#3538CD] hover:underline"
-              >
-                Fast-track your application →
-              </Link>
-          </div>
         </div>
       </div>
     </div>
