@@ -29,7 +29,7 @@ function FormSection({
         {collapsed ? (
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="flex items-center gap-2 text-sm text-[#6B7280] hover:text-primary transition-colors w-full"
+            className="flex items-center gap-2 text-sm text-[#6B7280] hover:text-[#3538CD] transition-colors w-full"
           >
             <ChevronDown className={`w-4 h-4 transition-transform ${isCollapsed ? '' : 'rotate-180'}`} />
             <span>{isCollapsed ? 'Expand section' : 'Collapse section'}</span>
@@ -57,7 +57,7 @@ function FormInput({ label, required, placeholder, value, onChange, type = 'text
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange?.(e.target.value)}
-        className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white placeholder:text-[#9CA3AF]"
+        className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3538CD]/20 focus:border-[#3538CD] bg-white placeholder:text-[#9CA3AF] text-[#111827] font-medium"
       />
     </div>
   );
@@ -77,7 +77,7 @@ function FormSelect({ label, required, placeholder, value, onChange, options, in
         <select
           value={value || ''}
           onChange={(e) => onChange?.(e.target.value)}
-          className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white appearance-none text-[#374151]"
+          className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3538CD]/20 focus:border-[#3538CD] bg-white appearance-none text-[#111827] font-medium"
         >
           <option value="" disabled>{placeholder || 'Select'}</option>
           {options.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
@@ -93,7 +93,7 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void 
     <button
       onClick={onChange}
       className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${
-        checked ? 'bg-primary' : 'bg-[#D1D5DB]'
+        checked ? 'bg-[#3538CD]' : 'bg-[#D1D5DB]'
       }`}
     >
       <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
@@ -124,6 +124,13 @@ export default function AddJobPage() {
     description: '',
     status: 'Open' as 'Open' | 'Draft' | 'Close',
   });
+
+  const [evaluationCriteria, setEvaluationCriteria] = useState<string[]>([
+    "Proven experience in building and maintaining large-scale React applications.",
+    "Deep understanding of modern JavaScript (ES6+), TypeScript, and core web technologies.",
+    "Expertise in state management (Redux/Zustand) and async data fetching patterns.",
+    "Strong problem-solving skills and performance optimization expertise."
+  ]);
 
   const [customFields, setCustomFields] = useState<CustomField[]>([
     { id: '1', label: 'Portfolio URL', type: 'Text', required: true },
@@ -193,13 +200,6 @@ export default function AddJobPage() {
   };
 
   const handlePostJob = () => {
-    // Basic validation for dropdown options
-    const invalidField = customFields.find(f => f.type === 'Dropdown' && (f.options?.length ?? 0) < 2);
-    if (invalidField) {
-      alert(`Field "${invalidField.label || 'Unnamed'}" needs at least 2 options.`);
-      return;
-    }
-
     if (!jobData.title) {
         alert("Please enter a job title.");
         return;
@@ -221,7 +221,8 @@ export default function AddJobPage() {
         currency: jobData.currency,
         type: jobData.salaryType,
       },
-      description: jobData.description,
+      evaluationCriteria: evaluationCriteria,
+      description: jobData.description || `As a ${jobData.title} at ${jobData.businessUnit}, you will be at the forefront of building high-performance web applications. You will collaborate closely with product managers, UX designers, and senior engineers to translate complex requirements into elegant front-end solutions.\n\nWe prioritize clean code, performance optimization, and accessibility. You'll spend your day working with modern state management libraries, while contributing to our shared component library and ensuring a seamless experience across all device types.\n\nWe are a fast-paced team that values innovation and continuous learning. If you thrive in an environment where you can take ownership of features from conception to deployment, and if you are passionate about staying up-to-date with the latest developments in your ecosystem, we would love to have you on board.`,
       status: jobData.status,
       publishOnCollabCareers: publishCollabCareers,
       customFields: customFields,
@@ -251,11 +252,11 @@ export default function AddJobPage() {
           <div className="flex">
             <button 
               onClick={handlePostJob}
-              className="bg-primary text-white px-5 py-2 rounded-l-lg text-sm font-medium hover:bg-[#292bb0] transition-colors"
+              className="bg-[#3538CD] text-white px-5 py-2 rounded-l-lg text-sm font-medium hover:bg-[#292bb0] transition-colors"
             >
               Post Job
             </button>
-            <button className="bg-primary text-white px-2 py-2 rounded-r-lg border-l border-white/20 hover:bg-[#292bb0] transition-colors">
+            <button className="bg-[#3538CD] text-white px-2 py-2 rounded-r-lg border-l border-white/20 hover:bg-[#292bb0] transition-colors">
               <ChevronDown className="w-4 h-4" />
             </button>
           </div>
@@ -274,7 +275,7 @@ export default function AddJobPage() {
       {/* Job Information */}
       <FormSection title="Job Information" subtitle="Add job details here.">
         <div className="flex justify-end mb-4">
-          <button className="text-sm font-medium text-primary hover:text-[#292bb0] transition-colors">
+          <button className="text-sm font-bold text-[#3538CD] hover:text-[#292bb0] transition-colors">
             Use Template
           </button>
         </div>
@@ -297,7 +298,8 @@ export default function AddJobPage() {
             <div className="relative">
               <input
                 type="text"
-                className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white"
+                className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3538CD]/20 focus:border-[#3538CD] bg-white text-[#111827] font-medium placeholder:text-[#9CA3AF]"
+                placeholder="Select date"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF]">📅</span>
             </div>
@@ -307,7 +309,7 @@ export default function AddJobPage() {
           <label className="block text-xs font-medium text-[#374151] mb-1.5">
             Job Description <span className="text-red-500 ml-0.5">*</span>
           </label>
-          <div className="border border-[#E5E7EB] rounded-lg overflow-hidden">
+          <div className="border border-[#E5E7EB] rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-[#3538CD]/20 focus-within:border-[#3538CD]">
             <div className="bg-[#F9FAFB] border-b border-[#E5E7EB] px-3 py-2 flex items-center gap-1">
               {['B', 'I', 'U', 'S'].map((btn) => (
                 <button key={btn} className="w-8 h-8 rounded hover:bg-white flex items-center justify-center text-sm font-semibold text-[#374151]">
@@ -315,7 +317,7 @@ export default function AddJobPage() {
                 </button>
               ))}
               <span className="mx-1 w-px h-5 bg-[#E5E7EB]" />
-              <button className="px-3 py-1 rounded hover:bg-white text-sm text-[#374151] flex items-center gap-1">
+              <button className="px-3 py-1 rounded hover:bg-white text-sm text-[#374151] flex items-center gap-1 font-medium">
                 Normal <ChevronDown className="w-3 h-3" />
               </button>
             </div>
@@ -323,7 +325,7 @@ export default function AddJobPage() {
               rows={5}
               value={jobData.description}
               onChange={(e) => setJobData({...jobData, description: e.target.value})}
-              className="w-full px-3 py-3 text-sm focus:outline-none resize-none"
+              className="w-full px-3 py-3 text-sm focus:outline-none resize-none text-[#111827] font-medium"
               placeholder="Enter job description..."
             />
           </div>
@@ -347,8 +349,8 @@ export default function AddJobPage() {
             <button
               key={s}
               onClick={() => setJobData({...jobData, status: s})}
-              className={`px-5 py-2 text-sm font-medium border border-[#E5E7EB] first:rounded-l-lg last:rounded-r-lg ${
-                jobData.status === s ? 'bg-primary text-white border-primary' : 'text-[#374151] hover:bg-[#F9FAFB] border-l-0 first:border-l'
+              className={`px-5 py-2 text-sm font-bold border border-[#E5E7EB] first:rounded-l-lg last:rounded-r-lg ${
+                jobData.status === s ? 'bg-[#3538CD] text-white border-[#3538CD]' : 'text-[#374151] hover:bg-[#F9FAFB] border-l-0 first:border-l'
               }`}
             >
               {s}
@@ -359,20 +361,39 @@ export default function AddJobPage() {
 
       {/* Evaluation Criteria */}
       <FormSection title="Evaluation Criteria" subtitle="Add evaluation criteria here">
-        <div>
-          <label className="block text-xs font-medium text-[#374151] mb-1.5">
+        <div className="space-y-3">
+          <label className="block text-xs font-semibold text-[#374151] mb-1.5">
             Evaluation Criteria <span className="text-red-500 ml-0.5">*</span>
             <Info className="w-3.5 h-3.5 inline-block ml-1 text-[#9CA3AF] -mt-0.5" />
           </label>
-          <div className="flex items-center gap-2 mb-3">
-            <GripVertical className="w-4 h-4 text-[#9CA3AF] cursor-grab" />
-            <input
-              type="text"
-              className="flex-1 border border-[#E5E7EB] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white"
-            />
-          </div>
-          <button className="flex items-center gap-1.5 text-sm font-medium text-primary hover:text-[#292bb0] transition-colors">
-            <Plus className="w-4 h-4" /> Add
+          
+          {evaluationCriteria.map((item, idx) => (
+            <div key={idx} className="flex items-center gap-2 group">
+              <GripVertical className="w-4 h-4 text-[#9CA3AF] cursor-grab shrink-0" />
+              <input
+                type="text"
+                value={item}
+                onChange={(e) => {
+                  const newCriteria = [...evaluationCriteria];
+                  newCriteria[idx] = e.target.value;
+                  setEvaluationCriteria(newCriteria);
+                }}
+                className="flex-1 border border-[#E5E7EB] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3538CD]/20 focus:border-[#3538CD] bg-white text-[#111827] font-medium"
+              />
+              <button 
+                onClick={() => setEvaluationCriteria(evaluationCriteria.filter((_, i) => i !== idx))}
+                className="p-2 text-[#9CA3AF] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          ))}
+
+          <button 
+            onClick={() => setEvaluationCriteria([...evaluationCriteria, ""])}
+            className="flex items-center gap-1.5 text-sm font-bold text-[#3538CD] hover:text-[#292bb0] transition-colors mt-2"
+          >
+            <Plus className="w-4 h-4" /> Add Criterion
           </button>
         </div>
       </FormSection>
@@ -385,7 +406,7 @@ export default function AddJobPage() {
         <div className="space-y-4">
           {customFields.map((field) => (
             <div key={field.id} className="space-y-3">
-              <div className="flex items-center gap-3 group bg-[#F9FAFB] rounded-lg p-3 border border-[#E5E7EB] hover:border-primary/30 transition-colors">
+              <div className="flex items-center gap-3 group bg-[#F9FAFB] rounded-lg p-3 border border-[#E5E7EB] hover:border-[#3538CD]/30 transition-colors">
                 <GripVertical className="w-5 h-5 text-[#9CA3AF] cursor-grab shrink-0" />
                 <div className="flex-1 min-w-0">
                   <input
@@ -393,7 +414,7 @@ export default function AddJobPage() {
                     value={field.label}
                     onChange={(e) => setCustomFields(customFields.map(f => f.id === field.id ? {...f, label: e.target.value} : f))}
                     placeholder="e.g. Portfolio URL"
-                    className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white px-3"
+                    className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#3538CD]/20 focus:border-[#3538CD] bg-white"
                   />
                 </div>
                 <div className="w-[160px] shrink-0">
@@ -401,7 +422,7 @@ export default function AddJobPage() {
                     <select
                       value={field.type}
                       onChange={(e) => handleTypeChange(field.id, e.target.value as FieldType)}
-                      className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white appearance-none"
+                      className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#3538CD]/20 focus:border-[#3538CD] bg-white appearance-none"
                     >
                       {fieldTypes.map(ft => <option key={ft} value={ft}>{ft}</option>)}
                     </select>
@@ -409,7 +430,7 @@ export default function AddJobPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-xs text-[#6B7280] font-medium">Required</span>
+                  <span className="text-[10px] text-[#6B7280] font-black uppercase tracking-widest">Required</span>
                   <Toggle
                     checked={field.required}
                     onChange={() => setCustomFields(customFields.map(f => f.id === field.id ? {...f, required: !f.required} : f))}
@@ -424,10 +445,10 @@ export default function AddJobPage() {
               {field.type === 'Dropdown' && (
                 <div className="ml-8 p-4 bg-white border border-[#E5E7EB] rounded-xl shadow-sm space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
                   <div className="flex items-center justify-between border-b border-[#F3F4F6] pb-2 mb-2">
-                    <h4 className="text-xs font-bold text-[#1A1A2E] flex items-center gap-1.5">
-                      <Plus className="w-3.5 h-3.5 text-primary" /> Dropdown Options
+                    <h4 className="text-xs font-bold text-[#111827] flex items-center gap-1.5">
+                      <Plus className="w-3.5 h-3.5 text-[#3538CD]" /> Dropdown Options
                     </h4>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${ (field.options?.length ?? 0) >= 2 ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600'}`}>
+                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${ (field.options?.length ?? 0) >= 2 ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600'}`}>
                       {(field.options?.length ?? 0)} Options
                     </span>
                   </div>
@@ -435,7 +456,7 @@ export default function AddJobPage() {
                   <div className="space-y-2">
                     {field.options?.map((opt) => (
                       <div key={opt.id} className="flex items-center justify-between text-sm bg-[#F9FAFB] px-3 py-1.5 rounded-lg group">
-                        <span className="text-[#374151]">{opt.value}</span>
+                        <span className="text-[#374151] font-medium">{opt.value}</span>
                         <button onClick={() => removeDropdownOption(field.id, opt.id)} className="text-[#9CA3AF] hover:text-red-500 transition-colors">
                           <X className="w-3.5 h-3.5" />
                         </button>
@@ -451,18 +472,18 @@ export default function AddJobPage() {
                       onKeyDown={(e) => e.key === 'Enter' && addDropdownOption(field.id)}
                       placeholder="Type an option..."
                       maxLength={100}
-                      className="flex-1 border border-[#E5E7EB] rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      className="flex-1 border border-[#E5E7EB] rounded-lg px-3 py-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#3538CD]/20 focus:border-[#3538CD]"
                     />
                     <button
                       onClick={() => addDropdownOption(field.id)}
-                      className="bg-primary text-white px-3 py-2 rounded-lg text-xs font-bold hover:bg-[#292bb0] transition-colors"
+                      className="bg-[#3538CD] text-white px-3 py-2 rounded-lg text-xs font-black hover:bg-[#292bb0] transition-colors"
                     >
                       Add
                     </button>
                   </div>
                   
                   {(field.options?.length ?? 0) < 2 && (
-                    <div className="flex items-center gap-1.5 text-[10px] text-amber-600 font-medium bg-amber-50 p-2 rounded-lg border border-amber-100">
+                    <div className="flex items-center gap-1.5 text-[10px] text-amber-600 font-bold bg-amber-50 p-2 rounded-lg border border-amber-100">
                       <AlertCircle className="w-3 h-3" />
                       Add at least 2 options before saving
                     </div>
@@ -474,7 +495,7 @@ export default function AddJobPage() {
 
           <button
             onClick={addField}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-primary text-primary text-sm font-medium hover:bg-primary/5 transition-colors"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg border-2 border-[#3538CD] text-[#3538CD] text-sm font-black hover:bg-[#3538CD]/5 transition-all"
           >
             <Plus className="w-4 h-4" /> Add Field
           </button>
@@ -486,16 +507,16 @@ export default function AddJobPage() {
         <div className="space-y-5">
           <div className="flex items-start justify-between">
             <div>
-              <h4 className="text-sm font-semibold text-[#374151]">Publish on Website</h4>
-              <p className="text-xs text-[#6B7280] mt-0.5 max-w-md">Select this to show the job on your website if it's integrated with our API manager.</p>
+              <h4 className="text-sm font-bold text-[#374151]">Publish on Website</h4>
+              <p className="text-xs text-[#6B7280] mt-0.5 max-w-md font-medium">Select this to show the job on your website if it's integrated with our API manager.</p>
             </div>
             <Toggle checked={publishWebsite} onChange={() => setPublishWebsite(!publishWebsite)} />
           </div>
           <div className="border-t border-[#E5E7EB]" />
           <div className="flex items-start justify-between">
             <div>
-              <h4 className="text-sm font-semibold text-[#374151]">Publish on CollabCareers</h4>
-              <p className="text-xs text-[#6B7280] mt-0.5 max-w-md">Candidates can discover and apply for this job on your CollabCareers portal</p>
+              <h4 className="text-sm font-bold text-[#374151]">Publish on CollabCareers</h4>
+              <p className="text-xs text-[#6B7280] mt-0.5 max-w-md font-medium">Candidates can discover and apply for this job on your CollabCareers portal</p>
             </div>
             <Toggle checked={publishCollabCareers} onChange={() => setPublishCollabCareers(!publishCollabCareers)} />
           </div>

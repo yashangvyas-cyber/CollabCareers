@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import PortalLayout from '../components/PortalLayout';
-import { ChevronDown, CheckCircle, Upload, Trash2, FileText, Zap, AlertCircle } from 'lucide-react';
+import { 
+  ChevronDown, CheckCircle, Upload, Zap, Sparkles, 
+  Lock, ArrowRight, Download, X, FileText,
+  Plus, ExternalLink
+} from 'lucide-react';
 import { useApp } from '../store/AppContext';
 import { Job, CustomField } from '../store/types';
 
@@ -10,33 +14,39 @@ export default function ApplicationFormPage() {
   const { jobs, currentUser, submitApplication, alumniVerified } = useApp();
   const navigate = useNavigate();
   
+  // Find job from state
   const job = jobs.find(j => j.id === jobId) || jobs[0] || {
-    id: '1', title: 'React Developer', businessUnit: 'Yopmails', customFields: []
+    id: 'd1', title: 'React Developer', businessUnit: 'Yopmails', customFields: [
+      { id: '1', label: 'Portfolio URL', type: 'Text', required: true },
+      { id: '2', label: 'Are you open to relocate?', type: 'Yes/No', required: false }
+    ]
   } as any as Job;
 
   const [step, setStep] = useState(0); // 0 = CV Upload, 1 = Form, 2 = Review
   const [extracting, setExtracting] = useState(false);
   const [resumeName, setResumeName] = useState('');
+  const [resumeLink, setResumeLink] = useState('');
+  const [isFresher, setIsFresher] = useState(false);
 
   const [formData, setFormData] = useState({
     personal: {
-      firstName: currentUser?.firstName || '',
-      lastName: currentUser?.lastName || '',
-      email: currentUser?.email || '',
-      phone: currentUser?.phone || '',
-      dob: '12/05/1998',
+      firstName: currentUser?.firstName || 'Alex',
+      lastName: currentUser?.lastName || 'Patel',
       gender: 'Male',
+      contactNumber: currentUser?.phone || '98765 43210',
+      email: currentUser?.email || 'alex.patel@example.com',
+      dob: '12/05/1998',
+      linkedin: 'linkedin.com/in/alexpatel',
       maritalStatus: 'Single',
-      linkedin: 'linkedin.com/in/yashangpatel',
     },
     professional: {
-      isFresher: false,
-      totalExperience: '3 Years, 2 Months',
-      highestQualification: 'B.Tech Computer Science',
       currentOrg: 'MindInventory',
       currentDesignation: 'UI Developer',
+      expYears: '3',
+      expMonths: '2',
+      highestQualification: 'B.Tech Computer Science',
       noticePeriod: '30',
-      skills: 'React, JavaScript, TypeScript, Redux',
+      skills: ['React', 'JavaScript', 'TypeScript', 'Redux'],
       remarks: '',
     },
     salary: {
@@ -45,8 +55,23 @@ export default function ApplicationFormPage() {
       currentCtc: '6',
       expectedCtc: '9',
     },
+    address: {
+      street: '123, Business Park, S.G. Highway',
+      country: 'India',
+      state: 'Gujarat',
+      city: 'Ahmedabad',
+      zip: '380015',
+    },
     customAnswers: {} as Record<string, any>,
   });
+
+  const [collapsedSections, setCollapsedSections] = useState<Record<number, boolean>>({
+    1: false, 2: false, 3: false, 4: false, 5: false
+  });
+
+  const toggleSection = (id: number) => {
+    setCollapsedSections(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   useEffect(() => {
     if (!currentUser) {
@@ -55,12 +80,17 @@ export default function ApplicationFormPage() {
   }, [currentUser, navigate, jobId]);
 
   const handleCvUpload = () => {
-    setResumeName('resume_yashang.pdf');
     setExtracting(true);
     setTimeout(() => {
+      setResumeName('resume_alex.pdf');
       setExtracting(false);
       setStep(1);
-    }, 2500);
+    }, 2000);
+  };
+
+  const handleSkip = () => {
+    setResumeName('');
+    setStep(1);
   };
 
   const handleSubmit = () => {
@@ -71,7 +101,7 @@ export default function ApplicationFormPage() {
       status: 'Submitted',
       appliedAt: new Date().toISOString(),
       answers: formData.customAnswers,
-      resumeUrl: resumeName,
+      resumeUrl: resumeName || resumeLink || 'Manually Filled',
     });
     navigate(`/portal/yopmails/confirmation/${job.id}`);
   };
@@ -79,329 +109,577 @@ export default function ApplicationFormPage() {
   if (!currentUser) return null;
 
   return (
-    <PortalLayout isLoggedIn>
-      <div className="max-w-3xl mx-auto px-6 py-8">
+    <PortalLayout>
+      <div className="max-w-4xl mx-auto px-6 py-10 min-h-[80vh] flex flex-col">
         
         {/* Progress Stepper */}
-        <div className="flex items-center justify-between mb-8 max-w-xl mx-auto">
+        <div className="flex items-center justify-between mb-12 max-w-2xl mx-auto relative px-4">
           {[
-            { label: 'CV Upload', s: 0 },
-            { label: 'Fill Details', s: 1 },
-            { label: 'Review & Submit', s: 2 }
+            { label: 'CV UPLOAD', s: 0 },
+            { label: 'FILL DETAILS', s: 1 },
+            { label: 'REVIEW & SUBMIT', s: 2 }
           ].map((item, i) => (
-            <div key={item.label} className="flex items-center flex-1 last:flex-none">
-              <div className="flex flex-col items-center gap-2">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
-                  step > item.s
-                    ? 'bg-green-500 text-white'
-                    : step === item.s
-                    ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                    : 'bg-[#E5E7EB] text-[#9CA3AF]'
-                }`}>
-                  {step > item.s ? <CheckCircle className="w-4 h-4" /> : i + 1}
-                </div>
-                <span className={`text-[10px] uppercase tracking-wider font-bold ${step === item.s ? 'text-primary' : 'text-[#9CA3AF]'}`}>
-                  {item.label}
-                </span>
+            <div key={item.label} className="flex flex-col items-center gap-3 z-10 transition-all duration-500">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-black transition-all duration-300 border-2 ${
+                step > item.s
+                  ? 'bg-[#3538CD] border-[#3538CD] text-white'
+                  : step === item.s
+                  ? 'bg-white border-[#3538CD] text-[#3538CD]'
+                  : 'bg-white border-[#D1D5DB] text-[#9CA3AF]'
+              }`}>
+                {step > item.s ? <CheckCircle className="w-5 h-5" /> : i + 1}
               </div>
-              {i < 2 && (
-                <div className={`flex-1 h-0.5 mx-4 -mt-6 transition-colors ${step > i ? 'bg-green-500' : 'bg-[#E5E7EB]'}`} />
-              )}
+              <span className={`text-[10px] font-black tracking-[0.1em] uppercase ${step === item.s ? 'text-[#3538CD]' : 'text-[#9CA3AF]'}`}>
+                {item.label}
+              </span>
             </div>
           ))}
+          {/* Connector Lines */}
+          <div className="absolute top-5 left-[15%] right-[15%] h-[2px] bg-[#E5E7EB] -z-0" />
+          <div 
+            className="absolute top-5 left-[15%] h-[2px] bg-[#3538CD] -z-0 transition-all duration-500" 
+            style={{ width: step === 0 ? '0%' : step === 1 ? '35%' : '70%' }}
+          />
         </div>
 
-        {/* Job Context */}
-        <div className="flex items-center gap-3 mb-6 p-4 bg-white rounded-xl border border-[#E5E7EB] shadow-sm">
-          <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-white font-bold text-xl shadow-inner">
-            {job.businessUnit?.[0] || 'Y'}
+        {/* Job Context Banner */}
+        <div className="flex items-center gap-4 mb-8 p-4 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
+          <div className="w-14 h-14 rounded-xl bg-[#3538CD] flex items-center justify-center text-white font-black text-2xl shadow-inner uppercase overflow-hidden">
+             {job.businessUnit?.[0] || 'Y'}
           </div>
           <div className="flex-1">
-            <h2 className="text-base font-bold text-[#1A1A2E] leading-tight">{job.title}</h2>
-            <p className="text-xs text-[#6B7280]">{job.businessUnit} · Career Portal</p>
+            <h2 className="text-xl font-black text-[#111827] leading-tight">{job.title}</h2>
+            <div className="flex items-center gap-2 mt-1 font-bold">
+              <span className="text-xs text-[#6B7280]">{job.businessUnit}</span>
+              <span className="w-1 h-1 rounded-full bg-[#D1D5DB]" />
+              <span className="text-xs text-[#3538CD]">Career Portal</span>
+            </div>
           </div>
           {alumniVerified.verified && (
-            <div className="flex items-center gap-1.5 px-3 py-1 bg-[#E07C3F]/10 text-[#E07C3F] rounded-full border border-[#E07C3F]/20">
-              <Zap className="w-3.5 h-3.5 fill-[#E07C3F]" />
-              <span className="text-[10px] font-bold uppercase tracking-wider">Alumni Verified</span>
+            <div className="flex items-center gap-2 px-4 py-1.5 bg-[#3538CD]/10 text-[#3538CD] rounded-full border border-[#3538CD]/20">
+              <Zap className="w-4 h-4 fill-[#3538CD]" />
+              <span className="text-[11px] font-black uppercase tracking-widest">Alumni Verified</span>
             </div>
           )}
         </div>
 
         {/* STEP 0: CV Upload */}
         {step === 0 && (
-          <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-xl overflow-hidden p-10 text-center animate-in zoom-in-95 duration-300">
-            <div className="max-w-md mx-auto">
-              <div 
-                onClick={handleCvUpload}
-                className={`relative border-2 border-dashed rounded-3xl p-10 cursor-pointer transition-all duration-300 ${
-                  extracting ? 'border-primary bg-primary/5' : 'border-[#D1D5DB] hover:border-primary hover:bg-primary/5'
-                }`}
-              >
+          <div className="flex-1">
+            <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-2xl overflow-hidden p-12 text-center animate-in zoom-in-95 duration-500">
+              <div className="max-w-lg mx-auto">
                 {!extracting ? (
-                  <>
-                    <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                      <Upload className="w-8 h-8 text-primary" />
+                  <div 
+                    onClick={handleCvUpload}
+                    className="group relative border-2 border-dashed border-[#D1D5DB] hover:border-[#3538CD] rounded-[40px] p-16 cursor-pointer transition-all duration-300 hover:bg-[#F4F5FA] text-center"
+                  >
+                    <div className="w-20 h-20 bg-[#F4F5FA] group-hover:bg-[#3538CD]/10 rounded-3xl flex items-center justify-center mx-auto mb-6 transition-colors">
+                      <Upload className="w-10 h-10 text-[#3538CD]" />
                     </div>
-                    <h3 className="text-lg font-bold text-[#1A1A2E] mb-2">Upload your Resume</h3>
-                    <p className="text-sm text-[#6B7280] mb-6">We'll use it to auto-fill the application form for you.</p>
-                    <div className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-white text-sm font-bold rounded-full hover:bg-[#292bb0] transition-colors shadow-lg shadow-primary/20">
-                      Standard Resume Format (PDF/DOC)
-                    </div>
-                  </>
+                    <h3 className="text-2xl font-black text-[#111827] mb-3">Upload your Resume</h3>
+                    <p className="text-[#6B7280] mb-8 font-medium">Drag and drop your CV here or click to browse</p>
+                    
+                    <p className="text-xs text-[#9CA3AF] font-bold uppercase tracking-widest">Accepted formats: PDF, DOC, DOCX · Max 5MB</p>
+                  </div>
                 ) : (
-                  <div className="py-2">
-                    <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-6" />
-                    <h3 className="text-lg font-bold text-primary mb-2">Extracting your details...</h3>
-                    <p className="text-sm text-[#6B7280]">Our AI is parsing your CV to pre-fill the form.</p>
-                    <div className="mt-8 h-1.5 w-full bg-[#E5E7EB] rounded-full overflow-hidden">
-                      <div className="h-full bg-primary animate-progress duration-[2500ms]" style={{ width: '100%' }} />
+                  <div className="py-10">
+                    <div className="relative w-24 h-24 mx-auto mb-8">
+                       <div className="absolute inset-0 border-4 border-[#3538CD]/10 rounded-full" />
+                       <div className="absolute inset-0 border-4 border-[#3538CD] border-t-transparent rounded-full animate-spin" />
+                       <div className="absolute inset-0 m-auto flex items-center justify-center">
+                          <FileText className="w-10 h-10 text-[#3538CD]" />
+                       </div>
+                    </div>
+                    <h3 className="text-2xl font-black text-[#3538CD] mb-3">Extracting your details...</h3>
+                    <p className="text-[#6B7280] font-medium mb-10 text-center">Our AI is parsing your CV to pre-fill the form.</p>
+                    <div className="h-2 w-full bg-[#E5E7EB] rounded-full overflow-hidden">
+                      <div className="h-full bg-[#3538CD] animate-progress" style={{ width: '100%' }} />
+                    </div>
+                  </div>
+                )}
+
+                {!extracting && (
+                  <div className="mt-12 space-y-8 text-center">
+                    <div className="relative flex items-center justify-center">
+                      <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-[#E5E7EB]" /></div>
+                      <span className="relative px-6 bg-white text-[10px] font-black text-[#9CA3AF] tracking-[0.3em] uppercase">OR</span>
+                    </div>
+                    
+                    <div className="text-left">
+                      <input 
+                        type="text"
+                        placeholder="Paste resume link here"
+                        value={resumeLink}
+                        onChange={(e) => setResumeLink(e.target.value)}
+                        className="w-full border border-[#E5E7EB] rounded-2xl px-6 py-4 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] text-[#111827] placeholder:text-[#9CA3AF]"
+                      />
+                      <p className="text-[11px] text-[#9CA3AF] mt-4 font-bold text-center leading-relaxed">
+                        We'll auto-fill your application form from your CV. <br/>You can review and edit everything before submitting.
+                      </p>
                     </div>
                   </div>
                 )}
               </div>
-              <p className="text-xs text-[#9CA3AF] mt-6">
-                OR <button className="text-primary font-bold hover:underline" onClick={() => setStep(1)}>Fill details manually</button>
-              </p>
+            </div>
+            
+            <div className="mt-10 flex justify-end px-4">
+               <button onClick={handleSkip} className="text-[#3538CD] font-black text-sm hover:underline flex items-center gap-1">
+                 Skip, fill manually →
+               </button>
             </div>
           </div>
         )}
 
         {/* STEP 1: Fill Details */}
         {step === 1 && (
-          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3">
-              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center shrink-0">
-                <CheckCircle className="w-5 h-5 text-green-600" />
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-700">
+            {resumeName && (
+              <div className="bg-[#3538CD]/5 border border-[#3538CD]/10 rounded-2xl p-5 flex items-center gap-4">
+                <div className="w-10 h-10 bg-[#3538CD] rounded-full flex items-center justify-center shrink-0 shadow-lg shadow-[#3538CD]/20">
+                  <CheckCircle className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-black text-[#3538CD] tracking-wide">CV Auto-Extracted</p>
+                  <p className="text-sm text-[#3538CD]/70 font-bold mt-0.5">We've pre-filled the form with data from <b>{resumeName}</b>. Please review and edit if needed.</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-bold text-green-800">CV Auto-Extracted</p>
-                <p className="text-xs text-green-600">We've pre-filled the form with data from <b>{resumeName}</b>. Please review carefully.</p>
-              </div>
-            </div>
+            )}
 
-            <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden">
-              <Section title="Personal Information" defaultOpen>
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <FormInput label="First Name" value={formData.personal.firstName} readOnly />
-                  <FormInput label="Last Name" value={formData.personal.lastName} readOnly />
+            <div className="space-y-6">
+              {/* Section 1 — Candidate Information */}
+              <FormCollapsibleCard 
+                id={1} 
+                title="Candidate Information" 
+                isCollapsed={collapsedSections[1]} 
+                onToggle={() => toggleSection(1)}
+              >
+                <div className="grid grid-cols-2 gap-6 mb-6">
+                   <FormInput label="First Name" required value={formData.personal.firstName} isExtracted={!!resumeName} />
+                   <FormInput label="Last Name" required value={formData.personal.lastName} isExtracted={!!resumeName} />
                 </div>
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <FormInput label="Email Address" value={formData.personal.email} readOnly />
-                  <FormInput label="Phone Number" value={formData.personal.phone} />
+                <div className="grid grid-cols-2 gap-6 mb-6">
+                   <FormSelect label="Gender" options={['Select', 'Male', 'Female', 'Other', 'Prefer not to say']} value={formData.personal.gender} />
+                   <FormPhoneInput label="Contact Number" required value={formData.personal.contactNumber} isExtracted={!!resumeName} />
                 </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <FormInput label="Date of Birth" value={formData.personal.dob} isExtracted />
-                  <FormInput label="Gender" value={formData.personal.gender} isExtracted />
-                  <FormInput label="Marital Status" value={formData.personal.maritalStatus} isExtracted />
+                <div className="grid grid-cols-2 gap-6 mb-6">
+                   <FormInput label="Email Address" required value={formData.personal.email} isLocked />
+                   <FormInput label="Date of Birth" value={formData.personal.dob} type="date" isExtracted={!!resumeName} />
                 </div>
-              </Section>
+                <div className="grid grid-cols-2 gap-6">
+                   <FormInput label="LinkedIn Profile" value={formData.personal.linkedin} placeholder="linkedin.com/in/..." />
+                   <FormSelect label="Marital Status" options={['Select', 'Single', 'Married', 'Other']} value={formData.personal.maritalStatus} />
+                </div>
+              </FormCollapsibleCard>
 
-              <Section title="Professional Details">
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <FormInput label="Current Organization" value={formData.professional.currentOrg} isExtracted />
-                  <FormInput label="Current Designation" value={formData.professional.currentDesignation} isExtracted />
+              {/* Section 2 — Professional Details */}
+              <FormCollapsibleCard 
+                id={2} 
+                title="Professional Details" 
+                isCollapsed={collapsedSections[2]} 
+                onToggle={() => toggleSection(2)}
+              >
+                <div className="mb-8">
+                   <label className="flex items-center gap-3 cursor-pointer group w-fit">
+                      <div className="relative flex items-center">
+                        <input 
+                          type="checkbox" 
+                          checked={isFresher} 
+                          onChange={(e) => setIsFresher(e.target.checked)}
+                          className="w-5 h-5 border-2 border-[#D1D5DB] rounded-md checked:bg-[#3538CD] checked:border-[#3538CD] appearance-none transition-all cursor-pointer" 
+                        />
+                        <CheckCircle className={`absolute inset-0 m-auto w-3.5 h-3.5 text-white transition-opacity ${isFresher ? 'opacity-100' : 'opacity-0'}`} />
+                      </div>
+                      <span className="text-sm font-black text-[#374151] group-hover:text-[#111827] uppercase tracking-widest">I am a Fresher</span>
+                   </label>
                 </div>
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <FormInput label="Total Experience" value={formData.professional.totalExperience} isExtracted />
-                  <FormInput label="Highest Qualification" value={formData.professional.highestQualification} isExtracted />
-                </div>
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <FormSelect label="Notice Period (Days)" value={formData.professional.noticePeriod} options={['Immediate', '15', '30', '45', '60', '90']} />
-                  <FormInput label="Skills" value={formData.professional.skills} isExtracted />
-                </div>
-              </Section>
 
-              <Section title="Salary Information">
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <FormSelect label="CTC Type" value={formData.salary.ctcType} options={['Annual', 'Monthly', 'Hourly']} />
-                  <FormSelect label="Currency" value={formData.salary.currency} options={['INR', 'USD', 'GBP', 'EUR']} />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <FormInput label="Current CTC" value={formData.salary.currentCtc} />
-                  <FormInput label="Expected CTC" value={formData.salary.expectedCtc} />
-                </div>
-              </Section>
-
-              {/* DYNAMIC CUSTOM FIELDS */}
-              {job.customFields && job.customFields.length > 0 && (
-                <div className="border-t border-[#E5E7EB]">
-                  <div className="px-6 py-4 bg-primary/5 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                       <span className="text-sm font-bold text-[#1A1A2E]">Additional Information</span>
-                       <span className="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold rounded-full uppercase tracking-wider">Required by {job.businessUnit}</span>
-                    </div>
-                  </div>
-                  <div className="px-6 py-5 space-y-4">
-                    {job.customFields.map((f: CustomField) => (
-                      <div key={f.id}>
-                        <label className="block text-xs font-semibold text-[#374151] mb-1.5">
-                          {f.label} {f.required && <span className="text-red-500">*</span>}
-                        </label>
-                        {f.type === 'Dropdown' ? (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 gap-6">
+                    <FormInput label="Highest Qualification" value={formData.professional.highestQualification} isExtracted={!!resumeName} />
+                    {!isFresher && (
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest">Total Experience</label>
+                        <div className="grid grid-cols-2 gap-3">
                           <div className="relative">
-                            <select 
-                              onChange={(e) => setFormData({...formData, customAnswers: {...formData.customAnswers, [f.label]: e.target.value}})}
-                              className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white appearance-none"
-                            >
-                              <option value="">Select an option</option>
-                              {f.options?.map(opt => <option key={opt.id} value={opt.value}>{opt.value}</option>)}
-                            </select>
-                            <ChevronDown className="w-4 h-4 text-[#9CA3AF] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                            <input type="number" placeholder="Years" defaultValue={formData.professional.expYears} className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD]" />
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-[#9CA3AF] uppercase">Yrs</span>
                           </div>
-                        ) : f.type === 'Yes/No' ? (
-                          <div className="flex gap-4">
-                            {['Yes', 'No'].map(o => (
-                              <label key={o} className="flex items-center gap-2 cursor-pointer">
-                                <input type="radio" name={f.id} value={o} onChange={(e) => setFormData({...formData, customAnswers: {...formData.customAnswers, [f.label]: e.target.value}})} className="w-4 h-4 text-primary" />
-                                <span className="text-sm text-[#374151]">{o}</span>
-                              </label>
-                            ))}
+                          <div className="relative">
+                            <input type="number" placeholder="Months" defaultValue={formData.professional.expMonths} className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD]" />
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-[#9CA3AF] uppercase">Mos</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {!isFresher && (
+                    <>
+                      <div className="grid grid-cols-2 gap-6">
+                        <FormInput label="Current Organization" value={formData.professional.currentOrg} isExtracted={!!resumeName} />
+                        <FormInput label="Current Designation" value={formData.professional.currentDesignation} isExtracted={!!resumeName} />
+                      </div>
+                      <FormInput label="Notice Period (Days)" type="number" value={formData.professional.noticePeriod} />
+                    </>
+                  )}
+                </div>
+                   <div>
+                      <label className="block text-[10px] font-black text-[#6B7280] uppercase tracking-widest mb-3">Skills</label>
+                      <div className="p-4 bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl flex flex-wrap gap-2">
+                         {formData.professional.skills.map(skill => (
+                           <span key={skill} className="px-3 py-1.5 bg-white border border-[#E5E7EB] rounded-lg text-[11px] font-black text-[#3538CD] flex items-center gap-1.5 shadow-sm">
+                             {skill} <X className="w-3 h-3 text-[#9CA3AF] cursor-pointer hover:text-red-500" />
+                           </span>
+                         ))}
+                         <button className="px-3 py-1.5 text-[11px] font-black text-[#3538CD] hover:bg-white rounded-lg transition-colors flex items-center gap-1">
+                            <Plus className="w-3.5 h-3.5" /> Add Skill
+                         </button>
+                      </div>
+                   </div>
+                   <FormTextarea label="General Remarks" value={formData.professional.remarks} />
+              </FormCollapsibleCard>
+
+              {/* Section 3 — Salary Information */}
+              <FormCollapsibleCard 
+                id={3} 
+                title="Salary Information" 
+                isCollapsed={collapsedSections[3]} 
+                onToggle={() => toggleSection(3)}
+              >
+                <div className={`grid gap-4 ${isFresher ? 'grid-cols-3' : 'grid-cols-4'}`}>
+                   <FormSelect label="CTC Type" options={['Annual', 'Monthly', 'Hourly']} value={formData.salary.ctcType} />
+                   <FormSelect label="Currency" options={['INR', 'USD', 'GBP', 'EUR']} value={formData.salary.currency} />
+                   {!isFresher && <FormInput label="Current CTC" type="number" value={formData.salary.currentCtc} />}
+                   <FormInput label="Expected CTC" type="number" value={formData.salary.expectedCtc} />
+                </div>
+              </FormCollapsibleCard>
+
+              {/* Section 4 — Address */}
+              <FormCollapsibleCard 
+                id={4} 
+                title="Address" 
+                isCollapsed={collapsedSections[4]} 
+                onToggle={() => toggleSection(4)}
+              >
+                <div className="grid grid-cols-1 mb-6">
+                   <FormInput label="Address" value={formData.address.street} />
+                </div>
+                <div className="grid grid-cols-2 gap-6 mb-6">
+                   <FormSelect label="Country" options={['Select', 'India', 'USA', 'UK', 'Germany']} value={formData.address.country} />
+                   <FormSelect label="State" options={['Select', 'Gujarat', 'Maharashtra', 'Karnataka', 'New York']} value={formData.address.state} />
+                </div>
+                <div className="grid grid-cols-2 gap-6">
+                   <FormInput label="Town/City" value={formData.address.city} />
+                   <FormInput label="Zip/Postal Code" value={formData.address.zip} />
+                </div>
+              </FormCollapsibleCard>
+
+              {/* Section 5 — Additional Information */}
+              {job.customFields && job.customFields.length > 0 && (
+                <FormCollapsibleCard 
+                  id={5} 
+                  title="Additional Information" 
+                  subtitle="Required for this specific job"
+                  isCollapsed={collapsedSections[5]} 
+                  onToggle={() => toggleSection(5)}
+                >
+                  <div className="space-y-8">
+                    {job.customFields.map((f: CustomField) => (
+                      <div key={f.id} className="max-w-2xl">
+                        <label className="block text-[10px] font-black uppercase tracking-widest text-[#6B7280] mb-3">
+                          {f.label} {f.required ? '(Required)' : <span className="text-[#9CA3AF]">(Optional)</span>}
+                        </label>
+                        {f.type === 'Yes/No' ? (
+                          <div className="flex items-center gap-4">
+                             <div className="flex bg-[#F3F4F6] rounded-xl p-1 border border-[#E5E7EB]">
+                                {['Yes', 'No'].map(o => (
+                                  <button 
+                                    key={o}
+                                    onClick={() => setFormData({...formData, customAnswers: {...formData.customAnswers, [f.label]: o}})}
+                                    className={`px-8 py-2 text-xs font-black rounded-lg transition-all ${
+                                      (formData.customAnswers[f.label] || 'Yes') === o 
+                                        ? 'bg-[#3538CD] text-white shadow-lg shadow-[#3538CD]/20' 
+                                        : 'text-[#6B7280] hover:text-[#111827]'
+                                    }`}
+                                  >
+                                    {o}
+                                  </button>
+                                ))}
+                             </div>
+                             <span className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-widest italic">Toggle selection</span>
                           </div>
                         ) : (
-                          <input
-                            type={f.type === 'Number' ? 'number' : f.type === 'Date' ? 'date' : 'text'}
-                            placeholder={f.label}
-                            onChange={(e) => setFormData({...formData, customAnswers: {...formData.customAnswers, [f.label]: e.target.value}})}
-                            className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white"
-                          />
+                          <div className="space-y-2">
+                             <input 
+                               type={f.type === 'Number' ? 'number' : f.type === 'Date' ? 'date' : 'text'}
+                               placeholder={f.label === 'Portfolio URL' ? 'https://yourportfolio.com' : f.label}
+                               className="w-full border border-[#E5E7EB] rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-white placeholder:text-[#9CA3AF]"
+                               onChange={(e) => setFormData({...formData, customAnswers: {...formData.customAnswers, [f.label]: e.target.value}})}
+                             />
+                             {f.label === 'Portfolio URL' && <p className="text-[11px] text-[#9CA3AF] font-bold italic ml-1">Please share your design portfolio or GitHub</p>}
+                          </div>
                         )}
                       </div>
                     ))}
                   </div>
-                </div>
+                </FormCollapsibleCard>
               )}
-
-              {/* Bottom Actions */}
-              <div className="px-6 py-5 bg-[#F9FAFB] border-t border-[#E5E7EB] flex items-center justify-between">
-                <button onClick={() => setStep(0)} className="text-sm text-[#6B7280] hover:text-[#374151] font-medium transition-colors">
-                  ← Change Resume
-                </button>
-                <div className="flex gap-3">
-                  <button className="px-6 py-2.5 bg-white border border-[#E5E7EB] text-[#374151] text-sm font-semibold rounded-lg hover:bg-[#F9FAFB] transition-colors">
-                    Save Draft
-                  </button>
-                  <button
-                    onClick={() => setStep(2)}
-                    className="px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-[#292bb0] transition-colors shadow-lg shadow-primary/10"
-                  >
-                    Review Application →
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 2: Review */}
-        {step === 2 && (
-          <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-500">
-            <div className="px-8 py-8 border-b border-[#F3F4F6] bg-gradient-to-r from-primary/5 to-white">
-              <h2 className="text-2xl font-bold text-[#1A1A2E]">Review Your Application</h2>
-              <p className="text-sm text-[#6B7280] mt-1">Ready to start the next chapter with {job.businessUnit}?</p>
             </div>
             
-            <div className="px-8 py-8 space-y-8">
-              <ReviewSection title="Personal" data={[
-                { label: 'Full Name', value: `${formData.personal.firstName} ${formData.personal.lastName}` },
-                { label: 'Email', value: formData.personal.email },
-                { label: 'Phone', value: formData.personal.phone }
-              ]} />
-
-              <ReviewSection title="Professional" data={[
-                { label: 'Current Role', value: `${formData.professional.currentDesignation} at ${formData.professional.currentOrg}` },
-                { label: 'Experience', value: formData.professional.totalExperience },
-                { label: 'Notice Period', value: `${formData.professional.noticePeriod} Days` }
-              ]} />
-
-              <ReviewSection title="Additional Info" data={[
-                ...Object.entries(formData.customAnswers).map(([k, v]) => ({ label: k, value: String(v) })),
-                { label: 'Resume', value: resumeName }
-              ]} isHighlight />
-            </div>
-
-            <div className="px-8 py-6 bg-[#F9FAFB] border-t border-[#E5E7EB] flex items-center justify-between">
-              <button
-                onClick={() => setStep(1)}
-                className="text-sm font-bold text-primary hover:underline"
-              >
-                ← Back to Edit
-              </button>
-              <button
-                onClick={handleSubmit}
-                className="px-10 py-3.5 bg-primary text-white text-base font-bold rounded-xl hover:bg-[#292bb0] transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-primary/25 flex items-center gap-2"
-              >
-                Submit Application <CheckCircle className="w-5 h-5" />
-              </button>
-            </div>
+            {/* Action Bar spacer */}
+            <div className="h-24" />
           </div>
         )}
+
+        {/* STEP 2: Review & Submit */}
+        {step === 2 && (
+          <div className="animate-in zoom-in-95 duration-500 space-y-8 flex-1">
+            <div className="text-center mb-10 overflow-hidden">
+               <h2 className="text-3xl font-black text-[#111827]">Review Your Application</h2>
+               <p className="text-base text-[#6B7280] mt-2 font-medium">Please review your information before submitting.</p>
+            </div>
+               
+            <div className="space-y-6">
+               <ReviewCard title="Candidate" onEdit={() => setStep(1)} data={[
+                  { label: 'Full Name', value: `${formData.personal.firstName} ${formData.personal.lastName}` },
+                  { label: 'Email', value: formData.personal.email },
+                  { label: 'Contact Number', value: `+91 ${formData.personal.contactNumber}` },
+                  { label: 'Date of Birth', value: formData.personal.dob },
+                  { label: 'Gender', value: formData.personal.gender },
+                  { label: 'Marital Status', value: formData.personal.maritalStatus },
+                  { label: 'LinkedIn Profile', value: formData.personal.linkedin }
+               ]} />
+
+               <ReviewCard title="Professional" onEdit={() => setStep(1)} data={[
+                  { label: 'Current Organization', value: isFresher ? '-' : formData.professional.currentOrg },
+                  { label: 'Current Designation', value: isFresher ? '-' : formData.professional.currentDesignation },
+                  { label: 'Total Experience', value: isFresher ? 'Fresher' : `${formData.professional.expYears} Years, ${formData.professional.expMonths} Months` },
+                  { label: 'Highest Qualification', value: formData.professional.highestQualification },
+                  { label: 'Notice Period', value: `${formData.professional.noticePeriod} Days` },
+                  { label: 'Skills', value: formData.professional.skills.join(', ') }
+               ]} />
+
+               <ReviewCard title="Salary" onEdit={() => setStep(1)} data={[
+                  { label: 'CTC Type', value: formData.salary.ctcType },
+                  { label: 'Currency', value: formData.salary.currency },
+                  { label: 'Current CTC', value: formData.salary.currentCtc },
+                  { label: 'Expected CTC', value: formData.salary.expectedCtc }
+               ]} />
+
+               <ReviewCard title="Address" onEdit={() => setStep(1)} data={[
+                  { label: 'Address', value: formData.address.street },
+                  { label: 'Country', value: formData.address.country },
+                  { label: 'State', value: formData.address.state },
+                  { label: 'Town/City', value: formData.address.city },
+                  { label: 'Zip/Postal Code', value: formData.address.zip }
+               ]} />
+
+               {job.customFields && job.customFields.length > 0 && (
+                  <ReviewCard title="Additional" onEdit={() => setStep(1)} data={[
+                     ...Object.entries(formData.customAnswers).map(([k, v]) => ({ 
+                        label: k, 
+                        value: k.includes('URL') ? <a href={String(v)} target="_blank" className="text-[#3538CD] underline flex items-center gap-1">{String(v)} <ExternalLink className="w-3 h-3" /></a> : String(v) 
+                     }))
+                  ]} />
+               )}
+
+               <div className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-3xl p-8 flex items-center justify-between group">
+                  <div className="flex items-center gap-4">
+                     <div className="w-16 h-16 bg-white rounded-2xl border border-[#E5E7EB] flex items-center justify-center text-[#3538CD] group-hover:border-[#3538CD]/30 transition-colors">
+                        <FileText className="w-8 h-8" />
+                     </div>
+                     <div>
+                        <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-1">Resume</p>
+                        <p className="text-base font-black text-[#111827]">{resumeName || 'Manually Filled'}</p>
+                     </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                     {resumeName && <button className="p-3 text-[#3538CD] hover:bg-[#3538CD]/5 rounded-xl transition-colors"><Download className="w-6 h-6" /></button>}
+                     <button onClick={() => setStep(1)} className="text-[#3538CD] font-black text-xs hover:underline uppercase tracking-widest">Edit</button>
+                  </div>
+               </div>
+            </div>
+
+            <div className="h-32" />
+          </div>
+        )}
+
+        {/* Fixed Action Bar for Step 2 and 3 */}
+        {step > 0 && (
+           <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-[#E5E7EB] px-6 py-6 z-50">
+              <div className="max-w-4xl mx-auto flex items-center justify-between">
+                 {step === 1 ? (
+                    <>
+                       <button onClick={() => setStep(0)} className="text-[#6B7280] hover:text-[#3538CD] font-black text-sm transition-colors uppercase tracking-widest">
+                         ← Change Resume
+                       </button>
+                       <div className="flex gap-4">
+                          <button className="px-8 py-3.5 border-2 border-[#E5E7EB] text-[#374151] text-sm font-black rounded-xl hover:bg-[#F9FAFB] transition-all uppercase tracking-widest">
+                            Save Draft
+                          </button>
+                          <button 
+                            onClick={() => { setStep(2); window.scrollTo(0, 0); }}
+                            className="px-10 py-3.5 bg-[#3538CD] text-white text-sm font-black rounded-xl hover:bg-[#292bb0] shadow-xl shadow-[#3538CD]/20 transition-all uppercase tracking-widest flex items-center gap-2"
+                          >
+                            Review Application <ArrowRight className="w-4 h-4" />
+                          </button>
+                       </div>
+                    </>
+                 ) : (
+                    <>
+                       <button onClick={() => { setStep(1); window.scrollTo(0, 0); }} className="text-[#3538CD] font-black text-sm hover:underline uppercase tracking-widest">
+                         ← Back to Edit
+                       </button>
+                       <button 
+                         onClick={handleSubmit}
+                         className="px-12 py-4 bg-[#3538CD] text-white text-base font-black rounded-xl hover:bg-[#292bb0] shadow-2xl shadow-[#3538CD]/20 transition-all uppercase tracking-widest flex items-center justify-center gap-3 w-full max-w-sm"
+                       >
+                         Submit Application <ArrowRight className="w-5 h-5" />
+                       </button>
+                    </>
+                 )}
+              </div>
+           </div>
+        )}
+
+        {/* Global Footer */}
+        <div className="py-10 border-t border-[#E5E7EB] mt-auto flex justify-between items-center text-[10px] font-black text-[#9CA3AF] uppercase tracking-[0.2em] px-2">
+           <div>Powered by CollabCareers</div>
+           <div className="flex gap-10">
+              <button className="hover:text-[#3538CD] transition-colors">Privacy Policy</button>
+              <span className="cursor-default">© {new Date().getFullYear()}</span>
+           </div>
+        </div>
       </div>
     </PortalLayout>
   );
 }
 
-function Section({ title, children, defaultOpen = false }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
-  const [open, setOpen] = useState(defaultOpen);
+// UI Components
+function FormCollapsibleCard({ title, subtitle, children, isCollapsed, onToggle }: any) {
   return (
-    <div className="border-t border-[#E5E7EB] first:border-t-0">
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full px-6 py-5 flex items-center justify-between group hover:bg-[#F9FAFB] transition-colors"
+    <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden transition-all duration-300">
+      <button 
+        onClick={onToggle}
+        className="w-full px-8 py-6 flex items-center justify-between hover:bg-[#F9FAFB] transition-colors group"
       >
-        <span className="text-sm font-bold text-[#1A1A2E] group-hover:text-primary transition-colors">{title}</span>
-        <ChevronDown className={`w-4 h-4 text-[#9CA3AF] transition-transform ${open ? 'rotate-180' : 'rotate-0'}`} />
+        <div>
+           <h3 className="text-sm font-black text-[#111827] uppercase tracking-widest group-hover:text-[#3538CD] transition-colors">{title}</h3>
+           {subtitle && <p className="text-[11px] text-[#9CA3AF] font-bold mt-0.5">{subtitle}</p>}
+        </div>
+        <div className={`p-2 rounded-lg bg-[#F4F5FA] text-[#9CA3AF] group-hover:text-[#3538CD] transition-all duration-300 ${isCollapsed ? 'rotate-0' : 'rotate-180'}`}>
+           <ChevronDown className="w-4 h-4" />
+        </div>
       </button>
-      {open && <div className="px-6 pb-6 animate-in slide-in-from-top-2 duration-300">{children}</div>}
-    </div>
-  );
-}
-
-function FormInput({ label, value, readOnly, isExtracted }: { label: string; value: string; readOnly?: boolean; isExtracted?: boolean }) {
-  return (
-    <div>
-      <label className="block text-[10px] font-bold text-[#6B7280] uppercase tracking-wider mb-1.5">{label}</label>
-      <div className="relative">
-        <input
-          type="text"
-          defaultValue={value}
-          readOnly={readOnly}
-          className={`w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all ${
-            readOnly ? 'bg-[#F9FAFB] text-[#9CA3AF]' : isExtracted ? 'border-green-300 bg-green-50/30' : 'border-[#E5E7EB] bg-white'
-          }`}
-        />
-        {isExtracted && <Zap className="w-3 h-3 text-green-500 absolute right-3 top-1/2 -translate-y-1/2 fill-green-500" />}
+      <div className={`transition-all duration-300 ${isCollapsed ? 'max-h-0 opacity-0' : 'max-h-[2000px] opacity-100 p-8 pt-0'}`}>
+         <div className="border-t border-[#F3F4F6] pt-8">
+            {children}
+         </div>
       </div>
     </div>
   );
 }
 
-function FormSelect({ label, value, options }: { label: string; value?: string; options: string[] }) {
+function FormInput({ label, required, value, isExtracted, isLocked, type = 'text', placeholder, onChange }: any) {
   return (
-    <div>
-      <label className="block text-[10px] font-bold text-[#6B7280] uppercase tracking-wider mb-1.5">{label}</label>
+    <div className="space-y-2 group">
+      <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1 flex items-center gap-1.5 min-h-[1.2rem]">
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
+      <div className="relative">
+        {isLocked && <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10 text-[#9CA3AF]"><Lock className="w-3.5 h-3.5" /></div>}
+        <input
+          type={type}
+          defaultValue={value}
+          readOnly={isLocked}
+          placeholder={placeholder}
+          onChange={(e) => onChange?.(e.target.value)}
+          className={`w-full border rounded-xl px-5 py-3.5 text-sm font-bold transition-all focus:outline-none focus:ring-4 ${
+            isLocked 
+              ? 'bg-[#F3F4F6] border-[#E5E7EB] text-[#9CA3AF] pl-10 cursor-not-allowed shadow-inner' 
+              : 'bg-white border-[#E5E7EB] text-[#111827] focus:ring-[#3538CD]/10 focus:border-[#3538CD] hover:border-[#D1D5DB] hover:shadow-sm cursor-text'
+          }`}
+        />
+        {isExtracted && !isLocked && (
+           <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[#3538CD]">
+              <Sparkles className="w-4 h-4 fill-[#3538CD]" />
+           </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function FormPhoneInput({ label, required, value, isExtracted }: any) {
+  return (
+    <div className="space-y-2">
+      <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">{label} {required && <span className="text-red-500">*</span>}</label>
+      <div className="flex gap-2">
+         <div className="w-24 shrink-0 relative">
+            <select className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3.5 text-sm font-bold appearance-none bg-[#F9FAFB]">
+               <option>+91</option>
+               <option>+1</option>
+               <option>+44</option>
+            </select>
+            <ChevronDown className="w-3.5 h-3.5 text-[#9CA3AF] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+         </div>
+         <div className="relative flex-1">
+            <input 
+              type="text" 
+              defaultValue={value}
+              className="w-full border border-[#E5E7EB] rounded-xl px-5 py-3.5 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD]" 
+            />
+            {isExtracted && <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[#3538CD]"><Sparkles className="w-4 h-4 fill-[#3538CD]" /></div>}
+         </div>
+      </div>
+    </div>
+  );
+}
+
+function FormSelect({ label, options, value }: any) {
+  return (
+    <div className="space-y-2">
+      <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">{label}</label>
       <div className="relative">
         <select
           defaultValue={value}
-          className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white appearance-none"
+          className="w-full border border-[#E5E7EB] bg-white rounded-xl px-5 py-3.5 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] appearance-none text-[#111827] hover:border-[#D1D5DB] transition-all"
         >
-          {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+          {options.map((opt: string) => <option key={opt} value={opt === 'Select' ? '' : opt}>{opt}</option>)}
         </select>
-        <ChevronDown className="w-4 h-4 text-[#9CA3AF] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+        <ChevronDown className="w-4 h-4 text-[#9CA3AF] absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none" />
       </div>
     </div>
   );
 }
 
-function ReviewSection({ title, data, isHighlight }: { title: string, data: {label: string, value: string}[], isHighlight?: boolean }) {
+function FormTextarea({ label, value }: any) {
   return (
-    <div className={`p-6 rounded-2xl border ${isHighlight ? 'bg-primary shadow-sm border-primary/20' : 'bg-[#F9FAFB] border-[#E5E7EB]'}`}>
-      <h3 className={`text-xs font-bold uppercase tracking-widest mb-4 ${isHighlight ? 'text-white/80' : 'text-[#9CA3AF]'}`}>{title}</h3>
-      <div className="grid grid-cols-2 gap-y-4 gap-x-8">
-        {data.map(item => (
+    <div className="space-y-2">
+      <label className="block text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">{label}</label>
+      <textarea
+        defaultValue={value}
+        rows={4}
+        className="w-full border border-[#E5E7EB] bg-white rounded-2xl px-5 py-4 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] text-[#111827] resize-none hover:border-[#D1D5DB] transition-all"
+      />
+    </div>
+  );
+}
+
+function ReviewCard({ title, data, onEdit }: any) {
+  return (
+    <div className="bg-[#F9FAFB] rounded-3xl border border-[#E5E7EB] p-8 relative group">
+      <div className="flex items-center justify-between mb-8 border-b border-[#E5E7EB] pb-4">
+         <h3 className="text-xs font-black text-[#9CA3AF] uppercase tracking-widest">{title} Information</h3>
+         <button onClick={onEdit} className="text-[#3538CD] text-[10px] font-black uppercase tracking-widest hover:underline opacity-60 hover:opacity-100 transition-opacity">
+           Edit
+         </button>
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-y-10 gap-x-8">
+        {data.map((item: any) => (
           <div key={item.label}>
-            <p className={`text-[10px] font-bold uppercase tracking-wider mb-1 ${isHighlight ? 'text-white/60' : 'text-[#9CA3AF]'}`}>{item.label}</p>
-            <p className={`text-sm font-semibold truncate ${isHighlight ? 'text-white' : 'text-[#1A1A2E]'}`}>{item.value}</p>
+            <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-[0.2em] mb-2">{item.label}</p>
+            <div className="text-sm font-bold text-[#111827] break-words">{item.value || <span className="text-[#D1D5DB]">—</span>}</div>
           </div>
         ))}
       </div>

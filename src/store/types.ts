@@ -33,6 +33,7 @@ export interface Job {
   status: 'Open' | 'Draft' | 'Close';
   publishOnCollabCareers: boolean;
   customFields: CustomField[];
+  evaluationCriteria: string[];
   createdAt: string;
 }
 

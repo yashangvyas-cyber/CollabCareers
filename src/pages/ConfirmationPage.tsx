@@ -1,110 +1,92 @@
-import { Link, useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import PortalLayout from '../components/PortalLayout';
-import { CheckCircle, ArrowRight, Briefcase, Eye, Clock, Zap } from 'lucide-react';
-import { useApp } from '../store/AppContext';
-import { Job } from '../store/types';
+import { Check, Briefcase, List } from 'lucide-react';
 
 export default function ConfirmationPage() {
-  const { jobId } = useParams();
-  const { jobs } = useApp();
-  
-  const job = jobs.find(j => j.id === jobId) || jobs[0] || {
-    id: '1', title: 'React Developer', businessUnit: 'Yopmails', location: 'Ahmedabad'
-  } as any as Job;
+  const steps = [
+    { label: 'Applied', status: 'completed' },
+    { label: 'Under Review', status: 'current' },
+    { label: 'Interview', status: 'upcoming' },
+    { label: 'Decision', status: 'upcoming' },
+  ];
 
   return (
-    <PortalLayout isLoggedIn>
-      <div className="max-w-2xl mx-auto px-6 py-16 text-center animate-in fade-in zoom-in-95 duration-700">
-        {/* Success Animation */}
-        <div className="w-24 h-24 rounded-full bg-green-100 mx-auto flex items-center justify-center mb-8 relative">
-           <div className="absolute inset-0 bg-green-400 rounded-full animate-ping opacity-20" />
-           <CheckCircle className="w-12 h-12 text-green-600 relative z-10" />
+    <PortalLayout>
+      <div className="max-w-2xl mx-auto px-6 py-16 flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-700">
+        
+        {/* Large Checkmark Icon */}
+        <div className="w-20 h-20 rounded-full bg-[#3538CD]/10 flex items-center justify-center mb-8">
+          <div className="w-16 h-16 rounded-full bg-[#3538CD] flex items-center justify-center shadow-lg shadow-[#3538CD]/20">
+            <Check className="w-10 h-10 text-white stroke-[3px]" />
+          </div>
         </div>
 
-        <h1 className="text-3xl font-black text-[#1A1A2E] mb-3 tracking-tight">Application Submitted!</h1>
-        <p className="text-[#6B7280] mb-10 max-w-sm mx-auto text-sm leading-relaxed">
-          Awesome! Your application for <strong>{job.title}</strong> at
-          <strong className="text-primary"> {job.businessUnit}</strong> is on its way.
+        {/* Heading and Subtext */}
+        <h1 className="text-3xl font-black text-[#111827] mb-4 tracking-tight">
+          Application Submitted Successfully!
+        </h1>
+        <p className="text-[#6B7280] text-base leading-relaxed max-w-lg mb-8">
+          You've applied for <span className="text-[#111827] font-bold">React Developer</span> at <span className="text-[#111827] font-bold">Yopmails</span>. 
+          The recruiter will review your application and reach out if shortlisted.
         </p>
 
-        {/* Status Card */}
-        <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-xl p-6 mb-10 text-left transform transition-transform hover:scale-[1.01]">
-          <div className="flex items-center gap-4 mb-5 pb-5 border-b border-[#F3F4F6]">
-            <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-white font-black text-xl shadow-inner">
-              {job.businessUnit?.[0] || 'Y'}
-            </div>
-            <div className="flex-1">
-              <p className="text-base font-bold text-[#1A1A2E]">{job.title}</p>
-              <p className="text-xs text-[#6B7280] font-medium">{job.businessUnit} • {job.location}</p>
-            </div>
-            <div className="flex flex-col items-end gap-1">
-              <span className="px-3 py-1 text-[10px] font-black uppercase tracking-widest bg-green-50 text-green-700 border border-green-200 rounded-full shadow-sm">
-                Submitted
-              </span>
-              <span className="text-[10px] text-[#9CA3AF] font-medium">Ref: {job.id.substring(0,8)}</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-6 text-[11px] text-[#6B7280] font-semibold">
-            <span className="flex items-center gap-2"><Clock className="w-3.5 h-3.5 text-primary" /> Applied just now</span>
-            <span className="flex items-center gap-2"><Eye className="w-3.5 h-3.5 text-primary" /> Under initial review</span>
-          </div>
+        {/* Application ID Pill */}
+        <div className="inline-flex items-center px-4 py-1.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-full text-sm font-semibold text-[#374151] mb-12">
+          Application ID: <span className="text-[#3538CD] ml-1.5 font-bold">CC-2044-0312</span>
         </div>
 
-        {/* What's Next Section */}
-        <div className="bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] p-8 mb-10 text-left">
-          <h3 className="text-sm font-black text-[#1A1A2E] uppercase tracking-widest mb-6 flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-            What happens next?
-          </h3>
-          <div className="space-y-6">
-            {[
-              { step: '1', text: 'Hiring team reviews your profile and CV', time: '1–3 days' },
-              { step: '2', text: 'Initial screening call or technical assessment', time: '3–5 days' },
-              { step: '3', text: 'Track everything from your candidate dashboard', time: '' },
-            ].map((item) => (
-              <div key={item.step} className="flex items-start gap-4">
-                <div className="w-7 h-7 rounded-lg bg-white border border-[#E5E7EB] shadow-sm text-primary flex items-center justify-center text-xs font-black shrink-0">
-                  {item.step}
+        {/* Horizontal Status Stepper */}
+        <div className="w-full max-w-xl mb-16 relative">
+          <div className="absolute top-5 left-0 w-full h-[2px] bg-[#E5E7EB]" />
+          <div className="relative flex justify-between">
+            {steps.map((step, index) => (
+              <div key={index} className="flex flex-col items-center relative z-10 w-24">
+                <div 
+                  className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
+                    step.status === 'completed' 
+                      ? 'bg-[#3538CD] border-[#3538CD] text-white' 
+                      : step.status === 'current'
+                      ? 'bg-white border-[#3538CD] text-[#3538CD]'
+                      : 'bg-white border-[#E5E7EB] text-[#9CA3AF]'
+                  }`}
+                >
+                  {step.status === 'completed' ? (
+                    <Check className="w-5 h-5 stroke-[3px]" />
+                  ) : (
+                    <span className="text-sm font-bold">{index + 1}</span>
+                  )}
                 </div>
-                <div className="flex-1">
-                   <p className="text-sm text-[#374151] font-semibold">{item.text}</p>
-                   {item.time && <p className="text-[10px] text-[#9CA3AF] font-bold uppercase mt-0.5">{item.time}</p>}
-                </div>
+                <p 
+                  className={`mt-3 text-xs font-bold whitespace-nowrap ${
+                    step.status !== 'upcoming' ? 'text-[#3538CD]' : 'text-[#9CA3AF]'
+                  }`}
+                >
+                  {step.label}
+                </p>
               </div>
             ))}
           </div>
+          {/* Progress bar overlay */}
+          <div 
+            className="absolute top-5 left-0 h-[2px] bg-[#3538CD] transition-all duration-500" 
+            style={{ width: '33%' }} 
+          />
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
           <Link
             to="/portal/yopmails/profile"
-            className="flex items-center gap-2 w-full sm:w-auto px-8 py-4 bg-primary text-white text-sm font-black rounded-xl hover:bg-[#292bb0] transition-all shadow-lg shadow-primary/25 transform hover:translate-y-[-2px]"
+            className="flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 bg-[#3538CD] text-white text-sm font-bold rounded-xl hover:bg-[#292bb0] transition-all shadow-lg shadow-[#3538CD]/20"
           >
-            My Candidate Profile <ArrowRight className="w-4 h-4" />
+            <List className="w-4 h-4" /> View My Applications
           </Link>
           <Link
             to="/portal/yopmails"
-            className="flex items-center gap-2 w-full sm:w-auto px-8 py-4 bg-white border border-[#E5E7EB] text-[#374151] text-sm font-bold rounded-xl hover:bg-[#F9FAFB] transition-all shadow-sm"
+            className="flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 bg-white border border-[#E5E7EB] text-[#374151] text-sm font-bold rounded-xl hover:bg-[#F9FAFB] transition-all"
           >
             <Briefcase className="w-4 h-4" /> Browse More Jobs
           </Link>
-        </div>
-
-        {/* One-Click Reapply Teaser */}
-        <div className="bg-primary/5 rounded-2xl border border-primary/15 p-6 text-left relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
-             <Zap className="w-12 h-12 text-primary fill-primary" />
-          </div>
-          <div className="flex items-center gap-2 mb-3">
-            <Zap className="w-4 h-4 text-primary fill-primary" />
-            <span className="text-sm font-black text-primary uppercase tracking-widest">Speed Apply Active</span>
-          </div>
-          <p className="text-xs text-[#6B7280] leading-relaxed font-medium max-w-md">
-            Your profile and documents are now stored in our talent pool. 
-            You can apply to any other role at <span className="text-[#1A1A2E] font-bold">Yopmails</span> instantly with a single click.
-          </p>
         </div>
       </div>
     </PortalLayout>
