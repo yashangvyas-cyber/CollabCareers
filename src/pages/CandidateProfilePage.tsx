@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import PortalLayout from '../components/PortalLayout';
-import { Briefcase, Mail, Phone, MapPin, FileText, ExternalLink, Clock, Linkedin } from 'lucide-react';
+import { Briefcase, Mail, Phone, MapPin, FileText, ExternalLink, Clock, Linkedin, LogOut } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 
 const brandStatusStyles: Record<string, string> = {
@@ -23,8 +23,14 @@ const savedJobs = [
 ];
 
 export default function CandidateProfilePage() {
-  const { currentUser } = useApp();
+  const { currentUser, logoutCandidate } = useApp();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'applications' | 'saved'>('applications');
+
+  const handleLogout = () => {
+    logoutCandidate();
+    navigate('/portal/yopmails');
+  };
 
   return (
     <PortalLayout>
@@ -45,6 +51,14 @@ export default function CandidateProfilePage() {
                 
                 <button className="mt-4 px-4 py-2 border border-[#E5E7EB] text-[#374151] text-xs font-black rounded-lg hover:bg-[#F9FAFB] transition-colors w-full uppercase tracking-widest">
                   Edit Profile
+                </button>
+                
+                <button 
+                  onClick={handleLogout}
+                  className="mt-2 px-4 py-2 border border-red-100 text-red-600 text-xs font-black rounded-lg hover:bg-red-50 transition-colors w-full uppercase tracking-widest flex items-center justify-center gap-2"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  Sign Out
                 </button>
               </div>
 
