@@ -30,7 +30,7 @@ const initialState: AppState = {
       publishOnCollabCareers: true,
       customFields: [
         { id: '1', label: 'Portfolio URL', type: 'Text', required: true },
-        { id: '2', label: 'Relocation Open?', type: 'Yes/No', required: false }
+        { id: '2', label: 'Are you open to relocate?', type: 'Yes/No', required: false }
       ],
       evaluationCriteria: [
         "Proven React experience with component architecture.",

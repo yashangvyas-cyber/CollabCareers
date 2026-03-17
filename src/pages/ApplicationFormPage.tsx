@@ -386,8 +386,8 @@ export default function ApplicationFormPage() {
                   <div className="space-y-8">
                     {job.customFields.map((f: CustomField) => (
                       <div key={f.id} className="max-w-2xl">
-                        <label className="block text-[10px] font-black uppercase tracking-widest text-[#6B7280] mb-3">
-                          {f.label} {f.required ? '(Required)' : <span className="text-[#9CA3AF]">(Optional)</span>}
+                        <label className="flex items-center gap-2 text-[10px] font-black text-[#6B7280] mb-3">
+                          {f.label} {!f.required && <span className="px-1.5 py-0.5 bg-[#F3F4F6] text-[#9CA3AF] rounded text-[8px] border border-[#E5E7EB] font-bold">Optional</span>}
                         </label>
                         {f.type === 'Yes/No' ? (
                           <div className="flex items-center gap-4">
@@ -406,7 +406,6 @@ export default function ApplicationFormPage() {
                                   </button>
                                 ))}
                              </div>
-                             <span className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-widest italic">Toggle selection</span>
                           </div>
                         ) : (
                           <div className="space-y-2">
