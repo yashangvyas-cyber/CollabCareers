@@ -40,7 +40,6 @@ export default function CareerPage() {
     return jobs.filter(j => j.publishOnCollabCareers);
   }, [jobs]);
 
-  const activeFilters = [locationFilter, employmentFilter, jobTypeFilter].filter(Boolean);
 
   const filteredJobs = displayJobs.filter((job) => {
     if (searchQuery && !job.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
@@ -73,11 +72,9 @@ export default function CareerPage() {
             </div>
             <div>
               <h1 className="text-3xl font-bold tracking-tight">Yopmails</h1>
-              <p className="text-white/70 text-sm mt-1">Building the future of email infrastructure</p>
             </div>
           </div>
           <div className="flex items-center gap-4 text-sm text-white/60 mt-2">
-            <span className="flex items-center gap-1.5"><Building2 className="w-4 h-4" /> Technology</span>
             <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4" /> Ahmedabad, India</span>
             <span className="flex items-center gap-1.5"><Briefcase className="w-4 h-4" /> {displayJobs.length} Open Positions</span>
           </div>
@@ -102,21 +99,35 @@ export default function CareerPage() {
 
             {/* Filters */}
             <div className="flex flex-wrap items-center gap-3 flex-1 lg:justify-end">
-              <FilterDropdown
+              <FilterPill
                 label="Location"
                 icon={<MapPin className="w-3.5 h-3.5" />}
                 value={locationFilter}
                 options={locations}
                 onChange={setLocationFilter}
               />
-              <FilterDropdown
+              <FilterPill
                 label="Experience"
                 icon={<Clock className="w-3.5 h-3.5" />}
                 value={experienceFilter}
                 options={experienceLevels}
                 onChange={setExperienceFilter}
               />
-              {activeFilters.length > 0 && (
+              <FilterPill
+                label="Employment"
+                icon={<Briefcase className="w-3.5 h-3.5" />}
+                value={employmentFilter}
+                options={Array.from(new Set(displayJobs.map(j => j.employmentType)))}
+                onChange={setEmploymentFilter}
+              />
+              <FilterPill
+                label="Type"
+                icon={<Building2 className="w-3.5 h-3.5" />}
+                value={jobTypeFilter}
+                options={Array.from(new Set(displayJobs.map(j => j.jobType)))}
+                onChange={setJobTypeFilter}
+              />
+              { (locationFilter || experienceFilter || employmentFilter || jobTypeFilter) && (
                 <button
                   onClick={clearFilters}
                   className="text-[10px] font-black text-primary hover:text-[#292bb0] uppercase tracking-widest px-2"
@@ -127,29 +138,6 @@ export default function CareerPage() {
             </div>
           </div>
 
-          {/* Active Filters */}
-          {activeFilters.length > 0 && (
-            <div className="flex items-center gap-2 mt-3">
-              {locationFilter && (
-                <Chip variant="active">
-                  Location: {locationFilter}
-                  <button onClick={() => setLocationFilter('')} className="ml-1.5"><X className="w-3 h-3" /></button>
-                </Chip>
-              )}
-              {employmentFilter && (
-                <Chip variant="active">
-                  {employmentFilter}
-                  <button onClick={() => setEmploymentFilter('')} className="ml-1.5"><X className="w-3 h-3" /></button>
-                </Chip>
-              )}
-              {jobTypeFilter && (
-                <Chip variant="active">
-                  {jobTypeFilter}
-                  <button onClick={() => setJobTypeFilter('')} className="ml-1.5"><X className="w-3 h-3" /></button>
-                </Chip>
-              )}
-            </div>
-          )}
         </div>
       </div>
 
@@ -227,29 +215,82 @@ export default function CareerPage() {
   );
 }
 
-// Filter Dropdown component
-function FilterDropdown({ label, icon, value, options, onChange }: {
-  label: string; icon: React.ReactNode; value: string; options: string[];
+// Modern Filter Pill component with custom floating dropdown
+function FilterPill({ label, icon, value, options, onChange }: {
+  label: string; 
+  icon: React.ReactNode; 
+  value: string; 
+  options: string[];
   onChange: (v: string) => void;
 }) {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <div className="relative group">
-      <div className={`absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none transition-colors ${value ? 'text-primary' : 'text-[#9CA3AF]'}`}>
-        {icon}
-      </div>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`appearance-none border rounded-lg pl-9 pr-8 py-2.5 text-xs font-bold cursor-pointer focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all ${
-          value ? 'bg-primary/5 border-primary/30 text-primary uppercase tracking-widest' : 'bg-[#F9FAFB] border-[#E5E7EB] text-[#374151] uppercase tracking-widest'
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={`flex items-center gap-2.5 px-4 py-2 text-xs font-black rounded-full border-2 transition-all uppercase tracking-widest ${
+          value 
+            ? 'bg-[#3538CD]/5 border-[#3538CD] text-[#3538CD]' 
+            : 'bg-white border-[#E5E7EB] text-[#6B7280] hover:border-[#D1D5DB]'
         }`}
       >
-        <option value="" className="normal-case">{label}</option>
-        {options.map(opt => (
-          <option key={opt} value={opt} className="normal-case text-sm">{opt}</option>
-        ))}
-      </select>
-      <ChevronDown className="w-3.5 h-3.5 text-[#9CA3AF] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none group-hover:text-primary transition-colors" />
+        <span className={value ? 'text-[#3538CD]' : 'text-[#9CA3AF]'}>{icon}</span>
+        <span>{value || label}</span>
+        {value ? (
+          <div 
+            onClick={(e) => {
+              e.stopPropagation();
+              onChange('');
+              setIsOpen(false);
+            }}
+            className="ml-1 p-0.5 hover:bg-[#3538CD]/10 rounded-full transition-colors"
+          >
+            <X className="w-3 h-3" />
+          </div>
+        ) : (
+          <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+        )}
+      </button>
+
+      {/* Floating Dropdown Panel */}
+      {isOpen && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+          <div className="absolute top-full left-0 mt-2 min-w-[200px] bg-white border border-[#E5E7EB] rounded-2xl shadow-xl z-50 py-2 animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
+            <div className="px-3 pb-2 mb-2 border-b border-[#F3F4F6]">
+              <span className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">Select {label}</span>
+            </div>
+            <div className="max-h-[240px] overflow-y-auto custom-scrollbar">
+              <button
+                onClick={() => {
+                  onChange('');
+                  setIsOpen(false);
+                }}
+                className="w-full text-left px-4 py-2.5 text-xs font-bold text-[#6B7280] hover:bg-[#F9FAFB] transition-colors"
+              >
+                All {label}s
+              </button>
+              {options.map((option) => (
+                <button
+                  key={option}
+                  onClick={() => {
+                    onChange(option);
+                    setIsOpen(false);
+                  }}
+                  className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors ${
+                    value === option 
+                      ? 'text-[#3538CD] bg-[#3538CD]/5' 
+                      : 'text-[#374151] hover:bg-[#F9FAFB]'
+                  }`}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

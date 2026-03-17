@@ -413,7 +413,7 @@ export default function AuthModal({ isOpen, onClose, jobTitle, businessUnit, job
                   </div>
                   <div>
                     <h4 className="text-sm font-black text-[#111827]">Senior Software Engineer</h4>
-                    <p className="text-[11px] font-bold text-[#6B7280] uppercase tracking-tight">Jan 2021 - Mar 2024 (3.2 Years)</p>
+                    <p className="text-[11px] font-bold text-[#6B7280] uppercase tracking-tight">Jan 2021 - Mar 2024 (3 Years 2 Months)</p>
                   </div>
                 </div>
               </div>

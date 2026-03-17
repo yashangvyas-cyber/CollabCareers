@@ -34,26 +34,7 @@ export default function PortalLayout({
     <div className="min-h-screen bg-[#F9FAFB] flex flex-col">
       {/* Top Bar */}
       <header className="bg-white border-b border-[#E5E7EB] sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-          {/* Left: CollabCareers branding (secondary) */}
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-lg bg-[#3538CD] flex items-center justify-center">
-              <Briefcase className="w-4 h-4 text-white" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-bold text-[#1A1A2E] leading-tight">CollabCareers</span>
-              <span className="text-[10px] text-[#9CA3AF] leading-tight">Job Portal</span>
-            </div>
-          </Link>
-
-          {/* Center: Company Name */}
-          <Link to="/portal/yopmails" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#3538CD] to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
-              {companyName.charAt(0)}
-            </div>
-            <span className="text-lg font-bold text-[#1A1A2E]">{companyName}</span>
-          </Link>
-
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-end">
           {/* Right: Auth */}
           <div className="flex items-center gap-3">
             {currentUser ? (
