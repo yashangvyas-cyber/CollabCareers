@@ -430,7 +430,7 @@ export default function AddJobPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-[10px] text-[#6B7280] font-black uppercase tracking-widest">Required</span>
+                  <span className="text-[10px] text-[#6B7280] font-black uppercase tracking-widest">Mandatory</span>
                   <Toggle
                     checked={field.required}
                     onChange={() => setCustomFields(customFields.map(f => f.id === field.id ? {...f, required: !f.required} : f))}

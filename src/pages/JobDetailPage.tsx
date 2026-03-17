@@ -3,10 +3,19 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import PortalLayout from '../components/PortalLayout';
 import AuthModal from '../components/AuthModal';
 import { 
-  MapPin, Briefcase, Building2, Clock, IndianRupee, 
-  ArrowRight, Bookmark, ChevronRight, TrendingUp, ArrowLeft, Calendar, Share2 
+  MapPin, Briefcase, Building2, Clock, 
+  ArrowRight, Bookmark, ChevronRight, TrendingUp, ArrowLeft, Copy, CheckCheck 
 } from 'lucide-react';
 import { useApp } from '../store/AppContext';
+
+const formatExperience = (exp: string) => {
+  if (!exp) return '';
+  const match = exp.match(/^(\d+)/);
+  if (match) {
+    return `${match[1]}+ Years Experience`;
+  }
+  return exp;
+};
 
 export default function JobDetailPage() {
   const { jobId } = useParams();
@@ -14,6 +23,7 @@ export default function JobDetailPage() {
   const navigate = useNavigate();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authTab, setAuthTab] = useState<'register' | 'signin'>('register');
+  const [copied, setCopied] = useState(false);
 
   // Find job from state, or fallback to first job
   const job = jobs.find(j => j.id === jobId) || jobs[0];
@@ -46,6 +56,12 @@ export default function JobDetailPage() {
     e.preventDefault();
     setAuthTab('signin');
     setShowAuthModal(true);
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   // Dynamic similar jobs (excluding current)
@@ -85,16 +101,9 @@ export default function JobDetailPage() {
                 <span className="flex items-center gap-2"><MapPin className="w-4 h-4 text-[#3538CD]" /> {job.location}</span>
                 <span className="flex items-center gap-2"><Briefcase className="w-4 h-4 text-[#3538CD]" /> {job.employmentType}</span>
                 <span className="flex items-center gap-2"><Building2 className="w-4 h-4 text-[#3538CD]" /> {job.jobType}</span>
-                <span className="flex items-center gap-2"><Clock className="w-4 h-4 text-[#3538CD]" /> {job.experience} Experience</span>
+                <span className="flex items-center gap-2"><Clock className="w-4 h-4 text-[#3538CD]" /> {formatExperience(job.experience)}</span>
               </div>
 
-              {/* Salary Chip */}
-              {job.salaryRange && job.salaryRange.min && job.salaryRange.max && (
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#F4F5FA] border border-[#3538CD]/10 rounded-lg text-sm font-bold text-[#3538CD] mb-8">
-                  <IndianRupee className="w-4 h-4" />
-                  {job.salaryRange.min} – {job.salaryRange.max} LPA ({job.salaryRange.type})
-                </div>
-              )}
 
               {/* Required Skills */}
               <div className="mb-10">
@@ -138,20 +147,6 @@ export default function JobDetailPage() {
                 </div>
               )}
 
-              {/* Additional Information Required */}
-              {job.customFields && job.customFields.length > 0 && (
-                <div className="p-8 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
-                  <h3 className="text-sm font-black text-[#111827] uppercase tracking-widest mb-6">Additional Information Required</h3>
-                  <div className="grid grid-cols-2 gap-6">
-                    {job.customFields.map((field: any) => (
-                      <div key={field.id} className="flex items-center gap-3">
-                        <div className="w-2 h-2 rounded-full bg-[#3538CD]/30" />
-                        <span className="text-sm font-bold text-[#374151]">{field.label} {field.required && <span className="text-[#3538CD] font-black text-xs">*</span>}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
 
             </div>
           </div>
@@ -174,12 +169,6 @@ export default function JobDetailPage() {
                     <h3 className="text-xl font-black text-[#111827] mb-2">Apply for this role</h3>
                   </div>
 
-                  {job.targetDate && (
-                    <div className="mb-6 p-4 bg-[#D97706]/5 border border-[#D97706]/20 rounded-xl flex items-center gap-3">
-                      <Calendar className="w-5 h-5 text-[#D97706] shrink-0" />
-                      <span className="text-xs font-black text-[#D97706] uppercase tracking-widest">Apply before 30 Mar 2026</span>
-                    </div>
-                  )}
 
 
                   <button
@@ -195,7 +184,7 @@ export default function JobDetailPage() {
                       onClick={handleSignInClick}
                       className="text-[13px] font-black text-[#3538CD] hover:underline"
                     >
-                      Sign in for one-click apply →
+                      Sign In
                     </button>
                   </div>
 
@@ -203,9 +192,19 @@ export default function JobDetailPage() {
                     <button className="flex-1 flex items-center justify-center gap-2 py-3.5 border-2 border-[#E5E7EB] text-[#374151] text-xs font-black rounded-xl hover:bg-[#F9FAFB] hover:border-[#D1D5DB] transition-all uppercase tracking-widest group">
                       <Bookmark className="w-4 h-4 group-hover:fill-[#111827]" /> Save
                     </button>
-                    <button className="p-3.5 border-2 border-[#E5E7EB] text-[#6B7280] rounded-xl hover:bg-[#F9FAFB] hover:border-[#D1D5DB] transition-all">
-                      <Share2 className="w-4 h-4" />
-                    </button>
+                    <div className="relative">
+                      <button 
+                        onClick={handleCopyLink}
+                        className="p-3.5 border-2 border-[#E5E7EB] text-[#6B7280] rounded-xl hover:bg-[#F9FAFB] hover:border-[#D1D5DB] transition-all relative"
+                      >
+                        {copied ? <CheckCheck className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+                      </button>
+                      {copied && (
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-[10px] font-bold rounded whitespace-nowrap animate-in fade-in slide-in-from-bottom-1 duration-200">
+                          Link copied!
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -232,11 +231,11 @@ export default function JobDetailPage() {
                 <div className="flex flex-wrap gap-2 mb-6">
                   <span className="px-2 py-1 bg-[#F9FAFB] text-[#6B7280] text-[10px] font-black rounded uppercase">{js.location}</span>
                   <span className="px-2 py-1 bg-[#F9FAFB] text-[#6B7280] text-[10px] font-black rounded uppercase">{js.employmentType}</span>
-                  <span className="px-2 py-1 bg-[#F9FAFB] text-[#6B7280] text-[10px] font-black rounded uppercase">{js.experience}</span>
+                  <span className="px-2 py-1 bg-[#F9FAFB] text-[#6B7280] text-[10px] font-black rounded uppercase">{formatExperience(js.experience)}</span>
                 </div>
                 
                 <div className="flex items-center justify-between pt-6 border-t border-[#F3F4F6]">
-                  <span className="text-sm font-black text-[#111827]">{js.salaryRange.currency}{js.salaryRange.min} – {js.salaryRange.max} LPA</span>
+                  <span className="text-[11px] font-black text-[#9CA3AF] uppercase tracking-widest italic">View Details</span>
                   <Link
                     to={`/portal/yopmails/job/${js.id}`}
                     className="text-xs font-black text-[#3538CD] hover:underline flex items-center gap-1 uppercase tracking-widest"

@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import PortalLayout from '../components/PortalLayout';
-import { Search, MapPin, Briefcase, Clock, ChevronDown, X, Building2, Zap, IndianRupee } from 'lucide-react';
+import { Search, MapPin, Briefcase, Clock, ChevronDown, X, Building2 } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 
 function Chip({ children, variant = 'default' }: { children: React.ReactNode; variant?: 'default' | 'skill' | 'active' }) {
@@ -18,6 +18,15 @@ function Chip({ children, variant = 'default' }: { children: React.ReactNode; va
 }
 
 
+const formatExperience = (exp: string) => {
+  if (!exp) return '';
+  const match = exp.match(/^(\d+)/);
+  if (match) {
+    return `${match[1]}+ Years Experience`;
+  }
+  return exp;
+};
+
 export default function CareerPage() {
   const { jobs } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
@@ -25,7 +34,6 @@ export default function CareerPage() {
   const [employmentFilter, setEmploymentFilter] = useState('');
   const [jobTypeFilter, setJobTypeFilter] = useState('');
   const [experienceFilter, setExperienceFilter] = useState('');
-  const [skillFilter, setSkillFilter] = useState('');
 
   // Combine store jobs with defaults if store is sparse
   const displayJobs = useMemo(() => {
@@ -41,7 +49,6 @@ export default function CareerPage() {
     if (employmentFilter && job.employmentType !== employmentFilter) return false;
     if (jobTypeFilter && job.jobType !== jobTypeFilter) return false;
     if (experienceFilter && job.experience !== experienceFilter) return false;
-    if (skillFilter && !job.skills.includes(skillFilter)) return false;
     return true;
   });
 
@@ -54,7 +61,6 @@ export default function CareerPage() {
 
   const locations = Array.from(new Set(displayJobs.map(j => j.location))).filter(Boolean);
   const experienceLevels = Array.from(new Set(displayJobs.map(j => j.experience))).filter(Boolean);
-  const allSkills = Array.from(new Set(displayJobs.flatMap(j => j.skills))).filter(Boolean);
 
   return (
     <PortalLayout>
@@ -109,13 +115,6 @@ export default function CareerPage() {
                 value={experienceFilter}
                 options={experienceLevels}
                 onChange={setExperienceFilter}
-              />
-              <FilterDropdown
-                label="Skills"
-                icon={<Zap className="w-3.5 h-3.5" />}
-                value={skillFilter}
-                options={allSkills}
-                onChange={setSkillFilter}
               />
               {activeFilters.length > 0 && (
                 <button
@@ -185,14 +184,8 @@ export default function CareerPage() {
               <div className="space-y-2 mb-5">
                 <div className="flex items-center gap-2 text-[13px] font-bold text-[#6B7280]">
                   <Clock className="w-3.5 h-3.5 text-primary" />
-                  <span>{job.experience} Experience</span>
+                  <span>{formatExperience(job.experience)}</span>
                 </div>
-                {job.salaryRange && (
-                  <div className="flex items-center gap-2 text-[13px] font-bold text-primary">
-                    <IndianRupee className="w-3.5 h-3.5" />
-                    <span>{job.salaryRange.currency}{job.salaryRange.min}–{job.salaryRange.max} LPA ({job.salaryRange.type})</span>
-                  </div>
-                )}
               </div>
 
               <div className="border-t border-[#F3F4F6] pt-5 mb-5" />

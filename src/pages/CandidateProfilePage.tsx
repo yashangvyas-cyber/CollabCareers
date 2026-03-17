@@ -49,13 +49,9 @@ export default function CandidateProfilePage() {
                 <h2 className="text-xl font-black text-[#111827]">{currentUser?.firstName} {currentUser?.lastName}</h2>
                 <p className="text-sm font-bold text-[#6B7280] mt-1">UI Developer</p>
                 
-                <button className="mt-4 px-4 py-2 border border-[#E5E7EB] text-[#374151] text-xs font-black rounded-lg hover:bg-[#F9FAFB] transition-colors w-full uppercase tracking-widest">
-                  Edit Profile
-                </button>
-                
                 <button 
                   onClick={handleLogout}
-                  className="mt-2 px-4 py-2 border border-red-100 text-red-600 text-xs font-black rounded-lg hover:bg-red-50 transition-colors w-full uppercase tracking-widest flex items-center justify-center gap-2"
+                  className="mt-4 px-4 py-2 border border-red-100 text-red-600 text-xs font-black rounded-lg hover:bg-red-50 transition-colors w-full uppercase tracking-widest flex items-center justify-center gap-2"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   Sign Out

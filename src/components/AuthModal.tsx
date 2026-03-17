@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  X, Eye, EyeOff, Zap, ArrowRight, ShieldCheck, Mail, Lock, ArrowLeft
+  X, Eye, EyeOff, Building2, ArrowRight, ShieldCheck, Mail, Lock, ArrowLeft
 } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 
@@ -69,6 +69,11 @@ export default function AuthModal({ isOpen, onClose, jobTitle, businessUnit, job
     setTimeout(() => {
       if (formData.email.toLowerCase().includes('yopmails')) {
         setAlumniVerified(true, formData.email);
+        setFormData(prev => ({
+          ...prev,
+          firstName: 'Yash',
+          lastName: 'Vyas'
+        }));
         setModalState('alumni-success');
       } else {
         setError("We couldn't match this email with our employee records.");
@@ -131,29 +136,31 @@ export default function AuthModal({ isOpen, onClose, jobTitle, businessUnit, job
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex border-b border-[#E5E7EB]">
-          <button
-            onClick={() => setActiveTab('register')}
-            className={`flex-1 py-4 text-xs font-black text-center transition-all uppercase tracking-widest border-b-2 ${
-              activeTab === 'register'
-                ? 'text-[#3538CD] border-[#3538CD] bg-[#3538CD]/5'
-                : 'text-[#6B7280] border-transparent hover:text-[#374151]'
-            }`}
-          >
-            New Candidate
-          </button>
-          <button
-            onClick={() => setActiveTab('signin')}
-            className={`flex-1 py-4 text-xs font-black text-center transition-all uppercase tracking-widest border-b-2 ${
-              activeTab === 'signin'
-                ? 'text-[#3538CD] border-[#3538CD] bg-[#3538CD]/5'
-                : 'text-[#6B7280] border-transparent hover:text-[#374151]'
-            }`}
-          >
-            Already Registered
-          </button>
-        </div>
+        {/* Tabs - Hidden in Alumni States */}
+        {modalState === 'auth' && (
+          <div className="flex border-b border-[#E5E7EB]">
+            <button
+              onClick={() => setActiveTab('register')}
+              className={`flex-1 py-4 text-xs font-black text-center transition-all uppercase tracking-widest border-b-2 ${
+                activeTab === 'register'
+                  ? 'text-[#3538CD] border-[#3538CD] bg-[#3538CD]/5'
+                  : 'text-[#6B7280] border-transparent hover:text-[#374151]'
+              }`}
+            >
+              Sign Up
+            </button>
+            <button
+              onClick={() => setActiveTab('signin')}
+              className={`flex-1 py-4 text-xs font-black text-center transition-all uppercase tracking-widest border-b-2 ${
+                activeTab === 'signin'
+                  ? 'text-[#3538CD] border-[#3538CD] bg-[#3538CD]/5'
+                  : 'text-[#6B7280] border-transparent hover:text-[#374151]'
+              }`}
+            >
+              Sign In
+            </button>
+          </div>
+        )}
 
         <div className="p-8">
           {modalState === 'auth' ? (
@@ -390,7 +397,7 @@ export default function AuthModal({ isOpen, onClose, jobTitle, businessUnit, job
                 <ArrowLeft className="w-3.5 h-3.5" /> Back
               </button>
 
-              <div className="text-center mb-10">
+              <div className="text-center mb-8">
                 <div className="w-16 h-16 rounded-full bg-[#10b981]/10 text-[#10b981] flex items-center justify-center mx-auto mb-4 border border-[#10b981]/20">
                   <ShieldCheck className="w-8 h-8" />
                 </div>
@@ -398,13 +405,32 @@ export default function AuthModal({ isOpen, onClose, jobTitle, businessUnit, job
                 <p className="text-sm text-[#6B7280] font-medium leading-relaxed mb-6">
                   You've been verified as a former employee. Complete your profile setup to continue.
                 </p>
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#3538CD]/10 text-[#3538CD] rounded-full border border-[#3538CD]/20">
-                  <Zap className="w-3.5 h-3.5 fill-[#3538CD]" />
-                  <span className="text-[10px] font-black uppercase tracking-widest italic">Alumni Status Applied</span>
+                
+                {/* Verified Info Box */}
+                <div className="bg-[#3538CD]/5 border border-[#3538CD]/10 rounded-2xl p-4 text-left mb-8 flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm">
+                    <Building2 className="w-5 h-5 text-[#3538CD]" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-black text-[#111827]">Senior Software Engineer</h4>
+                    <p className="text-[11px] font-bold text-[#6B7280] uppercase tracking-tight">Jan 2021 - Mar 2024 (3.2 Years)</p>
+                  </div>
                 </div>
               </div>
 
               <form onSubmit={handleAlumniFinalize} className="space-y-4">
+                 <div className="space-y-1.5 text-left">
+                    <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Email Address</label>
+                    <input
+                      type="email"
+                      required
+                      value={formData.email}
+                      onChange={e => setFormData({...formData, email: e.target.value})}
+                      className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
+                    />
+                    <p className="text-[10px] font-bold text-[#9CA3AF] ml-1 mt-1">This will be used to sign in to your CollabCareers account</p>
+                 </div>
+
                  <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1.5 text-left">
                        <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">First Name *</label>
@@ -429,7 +455,7 @@ export default function AuthModal({ isOpen, onClose, jobTitle, businessUnit, job
                  </div>
 
                  <div className="space-y-1.5 text-left">
-                    <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Setup Password *</label>
+                    <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Password *</label>
                     <div className="relative">
                       <input
                         type={showPassword ? 'text' : 'password'}
@@ -472,7 +498,7 @@ export default function AuthModal({ isOpen, onClose, jobTitle, businessUnit, job
                     type="submit"
                     className="w-full py-4 bg-[#3538CD] text-white text-sm font-black rounded-xl hover:bg-[#292bb0] transition-all shadow-lg shadow-[#3538CD]/20 uppercase tracking-widest flex items-center justify-center gap-2 mt-4"
                   >
-                    Setup Account & Apply <ArrowRight className="w-4 h-4" />
+                    Submit <ArrowRight className="w-4 h-4" />
                   </button>
               </form>
             </div>
