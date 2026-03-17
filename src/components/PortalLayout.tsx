@@ -34,7 +34,21 @@ export default function PortalLayout({
     <div className="min-h-screen bg-[#F9FAFB] flex flex-col">
       {/* Top Bar */}
       <header className="bg-white border-b border-[#E5E7EB] sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-end">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          {/* Left: Navigation */}
+          <div className="flex items-center gap-6">
+            <Link 
+              to="/portal/yopmails" 
+              className={`text-sm font-black uppercase tracking-widest transition-colors ${
+                location.pathname === '/portal/yopmails' || location.pathname === '/portal/yopmails/'
+                  ? 'text-[#3538CD]'
+                  : 'text-[#6B7280] hover:text-[#111827]'
+              }`}
+            >
+              Open Positions
+            </Link>
+          </div>
+
           {/* Right: Auth */}
           <div className="flex items-center gap-3">
             {currentUser ? (

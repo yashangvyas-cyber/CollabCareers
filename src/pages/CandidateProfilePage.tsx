@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import PortalLayout from '../components/PortalLayout';
-import { Briefcase, Mail, Phone, MapPin, FileText, ExternalLink, Clock, Linkedin, LogOut } from 'lucide-react';
+import { Briefcase, Mail, Phone, MapPin, FileText, ExternalLink, Linkedin, LogOut, ArrowRight } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 
 const brandStatusStyles: Record<string, string> = {
@@ -9,12 +9,13 @@ const brandStatusStyles: Record<string, string> = {
   'Interview in Progress': 'bg-[#F4F5FA] text-[#3538CD] border-[#3538CD]/20',
   'Decision Pending': 'bg-[#F9FAFB] text-[#6B7280] border-[#E5E7EB]',
   'Offer Made': 'bg-[#3538CD] text-white border-[#3538CD]',
-  'Rejected': 'bg-gray-100 text-gray-400 border-gray-200'
+  'Rejected': 'bg-gray-100 text-gray-400 border-gray-200',
+  'Draft': 'bg-[#F4F5FA] text-[#3538CD] border border-[#3538CD]/20',
 };
 
-const appliedJobs = [
-  { id: '1', title: 'React Developer', company: 'Yopmails', status: 'Under Review', date: '13/Mar/2026' },
-  { id: '3', title: 'Project Manager', company: 'Yopmails', status: 'Interview in Progress', date: '10/Mar/2026' },
+const initialAppliedJobs = [
+  { id: '1', title: 'React Developer', company: 'Yopmails', status: 'Under Review', date: '13/Mar/2026', appliedAt: '2026-03-13T10:00:00Z', jobId: 'job1', jobClosed: false },
+  { id: '3', title: 'Flutter Developer', company: 'Yopmails', status: 'Under Review', date: '05/Mar/2026', appliedAt: '2026-03-05T10:00:00Z', jobId: 'job3', jobClosed: true },
 ];
 
 const savedJobs = [
@@ -22,10 +23,30 @@ const savedJobs = [
   { id: '6', title: 'UI/UX Designer', company: 'Yopmails', location: 'Remote', type: 'Full-time' },
 ];
 
+const formatDate = (dateString: string) => {
+  const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
+  return new Date(dateString).toLocaleDateString(undefined, options);
+};
+
 export default function CandidateProfilePage() {
-  const { currentUser, logoutCandidate } = useApp();
+  const { currentUser, logoutCandidate, applications, jobs } = useApp();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'applications' | 'saved'>('applications');
+
+  // Merge context apps with initial data for demo
+  const userApps = applications.filter(a => a.candidateId === currentUser?.id);
+  const displayApps = [...userApps.map(a => {
+    const job = jobs.find(j => j.id === a.jobId);
+    return {
+      ...a,
+      company: job?.businessUnit || 'Yopmails',
+      title: job?.title || 'React Developer',
+      jobClosed: job?.status === 'Close',
+    };
+  })];
+
+  // For demo, if empty show initial
+  const finalApps = displayApps.length > 0 ? displayApps : initialAppliedJobs;
 
   const handleLogout = () => {
     logoutCandidate();
@@ -118,49 +139,66 @@ export default function CandidateProfilePage() {
             <div className="flex items-center border-b border-[#E5E7EB] mb-8">
               <button
                 onClick={() => setActiveTab('applications')}
-                className={`px-8 py-4 text-sm font-black uppercase tracking-widest transition-all relative ${
+                className={`px-8 py-4 text-sm font-black uppercase tracking-widest transition-all relative flex items-center gap-2 ${
                   activeTab === 'applications' ? 'text-[#3538CD]' : 'text-[#9CA3AF] hover:text-[#6B7280]'
                 }`}
               >
                 My Applications
+                <span className="bg-[#3538CD] text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
+                  {finalApps.length}
+                </span>
                 {activeTab === 'applications' && <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#3538CD] rounded-full" />}
               </button>
               <button
                 onClick={() => setActiveTab('saved')}
-                className={`px-8 py-4 text-sm font-black uppercase tracking-widest transition-all relative ${
+                className={`px-8 py-4 text-sm font-black uppercase tracking-widest transition-all relative flex items-center gap-2 ${
                   activeTab === 'saved' ? 'text-[#3538CD]' : 'text-[#9CA3AF] hover:text-[#6B7280]'
                 }`}
               >
                 Saved Jobs
+                <span className="bg-[#3538CD] text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
+                  {savedJobs.length}
+                </span>
                 {activeTab === 'saved' && <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#3538CD] rounded-full" />}
               </button>
             </div>
 
             <div className="space-y-4">
               {activeTab === 'applications' ? (
-                appliedJobs.map((job) => (
-                  <div key={job.id} className="bg-white rounded-2xl border border-[#E5E7EB] p-6 flex items-center justify-between hover:border-[#3538CD]/30 hover:shadow-md transition-all group">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-[#F4F5FA] flex items-center justify-center text-[#3538CD] font-black text-lg">
-                        {job.company.charAt(0)}
+                finalApps.map((app: any) => (
+                  <div key={app.id} className="bg-white rounded-2xl border border-[#E5E7EB] p-6 flex items-center justify-between gap-4 hover:border-[#3538CD]/30 hover:shadow-md transition-all group min-h-[92px]">
+                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                      <div className="w-12 h-12 rounded-xl bg-[#F4F5FA] flex items-center justify-center text-[#3538CD] font-black text-lg shrink-0">
+                        {app.company.charAt(0)}
                       </div>
-                      <div>
-                        <h4 className="text-base font-black text-[#111827] group-hover:text-[#3538CD] transition-colors">{job.title}</h4>
-                        <div className="flex items-center gap-3 mt-1">
-                          <p className="text-xs font-bold text-[#6B7280]">{job.company}</p>
-                          <span className="w-1 h-1 rounded-full bg-[#D1D5DB]" />
-                          <span className="text-[10px] font-bold text-[#9CA3AF] flex items-center gap-1"><Clock className="w-3 h-3" /> Applied on {job.date}</span>
-                        </div>
+                      <div className="min-w-0 flex-1">
+                        <h4 className="text-base font-black text-[#111827] group-hover:text-[#3538CD] transition-colors truncate">{app.title}</h4>
+                        <p className="text-xs font-bold text-[#6B7280] mt-1 truncate">
+                          {app.company} <span className="mx-1 text-[#D1D5DB]">•</span> {formatDate(app.appliedAt)}
+                        </p>
+                        {app.jobClosed && (
+                          <p className="text-xs text-gray-400 mt-1">No longer accepting applications</p>
+                        )}
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-8">
-                      <span className={`px-3 py-1.5 text-[10px] font-black rounded-full border uppercase tracking-wider ${brandStatusStyles[job.status] || brandStatusStyles['Under Review']}`}>
-                        {job.status}
+                    <div className="flex items-center gap-6 shrink-0">
+                      <span className={`px-3 py-1 text-xs font-black rounded-full border uppercase tracking-wider whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px] text-center ${brandStatusStyles[app.status as keyof typeof brandStatusStyles] || 'bg-gray-100'}`}>
+                        {app.status}
                       </span>
-                      <Link to="#" className="text-sm font-black text-[#3538CD] hover:underline flex items-center gap-1">
-                        View Application <ArrowIcon />
-                      </Link>
+                      
+                      {app.status === 'Draft' && !app.jobClosed ? (
+                        <button 
+                          onClick={() => navigate(`/portal/yopmails/apply/${app.jobId}`)}
+                          className="flex items-center gap-1.5 text-xs font-black text-[#3538CD] hover:underline whitespace-nowrap min-w-[120px] justify-end"
+                        >
+                          Continue Application <ArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                      ) : (
+                        <Link to="#" className="text-xs font-black text-[#3538CD] hover:underline flex items-center gap-1 whitespace-nowrap min-w-[120px] justify-end">
+                          View Application <ArrowIcon />
+                        </Link>
+                      )}
                     </div>
                   </div>
                 ))
@@ -183,7 +221,7 @@ export default function CandidateProfilePage() {
                 ))
               )}
 
-              {(activeTab === 'applications' ? appliedJobs.length : savedJobs.length) === 0 && (
+              {(activeTab === 'applications' ? finalApps.length : savedJobs.length) === 0 && (
                 <div className="py-20 text-center bg-white rounded-2xl border border-dashed border-[#E5E7EB]">
                   <Briefcase className="w-12 h-12 text-[#E5E7EB] mx-auto mb-4" />
                   <p className="text-sm font-bold text-[#9CA3AF]">No {activeTab === 'applications' ? 'applications' : 'saved jobs'} found.</p>

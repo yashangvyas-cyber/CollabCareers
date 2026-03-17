@@ -7,6 +7,7 @@ interface AppContextType extends AppState {
   loginCandidate: (email: string) => void;
   logoutCandidate: () => void;
   submitApplication: (application: Application) => void;
+  saveDraft: (application: Application) => void;
   setAlumniVerified: (verified: boolean, email: string | null) => void;
 }
 
@@ -242,7 +243,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const submitApplication = (app: Application) => {
     setState(prev => ({
       ...prev,
-      applications: [...prev.applications, app],
+      applications: [...prev.applications.filter(a => !(a.jobId === app.jobId && a.candidateId === app.candidateId && a.status === 'Draft')), app],
+    }));
+  };
+
+  const saveDraft = (app: Application) => {
+    setState(prev => ({
+      ...prev,
+      applications: [...prev.applications.filter(a => !(a.jobId === app.jobId && a.candidateId === app.candidateId && a.status === 'Draft')), app],
     }));
   };
 
@@ -262,6 +270,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         loginCandidate,
         logoutCandidate,
         submitApplication,
+        saveDraft,
         setAlumniVerified,
       }}
     >

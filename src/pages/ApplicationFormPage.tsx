@@ -11,7 +11,7 @@ import { Job, CustomField } from '../store/types';
 
 export default function ApplicationFormPage() {
   const { jobId } = useParams();
-  const { jobs, currentUser, submitApplication, alumniVerified } = useApp();
+  const { jobs, currentUser, applications, submitApplication, saveDraft, alumniVerified } = useApp();
   const navigate = useNavigate();
   
   // Find job from state
@@ -25,8 +25,9 @@ export default function ApplicationFormPage() {
   const [step, setStep] = useState(0); // 0 = CV Upload, 1 = Form, 2 = Review
   const [extracting, setExtracting] = useState(false);
   const [resumeName, setResumeName] = useState('');
-  const [resumeLink, setResumeLink] = useState('');
   const [isFresher, setIsFresher] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [jobClosed, setJobClosed] = useState(false);
 
   const [formData, setFormData] = useState({
     personal: {
@@ -76,8 +77,25 @@ export default function ApplicationFormPage() {
   useEffect(() => {
     if (!currentUser) {
       navigate(`/portal/yopmails/register?job=${jobId || '1'}`);
+      return;
     }
-  }, [currentUser, navigate, jobId]);
+
+    // Check if job is closed
+    if (job?.status === 'Close') {
+      setJobClosed(true);
+    }
+
+    // Check for existing draft
+    const draft = applications.find(a => a.jobId === job?.id && a.candidateId === currentUser.id && a.status === 'Draft');
+    if (draft) {
+      setFormData(prev => ({
+        ...prev,
+        customAnswers: draft.answers || {}
+      }));
+      setResumeName(draft.resumeUrl);
+      setStep(1); // Resume at Step 2
+    }
+  }, [currentUser, navigate, jobId, applications, job]);
 
   const handleCvUpload = () => {
     setExtracting(true);
@@ -88,9 +106,18 @@ export default function ApplicationFormPage() {
     }, 2000);
   };
 
-  const handleSkip = () => {
-    setResumeName('');
-    setStep(1);
+  const handleSaveDraft = () => {
+    saveDraft({
+      id: `DRAFT-${Date.now()}`,
+      candidateId: currentUser?.id || 'guest',
+      jobId: job.id,
+      status: 'Draft',
+      appliedAt: new Date().toISOString(),
+      answers: formData.customAnswers,
+      resumeUrl: resumeName || 'Manually Filled',
+    });
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
   };
 
   const handleSubmit = () => {
@@ -101,7 +128,7 @@ export default function ApplicationFormPage() {
       status: 'Submitted',
       appliedAt: new Date().toISOString(),
       answers: formData.customAnswers,
-      resumeUrl: resumeName || resumeLink || 'Manually Filled',
+      resumeUrl: resumeName || 'Manually Filled',
     });
     navigate(`/portal/yopmails/confirmation/${job.id}`);
   };
@@ -113,13 +140,13 @@ export default function ApplicationFormPage() {
       <div className="max-w-4xl mx-auto px-6 py-10 min-h-[80vh] flex flex-col">
         
         {/* Progress Stepper */}
-        <div className="flex items-center justify-between mb-12 max-w-2xl mx-auto relative px-4">
+        <div className="flex items-center justify-between mb-16 max-w-3xl mx-auto relative px-10">
           {[
             { label: 'CV UPLOAD', s: 0 },
             { label: 'FILL DETAILS', s: 1 },
             { label: 'REVIEW & SUBMIT', s: 2 }
           ].map((item, i) => (
-            <div key={item.label} className="flex flex-col items-center gap-3 z-10 transition-all duration-500">
+            <div key={item.label} className="flex flex-col items-center z-10 transition-all duration-500 min-w-[120px]">
               <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-black transition-all duration-300 border-2 ${
                 step > item.s
                   ? 'bg-[#3538CD] border-[#3538CD] text-white'
@@ -129,16 +156,16 @@ export default function ApplicationFormPage() {
               }`}>
                 {step > item.s ? <CheckCircle className="w-5 h-5" /> : i + 1}
               </div>
-              <span className={`text-[10px] font-black tracking-[0.1em] uppercase ${step === item.s ? 'text-[#3538CD]' : 'text-[#9CA3AF]'}`}>
+              <span className={`mt-3 text-[10px] font-black tracking-[0.1em] uppercase text-center ${step === item.s ? 'text-[#3538CD]' : 'text-[#9CA3AF]'}`}>
                 {item.label}
               </span>
             </div>
           ))}
           {/* Connector Lines */}
-          <div className="absolute top-5 left-[15%] right-[15%] h-[2px] bg-[#E5E7EB] -z-0" />
+          <div className="absolute top-5 left-[20%] right-[20%] h-[2px] bg-[#E5E7EB] -z-0" />
           <div 
-            className="absolute top-5 left-[15%] h-[2px] bg-[#3538CD] -z-0 transition-all duration-500" 
-            style={{ width: step === 0 ? '0%' : step === 1 ? '35%' : '70%' }}
+            className="absolute top-5 left-[20%] h-[2px] bg-[#3538CD] -z-0 transition-all duration-500" 
+            style={{ width: step === 0 ? '0%' : step === 1 ? '30%' : '60%' }}
           />
         </div>
 
@@ -151,17 +178,27 @@ export default function ApplicationFormPage() {
             <h2 className="text-xl font-black text-[#111827] leading-tight">{job.title}</h2>
             <div className="flex items-center gap-2 mt-1 font-bold">
               <span className="text-xs text-[#6B7280]">{job.businessUnit}</span>
-              <span className="w-1 h-1 rounded-full bg-[#D1D5DB]" />
-              <span className="text-xs text-[#3538CD]">Career Portal</span>
+              {alumniVerified.verified && (
+                <div className="flex items-center gap-2 px-4 py-1.5 bg-[#3538CD]/10 text-[#3538CD] rounded-full border border-[#3538CD]/20">
+                  <Zap className="w-4 h-4 fill-[#3538CD]" />
+                  <span className="text-[11px] font-black uppercase tracking-widest">Alumni Verified</span>
+                </div>
+              )}
             </div>
           </div>
-          {alumniVerified.verified && (
-            <div className="flex items-center gap-2 px-4 py-1.5 bg-[#3538CD]/10 text-[#3538CD] rounded-full border border-[#3538CD]/20">
-              <Zap className="w-4 h-4 fill-[#3538CD]" />
-              <span className="text-[11px] font-black uppercase tracking-widest">Alumni Verified</span>
-            </div>
-          )}
         </div>
+
+        {jobClosed && (
+          <div className="flex items-center gap-4 mb-8 p-4 bg-[#3538CD]/5 rounded-2xl border border-[#3538CD]/20 shadow-sm">
+            <div className="w-10 h-10 rounded-full bg-[#3538CD] flex items-center justify-center shrink-0">
+              <X className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <p className="text-sm font-black text-[#3538CD] tracking-wide">Job Closed</p>
+              <p className="text-sm text-[#3538CD]/80 font-bold mt-0.5">This job is no longer accepting applications.</p>
+            </div>
+          </div>
+        )}
 
         {/* STEP 0: CV Upload */}
         {step === 0 && (
@@ -198,32 +235,11 @@ export default function ApplicationFormPage() {
                   </div>
                 )}
 
-                {!extracting && (
-                  <div className="mt-12 space-y-8 text-center">
-                    <div className="relative flex items-center justify-center">
-                      <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-[#E5E7EB]" /></div>
-                      <span className="relative px-6 bg-white text-[10px] font-black text-[#9CA3AF] tracking-[0.3em] uppercase">OR</span>
-                    </div>
-                    
-                    <div className="text-left">
-                      <input 
-                        type="text"
-                        placeholder="Paste resume link here"
-                        value={resumeLink}
-                        onChange={(e) => setResumeLink(e.target.value)}
-                        className="w-full border border-[#E5E7EB] rounded-2xl px-6 py-4 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] text-[#111827] placeholder:text-[#9CA3AF]"
-                      />
-                      <p className="text-[11px] text-[#9CA3AF] mt-4 font-bold text-center leading-relaxed">
-                        We'll auto-fill your application form from your CV. <br/>You can review and edit everything before submitting.
-                      </p>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
             
             <div className="mt-10 flex justify-end px-4">
-               <button onClick={handleSkip} className="text-[#3538CD] font-black text-sm hover:underline flex items-center gap-1">
+               <button onClick={() => setStep(1)} className="text-[#3538CD] font-black text-sm hover:underline flex items-center gap-1">
                  Skip, fill manually →
                </button>
             </div>
@@ -415,7 +431,6 @@ export default function ApplicationFormPage() {
                                className="w-full border border-[#E5E7EB] rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-white placeholder:text-[#9CA3AF]"
                                onChange={(e) => setFormData({...formData, customAnswers: {...formData.customAnswers, [f.label]: e.target.value}})}
                              />
-                             {f.label === 'Portfolio URL' && <p className="text-[11px] text-[#9CA3AF] font-bold italic ml-1">Please share your design portfolio or GitHub</p>}
                           </div>
                         )}
                       </div>
@@ -513,15 +528,23 @@ export default function ApplicationFormPage() {
                          ← Change Resume
                        </button>
                        <div className="flex gap-4">
-                          <button className="px-8 py-3.5 border-2 border-[#E5E7EB] text-[#374151] text-sm font-black rounded-xl hover:bg-[#F9FAFB] transition-all uppercase tracking-widest">
+                          <button 
+                            onClick={handleSaveDraft}
+                            className="px-8 py-3.5 border-2 border-[#E5E7EB] text-[#374151] text-sm font-black rounded-xl hover:bg-[#F9FAFB] transition-all uppercase tracking-widest"
+                          >
                             Save Draft
                           </button>
-                          <button 
-                            onClick={() => { setStep(2); window.scrollTo(0, 0); }}
-                            className="px-10 py-3.5 bg-[#3538CD] text-white text-sm font-black rounded-xl hover:bg-[#292bb0] shadow-xl shadow-[#3538CD]/20 transition-all uppercase tracking-widest flex items-center gap-2"
-                          >
-                            Review Application <ArrowRight className="w-4 h-4" />
-                          </button>
+                           <button 
+                             onClick={() => { setStep(2); window.scrollTo(0, 0); }}
+                             disabled={jobClosed}
+                             className={`px-10 py-3.5 text-white text-sm font-black rounded-xl shadow-xl transition-all uppercase tracking-widest flex items-center gap-2 ${
+                               jobClosed 
+                                 ? 'bg-gray-300 cursor-not-allowed shadow-none' 
+                                 : 'bg-[#3538CD] hover:bg-[#292bb0] shadow-[#3538CD]/20'
+                             }`}
+                           >
+                             Review Application <ArrowRight className="w-4 h-4" />
+                           </button>
                        </div>
                     </>
                  ) : (
@@ -549,6 +572,14 @@ export default function ApplicationFormPage() {
               <span className="cursor-default">© {new Date().getFullYear()}</span>
            </div>
         </div>
+
+        {/* Success Toast */}
+        {showToast && (
+          <div className="fixed bottom-28 left-1/2 -translate-x-1/2 bg-[#111827] text-white px-6 py-3 rounded-full shadow-2xl z-[100] animate-in slide-in-from-bottom-5 duration-300 flex items-center gap-3">
+            <CheckCircle className="w-5 h-5 text-[#3538CD]" />
+            <span className="text-sm font-bold">Draft saved successfully</span>
+          </div>
+        )}
       </div>
     </PortalLayout>
   );
@@ -579,10 +610,13 @@ function FormCollapsibleCard({ title, subtitle, children, isCollapsed, onToggle 
   );
 }
 
-function FormInput({ label, required, value, isExtracted, isLocked, type = 'text', placeholder, onChange }: any) {
+function FormInput(props: any) {
+  const { label, required, value, isExtracted, isLocked, type = 'text', placeholder, onChange } = props;
+  const showSparkle = !!isExtracted && !isLocked && type !== 'date';
+  
   return (
     <div className="space-y-2 group">
-      <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1 flex items-center gap-1.5 min-h-[1.2rem]">
+      <label className="text-[10px] font-black text-[#6B7280] ml-1 flex items-center gap-1.5 min-h-[1.2rem]">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       <div className="relative">
@@ -599,7 +633,7 @@ function FormInput({ label, required, value, isExtracted, isLocked, type = 'text
               : 'bg-white border-[#E5E7EB] text-[#111827] focus:ring-[#3538CD]/10 focus:border-[#3538CD] hover:border-[#D1D5DB] hover:shadow-sm cursor-text'
           }`}
         />
-        {isExtracted && !isLocked && (
+        {showSparkle && (
            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[#3538CD]">
               <Sparkles className="w-4 h-4 fill-[#3538CD]" />
            </div>
@@ -628,7 +662,6 @@ function FormPhoneInput({ label, required, value, isExtracted }: any) {
               defaultValue={value}
               className="w-full border border-[#E5E7EB] rounded-xl px-5 py-3.5 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD]" 
             />
-            {isExtracted && <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[#3538CD]"><Sparkles className="w-4 h-4 fill-[#3538CD]" /></div>}
          </div>
       </div>
     </div>
