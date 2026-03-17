@@ -82,7 +82,7 @@ export default function ApplicationFormPage() {
   const handleCvUpload = () => {
     setExtracting(true);
     setTimeout(() => {
-      setResumeName('resume_alex.pdf');
+      setResumeName('Alex_Patel_Resume.pdf');
       setExtracting(false);
       setStep(1);
     }, 2000);
@@ -440,7 +440,7 @@ export default function ApplicationFormPage() {
             </div>
                
             <div className="space-y-6">
-               <ReviewCard title="Candidate" onEdit={() => setStep(1)} data={[
+               <ReviewCard title="PERSONAL INFORMATION" onEdit={() => setStep(1)} data={[
                   { label: 'Full Name', value: `${formData.personal.firstName} ${formData.personal.lastName}` },
                   { label: 'Email', value: formData.personal.email },
                   { label: 'Contact Number', value: `+91 ${formData.personal.contactNumber}` },
@@ -450,23 +450,23 @@ export default function ApplicationFormPage() {
                   { label: 'LinkedIn Profile', value: formData.personal.linkedin }
                ]} />
 
-               <ReviewCard title="Professional" onEdit={() => setStep(1)} data={[
+               <ReviewCard title="PROFESSIONAL DETAILS" onEdit={() => setStep(1)} data={[
                   { label: 'Current Organization', value: isFresher ? '-' : formData.professional.currentOrg },
                   { label: 'Current Designation', value: isFresher ? '-' : formData.professional.currentDesignation },
                   { label: 'Total Experience', value: isFresher ? 'Fresher' : `${formData.professional.expYears} Years, ${formData.professional.expMonths} Months` },
                   { label: 'Highest Qualification', value: formData.professional.highestQualification },
-                  { label: 'Notice Period', value: `${formData.professional.noticePeriod} Days` },
+                  { label: 'Notice Period', value: formData.professional.noticePeriod },
                   { label: 'Skills', value: formData.professional.skills.join(', ') }
                ]} />
 
-               <ReviewCard title="Salary" onEdit={() => setStep(1)} data={[
+               <ReviewCard title="SALARY INFORMATION" onEdit={() => setStep(1)} data={[
                   { label: 'CTC Type', value: formData.salary.ctcType },
                   { label: 'Currency', value: formData.salary.currency },
                   { label: 'Current CTC', value: formData.salary.currentCtc },
                   { label: 'Expected CTC', value: formData.salary.expectedCtc }
                ]} />
 
-               <ReviewCard title="Address" onEdit={() => setStep(1)} data={[
+               <ReviewCard title="ADDRESS INFORMATION" onEdit={() => setStep(1)} data={[
                   { label: 'Address', value: formData.address.street },
                   { label: 'Country', value: formData.address.country },
                   { label: 'State', value: formData.address.state },
@@ -475,7 +475,7 @@ export default function ApplicationFormPage() {
                ]} />
 
                {job.customFields && job.customFields.length > 0 && (
-                  <ReviewCard title="Additional" onEdit={() => setStep(1)} data={[
+                  <ReviewCard title="ADDITIONAL INFORMATION" onEdit={() => setStep(1)} data={[
                      ...Object.entries(formData.customAnswers).map(([k, v]) => ({ 
                         label: k, 
                         value: k.includes('URL') ? <a href={String(v)} target="_blank" className="text-[#3538CD] underline flex items-center gap-1">{String(v)} <ExternalLink className="w-3 h-3" /></a> : String(v) 
@@ -670,7 +670,7 @@ function ReviewCard({ title, data, onEdit }: any) {
   return (
     <div className="bg-[#F9FAFB] rounded-3xl border border-[#E5E7EB] p-8 relative group">
       <div className="flex items-center justify-between mb-8 border-b border-[#E5E7EB] pb-4">
-         <h3 className="text-xs font-black text-[#9CA3AF] uppercase tracking-widest">{title} Information</h3>
+         <h3 className="text-xs font-black text-[#9CA3AF] uppercase tracking-widest">{title}</h3>
          <button onClick={onEdit} className="text-[#3538CD] text-[10px] font-black uppercase tracking-widest hover:underline opacity-60 hover:opacity-100 transition-opacity">
            Edit
          </button>

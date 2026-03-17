@@ -6,7 +6,7 @@ import { useApp } from '../store/AppContext';
 
 const brandStatusStyles: Record<string, string> = {
   'Under Review': 'bg-[#F4F5FA] text-[#3538CD] border-[#3538CD]/20',
-  'Interview Scheduled': 'bg-[#F4F5FA] text-[#3538CD] border-[#3538CD]/20',
+  'Interview in Progress': 'bg-[#F4F5FA] text-[#3538CD] border-[#3538CD]/20',
   'Decision Pending': 'bg-[#F9FAFB] text-[#6B7280] border-[#E5E7EB]',
   'Offer Made': 'bg-[#3538CD] text-white border-[#3538CD]',
   'Rejected': 'bg-gray-100 text-gray-400 border-gray-200'
@@ -14,7 +14,7 @@ const brandStatusStyles: Record<string, string> = {
 
 const appliedJobs = [
   { id: '1', title: 'React Developer', company: 'Yopmails', status: 'Under Review', date: '13/Mar/2026' },
-  { id: '3', title: 'Project Manager', company: 'Yopmails', status: 'Interview Scheduled', date: '10/Mar/2026' },
+  { id: '3', title: 'Project Manager', company: 'Yopmails', status: 'Interview in Progress', date: '10/Mar/2026' },
 ];
 
 const savedJobs = [
@@ -51,7 +51,7 @@ export default function CandidateProfilePage() {
                 
                 <button 
                   onClick={handleLogout}
-                  className="mt-4 px-4 py-2 border border-red-100 text-red-600 text-xs font-black rounded-lg hover:bg-red-50 transition-colors w-full uppercase tracking-widest flex items-center justify-center gap-2"
+                  className="mt-4 px-4 py-2 border border-[#E5E7EB] text-gray-500 text-xs font-black rounded-lg hover:bg-gray-50 hover:text-gray-700 hover:border-gray-300 transition-colors w-full uppercase tracking-widest flex items-center justify-center gap-2"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   Sign Out
@@ -204,11 +204,7 @@ export default function CandidateProfilePage() {
                   </div>
                   <div>
                     <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-2">Notice Period</p>
-                    <p className="text-sm font-bold text-[#111827]">30 Days</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-2">Expected CTC</p>
-                    <p className="text-sm font-bold text-[#3538CD]">₹9 LPA (Annual)</p>
+                    <p className="text-sm font-bold text-[#111827]">30</p>
                   </div>
                 </div>
               </div>
