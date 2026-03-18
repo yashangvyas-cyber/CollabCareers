@@ -51,14 +51,14 @@ export default function CandidateProfilePage() {
   const profileData = latestApp?.answers?._fullFormData;
 
   const derivedProfile = {
-    phone: profileData?.personal?.contactNumber || 'Not provided',
+    phone: profileData?.personal?.contactNumber || null,
     location: profileData?.address?.city 
       ? `${profileData.address.city}, ${profileData.address.country}`
-      : 'Location not provided',
+      : null,
     linkedin: profileData?.personal?.linkedin || null,
-    designation: profileData?.professional?.currentDesignation || 'Candidate',
-    currentOrg: profileData?.professional?.currentOrg || 'Not provided',
-    noticePeriod: profileData?.professional?.noticePeriod || 'Not provided',
+    designation: profileData?.professional?.currentDesignation || null,
+    currentOrg: profileData?.professional?.currentOrg || null,
+    noticePeriod: profileData?.professional?.noticePeriod || null,
     skills: profileData?.professional?.skills || [],
     resumeName: latestApp?.resumeUrl || null,
   };
@@ -83,7 +83,9 @@ export default function CandidateProfilePage() {
               
               <div className="text-center mb-6">
                 <h2 className="text-xl font-black text-[#111827]">{currentUser?.firstName} {currentUser?.lastName}</h2>
-                <p className="text-sm font-bold text-[#6B7280] mt-1">{derivedProfile.designation}</p>
+                {derivedProfile.designation && (
+                  <p className="text-sm font-bold text-[#6B7280] mt-1">{derivedProfile.designation}</p>
+                )}
                 
                 <button 
                   onClick={handleLogout}
@@ -101,14 +103,18 @@ export default function CandidateProfilePage() {
                   <Mail className="w-4 h-4 text-[#9CA3AF]" />
                   <span className="truncate">{currentUser?.email}</span>
                 </div>
-                <div className="flex items-center gap-3 text-sm font-medium text-[#374151]">
-                  <Phone className="w-4 h-4 text-[#9CA3AF]" />
-                  <span>{derivedProfile.phone}</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm font-medium text-[#374151]">
-                  <MapPin className="w-4 h-4 text-[#9CA3AF]" />
-                  <span className="truncate">{derivedProfile.location}</span>
-                </div>
+                {derivedProfile.phone && (
+                  <div className="flex items-center gap-3 text-sm font-medium text-[#374151]">
+                    <Phone className="w-4 h-4 text-[#9CA3AF]" />
+                    <span>{derivedProfile.phone}</span>
+                  </div>
+                )}
+                {derivedProfile.location && (
+                  <div className="flex items-center gap-3 text-sm font-medium text-[#374151]">
+                    <MapPin className="w-4 h-4 text-[#9CA3AF]" />
+                    <span className="truncate">{derivedProfile.location}</span>
+                  </div>
+                )}
                 {derivedProfile.linkedin && (
                   <div className="flex items-center gap-3">
                     <Linkedin className="w-4 h-4 text-[#0A66C2]" />
@@ -138,23 +144,19 @@ export default function CandidateProfilePage() {
                 )}
               </div>
 
-              <div className="border-t border-[#F3F4F6] my-6" />
-
-              {/* Skills */}
-              <div>
-                <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-3">Skills</p>
-                <div className="flex flex-wrap gap-2">
-                  {derivedProfile.skills.length > 0 ? (
-                    derivedProfile.skills.map((skill: string) => (
+              {derivedProfile.skills.length > 0 && (
+                <div>
+                  <div className="border-t border-[#F3F4F6] my-6" />
+                  <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-3">Skills</p>
+                  <div className="flex flex-wrap gap-2">
+                    {derivedProfile.skills.map((skill: string) => (
                       <span key={skill} className="px-3 py-1 text-[10px] font-bold bg-[#F4F5FA] text-[#3538CD] border border-[#3538CD]/10 rounded-full">
                         {skill}
                       </span>
-                    ))
-                  ) : (
-                    <p className="text-xs font-bold text-[#9CA3AF] italic">No skills listed</p>
-                  )}
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
 
@@ -193,9 +195,6 @@ export default function CandidateProfilePage() {
                 displayApps.map((app: any) => (
                   <div key={app.id} className="bg-white rounded-2xl border border-[#E5E7EB] p-6 flex items-center justify-between gap-4 hover:border-[#3538CD]/30 hover:shadow-md transition-all group min-h-[92px]">
                     <div className="flex items-center gap-4 flex-1 min-w-0">
-                      <div className="w-12 h-12 rounded-xl bg-[#F4F5FA] flex items-center justify-center text-[#3538CD] font-black text-lg shrink-0">
-                        {app.company.charAt(0)}
-                      </div>
                       <div className="min-w-0 flex-1">
                         <h4 className="text-base font-black text-[#111827] group-hover:text-[#3538CD] transition-colors truncate">{app.title}</h4>
                         <p className="text-xs font-bold text-[#6B7280] mt-1 truncate">
@@ -235,11 +234,8 @@ export default function CandidateProfilePage() {
                       key={js.id} 
                       className={`bg-white rounded-2xl border border-[#E5E7EB] p-6 flex items-center justify-between hover:border-[#3538CD]/30 hover:shadow-md transition-all group ${isClosed ? 'opacity-60 grayscale-[0.5]' : ''}`}
                     >
-                      <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg ${isClosed ? 'bg-gray-100 text-gray-400' : 'bg-[#F4F5FA] text-[#3538CD]'}`}>
-                          {js.company.charAt(0)}
-                        </div>
-                        <div>
+                      <div className="flex items-center gap-4 flex-1 min-w-0">
+                        <div className="min-w-0 flex-1">
                           <h4 className={`text-base font-black transition-colors ${isClosed ? 'text-gray-500' : 'text-[#111827] group-hover:text-[#3538CD]'}`}>{js.title}</h4>
                           <p className="text-xs font-bold text-[#6B7280] mt-1">{js.company} • {js.location} • {js.type}</p>
                         </div>
@@ -267,23 +263,29 @@ export default function CandidateProfilePage() {
             </div>
 
             {/* Account Info Card */}
-            <div className="mt-12 bg-white rounded-2xl border border-[#E5E7EB] overflow-hidden shadow-sm">
-              <div className="px-8 py-5 border-b border-[#F3F4F6] bg-[#F9FAFB]/50">
-                <h3 className="text-sm font-black text-[#111827] uppercase tracking-widest">Additional Professional Info</h3>
-              </div>
-              <div className="p-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  <div>
-                    <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-2">Current Organization</p>
-                    <p className="text-sm font-bold text-[#111827]">{derivedProfile.currentOrg}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-2">Notice Period</p>
-                    <p className="text-sm font-bold text-[#111827]">{derivedProfile.noticePeriod} {derivedProfile.noticePeriod !== 'Not provided' ? 'Days' : ''}</p>
+            {(derivedProfile.currentOrg || derivedProfile.noticePeriod) && (
+              <div className="mt-12 bg-white rounded-2xl border border-[#E5E7EB] overflow-hidden shadow-sm">
+                <div className="px-8 py-5 border-b border-[#F3F4F6] bg-[#F9FAFB]/50">
+                  <h3 className="text-sm font-black text-[#111827] uppercase tracking-widest">Additional Professional Info</h3>
+                </div>
+                <div className="p-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {derivedProfile.currentOrg && (
+                      <div>
+                        <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-2">Current Organization</p>
+                        <p className="text-sm font-bold text-[#111827]">{derivedProfile.currentOrg}</p>
+                      </div>
+                    )}
+                    {derivedProfile.noticePeriod && (
+                      <div>
+                        <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-2">Notice Period</p>
+                        <p className="text-sm font-bold text-[#111827]">{derivedProfile.noticePeriod} Days</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
