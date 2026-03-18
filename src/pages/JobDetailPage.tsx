@@ -207,18 +207,27 @@ export default function JobDetailPage() {
                     Apply Now <ArrowRight className="w-5 h-5" />
                   </button>
 
-                  <div className="text-center mb-6">
-                    <p className="text-[11px] text-[#9CA3AF] font-bold uppercase tracking-widest mb-3">Already applied here before?</p>
-                    <button
-                      onClick={handleSignInClick}
-                      className="text-[13px] font-black text-[#3538CD] hover:underline"
-                    >
-                      Sign In
-                    </button>
-                  </div>
+                  {!currentUser && (
+                    <div className="text-center mb-6">
+                      <p className="text-[11px] text-[#9CA3AF] font-bold uppercase tracking-widest mb-3">Already applied here before?</p>
+                      <button
+                        onClick={handleSignInClick}
+                        className="text-[13px] font-black text-[#3538CD] hover:underline"
+                      >
+                        Sign In
+                      </button>
+                    </div>
+                  )}
 
                   <div className="flex gap-3">
-                    <button className="flex-1 flex items-center justify-center gap-2 py-3.5 border-2 border-[#E5E7EB] text-[#374151] text-xs font-black rounded-xl hover:bg-[#F9FAFB] hover:border-[#D1D5DB] transition-all uppercase tracking-widest group">
+                    <button 
+                      onClick={(e) => {
+                        if (!currentUser) {
+                          handleSignInClick(e);
+                        }
+                      }}
+                      className="flex-1 flex items-center justify-center gap-2 py-3.5 border-2 border-[#E5E7EB] text-[#374151] text-xs font-black rounded-xl hover:bg-[#F9FAFB] hover:border-[#D1D5DB] transition-all uppercase tracking-widest group"
+                    >
                       <Bookmark className="w-4 h-4 group-hover:fill-[#111827]" /> Save
                     </button>
                     <div className="relative">

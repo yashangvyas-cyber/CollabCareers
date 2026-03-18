@@ -12,6 +12,8 @@ import CandidateListingPage from './pages/CandidateListingPage';
 import FlowMapPage from './pages/FlowMapPage';
 import HandoffPage from './pages/HandoffPage';
 import PrototypeHome from './pages/PrototypeHome';
+import ViewApplicationPage from './pages/ViewApplicationPage';
+import OperationalConfigPage from './pages/OperationalConfigPage';
 
 function App() {
   return (
@@ -22,6 +24,7 @@ function App() {
         <Route path="/crm/add-job" element={<AddJobPage />} />
         <Route path="/crm/candidates/:candidateId" element={<CandidateDetailPage />} />
         <Route path="/crm/candidates" element={<CandidateListingPage />} />
+        <Route path="/crm/config" element={<OperationalConfigPage />} />
         {/* Unified Career Portal (Flows 2+3+4) */}
         <Route path="/portal/:slug" element={<CareerPage />} />
         <Route path="/portal/:slug/job/:jobId" element={<JobDetailPage />} />
@@ -29,6 +32,7 @@ function App() {
         <Route path="/portal/:slug/apply/:jobId" element={<ApplicationFormPage />} />
         <Route path="/portal/:slug/confirmation/:jobId" element={<ConfirmationPage />} />
         <Route path="/portal/:slug/profile" element={<CandidateProfilePage />} />
+        <Route path="/portal/:slug/application/:applicationId" element={<ViewApplicationPage />} />
         <Route path="/portal/:slug/alumni/apply/:jobId" element={<AlumniApplicationPage />} />
         {/* Flow 5: Stitching */}
         <Route path="/flow-map" element={<FlowMapPage />} />

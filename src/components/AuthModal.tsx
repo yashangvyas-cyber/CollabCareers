@@ -12,9 +12,10 @@ interface AuthModalProps {
   businessUnit: string;
   jobId: string;
   initialTab?: 'register' | 'signin';
+  redirectTo?: string;
 }
 
-export default function AuthModal({ isOpen, onClose, jobTitle, businessUnit, jobId, initialTab = 'register' }: AuthModalProps) {
+export default function AuthModal({ isOpen, onClose, jobTitle, businessUnit, jobId, initialTab = 'register', redirectTo }: AuthModalProps) {
   const { registerCandidate, loginCandidate, setAlumniVerified } = useApp();
   const navigate = useNavigate();
   
@@ -52,14 +53,14 @@ export default function AuthModal({ isOpen, onClose, jobTitle, businessUnit, job
       isAlumni: false,
     });
     onClose();
-    navigate(`/portal/yopmails/apply/${jobId}`);
+    navigate(redirectTo || `/portal/yopmails/apply/${jobId}`);
   };
 
   const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault();
     loginCandidate(formData.email);
     onClose();
-    navigate(`/portal/yopmails/apply/${jobId}`);
+    navigate(redirectTo || `/portal/yopmails/apply/${jobId}`);
   };
 
   const handleAlumniVerify = (e: React.FormEvent) => {
@@ -71,8 +72,8 @@ export default function AuthModal({ isOpen, onClose, jobTitle, businessUnit, job
         setAlumniVerified(true, formData.email);
         setFormData(prev => ({
           ...prev,
-          firstName: 'Yash',
-          lastName: 'Vyas'
+          firstName: 'Alex',
+          lastName: 'Patel'
         }));
         setModalState('alumni-success');
       } else {
@@ -97,7 +98,7 @@ export default function AuthModal({ isOpen, onClose, jobTitle, businessUnit, job
       isAlumni: true,
     });
     onClose();
-    navigate(`/portal/yopmails/apply/${jobId}`);
+    navigate(redirectTo || `/portal/yopmails/apply/${jobId}`);
   };
 
   return (
@@ -167,6 +168,24 @@ export default function AuthModal({ isOpen, onClose, jobTitle, businessUnit, job
             <>
               {activeTab === 'register' ? (
                 <form onSubmit={handleRegister} className="space-y-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Account Details</label>
+                    <button 
+                      type="button"
+                      onClick={() => setFormData({
+                        ...formData,
+                        firstName: 'Alex',
+                        lastName: 'Patel',
+                        email: 'alex.patel@example.com',
+                        password: 'password123',
+                        confirmPassword: 'password123',
+                        agreeToTerms: true
+                      })}
+                      className="px-2.5 py-1 bg-[#3538CD]/5 border border-[#3538CD]/10 rounded-lg text-[9px] font-black text-[#3538CD] uppercase tracking-widest hover:bg-[#3538CD] hover:text-white transition-all shadow-sm"
+                    >
+                      Auto-fill for Demo
+                    </button>
+                  </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1.5">
                       <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">First Name *</label>
@@ -263,6 +282,20 @@ export default function AuthModal({ isOpen, onClose, jobTitle, businessUnit, job
                 </form>
               ) : (
                 <form onSubmit={handleSignIn} className="space-y-5">
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Sign In</label>
+                    <button 
+                      type="button"
+                      onClick={() => setFormData({
+                        ...formData,
+                        email: 'alex.patel@example.com',
+                        password: 'password123'
+                      })}
+                      className="px-2.5 py-1 bg-[#3538CD]/5 border border-[#3538CD]/10 rounded-lg text-[9px] font-black text-[#3538CD] uppercase tracking-widest hover:bg-[#3538CD] hover:text-white transition-all shadow-sm"
+                    >
+                      Auto-fill for Demo
+                    </button>
+                  </div>
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Email Address *</label>
                     <input
@@ -283,6 +316,8 @@ export default function AuthModal({ isOpen, onClose, jobTitle, businessUnit, job
                       <input
                         type={showPassword ? 'text' : 'password'}
                         required
+                        value={formData.password}
+                        onChange={e => setFormData({...formData, password: e.target.value})}
                         className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] pr-12"
                       />
                       <button
@@ -338,9 +373,21 @@ export default function AuthModal({ isOpen, onClose, jobTitle, businessUnit, job
 
               <form onSubmit={handleAlumniVerify} className="space-y-6">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1 flex items-center gap-1.5">
-                    <Mail className="w-3.5 h-3.5" /> Enter your old company email
-                  </label>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1 flex items-center gap-1.5">
+                      <Mail className="w-3.5 h-3.5" /> Alumni Email
+                    </label>
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        setFormData({...formData, email: 'alex.patel@yopmails.com'});
+                        setError(null);
+                      }}
+                      className="px-2.5 py-1 bg-[#3538CD]/5 border border-[#3538CD]/10 rounded-lg text-[9px] font-black text-[#3538CD] uppercase tracking-widest hover:bg-[#3538CD] hover:text-white transition-all shadow-sm"
+                    >
+                      Use Demo Alumni Email
+                    </button>
+                  </div>
                   <input
                     type="email"
                     required

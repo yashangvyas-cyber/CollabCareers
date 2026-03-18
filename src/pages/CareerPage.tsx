@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import PortalLayout from '../components/PortalLayout';
-import { Search, MapPin, Briefcase, Clock, ChevronDown, X, Building2 } from 'lucide-react';
+import { Search, MapPin, Briefcase, Clock, ChevronDown, X, Building2, Bookmark } from 'lucide-react';
+import AuthModal from '../components/AuthModal';
 import { useApp } from '../store/AppContext';
 
 function Chip({ children, variant = 'default' }: { children: React.ReactNode; variant?: 'default' | 'skill' | 'active' }) {
@@ -28,12 +29,17 @@ const formatExperience = (exp: string) => {
 };
 
 export default function CareerPage() {
-  const { jobs } = useApp();
+  const { jobs, currentUser } = useApp();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authTab, setAuthTab] = useState<'register' | 'signin'>('signin');
+  const [selectedJob, setSelectedJob] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [locationFilter, setLocationFilter] = useState('');
   const [employmentFilter, setEmploymentFilter] = useState('');
   const [jobTypeFilter, setJobTypeFilter] = useState('');
   const [experienceFilter, setExperienceFilter] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
 
   // Combine store jobs with defaults if store is sparse
   const displayJobs = useMemo(() => {
@@ -51,11 +57,21 @@ export default function CareerPage() {
     return true;
   });
 
+  const totalPages = Math.ceil(filteredJobs.length / itemsPerPage);
+  const currentJobs = filteredJobs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const clearFilters = () => {
     setSearchQuery('');
     setLocationFilter('');
     setEmploymentFilter('');
     setJobTypeFilter('');
+    setExperienceFilter('');
+    setCurrentPage(1);
   };
 
   const locations = Array.from(new Set(displayJobs.map(j => j.location))).filter(Boolean);
@@ -75,7 +91,6 @@ export default function CareerPage() {
             </div>
           </div>
           <div className="flex items-center gap-4 text-sm text-white/60 mt-2">
-            <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4" /> Ahmedabad, India</span>
             <span className="flex items-center gap-1.5"><Briefcase className="w-4 h-4" /> {displayJobs.length} Open Positions</span>
           </div>
         </div>
@@ -144,7 +159,7 @@ export default function CareerPage() {
       <div className="max-w-7xl mx-auto px-6 py-8">
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filteredJobs.length > 0 ? filteredJobs.map((job) => (
+          {currentJobs.length > 0 ? currentJobs.map((job) => (
             <div
               key={job.id}
               className="bg-white rounded-xl border border-[#E5E7EB] p-6 hover:shadow-lg hover:border-primary/30 transition-all duration-200 group"
@@ -156,6 +171,19 @@ export default function CareerPage() {
                 >
                   {job.title}
                 </Link>
+                <button 
+                  onClick={() => {
+                    if (!currentUser) {
+                      setSelectedJob(job);
+                      setAuthTab('signin');
+                      setShowAuthModal(true);
+                    }
+                  }}
+                  className="p-2 text-[#9CA3AF] hover:text-[#3538CD] hover:bg-[#3538CD]/5 rounded-lg transition-all"
+                  title="Save Job"
+                >
+                  <Bookmark className="w-5 h-5" />
+                </button>
               </div>
 
               {/* Tags */}
@@ -209,7 +237,59 @@ export default function CareerPage() {
             </div>
           )}
         </div>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="mt-12 flex items-center justify-center gap-2">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className={`flex items-center gap-1 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+                currentPage === 1 
+                  ? 'text-gray-300 cursor-not-allowed' 
+                  : 'text-[#6B7280] hover:text-[#3538CD] hover:bg-[#F4F5FA]'
+              }`}
+            >
+              Previous
+            </button>
+            
+            {[...Array(totalPages)].map((_, i) => (
+              <button
+                key={i + 1}
+                onClick={() => handlePageChange(i + 1)}
+                className={`w-10 h-10 rounded-xl text-xs font-black flex items-center justify-center transition-all ${
+                  currentPage === i + 1
+                    ? 'bg-[#3538CD] text-white shadow-lg shadow-[#3538CD]/20'
+                    : 'text-[#6B7280] hover:bg-[#F4F5FA] hover:text-[#3538CD]'
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className={`flex items-center gap-1 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+                currentPage === totalPages 
+                  ? 'text-gray-300 cursor-not-allowed' 
+                  : 'text-[#6B7280] hover:text-[#3538CD] hover:bg-[#F4F5FA]'
+              }`}
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
+
+      <AuthModal 
+        isOpen={showAuthModal} 
+        onClose={() => setShowAuthModal(false)}
+        jobTitle={selectedJob?.title || 'Job'}
+        businessUnit={selectedJob?.businessUnit || 'Yopmails'}
+        jobId={selectedJob?.id || '1'}
+        initialTab={authTab}
+      />
     </PortalLayout>
   );
 }

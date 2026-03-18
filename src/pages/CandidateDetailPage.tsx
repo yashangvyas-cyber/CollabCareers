@@ -68,7 +68,7 @@ export default function CandidateDetailPage() {
                 <span className="px-4 py-1.5 text-[10px] font-black bg-[#F4F5FA] text-[#3538CD] border border-[#3538CD]/20 rounded-full uppercase tracking-widest">
                   Active
                 </span>
-                
+
                 {/* ADDITION 1 — Alumni Badge */}
                 <div className="flex flex-col items-center gap-1.5">
                   <span className="px-4 py-1.5 text-[10px] font-black bg-[#3538CD] text-white rounded-full uppercase tracking-widest">
@@ -89,24 +89,24 @@ export default function CandidateDetailPage() {
 
               <div className="w-full space-y-4 mt-6">
                 <div className="flex items-center gap-3 group cursor-pointer">
-                  <div className="w-8 h-8 rounded-lg bg-[#F9FAFB] flex items-center justify-center text-[#9CA3AF] group-hover:text-[#3538CD] transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-[#F9FAFB] flex items-center justify-center text-[#6B7280] group-hover:text-[#3538CD] transition-colors">
                     <Mail className="w-4 h-4" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-widest">Email</p>
+                    <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Email</p>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold text-[#374151] truncate">{candidate.email}</span>
-                      <Copy className="w-3.5 h-3.5 text-[#9CA3AF] hover:text-[#3538CD]" />
+                       <span className="text-sm font-bold text-[#374151] truncate">{candidate.email}</span>
+                       <Copy className="w-3.5 h-3.5 text-[#6B7280] hover:text-[#3538CD]" />
                     </div>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3 group">
-                  <div className="w-8 h-8 rounded-lg bg-[#F9FAFB] flex items-center justify-center text-[#9CA3AF] group-hover:text-[#3538CD] transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-[#F9FAFB] flex items-center justify-center text-[#6B7280] group-hover:text-[#3538CD] transition-colors">
                     <Phone className="w-4 h-4" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-widest">Phone</p>
+                    <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Phone</p>
                     <span className="text-sm font-bold text-[#374151]">{candidate.phone}</span>
                   </div>
                 </div>
@@ -117,12 +117,12 @@ export default function CandidateDetailPage() {
               {/* Metadata */}
               <div className="w-full space-y-3">
                 <div>
-                  <p className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-widest">Created by</p>
+                  <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Created by</p>
                   <p className="text-[10px] font-bold text-[#6B7280]">Super User · 16/Mar/2026, 12:18 PM</p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-widest">Modified by</p>
-                  <p className="text-[10px] font-bold text-[#6B7280]">Super User · 16/Mar/2026, 05:11 PM</p>
+                   <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Modified by</p>
+                   <p className="text-[10px] font-bold text-[#6B7280]">Super User · 16/Mar/2026, 05:11 PM</p>
                 </div>
               </div>
             </div>
@@ -137,11 +137,10 @@ export default function CandidateDetailPage() {
               {tabs.map((tab) => (
                 <button
                   key={tab}
-                  className={`px-6 py-2.5 text-xs font-black uppercase tracking-widest transition-all rounded-xl ${
-                    tab === activeTab
+                  className={`px-6 py-2.5 text-xs font-black uppercase tracking-widest transition-all rounded-xl ${tab === activeTab
                       ? 'bg-[#3538CD] text-white shadow-md shadow-[#3538CD]/20'
                       : 'text-[#6B7280] hover:text-[#111827] hover:bg-[#F9FAFB]'
-                  }`}
+                    }`}
                 >
                   {tab}
                 </button>
@@ -224,7 +223,7 @@ export default function CandidateDetailPage() {
               <div className="p-6 grid grid-cols-3 gap-8">
                 <div className="space-y-1">
                   <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Source</p>
-                  
+
                   {/* ADDITION 2 — Source Chip */}
                   <span className="inline-flex px-3 py-1.5 bg-[#3538CD] text-white text-[11px] font-black rounded-lg uppercase tracking-wider">
                     CollabCareers
@@ -237,9 +236,9 @@ export default function CandidateDetailPage() {
 
             {/* ADDITION 3 — Additional Information */}
             <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden">
-              <SectionHeader 
-                title="Additional Information" 
-                subtitle="Answers submitted by candidate for this job's custom fields" 
+              <SectionHeader
+                title="Additional Information"
+                subtitle="Answers submitted by candidate for this job's custom fields"
               />
               <div className="p-6 grid grid-cols-2 gap-8">
                 <DetailField label="Portfolio URL" value="https://alex.design" isLink />

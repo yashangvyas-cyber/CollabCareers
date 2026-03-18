@@ -53,7 +53,7 @@ export interface Application {
   id: string;
   candidateId: string;
   jobId: string;
-  status: 'Draft' | 'Submitted' | 'Under Review' | 'Interview' | 'Decision';
+  status: 'Draft' | 'Submitted' | 'Under Review' | 'Interview in Progress' | 'Decision Made' | 'Offer Made' | 'Rejected';
   appliedAt: string;
   answers: Record<string, any>;
   resumeUrl: string;

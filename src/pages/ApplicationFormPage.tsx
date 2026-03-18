@@ -9,6 +9,16 @@ import {
 import { useApp } from '../store/AppContext';
 import { Job, CustomField } from '../store/types';
 
+const formatDateForBanner = (dateString: string) => {
+  if (!dateString) return '18 Mar 2026';
+  const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' };
+  try {
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  } catch (e) {
+    return '18 Mar 2026';
+  }
+};
+
 export default function ApplicationFormPage() {
   const { jobId } = useParams();
   const { jobs, currentUser, applications, submitApplication, saveDraft, alumniVerified } = useApp();
@@ -108,17 +118,92 @@ export default function ApplicationFormPage() {
       }
     }
 
-    // Check for existing draft
+    // Check for existing draft or continueDraft state
+    const continueDraft = location.state?.continueDraft;
+
+    if (continueDraft) {
+      // Populate with realistic dummy draft data for Business Analyst
+      setFormData({
+        personal: {
+          firstName: 'Alex',
+          lastName: 'Patel',
+          gender: 'Male',
+          contactNumber: '98765 43210',
+          email: currentUser.email,
+          dob: '15/06/1996',
+          linkedin: 'linkedin.com/in/alexpatel',
+          maritalStatus: 'Single',
+        },
+        professional: {
+          currentOrg: 'TechSolutions Inc.',
+          currentDesignation: 'Senior Frontend Engineer',
+          expYears: '5',
+          expMonths: '0',
+          highestQualification: 'B.Tech',
+          noticePeriod: '30',
+          skills: ['React', 'TypeScript', 'Node.js', 'Tailwind CSS', 'Redux'],
+          remarks: 'I am passionate about building accessible and performant web applications.',
+        },
+        salary: {
+          ctcType: 'Annual',
+          currency: 'INR',
+          currentCtc: '18.5',
+          expectedCtc: '24',
+        },
+        address: {
+          street: '402, Skyline Apartments, Satellite',
+          country: 'India',
+          state: 'Gujarat',
+          city: 'Ahmedabad',
+          zip: '380015',
+        },
+        customAnswers: {
+          'Are you open to relocate?': 'Yes'
+        } as Record<string, any>,
+      });
+      setResumeName('Alex_Patel_Resume.pdf');
+      setStep(1);
+      // Force all sections expanded
+      setCollapsedSections({
+        1: false, 2: false, 3: false, 4: false, 5: false
+      });
+      return;
+    }
+
+    // Check for existing draft (auto-resumption)
     const draft = applications.find(a => a.jobId === job?.id && a.candidateId === currentUser.id && a.status === 'Draft');
     if (draft) {
       setFormData(prev => ({
-        ...(draft.answers?._fullFormData || prev), // Use full saved data if available
+        ...(draft.answers?._fullFormData || prev),
         customAnswers: draft.answers || {}
       }));
       setResumeName(draft.resumeUrl);
       setStep(1); 
+      return;
     }
-  }, [currentUser, navigate, jobId, applications, job, prefillFromId, jobs]);
+
+    // NEW: Auto-prefill from latest SUBMITTED application if not a draft
+    const latestSubmission = applications
+      .filter(a => a.candidateId === currentUser.id && a.status === 'Submitted')
+      .sort((a, b) => new Date(b.appliedAt).getTime() - new Date(a.appliedAt).getTime())[0];
+
+    if (latestSubmission && step === 0 && !resumeName) {
+      const sourceData = latestSubmission.answers?._fullFormData;
+      if (sourceData) {
+        setFormData(prev => ({
+          ...prev,
+          ...sourceData,
+          personal: { ...sourceData.personal, email: currentUser.email }, // Privacy: keep current session email
+          customAnswers: {}, // Always fresh for new job
+        }));
+        setResumeName(latestSubmission.resumeUrl);
+        setPrefillSource({
+          title: jobs.find(j => j.id === latestSubmission.jobId)?.title || 'Previous Job',
+          date: new Date(latestSubmission.appliedAt).toLocaleDateString()
+        });
+      }
+    }
+  }, [currentUser, navigate, jobId, applications, job, prefillFromId, jobs, step, resumeName]);
 
   const handleCvUpload = () => {
     setExtracting(true);
@@ -272,6 +357,20 @@ export default function ApplicationFormPage() {
         {/* STEP 1: Fill Details */}
         {step === 1 && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-700">
+            {location.state?.continueDraft && (
+              <div className="bg-[#3538CD]/5 border border-[#3538CD]/20 rounded-2xl p-5 flex items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-500 mb-6">
+                <div className="w-10 h-10 bg-[#3538CD] rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-[#3538CD]/20">
+                  <Sparkles className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-black text-[#3538CD] tracking-wide uppercase tracking-widest text-[10px]">Resuming your draft</p>
+                  <p className="text-sm text-[#3538CD]/80 font-bold mt-0.5">
+                    ✦ {location.state.draftJobTitle || 'Business Analyst'} · Last saved {formatDateForBanner(location.state.lastSaved)}
+                  </p>
+                </div>
+              </div>
+            )}
+
             {prefillSource && (
               <div className="bg-[#3538CD]/5 border border-[#3538CD]/20 rounded-2xl p-5 flex items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
                 <div className="w-10 h-10 bg-[#3538CD] rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-[#3538CD]/20">
@@ -287,12 +386,12 @@ export default function ApplicationFormPage() {
             )}
 
             {resumeName && !prefillSource && (
-              <div className="bg-[#3538CD]/5 border border-[#3538CD]/10 rounded-2xl p-5 flex items-center gap-4">
+              <div className="bg-[#3538CD]/5 border border-[#3538CD]/10 rounded-2xl p-5 flex items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
                 <div className="w-10 h-10 bg-[#3538CD] rounded-full flex items-center justify-center shrink-0 shadow-lg shadow-[#3538CD]/20">
-                  <CheckCircle className="w-6 h-6 text-white" />
+                  <Sparkles className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm font-black text-[#3538CD] tracking-wide">CV Auto-Extracted</p>
+                  <p className="text-sm font-black text-[#3538CD] tracking-wide uppercase tracking-widest text-[10px]">CV Auto-Extracted</p>
                   <p className="text-sm text-[#3538CD]/70 font-bold mt-0.5">We've pre-filled the form with data from <b>{resumeName}</b>. Please review and edit if needed.</p>
                 </div>
               </div>
@@ -461,7 +560,7 @@ export default function ApplicationFormPage() {
                       </div>
                    </div>
                    <FormTextarea 
-                     label="General Remarks" 
+                     label="Additional Notes" 
                      value={formData.professional.remarks} 
                      onChange={(val: string) => setFormData(p => ({ ...p, professional: { ...p.professional, remarks: val }}))}
                    />
@@ -676,43 +775,43 @@ export default function ApplicationFormPage() {
 
         {/* Fixed Action Bar for Step 2 and 3 */}
         {step > 0 && (
-           <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-[#E5E7EB] px-6 py-6 z-50">
+           <div className="fixed bottom-0 left-0 right-0 bg-white/60 backdrop-blur-xl border-t border-[#E5E7EB] px-6 py-6 z-50">
               <div className="max-w-4xl mx-auto flex items-center justify-between">
                  {step === 1 ? (
                     <>
-                       <button onClick={() => setStep(0)} className="text-[#6B7280] hover:text-[#3538CD] font-black text-sm transition-colors uppercase tracking-widest">
-                         ← Change Resume
+                       <button onClick={() => setStep(0)} className="text-[#6B7280] hover:text-[#3538CD] font-black text-[11px] transition-colors uppercase tracking-[0.2em] flex items-center gap-2">
+                         <span className="text-lg">←</span> Change Resume
                        </button>
                        <div className="flex gap-4">
                           <button 
                             onClick={handleSaveDraft}
-                            className="px-8 py-3.5 border-2 border-[#E5E7EB] text-[#374151] text-sm font-black rounded-xl hover:bg-[#F9FAFB] transition-all uppercase tracking-widest"
+                            className="px-8 py-3.5 border-2 border-[#E5E7EB] text-[#374151] text-xs font-black rounded-2xl hover:bg-white transition-all uppercase tracking-widest shadow-sm active:scale-95"
                           >
                             Save Draft
                           </button>
                            <button 
                              onClick={() => { setStep(2); window.scrollTo(0, 0); }}
                              disabled={jobClosed}
-                             className={`px-10 py-3.5 text-white text-sm font-black rounded-xl shadow-xl transition-all uppercase tracking-widest flex items-center gap-2 ${
+                             className={`px-10 py-3.5 text-white text-xs font-black rounded-2xl shadow-xl transition-all uppercase tracking-widest flex items-center gap-2 active:scale-95 ${
                                jobClosed 
                                  ? 'bg-gray-300 cursor-not-allowed shadow-none' 
-                                 : 'bg-[#3538CD] hover:bg-[#292bb0] shadow-[#3538CD]/20'
+                                 : 'bg-[#3538CD] hover:bg-[#292bb0] shadow-[#3538CD]/30'
                              }`}
                            >
-                             Review Application <ArrowRight className="w-4 h-4" />
+                             Continue to Review <ArrowRight className="w-4 h-4" />
                            </button>
                        </div>
                     </>
                  ) : (
                     <>
-                       <button onClick={() => { setStep(1); window.scrollTo(0, 0); }} className="text-[#3538CD] font-black text-sm hover:underline uppercase tracking-widest">
-                         ← Back to Edit
+                       <button onClick={() => { setStep(1); window.scrollTo(0, 0); }} className="text-[#3538CD] font-black text-[11px] hover:underline uppercase tracking-[0.2em] flex items-center gap-2">
+                         <span className="text-lg">←</span> Edit Details
                        </button>
                        <button 
                          onClick={handleSubmit}
-                         className="px-12 py-4 bg-[#3538CD] text-white text-base font-black rounded-xl hover:bg-[#292bb0] shadow-2xl shadow-[#3538CD]/20 transition-all uppercase tracking-widest flex items-center justify-center gap-3 w-full max-w-sm"
+                         className="px-12 py-4 bg-[#3538CD] text-white text-sm font-black rounded-2xl hover:bg-[#292bb0] shadow-2xl shadow-[#3538CD]/40 transition-all uppercase tracking-[0.2em] flex items-center justify-center gap-3 w-full max-w-[400px] active:scale-95"
                        >
-                         Submit Application <ArrowRight className="w-5 h-5" />
+                         Complete & Submit <ArrowRight className="w-5 h-5" />
                        </button>
                     </>
                  )}
@@ -751,9 +850,9 @@ function FormCollapsibleCard({ title, subtitle, children, isCollapsed, onToggle 
       >
         <div>
            <h3 className="text-sm font-black text-[#111827] uppercase tracking-widest group-hover:text-[#3538CD] transition-colors">{title}</h3>
-           {subtitle && <p className="text-[11px] text-[#9CA3AF] font-bold mt-0.5">{subtitle}</p>}
+           {subtitle && <p className="text-[11px] text-[#6B7280] font-bold mt-0.5">{subtitle}</p>}
         </div>
-        <div className={`p-2 rounded-lg bg-[#F4F5FA] text-[#9CA3AF] group-hover:text-[#3538CD] transition-all duration-300 ${isCollapsed ? 'rotate-0' : 'rotate-180'}`}>
+        <div className={`p-2 rounded-lg bg-[#F4F5FA] text-[#6B7280] group-hover:text-[#3538CD] transition-all duration-300 ${isCollapsed ? 'rotate-0' : 'rotate-180'}`}>
            <ChevronDown className="w-4 h-4" />
         </div>
       </button>
@@ -857,20 +956,21 @@ function FormTextarea({ label, value }: any) {
   );
 }
 
-function ReviewCard({ title, data, onEdit }: any) {
+function ReviewCard({ title, data, onEdit }: { title: string, data: any[], onEdit: () => void }) {
   return (
-    <div className="bg-[#F9FAFB] rounded-3xl border border-[#E5E7EB] p-8 relative group">
-      <div className="flex items-center justify-between mb-8 border-b border-[#E5E7EB] pb-4">
-         <h3 className="text-xs font-black text-[#9CA3AF] uppercase tracking-widest">{title}</h3>
-         <button onClick={onEdit} className="text-[#3538CD] text-[10px] font-black uppercase tracking-widest hover:underline opacity-60 hover:opacity-100 transition-opacity">
-           Edit
-         </button>
+    <div className="bg-white rounded-[32px] border border-[#E5E7EB] p-10 shadow-sm relative overflow-hidden group">
+      <div className="absolute top-0 left-0 w-1.5 h-full bg-[#3538CD]/5 group-hover:bg-[#3538CD]/20 transition-all" />
+      <div className="flex items-center justify-between mb-8 border-b border-[#F3F4F6] pb-6">
+        <h3 className="text-sm font-black text-[#111827] uppercase tracking-[0.15em]">{title}</h3>
+        <button onClick={onEdit} className="text-[#3538CD] font-black text-[10px] uppercase tracking-widest px-4 py-2 bg-[#3538CD]/5 rounded-lg border border-[#3538CD]/10 hover:bg-[#3538CD]/10 transition-colors">Edit Section</button>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-y-10 gap-x-8">
-        {data.map((item: any) => (
-          <div key={item.label}>
-            <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-[0.2em] mb-2">{item.label}</p>
-            <div className="text-sm font-bold text-[#111827] break-words">{item.value || <span className="text-[#D1D5DB]">—</span>}</div>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-y-10 gap-x-12">
+        {data.map((item, i) => (
+          <div key={i} className="space-y-2">
+            <p className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest">{item.label}</p>
+            <div className="text-[14px] font-bold text-[#111827] leading-relaxed">
+              {item.value || <span className="text-gray-300">Not Provided</span>}
+            </div>
           </div>
         ))}
       </div>

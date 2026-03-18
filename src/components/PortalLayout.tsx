@@ -91,10 +91,11 @@ export default function PortalLayout({
       <AuthModal 
         isOpen={showAuthModal} 
         onClose={() => setShowAuthModal(false)}
-        jobTitle="Portal" // Generic context for header triggers
+        jobTitle="Portal"
         businessUnit={companyName}
-        jobId="1" // Generic fallback
+        jobId="1"
         initialTab={authTab}
+        redirectTo="/portal/yopmails/profile"
       />
 
       {/* Content */}

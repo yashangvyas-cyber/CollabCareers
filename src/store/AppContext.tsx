@@ -24,22 +24,14 @@ const initialState: AppState = {
       experience: '2+ Years Experience',
       employmentType: 'Full-time',
       jobType: 'On-site',
-      skills: ['React', 'JavaScript', 'TypeScript', 'Redux', 'Tailwind CSS'],
-      salaryRange: { min: '6', max: '10', currency: '₹', type: 'Annual' },
-      description: "As a React Developer at Yopmails, you'll build high-performance web applications serving millions. You'll work with TypeScript, modern state management, and reusable component libraries.",
+      skills: ['React', 'JavaScript', 'TypeScript', 'Tailwind CSS'],
+      salaryRange: { min: '8', max: '14', currency: '₹', type: 'Annual' },
       status: 'Open',
       publishOnCollabCareers: true,
-      customFields: [
-        { id: '1', label: 'Portfolio URL', type: 'Text', required: true },
-        { id: '2', label: 'Are you open to relocate?', type: 'Yes/No', required: false }
-      ],
-      evaluationCriteria: [
-        "Proven React experience with component architecture.",
-        "Mastery of ES6+, TypeScript, and Tailwind CSS.",
-        "Expertise in Redux or Zustand state management."
-      ],
+      customFields: [{ id: '1', label: 'Portfolio URL', type: 'Text', required: true }],
+      evaluationCriteria: ['React expert', 'UI skills'],
       createdAt: new Date().toISOString(),
-      targetDate: '2026-03-30'
+      description: 'Expert React developer needed for performance-critical web applications.'
     },
     {
       id: 'd2',
@@ -50,134 +42,268 @@ const initialState: AppState = {
       experience: '2+ Years Experience',
       employmentType: 'Full-time',
       jobType: 'Remote',
-      skills: ['Figma', 'Adobe XD', 'Prototyping', 'User Research'],
-      salaryRange: { min: '8', max: '12', currency: '₹', type: 'Annual' },
-      description: "Join our design team to craft intuitive user journeys. You'll bridge the gap between user needs and technical implementation through rapid prototyping.",
+      skills: ['Figma', 'Design Systems', 'Prototyping'],
+      salaryRange: { min: '10', max: '16', currency: '₹', type: 'Annual' },
       status: 'Open',
       publishOnCollabCareers: true,
-      customFields: [{ id: '3', label: 'Behance/Dribbble Link', type: 'Text', required: true }],
-      evaluationCriteria: ["Portfolio showcasing complex UX flows.", "Advanced Figma prototyping skills."],
+      customFields: [{ id: '2', label: 'Behance link', type: 'Text', required: true }],
+      evaluationCriteria: ['Design systems mastery'],
       createdAt: new Date().toISOString(),
-      targetDate: '2026-04-15'
+      description: 'Join our design team to build consistent user experiences.'
     },
     {
       id: 'd3',
-      title: 'Node.js Backend Engineer',
+      title: 'Flutter Developer',
       businessUnit: 'Yopmails',
       recruiter: 'James Wilson',
-      location: 'Ahmedabad',
-      experience: '4+ Years Experience',
+      location: 'Remote',
+      experience: '1+ Years Experience',
       employmentType: 'Full-time',
-      jobType: 'In-office',
-      skills: ['Node.js', 'PostgreSQL', 'Redis', 'Docker', 'AWS'],
-      salaryRange: { min: '12', max: '18', currency: '₹', type: 'Annual' },
-      description: "Scale our real-time messaging systems. You'll optimize database queries and build resilient microservices.",
+      jobType: 'Remote',
+      skills: ['Dart', 'Firebase', 'Flutter'],
+      salaryRange: { min: '6', max: '12', currency: '₹', type: 'Annual' },
       status: 'Open',
       publishOnCollabCareers: true,
-      customFields: [{ id: '4', label: 'GitHub Profile', type: 'Text', required: true }],
-      evaluationCriteria: ["Expertise in Node.js and distributed systems.", "Strong SQL optimization skills."],
+      customFields: [],
+      evaluationCriteria: ['App store delivery experience'],
       createdAt: new Date().toISOString(),
-      targetDate: '2026-04-10'
+      description: 'Build cross-platform mobile apps using Flutter.'
     },
     {
       id: 'd4',
-      title: 'Product Manager',
+      title: 'Project Manager',
       businessUnit: 'Yopmails',
       recruiter: 'Lisa Ray',
       location: 'Ahmedabad',
       experience: '5+ Years Experience',
       employmentType: 'Full-time',
       jobType: 'Hybrid',
-      skills: ['Agile', 'Market Research', 'Jira', 'Product Roadmap', 'Analytics'],
-      salaryRange: { min: '15', max: '22', currency: '₹', type: 'Annual' },
-      description: "Drive the vision for our core email products. You'll work with engineering and marketing to launch high-impact features.",
+      skills: ['Agile', 'Jira', 'Kanban'],
+      salaryRange: { min: '18', max: '25', currency: '₹', type: 'Annual' },
       status: 'Open',
       publishOnCollabCareers: true,
       customFields: [],
-      evaluationCriteria: ["Experience launching SaaS products.", "Exceptional stakeholder management."],
+      evaluationCriteria: ['Agile certification'],
       createdAt: new Date().toISOString(),
-      targetDate: '2026-04-20'
+      description: 'Lead high-impact projects from ideation to delivery.'
     },
     {
       id: 'd5',
-      title: 'DevOps Engineer',
+      title: 'Business Analyst',
       businessUnit: 'Yopmails',
       recruiter: 'David Kim',
-      location: 'Remote',
-      experience: '3+ Years Experience',
+      location: 'Ahmedabad',
+      experience: '2+ Years Experience',
       employmentType: 'Full-time',
-      jobType: 'Remote',
-      skills: ['Kubernetes', 'Terraform', 'CI/CD', 'AWS', 'Python'],
-      salaryRange: { min: '14', max: '20', currency: '₹', type: 'Annual' },
-      description: "Automate everything. You'll maintain our global cloud infrastructure and ensure 99.9% availability.",
+      jobType: 'On-site',
+      skills: ['SQL', 'Tableau', 'Requirement Gathering'],
+      salaryRange: { min: '8', max: '12', currency: '₹', type: 'Annual' },
       status: 'Open',
       publishOnCollabCareers: true,
       customFields: [],
-      evaluationCriteria: ["Advanced K8s orchestration knowledge.", "Proficiency in Infrastructure as Code."],
+      evaluationCriteria: ['Analytical thinking'],
       createdAt: new Date().toISOString(),
-      targetDate: '2026-04-05'
+      description: 'Bridging the gap between business needs and technical solutions.'
     },
     {
       id: 'd6',
-      title: 'Mobile Developer (React Native)',
-      businessUnit: 'Yopmails',
-      recruiter: 'Sarah Chen',
-      location: 'Ahmedabad',
-      experience: '3+ Years Experience',
-      employmentType: 'Full-time',
-      jobType: 'Hybrid',
-      skills: ['React Native', 'Firebase', 'Swift', 'Kotlin', 'Mobile UI'],
-      salaryRange: { min: '10', max: '16', currency: '₹', type: 'Annual' },
-      description: "Build our flagship mobile app. You'll create smooth, native-like experiences for iOS and Android.",
-      status: 'Open',
-      publishOnCollabCareers: true,
-      customFields: [{ id: '5', label: 'Link to App Store app', type: 'Text', required: false }],
-      evaluationCriteria: ["Published RN apps on both stores.", "Knowledge of native bridging."],
-      createdAt: new Date().toISOString(),
-      targetDate: '2026-04-12'
-    },
-    {
-      id: 'd7',
-      title: 'Quality Assurance Lead',
-      businessUnit: 'Yopmails',
-      recruiter: 'Michael Park',
-      location: 'Ahmedabad',
-      experience: '5+ Years Experience',
-      employmentType: 'Full-time',
-      jobType: 'In-office',
-      skills: ['Selenium', 'Cypress', 'Automation', 'API Testing', 'Team Lead'],
-      salaryRange: { min: '12', max: '15', currency: '₹', type: 'Annual' },
-      description: "Define our testing strategy. You'll lead a team of QA engineers to ensure flawless product releases.",
-      status: 'Open',
-      publishOnCollabCareers: true,
-      customFields: [],
-      evaluationCriteria: ["Experience setting up automation frameworks.", "Leadership background."],
-      createdAt: new Date().toISOString(),
-      targetDate: '2026-03-25'
-    },
-    {
-      id: 'd8',
-      title: 'Data Scientist',
+      title: 'Node.js Backend Engineer',
       businessUnit: 'Yopmails',
       recruiter: 'James Wilson',
       location: 'Remote',
-      experience: '4+ Years Experience',
+      experience: '3+ Years Experience',
       employmentType: 'Full-time',
       jobType: 'Remote',
-      skills: ['Python', 'PyTorch', 'SQL', 'NLP', 'Data Visualization'],
-      salaryRange: { min: '18', max: '25', currency: '₹', type: 'Annual' },
-      description: "Unlock insights from trillions of data points. You'll build models to predict user churn and optimize server load.",
+      skills: ['Node.js', 'MongoDB', 'Express'],
+      salaryRange: { min: '14', max: '20', currency: '₹', type: 'Annual' },
       status: 'Open',
       publishOnCollabCareers: true,
-      customFields: [{ id: '6', label: 'Kaggle Profile Link', type: 'Text', required: false }],
-      evaluationCriteria: ["Mastery of machine learning algorithms.", "Experience with large-scale data processing."],
+      customFields: [],
+      evaluationCriteria: ['System architecture skills'],
       createdAt: new Date().toISOString(),
-      targetDate: '2026-04-30'
+      description: 'Build scalable backend services for our applications.'
+    },
+    {
+      id: 'd7',
+      title: 'DevOps Engineer',
+      businessUnit: 'Yopmails',
+      recruiter: 'Michael Park',
+      location: 'Remote',
+      experience: '4+ Years Experience',
+      employmentType: 'Contract',
+      jobType: 'Remote',
+      skills: ['AWS', 'Docker', 'Kubernetes'],
+      salaryRange: { min: '1500', max: '2500', currency: '₹', type: 'Weekly' },
+      status: 'Open',
+      publishOnCollabCareers: true,
+      customFields: [],
+      evaluationCriteria: ['Infrastructure automation experience'],
+      createdAt: new Date().toISOString(),
+      description: 'Cloud infrastructure management and CI/CD pipelines.'
+    },
+    {
+      id: 'd8',
+      title: 'QA Engineer',
+      businessUnit: 'Yopmails',
+      recruiter: 'Sarah Chen',
+      location: 'Ahmedabad',
+      experience: '1+ Years Experience',
+      employmentType: 'Full-time',
+      jobType: 'On-site',
+      skills: ['Selenium', 'JIRA', 'Manual Testing'],
+      salaryRange: { min: '5', max: '8', currency: '₹', type: 'Annual' },
+      status: 'Close',
+      publishOnCollabCareers: true,
+      customFields: [],
+      evaluationCriteria: ['Bug detection skills'],
+      createdAt: new Date().toISOString(),
+      description: 'Ensure software quality through automated and manual testing.'
+    },
+    {
+      id: 'd9',
+      title: 'Product Designer',
+      businessUnit: 'Yopmails',
+      recruiter: 'Lisa Ray',
+      location: 'Remote',
+      experience: '3+ Years Experience',
+      employmentType: 'Full-time',
+      jobType: 'Remote',
+      skills: ['Figma', 'Prototyping', 'User Interviews'],
+      salaryRange: { min: '12', max: '18', currency: '₹', type: 'Annual' },
+      status: 'Open',
+      publishOnCollabCareers: true,
+      customFields: [],
+      evaluationCriteria: ['Case studies quality'],
+      createdAt: new Date().toISOString(),
+      description: 'Drive product vision through design.'
+    },
+    {
+      id: 'd10',
+      title: 'Data Analyst',
+      businessUnit: 'Yopmails',
+      recruiter: 'David Kim',
+      location: 'Ahmedabad',
+      experience: '2+ Years Experience',
+      employmentType: 'Full-time',
+      jobType: 'On-site',
+      skills: ['Python', 'SQL', 'Pandas'],
+      salaryRange: { min: '7', max: '11', currency: '₹', type: 'Annual' },
+      status: 'Open',
+      publishOnCollabCareers: true,
+      customFields: [],
+      evaluationCriteria: ['Data manipulation proficiency'],
+      createdAt: new Date().toISOString(),
+      description: 'Translate raw data into actionable insights.'
+    },
+    {
+      id: 'd11',
+      title: 'iOS Developer',
+      businessUnit: 'Yopmails',
+      recruiter: 'Sarah Chen',
+      location: 'Remote',
+      experience: '2+ Years Experience',
+      employmentType: 'Full-time',
+      jobType: 'Remote',
+      skills: ['Swift', 'Xcode', 'Combine'],
+      salaryRange: { min: '12', max: '18', currency: '₹', type: 'Annual' },
+      status: 'Open',
+      publishOnCollabCareers: true,
+      customFields: [],
+      evaluationCriteria: ['iOS application lifecycle mastery'],
+      createdAt: new Date().toISOString(),
+      description: 'Build native iOS applications with Swift.'
+    },
+    {
+      id: 'd12',
+      title: 'Android Developer',
+      businessUnit: 'Yopmails',
+      recruiter: 'Michael Park',
+      location: 'Remote',
+      experience: '2+ Years Experience',
+      employmentType: 'Full-time',
+      jobType: 'Remote',
+      skills: ['Kotlin', 'Android SDK', 'Jetpack Compose'],
+      salaryRange: { min: '12', max: '18', currency: '₹', type: 'Annual' },
+      status: 'Open',
+      publishOnCollabCareers: true,
+      customFields: [],
+      evaluationCriteria: ['Android architecture components knowledge'],
+      createdAt: new Date().toISOString(),
+      description: 'Build robust native Android apps.'
     }
   ],
-  candidates: [],
-  applications: [],
-  currentUser: null,
+  candidates: [
+    {
+      id: 'c1',
+      firstName: 'Alex',
+      lastName: 'Patel',
+      email: 'alex.patel@example.com',
+      phone: '+91 98765 43210',
+      isAlumni: false
+    }
+  ],
+  applications: [
+    {
+      id: 'a1',
+      candidateId: 'c1',
+      jobId: 'd1',
+      status: 'Under Review',
+      appliedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+      answers: { 
+        _fullFormData: { 
+          personal: { contactNumber: '+91 98765 43210', linkedin: 'linkedin.com/in/alexpatel' }, 
+          address: { address: '402, Skyline Apartments, Satellite', city: 'Ahmedabad', country: 'India' }, 
+          professional: { currentOrg: 'TechSolutions Inc.', currentDesignation: 'Senior Frontend Engineer', skills: ['React', 'TypeScript', 'Tailwind CSS'] },
+          salary: { ctcType: 'Annual', currency: 'INR (₹)', currentCtc: '18,50,000', expectedCtc: '24,00,000' }
+        } 
+      },
+      resumeUrl: 'Alex_Patel_Resume.pdf'
+    },
+    {
+      id: 'a2',
+      candidateId: 'c1',
+      jobId: 'd2',
+      status: 'Interview in Progress',
+      appliedAt: new Date(Date.now() - 86400000 * 5).toISOString(),
+      answers: { _fullFormData: { personal: { contactNumber: '+91 98765 43210' }, address: { city: 'Ahmedabad', country: 'India' }, professional: { currentDesignation: 'Senior Developer' } } },
+      resumeUrl: 'Alex_Patel_Resume.pdf'
+    },
+    {
+      id: 'a3',
+      candidateId: 'c1',
+      jobId: 'd4',
+      status: 'Decision Made',
+      appliedAt: new Date(Date.now() - 86400000 * 10).toISOString(),
+      answers: { _fullFormData: { personal: { contactNumber: '+91 98765 43210' }, address: { city: 'Ahmedabad', country: 'India' } } },
+      resumeUrl: 'Alex_Patel_Resume.pdf'
+    },
+    {
+      id: 'a4',
+      candidateId: 'c1',
+      jobId: 'd5',
+      status: 'Draft',
+      appliedAt: new Date(Date.now() - 86400000 * 1).toISOString(),
+      answers: { _fullFormData: { personal: { contactNumber: '+91 98765 43210' } } },
+      resumeUrl: 'Alex_Patel_Resume.pdf'
+    },
+    {
+      id: 'a5',
+      candidateId: 'c1',
+      jobId: 'd8', // QA Engineer
+      status: 'Submitted',
+      appliedAt: new Date(Date.now() - 86400000 * 15).toISOString(),
+      answers: { _fullFormData: { personal: { contactNumber: '+91 98765 43210' } } },
+      resumeUrl: 'Alex_Patel_Resume.pdf'
+    }
+  ],
+  currentUser: {
+    id: 'c1',
+    firstName: 'Alex',
+    lastName: 'Patel',
+    email: 'alex.patel@example.com',
+    phone: '+91 98765 43210',
+    isAlumni: false
+  },
   alumniVerified: {
     verified: false,
     email: null,
@@ -205,7 +331,34 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
       });
 
-      return { ...parsed, jobs: mergedJobs };
+      // Ensure mock applications are present and linked to the actual current user ID
+      const currentApps = parsed.applications || [];
+      const mergedApps = [...currentApps];
+      const actualCandidateId = parsed.currentUser?.id || 'c1';
+
+      initialState.applications.forEach(defaultApp => {
+        const appToMerge = { ...defaultApp, candidateId: actualCandidateId };
+        const existingIdx = mergedApps.findIndex(a => a.id === appToMerge.id);
+        if (existingIdx === -1) {
+          mergedApps.push(appToMerge);
+        } else {
+          mergedApps[existingIdx] = appToMerge;
+        }
+      });
+
+      // Ensure mock candidate is present
+      const currentCandidates = parsed.candidates || [];
+      const mergedCandidates = [...currentCandidates];
+      initialState.candidates.forEach(defaultCandidate => {
+        const existingIdx = mergedCandidates.findIndex(c => c.id === defaultCandidate.id || c.email === defaultCandidate.email);
+        if (existingIdx === -1) {
+          mergedCandidates.push(defaultCandidate);
+        } else {
+          mergedCandidates[existingIdx] = { ...mergedCandidates[existingIdx], ...defaultCandidate };
+        }
+      });
+
+      return { ...parsed, jobs: mergedJobs, applications: mergedApps, candidates: mergedCandidates };
     }
     return initialState;
   });

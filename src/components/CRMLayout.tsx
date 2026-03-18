@@ -11,7 +11,7 @@ const navItems = [
   { name: 'Jobs', icon: Briefcase, path: '/crm/add-job', hasAdd: true },
   { name: 'Candidates', icon: Users, path: '/crm/candidates', hasAdd: true },
   { name: 'Interviews', icon: MessageSquare, path: '#' },
-  { name: 'Config', icon: Settings, path: '#' },
+  { name: 'Config', icon: Settings, path: '/crm/config' },
   { name: 'Timeline', icon: Clock, path: '#' },
 ];
 

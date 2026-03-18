@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import PortalLayout from '../components/PortalLayout';
-import { Briefcase, Mail, Phone, MapPin, FileText, ExternalLink, Linkedin, LogOut, ArrowRight } from 'lucide-react';
+import { Briefcase, Mail, Phone, MapPin, FileText, ExternalLink, Linkedin, LogOut, ArrowRight, Clock } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 
 const brandStatusStyles: Record<string, string> = {
   'Under Review': 'bg-[#F4F5FA] text-[#3538CD] border-[#3538CD]/20',
   'Interview in Progress': 'bg-[#F4F5FA] text-[#3538CD] border-[#3538CD]/20',
-  'Decision Pending': 'bg-[#F9FAFB] text-[#6B7280] border-[#E5E7EB]',
+  'Decision Made': 'bg-[#F9FAFB] text-[#6B7280] border-[#E5E7EB]',
   'Offer Made': 'bg-[#3538CD] text-white border-[#3538CD]',
   'Rejected': 'bg-gray-100 text-gray-400 border-gray-200',
   'Draft': 'bg-[#F4F5FA] text-[#3538CD] border border-[#3538CD]/20',
+  'Submitted': 'bg-[#F4F5FA] text-[#3538CD] border-[#3538CD]/20',
 };
 
 
@@ -70,7 +71,7 @@ export default function CandidateProfilePage() {
 
   return (
     <PortalLayout>
-      <div className="max-w-5xl mx-auto px-6 py-10">
+      <div className="max-w-7xl mx-auto px-6 py-10">
         <div className="flex flex-col lg:flex-row gap-8 items-start">
           
           {/* LEFT: Profile Sidebar */}
@@ -100,25 +101,25 @@ export default function CandidateProfilePage() {
 
               <div className="space-y-4">
                 <div className="flex items-center gap-3 text-sm font-medium text-[#374151]">
-                  <Mail className="w-4 h-4 text-[#9CA3AF]" />
+                  <span title="Email"><Mail className="w-4 h-4 text-[#6B7280] shrink-0" /></span>
                   <span className="truncate">{currentUser?.email}</span>
                 </div>
                 {derivedProfile.phone && (
                   <div className="flex items-center gap-3 text-sm font-medium text-[#374151]">
-                    <Phone className="w-4 h-4 text-[#9CA3AF]" />
-                    <span>{derivedProfile.phone}</span>
+                     <span title="Phone"><Phone className="w-4 h-4 text-[#6B7280] shrink-0" /></span>
+                     <span>{derivedProfile.phone}</span>
                   </div>
                 )}
                 {derivedProfile.location && (
                   <div className="flex items-center gap-3 text-sm font-medium text-[#374151]">
-                    <MapPin className="w-4 h-4 text-[#9CA3AF]" />
-                    <span className="truncate">{derivedProfile.location}</span>
+                     <span title="Location"><MapPin className="w-4 h-4 text-[#6B7280] shrink-0" /></span>
+                     <span className="truncate">{derivedProfile.location}</span>
                   </div>
                 )}
                 {derivedProfile.linkedin && (
                   <div className="flex items-center gap-3">
-                    <Linkedin className="w-4 h-4 text-[#0A66C2]" />
-                    <a href={`https://${derivedProfile.linkedin.replace('https://', '')}`} target="_blank" className="text-sm font-bold text-[#3538CD] hover:underline">LinkedIn Profile</a>
+                     <span title="LinkedIn"><Linkedin className="w-4 h-4 text-[#0A66C2] shrink-0" /></span>
+                     <a href={`https://${derivedProfile.linkedin.replace('https://', '')}`} target="_blank" className="text-sm font-bold text-[#3538CD] hover:underline">LinkedIn Profile</a>
                   </div>
                 )}
               </div>
@@ -127,27 +128,27 @@ export default function CandidateProfilePage() {
 
               {/* Resume */}
               <div>
-                <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-3">Professional Resume</p>
+                <p className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest mb-3">Professional Resume</p>
                 {derivedProfile.resumeName ? (
                   <div className="flex items-center gap-3 p-3 bg-[#F9FAFB] rounded-xl border border-[#E5E7EB] group transition-all hover:bg-white hover:border-[#3538CD]/30">
                     <FileText className="w-5 h-5 text-[#3538CD]" />
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-bold text-[#111827] truncate">{derivedProfile.resumeName}</p>
-                      <p className="text-[10px] text-[#9CA3AF] font-bold">Latest Uploaded</p>
+                      <p className="text-[10px] text-[#6B7280] font-bold">Latest Uploaded</p>
                     </div>
                     <button className="text-[#3538CD] hover:scale-110 transition-transform">
                       <ExternalLink className="w-4 h-4" />
                     </button>
                   </div>
                 ) : (
-                  <p className="text-xs font-bold text-[#9CA3AF] italic">No resume uploaded</p>
+                  <p className="text-xs font-bold text-[#6B7280] italic">No resume uploaded</p>
                 )}
               </div>
 
               {derivedProfile.skills.length > 0 && (
                 <div>
                   <div className="border-t border-[#F3F4F6] my-6" />
-                  <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-3">Skills</p>
+                  <p className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest mb-3">Skills</p>
                   <div className="flex flex-wrap gap-2">
                     {derivedProfile.skills.map((skill: string) => (
                       <span key={skill} className="px-3 py-1 text-[10px] font-bold bg-[#F4F5FA] text-[#3538CD] border border-[#3538CD]/10 rounded-full">
@@ -157,70 +158,99 @@ export default function CandidateProfilePage() {
                   </div>
                 </div>
               )}
+
+              {(derivedProfile.currentOrg || derivedProfile.noticePeriod) && (
+                <div>
+                  <div className="border-t border-[#F3F4F6] my-6" />
+                  <div className="space-y-4">
+                    {derivedProfile.currentOrg && (
+                      <div className="flex items-center gap-3 text-sm font-medium text-[#374151]">
+                        <span title="Current Organization"><Briefcase className="w-4 h-4 text-[#6B7280] shrink-0" /></span>
+                        <span className="truncate" title={derivedProfile.currentOrg}>{derivedProfile.currentOrg}</span>
+                      </div>
+                    )}
+                    {derivedProfile.noticePeriod && (
+                      <div className="flex items-center gap-3 text-sm font-medium text-[#374151]">
+                        <span title="Notice Period"><Clock className="w-4 h-4 text-[#6B7280] shrink-0" /></span>
+                        <span>{derivedProfile.noticePeriod} days</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
           {/* RIGHT: Main Content */}
           <div className="flex-1 min-w-0">
             {/* Tabs */}
-            <div className="flex items-center border-b border-[#E5E7EB] mb-8">
+            <div className="flex items-center gap-1 bg-[#F4F5FA] p-1 rounded-2xl mb-8 w-fit">
               <button
                 onClick={() => setActiveTab('applications')}
-                className={`px-8 py-4 text-sm font-black uppercase tracking-widest transition-all relative flex items-center gap-2 ${
-                  activeTab === 'applications' ? 'text-[#3538CD]' : 'text-[#9CA3AF] hover:text-[#6B7280]'
+                className={`px-6 py-2.5 text-[11px] font-black uppercase tracking-widest transition-all rounded-xl flex items-center gap-2 ${
+                  activeTab === 'applications' ? 'bg-white text-[#3538CD] shadow-sm' : 'text-[#6B7280] hover:text-[#111827]'
                 }`}
               >
-                My Applications
-                <span className="bg-[#3538CD] text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
+                Applications
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${activeTab === 'applications' ? 'bg-[#3538CD] text-white' : 'bg-gray-200 text-gray-500'}`}>
                   {displayApps.length}
                 </span>
-                {activeTab === 'applications' && <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#3538CD] rounded-full" />}
               </button>
               <button
                 onClick={() => setActiveTab('saved')}
-                className={`px-8 py-4 text-sm font-black uppercase tracking-widest transition-all relative flex items-center gap-2 ${
-                  activeTab === 'saved' ? 'text-[#3538CD]' : 'text-[#9CA3AF] hover:text-[#6B7280]'
+                className={`px-6 py-2.5 text-[11px] font-black uppercase tracking-widest transition-all rounded-xl flex items-center gap-2 ${
+                  activeTab === 'saved' ? 'bg-white text-[#3538CD] shadow-sm' : 'text-[#6B7280] hover:text-[#111827]'
                 }`}
               >
-                Saved Jobs
-                <span className="bg-[#3538CD] text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
+                Saved
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${activeTab === 'saved' ? 'bg-[#3538CD] text-white' : 'bg-gray-200 text-gray-500'}`}>
                   {savedJobs.length}
                 </span>
-                {activeTab === 'saved' && <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#3538CD] rounded-full" />}
               </button>
             </div>
 
             <div className="space-y-4">
               {activeTab === 'applications' ? (
                 displayApps.map((app: any) => (
-                  <div key={app.id} className="bg-white rounded-2xl border border-[#E5E7EB] p-6 flex items-center justify-between gap-4 hover:border-[#3538CD]/30 hover:shadow-md transition-all group min-h-[92px]">
-                    <div className="flex items-center gap-4 flex-1 min-w-0">
-                      <div className="min-w-0 flex-1">
-                        <h4 className="text-base font-black text-[#111827] group-hover:text-[#3538CD] transition-colors truncate">{app.title}</h4>
-                        <p className="text-xs font-bold text-[#6B7280] mt-1 truncate">
-                          {app.company} <span className="mx-1 text-[#D1D5DB]">•</span> {formatDate(app.appliedAt)}
-                        </p>
+                  <div key={app.id} className="bg-white rounded-2xl border border-[#E5E7EB] p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:border-[#3538CD]/40 hover:shadow-xl hover:shadow-[#3538CD]/5 transition-all duration-300 relative group">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-[#3538CD]/5 group-hover:bg-[#3538CD]/20 transition-all" />
+                    
+                    <div className="flex-1 min-w-0 pr-12">
+                      <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-6 mb-3">
+                        <h4 className="text-[22px] font-black text-[#111827] group-hover:text-[#3538CD] transition-colors tracking-tighter leading-tight">
+                          {app.title}
+                        </h4>
+                        <span className={`w-fit px-4 py-1.5 text-[10px] font-black rounded-full border uppercase tracking-widest shadow-sm shrink-0 ${brandStatusStyles[app.status as keyof typeof brandStatusStyles] || 'bg-gray-100'}`}>
+                          {app.status}
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center gap-3 text-xs">
+                        <p className="font-bold text-[#6B7280]">{app.company}</p>
+                        <span className="w-1 h-1 rounded-full bg-[#D1D5DB]" />
+                        <p className="font-black text-[#9CA3AF] uppercase tracking-widest text-[9px]">{formatDate(app.appliedAt)}</p>
                         {app.jobClosed && (
-                          <p className="text-xs text-gray-400 mt-1">No longer accepting applications</p>
+                          <div className="flex items-center gap-1.5 ml-2 text-[9px] font-black text-[#f87171] uppercase tracking-widest bg-red-50 px-2 py-0.5 rounded-md border border-red-100">
+                            Archived
+                          </div>
                         )}
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-6 shrink-0">
-                      <span className={`px-3 py-1 text-xs font-black rounded-full border uppercase tracking-wider whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px] text-center ${brandStatusStyles[app.status as keyof typeof brandStatusStyles] || 'bg-gray-100'}`}>
-                        {app.status}
-                      </span>
-                      
+                    <div className="shrink-0">
                       {app.status === 'Draft' && !app.jobClosed ? (
                         <button 
-                          onClick={() => navigate(`/portal/yopmails/apply/${app.jobId}`)}
-                          className="flex items-center gap-1.5 text-xs font-black text-[#3538CD] hover:underline whitespace-nowrap min-w-[120px] justify-end"
+                          onClick={() => navigate(`/portal/yopmails/apply/${app.jobId}`, { state: { continueDraft: true, draftJobTitle: app.title, lastSaved: app.appliedAt } })}
+                          className="flex items-center gap-2 bg-[#3538CD] text-white px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-[#292bb0] transition-all shadow-lg shadow-[#3538CD]/20 active:scale-95 whitespace-nowrap"
                         >
-                          Continue Application <ArrowRight className="w-3.5 h-3.5" />
+                          Continue Application <ArrowRight className="w-4 h-4" />
                         </button>
                       ) : (
-                        <Link to="#" className="text-xs font-black text-[#3538CD] hover:underline flex items-center gap-1 whitespace-nowrap min-w-[120px] justify-end">
-                          View Application <ArrowIcon />
+                        <Link 
+                          to={`/portal/yopmails/application/${app.id}`} 
+                          className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-[#E5E7EB] text-[#6B7280] hover:text-[#3538CD] hover:border-[#3538CD]/50 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95 whitespace-nowrap group/btn"
+                        >
+                          View Details <ArrowIcon className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                         </Link>
                       )}
                     </div>
@@ -232,23 +262,37 @@ export default function CandidateProfilePage() {
                   return (
                     <div 
                       key={js.id} 
-                      className={`bg-white rounded-2xl border border-[#E5E7EB] p-6 flex items-center justify-between hover:border-[#3538CD]/30 hover:shadow-md transition-all group ${isClosed ? 'opacity-60 grayscale-[0.5]' : ''}`}
+                      className={`bg-white rounded-2xl border border-[#E5E7EB] p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:border-[#3538CD]/40 hover:shadow-xl hover:shadow-[#3538CD]/5 transition-all duration-300 relative group ${isClosed ? 'opacity-80' : ''}`}
                     >
-                      <div className="flex items-center gap-4 flex-1 min-w-0">
-                        <div className="min-w-0 flex-1">
-                          <h4 className={`text-base font-black transition-colors ${isClosed ? 'text-gray-500' : 'text-[#111827] group-hover:text-[#3538CD]'}`}>{js.title}</h4>
-                          <p className="text-xs font-bold text-[#6B7280] mt-1">{js.company} • {js.location} • {js.type}</p>
+                      <div className="absolute top-0 left-0 w-1 h-full bg-[#3538CD]/5 group-hover:bg-[#3538CD]/20 transition-all" />
+                      
+                      <div className="flex-1 min-w-0 pr-12">
+                        <h4 className={`text-[22px] font-black transition-colors tracking-tighter leading-tight mb-3 ${isClosed ? 'text-gray-400' : 'text-[#111827] group-hover:text-[#3538CD]'}`}>
+                          {js.title}
+                        </h4>
+                        <div className="flex flex-wrap items-center gap-3 text-xs">
+                          <p className="font-bold text-[#6B7280]">{js.company}</p>
+                          <span className="w-1 h-1 rounded-full bg-[#D1D5DB]" />
+                          <p className="font-medium text-[#6B7280]">{js.location}</p>
+                          <span className="w-1 h-1 rounded-full bg-[#D1D5DB]" />
+                          <p className="font-black text-[#9CA3AF] uppercase tracking-widest text-[9px]">{js.type}</p>
                         </div>
                       </div>
-                      {isClosed ? (
-                        <span className="text-xs font-black text-gray-400 uppercase tracking-widest py-2.5">
-                          No longer accepting applications
-                        </span>
-                      ) : (
-                        <Link to={`/portal/yopmails/job/${js.id}`} className="px-6 py-2.5 bg-[#3538CD] text-white text-xs font-black rounded-lg hover:bg-[#292bb0] transition-colors uppercase tracking-widest shadow-lg shadow-[#3538CD]/10">
-                          Apply Now
-                        </Link>
-                      )}
+
+                      <div className="shrink-0">
+                        {isClosed ? (
+                          <div className="px-6 py-3 bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl text-[10px] font-black text-[#9CA3AF] uppercase tracking-wider">
+                            No longer accepting
+                          </div>
+                        ) : (
+                          <Link 
+                            to={`/portal/yopmails/job/${js.id}`} 
+                            className="flex items-center gap-2 px-8 py-3 bg-[#3538CD] text-white text-[11px] font-black rounded-xl hover:bg-[#292bb0] transition-all uppercase tracking-widest shadow-lg shadow-[#3538CD]/20 active:scale-95 whitespace-nowrap"
+                          >
+                            Apply Now <ArrowIcon className="w-4 h-4" />
+                          </Link>
+                        )}
+                      </div>
                     </div>
                   );
                 })
@@ -262,30 +306,6 @@ export default function CandidateProfilePage() {
               )}
             </div>
 
-            {/* Account Info Card */}
-            {(derivedProfile.currentOrg || derivedProfile.noticePeriod) && (
-              <div className="mt-12 bg-white rounded-2xl border border-[#E5E7EB] overflow-hidden shadow-sm">
-                <div className="px-8 py-5 border-b border-[#F3F4F6] bg-[#F9FAFB]/50">
-                  <h3 className="text-sm font-black text-[#111827] uppercase tracking-widest">Additional Professional Info</h3>
-                </div>
-                <div className="p-8">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {derivedProfile.currentOrg && (
-                      <div>
-                        <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-2">Current Organization</p>
-                        <p className="text-sm font-bold text-[#111827]">{derivedProfile.currentOrg}</p>
-                      </div>
-                    )}
-                    {derivedProfile.noticePeriod && (
-                      <div>
-                        <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-2">Notice Period</p>
-                        <p className="text-sm font-bold text-[#111827]">{derivedProfile.noticePeriod} Days</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -294,9 +314,9 @@ export default function CandidateProfilePage() {
 }
 
 
-function ArrowIcon() {
+function ArrowIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
-    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
