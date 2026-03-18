@@ -4,7 +4,7 @@ import PortalLayout from '../components/PortalLayout';
 import AuthModal from '../components/AuthModal';
 import { 
   MapPin, Briefcase, Building2, Clock, 
-  ArrowRight, Bookmark, ChevronRight, ArrowLeft, Copy, CheckCheck 
+  ArrowRight, Bookmark, ChevronRight, ArrowLeft, Copy, CheckCheck, X 
 } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 
@@ -25,6 +25,8 @@ export default function JobDetailPage() {
   const [authTab, setAuthTab] = useState<'register' | 'signin'>('register');
   const [copied, setCopied] = useState(false);
   const [showAllSkills, setShowAllSkills] = useState(false);
+  const [showReapplyModal, setShowReapplyModal] = useState(false);
+  const { applications } = useApp();
 
   // Find job from state, or fallback to first job
   const job = jobs.find(j => j.id === jobId) || jobs[0];
@@ -43,10 +45,18 @@ export default function JobDetailPage() {
     );
   }
 
+  const previousApp = applications
+    .filter(a => a.candidateId === currentUser?.id && a.status === 'Submitted')
+    .sort((a, b) => new Date(b.appliedAt).getTime() - new Date(a.appliedAt).getTime())[0];
+
   const handleApplyClick = (e: React.MouseEvent) => {
     e.preventDefault();
     if (currentUser) {
-      navigate(`/portal/yopmails/apply/${job.id}`);
+      if (previousApp) {
+        setShowReapplyModal(true);
+      } else {
+        navigate(`/portal/yopmails/apply/${job.id}`);
+      }
     } else {
       setAuthTab('register');
       setShowAuthModal(true);
@@ -239,7 +249,11 @@ export default function JobDetailPage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {similarJobs.map((js) => (
-              <div key={js.id} className="bg-white rounded-2xl border border-[#E5E7EB] p-6 shadow-sm hover:border-[#3538CD]/30 hover:shadow-md transition-all group">
+              <Link 
+                key={js.id} 
+                to={`/portal/yopmails/job/${js.id}`}
+                className="bg-white rounded-2xl border border-[#E5E7EB] p-6 shadow-sm hover:border-[#3538CD]/30 hover:shadow-md transition-all group"
+              >
                 <div className="flex justify-between items-start mb-4">
                   <h3 className="text-base font-black text-[#111827] group-hover:text-[#3538CD] transition-colors line-clamp-1">{js.title}</h3>
                   <span className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-wider whitespace-nowrap">Posted Today</span>
@@ -247,23 +261,40 @@ export default function JobDetailPage() {
                 
                 <p className="text-xs font-bold text-[#6B7280] mb-4">{js.businessUnit}</p>
                 
-                <div className="flex flex-wrap gap-2 mb-6">
+                <div className="flex flex-wrap gap-2 mb-4">
                   <span className="px-2 py-1 bg-[#F9FAFB] text-[#6B7280] text-[10px] font-black rounded uppercase">{js.location}</span>
                   <span className="px-2 py-1 bg-[#F9FAFB] text-[#6B7280] text-[10px] font-black rounded uppercase">{js.employmentType}</span>
                   <span className="px-2 py-1 bg-[#F9FAFB] text-[#6B7280] text-[10px] font-black rounded uppercase">{formatExperience(js.experience)}</span>
                 </div>
-                
-                <div className="flex items-center justify-between pt-6 border-t border-[#F3F4F6]">
-                  <span className="text-[11px] font-black text-[#9CA3AF] uppercase tracking-widest italic">View Details</span>
-                  <Link
-                    to={`/portal/yopmails/job/${js.id}`}
-                    className="text-xs font-black text-[#3538CD] hover:underline flex items-center gap-1 uppercase tracking-widest"
-                  >
-                    View & Apply <ChevronRight className="w-3.5 h-3.5" />
-                  </Link>
+
+                {/* Added Skill Chips for context */}
+                <div className="flex flex-wrap gap-1.5 pt-4 border-t border-[#F3F4F6]">
+                  {js.skills?.slice(0, 2).map(skill => (
+                    <span key={skill} className="px-2 py-0.5 bg-white border border-[#E5E7EB] text-[#4B5563] text-[9px] font-bold rounded-lg uppercase tracking-tight">
+                      {skill}
+                    </span>
+                  ))}
+                  {(js.skills?.length ?? 0) > 2 && (
+                    <span className="px-2 py-0.5 text-[#9CA3AF] text-[9px] font-bold uppercase">+{(js.skills?.length ?? 0) - 2}</span>
+                  )}
                 </div>
-              </div>
+                
+                <div className="flex items-center justify-end mt-4">
+                  <span className="text-xs font-black text-[#3538CD] flex items-center gap-1 uppercase tracking-widest group-hover:gap-2 transition-all">
+                    View & Apply <ChevronRight className="w-3.5 h-3.5" />
+                  </span>
+                </div>
+              </Link>
             ))}
+          </div>
+
+          <div className="mt-12 text-center">
+            <Link 
+              to="/portal/yopmails" 
+              className="inline-flex items-center gap-2 text-sm font-black text-[#3538CD] uppercase tracking-widest hover:gap-3 transition-all"
+            >
+              View All Open Positions <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
         </div>
       </div>
@@ -277,16 +308,67 @@ export default function JobDetailPage() {
         initialTab={authTab}
       />
 
-      {/* Footer */}
-      <footer className="mt-24 border-t border-[#E5E7EB] py-10 bg-white">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-bold text-[#9CA3AF] uppercase tracking-widest">
-           <div>Powered by CollabCareers</div>
-           <div className="flex items-center gap-8">
-             <Link to="#" className="hover:text-[#3538CD] transition-colors">Privacy Policy</Link>
-             <span>&copy; {new Date().getFullYear()} Yopmails Recruitment</span>
-           </div>
-        </div>
-      </footer>
+      <ReapplyModal 
+        isOpen={showReapplyModal}
+        onClose={() => setShowReapplyModal(false)}
+        candidateName={currentUser?.firstName || ''}
+        previousJobTitle={jobs.find(j => j.id === previousApp?.jobId)?.title || 'Previous Job'}
+        onContinue={() => navigate(`/portal/yopmails/apply/${job.id}`, { state: { prefillFrom: previousApp?.id } })}
+        onStartFresh={() => navigate(`/portal/yopmails/apply/${job.id}`)}
+      />
     </PortalLayout>
+  );
+}
+
+function ReapplyModal({ isOpen, onClose, candidateName, previousJobTitle, onContinue, onStartFresh }: any) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+      <div className="absolute inset-0 bg-[#111827]/60 backdrop-blur-sm" onClick={onClose} />
+      
+      <div className="relative bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="p-10">
+          <button onClick={onClose} className="absolute top-6 right-6 p-2 hover:bg-gray-100 rounded-full transition-colors">
+            <X className="w-5 h-5 text-gray-400" />
+          </button>
+
+          <div className="mb-10 text-center">
+            <h2 className="text-3xl font-black text-[#111827] mb-2 tracking-tight">Welcome back, {candidateName}!</h2>
+            <p className="text-[#6B7280] font-bold">We found your previous application for <span className="text-[#111827]">{previousJobTitle}</span>.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <button 
+              onClick={onContinue}
+              className="p-8 bg-white border-2 border-[#E5E7EB] rounded-3xl text-left hover:border-[#3538CD] group transition-all"
+            >
+              <div className="w-12 h-12 bg-[#3538CD]/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Copy className="w-6 h-6 text-[#3538CD]" />
+              </div>
+              <h3 className="text-lg font-black text-[#111827] mb-2">Use Previous Application</h3>
+              <p className="text-sm font-bold text-[#6B7280] leading-relaxed mb-6">We'll prefill all your details. You only need to fill new custom fields for this job.</p>
+              <span className="inline-flex items-center gap-2 text-sm font-black text-[#3538CD] uppercase tracking-widest">
+                Yes, Continue <ArrowRight className="w-4 h-4" />
+              </span>
+            </button>
+
+            <button 
+              onClick={onStartFresh}
+              className="p-8 bg-white border-2 border-[#E5E7EB] rounded-3xl text-left hover:border-gray-900 group transition-all"
+            >
+              <div className="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <ArrowRight className="w-6 h-6 text-gray-900" />
+              </div>
+              <h3 className="text-lg font-black text-[#111827] mb-2">Start Fresh</h3>
+              <p className="text-sm font-bold text-[#6B7280] leading-relaxed mb-6">Fill the application form from scratch.</p>
+              <span className="inline-flex items-center gap-2 text-sm font-black text-gray-900 border-b-2 border-gray-900 uppercase tracking-widest">
+                Start Fresh
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

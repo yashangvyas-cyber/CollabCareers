@@ -13,15 +13,6 @@ const brandStatusStyles: Record<string, string> = {
   'Draft': 'bg-[#F4F5FA] text-[#3538CD] border border-[#3538CD]/20',
 };
 
-const initialAppliedJobs = [
-  { id: '1', title: 'React Developer', company: 'Yopmails', status: 'Under Review', date: '13/Mar/2026', appliedAt: '2026-03-13T10:00:00Z', jobId: 'job1', jobClosed: false },
-  { id: '3', title: 'Flutter Developer', company: 'Yopmails', status: 'Under Review', date: '05/Mar/2026', appliedAt: '2026-03-05T10:00:00Z', jobId: 'job3', jobClosed: true },
-];
-
-const savedJobs = [
-  { id: '4', title: 'Flutter Developer', company: 'Yopmails', location: 'Remote', type: 'Full-time' },
-  { id: '6', title: 'UI/UX Designer', company: 'Yopmails', location: 'Remote', type: 'Full-time' },
-];
 
 const formatDate = (dateString: string) => {
   const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
@@ -33,20 +24,44 @@ export default function CandidateProfilePage() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'applications' | 'saved'>('applications');
 
-  // Merge context apps with initial data for demo
-  const userApps = applications.filter(a => a.candidateId === currentUser?.id);
-  const displayApps = [...userApps.map(a => {
+  // Populate mock saved jobs from actual jobs list
+  const savedJobs = [
+    { ...jobs[0], company: jobs[0]?.businessUnit || 'Yopmails', type: jobs[0]?.employmentType },
+    { ...jobs[2], company: jobs[2]?.businessUnit || 'Yopmails', type: jobs[2]?.employmentType },
+    { ...jobs[1], company: jobs[1]?.businessUnit || 'Yopmails', type: jobs[1]?.employmentType, status: 'Close' as const }
+  ].filter(j => !!j.id).slice(0, 3);
+
+  // Get user applications
+  const userApps = applications
+    .filter(a => a.candidateId === currentUser?.id)
+    .sort((a, b) => new Date(b.appliedAt).getTime() - new Date(a.appliedAt).getTime());
+
+  const displayApps = userApps.map(a => {
     const job = jobs.find(j => j.id === a.jobId);
     return {
       ...a,
       company: job?.businessUnit || 'Yopmails',
-      title: job?.title || 'React Developer',
+      title: job?.title || 'Job Opportunity',
       jobClosed: job?.status === 'Close',
     };
-  })];
+  });
 
-  // For demo, if empty show initial
-  const finalApps = displayApps.length > 0 ? displayApps : initialAppliedJobs;
+  // Derive profile data from the latest application
+  const latestApp = userApps[0];
+  const profileData = latestApp?.answers?._fullFormData;
+
+  const derivedProfile = {
+    phone: profileData?.personal?.contactNumber || 'Not provided',
+    location: profileData?.address?.city 
+      ? `${profileData.address.city}, ${profileData.address.country}`
+      : 'Location not provided',
+    linkedin: profileData?.personal?.linkedin || null,
+    designation: profileData?.professional?.currentDesignation || 'Candidate',
+    currentOrg: profileData?.professional?.currentOrg || 'Not provided',
+    noticePeriod: profileData?.professional?.noticePeriod || 'Not provided',
+    skills: profileData?.professional?.skills || [],
+    resumeName: latestApp?.resumeUrl || null,
+  };
 
   const handleLogout = () => {
     logoutCandidate();
@@ -68,7 +83,7 @@ export default function CandidateProfilePage() {
               
               <div className="text-center mb-6">
                 <h2 className="text-xl font-black text-[#111827]">{currentUser?.firstName} {currentUser?.lastName}</h2>
-                <p className="text-sm font-bold text-[#6B7280] mt-1">UI Developer</p>
+                <p className="text-sm font-bold text-[#6B7280] mt-1">{derivedProfile.designation}</p>
                 
                 <button 
                   onClick={handleLogout}
@@ -88,16 +103,18 @@ export default function CandidateProfilePage() {
                 </div>
                 <div className="flex items-center gap-3 text-sm font-medium text-[#374151]">
                   <Phone className="w-4 h-4 text-[#9CA3AF]" />
-                  <span>{currentUser?.phone || '+91 9876543210'}</span>
+                  <span>{derivedProfile.phone}</span>
                 </div>
                 <div className="flex items-center gap-3 text-sm font-medium text-[#374151]">
                   <MapPin className="w-4 h-4 text-[#9CA3AF]" />
-                  <span>Ahmedabad, India</span>
+                  <span className="truncate">{derivedProfile.location}</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <Linkedin className="w-4 h-4 text-[#0A66C2]" />
-                  <a href="#" className="text-sm font-bold text-[#3538CD] hover:underline">LinkedIn Profile</a>
-                </div>
+                {derivedProfile.linkedin && (
+                  <div className="flex items-center gap-3">
+                    <Linkedin className="w-4 h-4 text-[#0A66C2]" />
+                    <a href={`https://${derivedProfile.linkedin.replace('https://', '')}`} target="_blank" className="text-sm font-bold text-[#3538CD] hover:underline">LinkedIn Profile</a>
+                  </div>
+                )}
               </div>
 
               <div className="border-t border-[#F3F4F6] my-6" />
@@ -105,16 +122,20 @@ export default function CandidateProfilePage() {
               {/* Resume */}
               <div>
                 <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-3">Professional Resume</p>
-                <div className="flex items-center gap-3 p-3 bg-[#F9FAFB] rounded-xl border border-[#E5E7EB] group transition-all hover:bg-white hover:border-[#3538CD]/30">
-                  <FileText className="w-5 h-5 text-[#3538CD]" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-[#111827] truncate">Alex_Patel_Resume.pdf</p>
-                    <p className="text-[10px] text-[#9CA3AF] font-bold">2.4 MB</p>
+                {derivedProfile.resumeName ? (
+                  <div className="flex items-center gap-3 p-3 bg-[#F9FAFB] rounded-xl border border-[#E5E7EB] group transition-all hover:bg-white hover:border-[#3538CD]/30">
+                    <FileText className="w-5 h-5 text-[#3538CD]" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-[#111827] truncate">{derivedProfile.resumeName}</p>
+                      <p className="text-[10px] text-[#9CA3AF] font-bold">Latest Uploaded</p>
+                    </div>
+                    <button className="text-[#3538CD] hover:scale-110 transition-transform">
+                      <ExternalLink className="w-4 h-4" />
+                    </button>
                   </div>
-                  <button className="text-[#3538CD] hover:scale-110 transition-transform">
-                    <ExternalLink className="w-4 h-4" />
-                  </button>
-                </div>
+                ) : (
+                  <p className="text-xs font-bold text-[#9CA3AF] italic">No resume uploaded</p>
+                )}
               </div>
 
               <div className="border-t border-[#F3F4F6] my-6" />
@@ -123,11 +144,15 @@ export default function CandidateProfilePage() {
               <div>
                 <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-3">Skills</p>
                 <div className="flex flex-wrap gap-2">
-                  {['React', 'JavaScript', 'TypeScript', 'Redux', 'TailwindCSS'].map((skill) => (
-                    <span key={skill} className="px-3 py-1 text-[10px] font-bold bg-[#F4F5FA] text-[#3538CD] border border-[#3538CD]/10 rounded-full">
-                      {skill}
-                    </span>
-                  ))}
+                  {derivedProfile.skills.length > 0 ? (
+                    derivedProfile.skills.map((skill: string) => (
+                      <span key={skill} className="px-3 py-1 text-[10px] font-bold bg-[#F4F5FA] text-[#3538CD] border border-[#3538CD]/10 rounded-full">
+                        {skill}
+                      </span>
+                    ))
+                  ) : (
+                    <p className="text-xs font-bold text-[#9CA3AF] italic">No skills listed</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -145,7 +170,7 @@ export default function CandidateProfilePage() {
               >
                 My Applications
                 <span className="bg-[#3538CD] text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
-                  {finalApps.length}
+                  {displayApps.length}
                 </span>
                 {activeTab === 'applications' && <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#3538CD] rounded-full" />}
               </button>
@@ -165,7 +190,7 @@ export default function CandidateProfilePage() {
 
             <div className="space-y-4">
               {activeTab === 'applications' ? (
-                finalApps.map((app: any) => (
+                displayApps.map((app: any) => (
                   <div key={app.id} className="bg-white rounded-2xl border border-[#E5E7EB] p-6 flex items-center justify-between gap-4 hover:border-[#3538CD]/30 hover:shadow-md transition-all group min-h-[92px]">
                     <div className="flex items-center gap-4 flex-1 min-w-0">
                       <div className="w-12 h-12 rounded-xl bg-[#F4F5FA] flex items-center justify-center text-[#3538CD] font-black text-lg shrink-0">
@@ -203,25 +228,37 @@ export default function CandidateProfilePage() {
                   </div>
                 ))
               ) : (
-                savedJobs.map((job) => (
-                  <div key={job.id} className="bg-white rounded-2xl border border-[#E5E7EB] p-6 flex items-center justify-between hover:border-[#3538CD]/30 hover:shadow-md transition-all group">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-[#F4F5FA] flex items-center justify-center text-[#3538CD] font-black text-lg">
-                        {job.company.charAt(0)}
+                savedJobs.map((js: any) => {
+                  const isClosed = js.status === 'Close';
+                  return (
+                    <div 
+                      key={js.id} 
+                      className={`bg-white rounded-2xl border border-[#E5E7EB] p-6 flex items-center justify-between hover:border-[#3538CD]/30 hover:shadow-md transition-all group ${isClosed ? 'opacity-60 grayscale-[0.5]' : ''}`}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg ${isClosed ? 'bg-gray-100 text-gray-400' : 'bg-[#F4F5FA] text-[#3538CD]'}`}>
+                          {js.company.charAt(0)}
+                        </div>
+                        <div>
+                          <h4 className={`text-base font-black transition-colors ${isClosed ? 'text-gray-500' : 'text-[#111827] group-hover:text-[#3538CD]'}`}>{js.title}</h4>
+                          <p className="text-xs font-bold text-[#6B7280] mt-1">{js.company} • {js.location} • {js.type}</p>
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="text-base font-black text-[#111827] group-hover:text-[#3538CD] transition-colors">{job.title}</h4>
-                        <p className="text-xs font-bold text-[#6B7280] mt-1">{job.company} • {job.location} • {job.type}</p>
-                      </div>
+                      {isClosed ? (
+                        <span className="text-xs font-black text-gray-400 uppercase tracking-widest py-2.5">
+                          No longer accepting applications
+                        </span>
+                      ) : (
+                        <Link to={`/portal/yopmails/job/${js.id}`} className="px-6 py-2.5 bg-[#3538CD] text-white text-xs font-black rounded-lg hover:bg-[#292bb0] transition-colors uppercase tracking-widest shadow-lg shadow-[#3538CD]/10">
+                          Apply Now
+                        </Link>
+                      )}
                     </div>
-                    <Link to={`/portal/yopmails/job/${job.id}`} className="px-6 py-2.5 bg-[#3538CD] text-white text-xs font-black rounded-lg hover:bg-[#292bb0] transition-colors uppercase tracking-widest shadow-lg shadow-[#3538CD]/10">
-                      Apply Now
-                    </Link>
-                  </div>
-                ))
+                  );
+                })
               )}
 
-              {(activeTab === 'applications' ? finalApps.length : savedJobs.length) === 0 && (
+              {(activeTab === 'applications' ? displayApps.length : savedJobs.length) === 0 && (
                 <div className="py-20 text-center bg-white rounded-2xl border border-dashed border-[#E5E7EB]">
                   <Briefcase className="w-12 h-12 text-[#E5E7EB] mx-auto mb-4" />
                   <p className="text-sm font-bold text-[#9CA3AF]">No {activeTab === 'applications' ? 'applications' : 'saved jobs'} found.</p>
@@ -229,7 +266,7 @@ export default function CandidateProfilePage() {
               )}
             </div>
 
-            {/* Account Info Card (Moved below if needed, or kept for detail) */}
+            {/* Account Info Card */}
             <div className="mt-12 bg-white rounded-2xl border border-[#E5E7EB] overflow-hidden shadow-sm">
               <div className="px-8 py-5 border-b border-[#F3F4F6] bg-[#F9FAFB]/50">
                 <h3 className="text-sm font-black text-[#111827] uppercase tracking-widest">Additional Professional Info</h3>
@@ -238,11 +275,11 @@ export default function CandidateProfilePage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   <div>
                     <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-2">Current Organization</p>
-                    <p className="text-sm font-bold text-[#111827]">MindInventory</p>
+                    <p className="text-sm font-bold text-[#111827]">{derivedProfile.currentOrg}</p>
                   </div>
                   <div>
                     <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-2">Notice Period</p>
-                    <p className="text-sm font-bold text-[#111827]">30</p>
+                    <p className="text-sm font-bold text-[#111827]">{derivedProfile.noticePeriod} {derivedProfile.noticePeriod !== 'Not provided' ? 'Days' : ''}</p>
                   </div>
                 </div>
               </div>
@@ -253,6 +290,7 @@ export default function CandidateProfilePage() {
     </PortalLayout>
   );
 }
+
 
 function ArrowIcon() {
   return (

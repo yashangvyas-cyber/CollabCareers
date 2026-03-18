@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import PortalLayout from '../components/PortalLayout';
 import { 
   ChevronDown, CheckCircle, Upload, Zap, Sparkles, 
@@ -13,6 +13,9 @@ export default function ApplicationFormPage() {
   const { jobId } = useParams();
   const { jobs, currentUser, applications, submitApplication, saveDraft, alumniVerified } = useApp();
   const navigate = useNavigate();
+  const location = useLocation();
+  const prefillFromId = location.state?.prefillFrom;
+  const [prefillSource, setPrefillSource] = useState<any>(null);
   
   // Find job from state
   const job = jobs.find(j => j.id === jobId) || jobs[0] || {
@@ -85,17 +88,37 @@ export default function ApplicationFormPage() {
       setJobClosed(true);
     }
 
+    // Handle Prefill from Previous Application
+    if (prefillFromId) {
+      const prevApp = applications.find(a => a.id === prefillFromId);
+      if (prevApp && prevApp.answers?._fullFormData) {
+        const sourceData = prevApp.answers._fullFormData;
+        setFormData(() => ({
+          ...sourceData,
+          personal: { ...sourceData.personal, email: currentUser.email }, // Keep current email
+          customAnswers: {}, // Never prefill custom answers
+        }));
+        setResumeName(prevApp.resumeUrl);
+        setPrefillSource({
+          title: jobs.find(j => j.id === prevApp.jobId)?.title || 'Previous Job',
+          date: new Date(prevApp.appliedAt).toLocaleDateString()
+        });
+        setStep(1);
+        return;
+      }
+    }
+
     // Check for existing draft
     const draft = applications.find(a => a.jobId === job?.id && a.candidateId === currentUser.id && a.status === 'Draft');
     if (draft) {
       setFormData(prev => ({
-        ...prev,
+        ...(draft.answers?._fullFormData || prev), // Use full saved data if available
         customAnswers: draft.answers || {}
       }));
       setResumeName(draft.resumeUrl);
-      setStep(1); // Resume at Step 2
+      setStep(1); 
     }
-  }, [currentUser, navigate, jobId, applications, job]);
+  }, [currentUser, navigate, jobId, applications, job, prefillFromId, jobs]);
 
   const handleCvUpload = () => {
     setExtracting(true);
@@ -113,7 +136,7 @@ export default function ApplicationFormPage() {
       jobId: job.id,
       status: 'Draft',
       appliedAt: new Date().toISOString(),
-      answers: formData.customAnswers,
+      answers: { ...formData.customAnswers, _fullFormData: formData },
       resumeUrl: resumeName || 'Manually Filled',
     });
     setShowToast(true);
@@ -127,7 +150,7 @@ export default function ApplicationFormPage() {
       jobId: job.id,
       status: 'Submitted',
       appliedAt: new Date().toISOString(),
-      answers: formData.customAnswers,
+      answers: { ...formData.customAnswers, _fullFormData: formData },
       resumeUrl: resumeName || 'Manually Filled',
     });
     navigate(`/portal/yopmails/confirmation/${job.id}`);
@@ -249,7 +272,21 @@ export default function ApplicationFormPage() {
         {/* STEP 1: Fill Details */}
         {step === 1 && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-700">
-            {resumeName && (
+            {prefillSource && (
+              <div className="bg-[#3538CD]/5 border border-[#3538CD]/20 rounded-2xl p-5 flex items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                <div className="w-10 h-10 bg-[#3538CD] rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-[#3538CD]/20">
+                  <Sparkles className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-black text-[#3538CD] tracking-wide uppercase tracking-widest text-[10px]">Prefilled from your previous application</p>
+                  <p className="text-sm text-[#3538CD]/80 font-bold mt-0.5">
+                    ✦ {prefillSource.title} · {prefillSource.date}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {resumeName && !prefillSource && (
               <div className="bg-[#3538CD]/5 border border-[#3538CD]/10 rounded-2xl p-5 flex items-center gap-4">
                 <div className="w-10 h-10 bg-[#3538CD] rounded-full flex items-center justify-center shrink-0 shadow-lg shadow-[#3538CD]/20">
                   <CheckCircle className="w-6 h-6 text-white" />
@@ -269,22 +306,61 @@ export default function ApplicationFormPage() {
                 isCollapsed={collapsedSections[1]} 
                 onToggle={() => toggleSection(1)}
               >
-                <div className="grid grid-cols-2 gap-6 mb-6">
-                   <FormInput label="First Name" required value={formData.personal.firstName} isExtracted={!!resumeName} />
-                   <FormInput label="Last Name" required value={formData.personal.lastName} isExtracted={!!resumeName} />
-                </div>
-                <div className="grid grid-cols-2 gap-6 mb-6">
-                   <FormSelect label="Gender" options={['Select', 'Male', 'Female', 'Other', 'Prefer not to say']} value={formData.personal.gender} />
-                   <FormPhoneInput label="Contact Number" required value={formData.personal.contactNumber} isExtracted={!!resumeName} />
-                </div>
-                <div className="grid grid-cols-2 gap-6 mb-6">
-                   <FormInput label="Email Address" required value={formData.personal.email} isLocked />
-                   <FormInput label="Date of Birth" value={formData.personal.dob} type="date" isExtracted={!!resumeName} />
-                </div>
-                <div className="grid grid-cols-2 gap-6">
-                   <FormInput label="LinkedIn Profile" value={formData.personal.linkedin} placeholder="linkedin.com/in/..." />
-                   <FormSelect label="Marital Status" options={['Select', 'Single', 'Married', 'Other']} value={formData.personal.maritalStatus} />
-                </div>
+                 <div className="grid grid-cols-2 gap-6 mb-6">
+                    <FormInput 
+                      label="First Name" 
+                      required 
+                      value={formData.personal.firstName} 
+                      isExtracted={!!resumeName} 
+                      onChange={(val: string) => setFormData(p => ({ ...p, personal: { ...p.personal, firstName: val }}))}
+                    />
+                    <FormInput 
+                      label="Last Name" 
+                      required 
+                      value={formData.personal.lastName} 
+                      isExtracted={!!resumeName} 
+                      onChange={(val: string) => setFormData(p => ({ ...p, personal: { ...p.personal, lastName: val }}))}
+                    />
+                 </div>
+                 <div className="grid grid-cols-2 gap-6 mb-6">
+                    <FormSelect 
+                      label="Gender" 
+                      options={['Select', 'Male', 'Female', 'Other', 'Prefer not to say']} 
+                      value={formData.personal.gender} 
+                      onChange={(val: string) => setFormData(p => ({ ...p, personal: { ...p.personal, gender: val }}))}
+                    />
+                    <FormPhoneInput 
+                      label="Contact Number" 
+                      required 
+                      value={formData.personal.contactNumber} 
+                      isExtracted={!!resumeName} 
+                      onChange={(val: string) => setFormData(p => ({ ...p, personal: { ...p.personal, contactNumber: val }}))}
+                    />
+                 </div>
+                 <div className="grid grid-cols-2 gap-6 mb-6">
+                    <FormInput label="Email Address" required value={formData.personal.email} isLocked />
+                    <FormInput 
+                      label="Date of Birth" 
+                      value={formData.personal.dob} 
+                      type="date" 
+                      isExtracted={!!resumeName} 
+                      onChange={(val: string) => setFormData(p => ({ ...p, personal: { ...p.personal, dob: val }}))}
+                    />
+                 </div>
+                 <div className="grid grid-cols-2 gap-6">
+                    <FormInput 
+                      label="LinkedIn Profile" 
+                      value={formData.personal.linkedin} 
+                      placeholder="linkedin.com/in/..." 
+                      onChange={(val: string) => setFormData(p => ({ ...p, personal: { ...p.personal, linkedin: val }}))}
+                    />
+                    <FormSelect 
+                      label="Marital Status" 
+                      options={['Select', 'Single', 'Married', 'Other']} 
+                      value={formData.personal.maritalStatus} 
+                      onChange={(val: string) => setFormData(p => ({ ...p, personal: { ...p.personal, maritalStatus: val }}))}
+                    />
+                 </div>
               </FormCollapsibleCard>
 
               {/* Section 2 — Professional Details */}
@@ -311,17 +387,34 @@ export default function ApplicationFormPage() {
 
                 <div className="space-y-6">
                   <div className="grid grid-cols-2 gap-6">
-                    <FormInput label="Highest Qualification" value={formData.professional.highestQualification} isExtracted={!!resumeName} />
+                    <FormInput 
+                      label="Highest Qualification" 
+                      value={formData.professional.highestQualification} 
+                      isExtracted={!!resumeName} 
+                      onChange={(val: string) => setFormData(p => ({ ...p, professional: { ...p.professional, highestQualification: val }}))}
+                    />
                     {!isFresher && (
                       <div className="space-y-2">
                         <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest">Total Experience</label>
                         <div className="grid grid-cols-2 gap-3">
                           <div className="relative">
-                            <input type="number" placeholder="Years" defaultValue={formData.professional.expYears} className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD]" />
+                            <input 
+                              type="number" 
+                              placeholder="Years" 
+                              defaultValue={formData.professional.expYears} 
+                              onChange={(e) => setFormData(p => ({ ...p, professional: { ...p.professional, expYears: e.target.value }}))}
+                              className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD]" 
+                            />
                             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-[#9CA3AF] uppercase">Yrs</span>
                           </div>
                           <div className="relative">
-                            <input type="number" placeholder="Months" defaultValue={formData.professional.expMonths} className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD]" />
+                            <input 
+                              type="number" 
+                              placeholder="Months" 
+                              defaultValue={formData.professional.expMonths} 
+                              onChange={(e) => setFormData(p => ({ ...p, professional: { ...p.professional, expMonths: e.target.value }}))}
+                              className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD]" 
+                            />
                             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-[#9CA3AF] uppercase">Mos</span>
                           </div>
                         </div>
@@ -332,10 +425,25 @@ export default function ApplicationFormPage() {
                   {!isFresher && (
                     <>
                       <div className="grid grid-cols-2 gap-6">
-                        <FormInput label="Current Organization" value={formData.professional.currentOrg} isExtracted={!!resumeName} />
-                        <FormInput label="Current Designation" value={formData.professional.currentDesignation} isExtracted={!!resumeName} />
+                        <FormInput 
+                          label="Current Organization" 
+                          value={formData.professional.currentOrg} 
+                          isExtracted={!!resumeName} 
+                          onChange={(val: string) => setFormData(p => ({ ...p, professional: { ...p.professional, currentOrg: val }}))}
+                        />
+                        <FormInput 
+                          label="Current Designation" 
+                          value={formData.professional.currentDesignation} 
+                          isExtracted={!!resumeName} 
+                          onChange={(val: string) => setFormData(p => ({ ...p, professional: { ...p.professional, currentDesignation: val }}))}
+                        />
                       </div>
-                      <FormInput label="Notice Period (Days)" type="number" value={formData.professional.noticePeriod} />
+                      <FormInput 
+                        label="Notice Period (Days)" 
+                        type="number" 
+                        value={formData.professional.noticePeriod} 
+                        onChange={(val: string) => setFormData(p => ({ ...p, professional: { ...p.professional, noticePeriod: val }}))}
+                      />
                     </>
                   )}
                 </div>
@@ -352,7 +460,11 @@ export default function ApplicationFormPage() {
                          </button>
                       </div>
                    </div>
-                   <FormTextarea label="General Remarks" value={formData.professional.remarks} />
+                   <FormTextarea 
+                     label="General Remarks" 
+                     value={formData.professional.remarks} 
+                     onChange={(val: string) => setFormData(p => ({ ...p, professional: { ...p.professional, remarks: val }}))}
+                   />
               </FormCollapsibleCard>
 
               {/* Section 3 — Salary Information */}
@@ -362,12 +474,34 @@ export default function ApplicationFormPage() {
                 isCollapsed={collapsedSections[3]} 
                 onToggle={() => toggleSection(3)}
               >
-                <div className={`grid gap-4 ${isFresher ? 'grid-cols-3' : 'grid-cols-4'}`}>
-                   <FormSelect label="CTC Type" options={['Annual', 'Monthly', 'Hourly']} value={formData.salary.ctcType} />
-                   <FormSelect label="Currency" options={['INR', 'USD', 'GBP', 'EUR']} value={formData.salary.currency} />
-                   {!isFresher && <FormInput label="Current CTC" type="number" value={formData.salary.currentCtc} />}
-                   <FormInput label="Expected CTC" type="number" value={formData.salary.expectedCtc} />
-                </div>
+                 <div className={`grid gap-4 ${isFresher ? 'grid-cols-3' : 'grid-cols-4'}`}>
+                    <FormSelect 
+                      label="CTC Type" 
+                      options={['Annual', 'Monthly', 'Hourly']} 
+                      value={formData.salary.ctcType} 
+                      onChange={(val: string) => setFormData(p => ({ ...p, salary: { ...p.salary, ctcType: val }}))}
+                    />
+                    <FormSelect 
+                      label="Currency" 
+                      options={['INR', 'USD', 'GBP', 'EUR']} 
+                      value={formData.salary.currency} 
+                      onChange={(val: string) => setFormData(p => ({ ...p, salary: { ...p.salary, currency: val }}))}
+                    />
+                    {!isFresher && (
+                      <FormInput 
+                        label="Current CTC" 
+                        type="number" 
+                        value={formData.salary.currentCtc} 
+                        onChange={(val: string) => setFormData(p => ({ ...p, salary: { ...p.salary, currentCtc: val }}))}
+                      />
+                    )}
+                    <FormInput 
+                      label="Expected CTC" 
+                      type="number" 
+                      value={formData.salary.expectedCtc} 
+                      onChange={(val: string) => setFormData(p => ({ ...p, salary: { ...p.salary, expectedCtc: val }}))}
+                    />
+                 </div>
               </FormCollapsibleCard>
 
               {/* Section 4 — Address */}
@@ -377,17 +511,39 @@ export default function ApplicationFormPage() {
                 isCollapsed={collapsedSections[4]} 
                 onToggle={() => toggleSection(4)}
               >
-                <div className="grid grid-cols-1 mb-6">
-                   <FormInput label="Address" value={formData.address.street} />
-                </div>
-                <div className="grid grid-cols-2 gap-6 mb-6">
-                   <FormSelect label="Country" options={['Select', 'India', 'USA', 'UK', 'Germany']} value={formData.address.country} />
-                   <FormSelect label="State" options={['Select', 'Gujarat', 'Maharashtra', 'Karnataka', 'New York']} value={formData.address.state} />
-                </div>
-                <div className="grid grid-cols-2 gap-6">
-                   <FormInput label="Town/City" value={formData.address.city} />
-                   <FormInput label="Zip/Postal Code" value={formData.address.zip} />
-                </div>
+                 <div className="grid grid-cols-1 mb-6">
+                    <FormInput 
+                      label="Address" 
+                      value={formData.address.street} 
+                      onChange={(val: string) => setFormData(p => ({ ...p, address: { ...p.address, street: val }}))}
+                    />
+                 </div>
+                 <div className="grid grid-cols-2 gap-6 mb-6">
+                    <FormSelect 
+                      label="Country" 
+                      options={['Select', 'India', 'USA', 'UK', 'Germany']} 
+                      value={formData.address.country} 
+                      onChange={(val: string) => setFormData(p => ({ ...p, address: { ...p.address, country: val }}))}
+                    />
+                    <FormSelect 
+                      label="State" 
+                      options={['Select', 'Gujarat', 'Maharashtra', 'Karnataka', 'New York']} 
+                      value={formData.address.state} 
+                      onChange={(val: string) => setFormData(p => ({ ...p, address: { ...p.address, state: val }}))}
+                    />
+                 </div>
+                 <div className="grid grid-cols-2 gap-6">
+                    <FormInput 
+                      label="Town/City" 
+                      value={formData.address.city} 
+                      onChange={(val: string) => setFormData(p => ({ ...p, address: { ...p.address, city: val }}))}
+                    />
+                    <FormInput 
+                      label="Zip/Postal Code" 
+                      value={formData.address.zip} 
+                      onChange={(val: string) => setFormData(p => ({ ...p, address: { ...p.address, zip: val }}))}
+                    />
+                 </div>
               </FormCollapsibleCard>
 
               {/* Section 5 — Additional Information */}
@@ -411,7 +567,7 @@ export default function ApplicationFormPage() {
                                 {['Yes', 'No'].map(o => (
                                   <button 
                                     key={o}
-                                    onClick={() => setFormData({...formData, customAnswers: {...formData.customAnswers, [f.label]: o}})}
+                                    onClick={() => setFormData(prev => ({...prev, customAnswers: {...prev.customAnswers, [f.label]: o}}))}
                                     className={`px-8 py-2 text-xs font-black rounded-lg transition-all ${
                                       (formData.customAnswers[f.label] || 'Yes') === o 
                                         ? 'bg-[#3538CD] text-white shadow-lg shadow-[#3538CD]/20' 
@@ -429,7 +585,7 @@ export default function ApplicationFormPage() {
                                type={f.type === 'Number' ? 'number' : f.type === 'Date' ? 'date' : 'text'}
                                placeholder={f.label === 'Portfolio URL' ? 'https://yourportfolio.com' : f.label}
                                className="w-full border border-[#E5E7EB] rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-white placeholder:text-[#9CA3AF]"
-                               onChange={(e) => setFormData({...formData, customAnswers: {...formData.customAnswers, [f.label]: e.target.value}})}
+                               onChange={(e) => setFormData(prev => ({...prev, customAnswers: {...prev.customAnswers, [f.label]: e.target.value}}))}
                              />
                           </div>
                         )}
@@ -643,24 +799,26 @@ function FormInput(props: any) {
   );
 }
 
-function FormPhoneInput({ label, required, value, isExtracted: _isExtracted }: any) {
+ function FormPhoneInput({ label, required, value, isExtracted: _isExtracted, onChange }: any) {
   return (
     <div className="space-y-2">
       <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">{label} {required && <span className="text-red-500">*</span>}</label>
       <div className="flex gap-2">
-         <div className="w-24 shrink-0 relative">
-            <select className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3.5 text-sm font-bold appearance-none bg-[#F9FAFB]">
+         <div className="w-[72px] shrink-0 relative">
+            <select className="w-full border border-[#E5E7EB] rounded-xl px-3 py-3.5 text-xs font-bold appearance-none bg-[#F9FAFB]">
                <option>+91</option>
                <option>+1</option>
                <option>+44</option>
             </select>
-            <ChevronDown className="w-3.5 h-3.5 text-[#9CA3AF] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <ChevronDown className="w-3 h-3 text-[#9CA3AF] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
          </div>
          <div className="relative flex-1">
             <input 
               type="text" 
               defaultValue={value}
-              className="w-full border border-[#E5E7EB] rounded-xl px-5 py-3.5 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD]" 
+              onChange={(e) => onChange?.(e.target.value)}
+              className="w-full border border-[#E5E7EB] rounded-xl px-5 py-3.5 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] placeholder:text-gray-300" 
+              placeholder="98765 43210"
             />
          </div>
       </div>
@@ -668,13 +826,14 @@ function FormPhoneInput({ label, required, value, isExtracted: _isExtracted }: a
   );
 }
 
-function FormSelect({ label, options, value }: any) {
+ function FormSelect({ label, options, value, onChange }: any) {
   return (
     <div className="space-y-2">
       <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">{label}</label>
       <div className="relative">
         <select
           defaultValue={value}
+          onChange={(e) => onChange?.(e.target.value)}
           className="w-full border border-[#E5E7EB] bg-white rounded-xl px-5 py-3.5 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] appearance-none text-[#111827] hover:border-[#D1D5DB] transition-all"
         >
           {options.map((opt: string) => <option key={opt} value={opt === 'Select' ? '' : opt}>{opt}</option>)}
