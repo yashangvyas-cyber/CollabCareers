@@ -4,7 +4,7 @@ import PortalLayout from '../components/PortalLayout';
 import AuthModal from '../components/AuthModal';
 import { 
   MapPin, Briefcase, Building2, Clock, 
-  ArrowRight, Bookmark, ChevronRight, TrendingUp, ArrowLeft, Copy, CheckCheck 
+  ArrowRight, Bookmark, ChevronRight, ArrowLeft, Copy, CheckCheck 
 } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 
@@ -24,6 +24,7 @@ export default function JobDetailPage() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authTab, setAuthTab] = useState<'register' | 'signin'>('register');
   const [copied, setCopied] = useState(false);
+  const [showAllSkills, setShowAllSkills] = useState(false);
 
   // Find job from state, or fallback to first job
   const job = jobs.find(j => j.id === jobId) || jobs[0];
@@ -98,10 +99,26 @@ export default function JobDetailPage() {
 
               {/* Meta Row */}
               <div className="flex flex-wrap items-center gap-6 text-[13px] text-[#6B7280] mb-6 font-medium">
-                <span className="flex items-center gap-2"><MapPin className="w-4 h-4 text-[#3538CD]" /> {job.location}</span>
-                <span className="flex items-center gap-2"><Briefcase className="w-4 h-4 text-[#3538CD]" /> {job.employmentType}</span>
-                <span className="flex items-center gap-2"><Building2 className="w-4 h-4 text-[#3538CD]" /> {job.jobType}</span>
-                <span className="flex items-center gap-2"><Clock className="w-4 h-4 text-[#3538CD]" /> {formatExperience(job.experience)}</span>
+                <span className="group relative flex items-center gap-2 cursor-help">
+                  <MapPin className="w-4 h-4 text-[#3538CD]" />
+                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-[#111827] text-white text-[9px] font-black uppercase tracking-widest rounded opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap shadow-xl z-10">Location</span>
+                  {job.location}
+                </span>
+                <span className="group relative flex items-center gap-2 cursor-help">
+                  <Briefcase className="w-4 h-4 text-[#3538CD]" />
+                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-[#111827] text-white text-[9px] font-black uppercase tracking-widest rounded opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap shadow-xl z-10">Employment Type</span>
+                  {job.employmentType}
+                </span>
+                <span className="group relative flex items-center gap-2 cursor-help">
+                  <Building2 className="w-4 h-4 text-[#3538CD]" />
+                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-[#111827] text-white text-[9px] font-black uppercase tracking-widest rounded opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap shadow-xl z-10">Job Type</span>
+                  {job.jobType}
+                </span>
+                <span className="group relative flex items-center gap-2 cursor-help">
+                  <Clock className="w-4 h-4 text-[#3538CD]" />
+                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-[#111827] text-white text-[9px] font-black uppercase tracking-widest rounded opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap shadow-xl z-10">Experience</span>
+                  {formatExperience(job.experience)}
+                </span>
               </div>
 
 
@@ -109,15 +126,18 @@ export default function JobDetailPage() {
               <div className="mb-10">
                 <h3 className="text-[11px] font-black uppercase tracking-widest text-[#9CA3AF] mb-4">Required Skills</h3>
                 <div className="flex flex-wrap items-center gap-2">
-                  {job.skills?.slice(0, 4).map((skill) => (
-                    <span key={skill} className="px-4 py-1.5 text-xs font-bold bg-white text-[#374151] border border-[#E5E7EB] rounded-full shadow-sm hover:border-[#3538CD]/30 transition-colors">
+                  {(showAllSkills ? job.skills : job.skills?.slice(0, 4))?.map((skill) => (
+                    <span key={skill} className="px-4 py-1.5 text-xs font-bold bg-white text-[#374151] border border-[#E5E7EB] rounded-full shadow-sm hover:border-[#3538CD]/30 transition-colors animate-in fade-in zoom-in-95 duration-300">
                       {skill}
                     </span>
                   ))}
                   {(job.skills?.length ?? 0) > 4 && (
-                    <span className="px-4 py-1.5 text-xs font-bold bg-white text-[#374151] border border-[#E5E7EB] rounded-full shadow-sm">
-                      +{(job.skills?.length ?? 0) - 4} more
-                    </span>
+                    <button 
+                      onClick={() => setShowAllSkills(!showAllSkills)}
+                      className="px-4 py-1.5 text-xs font-black text-[#3538CD] bg-[#3538CD]/5 border border-[#3538CD]/20 rounded-full shadow-sm hover:bg-[#3538CD]/10 transition-all uppercase tracking-widest"
+                    >
+                      {showAllSkills ? 'Show Less' : `+${(job.skills?.length ?? 0) - 4} more`}
+                    </button>
                   )}
                 </div>
               </div>
@@ -161,7 +181,6 @@ export default function JobDetailPage() {
                       <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">Posted 3 days ago</p>
                       <p className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest">Job ID: <span className="text-[#111827]">JB-9921</span></p>
                    </div>
-                   <TrendingUp className="w-5 h-5 text-[#3538CD]" />
                 </div>
 
                 <div className="p-8">

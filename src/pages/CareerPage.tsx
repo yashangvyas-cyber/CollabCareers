@@ -83,61 +83,60 @@ export default function CareerPage() {
 
       {/* Search + Filter Bar */}
       <div className="bg-white border-b border-[#E5E7EB] sticky top-[57px] z-40 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-            {/* Search */}
-            <div className="relative flex-[1.2]">
-              <Search className="w-4 h-4 text-[#9CA3AF] absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search job title or skill..."
-                className="w-full bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg pl-10 pr-4 py-2.5 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
-              />
-            </div>
-
-            {/* Filters */}
-            <div className="flex flex-wrap items-center gap-3 flex-1 lg:justify-end">
-              <FilterPill
-                label="Location"
-                icon={<MapPin className="w-3.5 h-3.5" />}
-                value={locationFilter}
-                options={locations}
-                onChange={setLocationFilter}
-              />
-              <FilterPill
-                label="Experience"
-                icon={<Clock className="w-3.5 h-3.5" />}
-                value={experienceFilter}
-                options={experienceLevels}
-                onChange={setExperienceFilter}
-              />
-              <FilterPill
-                label="Employment"
-                icon={<Briefcase className="w-3.5 h-3.5" />}
-                value={employmentFilter}
-                options={Array.from(new Set(displayJobs.map(j => j.employmentType)))}
-                onChange={setEmploymentFilter}
-              />
-              <FilterPill
-                label="Type"
-                icon={<Building2 className="w-3.5 h-3.5" />}
-                value={jobTypeFilter}
-                options={Array.from(new Set(displayJobs.map(j => j.jobType)))}
-                onChange={setJobTypeFilter}
-              />
-              { (locationFilter || experienceFilter || employmentFilter || jobTypeFilter) && (
-                <button
-                  onClick={clearFilters}
-                  className="text-[10px] font-black text-primary hover:text-[#292bb0] uppercase tracking-widest px-2"
-                >
-                  Clear All
-                </button>
-              )}
-            </div>
+        <div className="max-w-7xl mx-auto px-6 py-5 space-y-6">
+          {/* Search Row - Integrated & Focused */}
+          <div className="relative max-w-4xl">
+            <Search className="w-5 h-5 text-[#9CA3AF] absolute left-4 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search job title, skills, or keywords..."
+              className="w-full bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl pl-12 pr-6 py-3.5 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-sm placeholder:text-[#9CA3AF] hover:border-[#D1D5DB]"
+            />
           </div>
 
+          {/* Filters Row - Clean & Aligned */}
+          <div className="flex flex-wrap items-center gap-3">
+            <FilterPill
+              label="Location"
+              icon={<MapPin className="w-3.5 h-3.5" />}
+              value={locationFilter}
+              options={locations}
+              onChange={setLocationFilter}
+            />
+            <FilterPill
+              label="Experience"
+              icon={<Clock className="w-3.5 h-3.5" />}
+              value={experienceFilter}
+              options={experienceLevels}
+              onChange={setExperienceFilter}
+            />
+            <FilterPill
+              label="Employment"
+              icon={<Briefcase className="w-3.5 h-3.5" />}
+              value={employmentFilter}
+              options={Array.from(new Set(displayJobs.map(j => j.employmentType)))}
+              onChange={setEmploymentFilter}
+            />
+            <FilterPill
+              label="Type"
+              icon={<Building2 className="w-3.5 h-3.5" />}
+              value={jobTypeFilter}
+              options={Array.from(new Set(displayJobs.map(j => j.jobType)))}
+              onChange={setJobTypeFilter}
+            />
+            
+            { (locationFilter || experienceFilter || employmentFilter || jobTypeFilter) && (
+              <button
+                onClick={clearFilters}
+                className="flex items-center gap-1.5 ml-2 px-3 py-1.5 text-[10px] font-black text-[#6B7280] hover:text-red-500 transition-colors uppercase tracking-widest bg-[#F3F4F6] hover:bg-red-50 rounded-lg group"
+              >
+                <X className="w-3 h-3 group-hover:rotate-90 transition-transform" />
+                Clear Filters
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -229,10 +228,10 @@ function FilterPill({ label, icon, value, options, onChange }: {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-2.5 px-4 py-2 text-xs font-black rounded-full border-2 transition-all uppercase tracking-widest ${
+        className={`flex items-center gap-2.5 px-5 py-2.5 text-[11px] font-black rounded-xl border transition-all uppercase tracking-[0.05em] shadow-sm ${
           value 
-            ? 'bg-[#3538CD]/5 border-[#3538CD] text-[#3538CD]' 
-            : 'bg-white border-[#E5E7EB] text-[#6B7280] hover:border-[#D1D5DB]'
+            ? 'bg-[#3538CD]/5 border-[#3538CD] text-[#3538CD] shadow-[#3538CD]/5' 
+            : 'bg-white border-[#E5E7EB] text-[#6B7280] hover:border-[#D1D5DB] hover:bg-[#F9FAFB]'
         }`}
       >
         <span className={value ? 'text-[#3538CD]' : 'text-[#9CA3AF]'}>{icon}</span>
@@ -244,12 +243,12 @@ function FilterPill({ label, icon, value, options, onChange }: {
               onChange('');
               setIsOpen(false);
             }}
-            className="ml-1 p-0.5 hover:bg-[#3538CD]/10 rounded-full transition-colors"
+            className="ml-1.5 p-0.5 hover:bg-[#3538CD]/10 rounded-full transition-colors"
           >
             <X className="w-3 h-3" />
           </div>
         ) : (
-          <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+          <ChevronDown className={`w-3.5 h-3.5 ml-0.5 text-[#9CA3AF] transition-transform duration-300 ${isOpen ? 'rotate-180 text-[#3538CD]' : ''}`} />
         )}
       </button>
 

@@ -643,7 +643,7 @@ function FormInput(props: any) {
   );
 }
 
-function FormPhoneInput({ label, required, value, isExtracted }: any) {
+function FormPhoneInput({ label, required, value, isExtracted: _isExtracted }: any) {
   return (
     <div className="space-y-2">
       <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">{label} {required && <span className="text-red-500">*</span>}</label>

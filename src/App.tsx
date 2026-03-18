@@ -15,7 +15,7 @@ import PrototypeHome from './pages/PrototypeHome';
 
 function App() {
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route path="/" element={<PrototypeHome />} />
         {/* Flow 1: Recruiter (CRM) */}

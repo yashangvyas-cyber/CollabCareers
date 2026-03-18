@@ -6,8 +6,7 @@ const flows = [
     title: 'Flow 1 — Recruiter (CRM)',
     description: 'Internal CRM screens for recruiters to create jobs and review candidates',
     screens: [
-      { label: 'Add Job Form', path: '/crm/add-job', badge: 'Prompt 1' },
-      { label: 'Candidate Detail', path: '/crm/candidate/1', badge: 'Prompt 2' },
+      { label: 'Internal Side', path: '/crm/add-job', badge: 'Prompt 1' },
     ],
     icon: <Monitor className="w-5 h-5" />,
     color: 'from-indigo-500 to-blue-600',
