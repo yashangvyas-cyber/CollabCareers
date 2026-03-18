@@ -9,6 +9,8 @@ interface AppContextType extends AppState {
   submitApplication: (application: Application) => void;
   saveDraft: (application: Application) => void;
   setAlumniVerified: (verified: boolean, email: string | null) => void;
+  toggleSaveJob: (jobId: string) => void;
+  withdrawApplication: (applicationId: string) => void;
 }
 
 const STORAGE_KEY = 'collab_careers_state';
@@ -413,6 +415,32 @@ export function AppProvider({ children }: { children: ReactNode }) {
       alumniVerified: { verified, email },
     }));
   };
+  
+  const toggleSaveJob = (jobId: string) => {
+    if (!state.currentUser) return;
+    
+    setState(prev => {
+      const currentSavedIds = prev.currentUser?.savedJobIds || [];
+      const newSavedIds = currentSavedIds.includes(jobId)
+        ? currentSavedIds.filter(id => id !== jobId)
+        : [...currentSavedIds, jobId];
+      
+      const updatedUser = { ...prev.currentUser!, savedJobIds: newSavedIds };
+      
+      return {
+        ...prev,
+        currentUser: updatedUser,
+        candidates: prev.candidates.map(c => c.id === updatedUser.id ? updatedUser : c)
+      };
+    });
+  };
+
+  const withdrawApplication = (id: string) => {
+    setState(prev => ({
+      ...prev,
+      applications: prev.applications.map(a => a.id === id ? { ...a, status: 'Withdrawn' } : a)
+    }));
+  };
 
   return (
     <AppContext.Provider
@@ -425,6 +453,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         submitApplication,
         saveDraft,
         setAlumniVerified,
+        toggleSaveJob,
+        withdrawApplication,
       }}
     >
       {children}

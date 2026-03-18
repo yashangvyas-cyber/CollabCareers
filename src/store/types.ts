@@ -47,13 +47,14 @@ export interface Candidate {
   resumeUrl?: string;
   isAlumni: boolean;
   alumniEmail?: string;
+  savedJobIds?: string[];
 }
 
 export interface Application {
   id: string;
   candidateId: string;
   jobId: string;
-  status: 'Draft' | 'Submitted' | 'Under Review' | 'Interview in Progress' | 'Decision Made' | 'Offer Made' | 'Rejected';
+  status: 'Draft' | 'Submitted' | 'Under Review' | 'Interview in Progress' | 'Decision Made' | 'Offer Made' | 'Rejected' | 'Withdrawn';
   appliedAt: string;
   answers: Record<string, any>;
   resumeUrl: string;
