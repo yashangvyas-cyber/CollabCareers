@@ -240,9 +240,17 @@ export default function CandidateListingPage() {
                     </button>
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-[#3538CD]/20 rounded-full text-[12px] text-[#3538CD] font-semibold">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#3538CD]"></span>
-                      {candidate.status}
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border rounded-full text-[12px] font-semibold ${
+                      candidate.status === 'Withdrawn' || candidate.status === 'Cancelled'
+                        ? 'border-gray-200 text-gray-400'
+                        : 'border-[#3538CD]/20 text-[#3538CD]'
+                    }`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${
+                        candidate.status === 'Withdrawn' || candidate.status === 'Cancelled'
+                          ? 'bg-gray-300'
+                          : 'bg-[#3538CD]'
+                      }`}></span>
+                      {candidate.status === 'Withdrawn' ? 'Cancelled' : candidate.status}
                     </span>
                   </td>
                   <td className="px-4 py-4">

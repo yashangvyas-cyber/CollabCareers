@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import PortalLayout from '../components/PortalLayout';
+import { useApp } from '../store/AppContext';
 import { 
   Download, Globe, Linkedin, FileText,
-  ChevronDown, MapPin, Briefcase, Building2, Clock, X
+  ChevronDown, MapPin, Briefcase, Building2, Clock, X, AlertTriangle
 } from 'lucide-react';
 
 const brandStatusStyles: Record<string, string> = {
@@ -18,7 +19,17 @@ const brandStatusStyles: Record<string, string> = {
 
 export default function ViewApplicationPage() {
   const { slug, applicationId } = useParams();
+  const navigate = useNavigate();
+  const { applications, jobs, withdrawApplication } = useApp();
   const [isJobExpanded, setIsJobExpanded] = useState(false);
+  const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
+
+  // Find real data
+  const application = applications.find(a => a.id === applicationId) || applications[0];
+  const job = jobs.find(j => j.id === application.jobId) || jobs[0];
+
+  const canWithdraw = job.status !== 'Close' && 
+    !['Not Considered', 'Joined', 'Not Joined', 'Withdrawn'].includes(application.status);
 
   // Mock data for React Developer application
   const appData = {
@@ -138,10 +149,15 @@ export default function ViewApplicationPage() {
                </div>
             </div>
             
-            <button className="flex items-center gap-2 px-6 py-3 border-2 border-[#E5E7EB] text-[#6B7280] hover:text-red-500 hover:border-red-100 hover:bg-red-50 rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-sm active:scale-95 group">
-              <X className="w-4 h-4 group-hover:scale-110 transition-transform" />
-              Withdraw Application
-            </button>
+            {canWithdraw && (
+              <button 
+                onClick={() => setIsWithdrawModalOpen(true)}
+                className="flex items-center gap-2 px-6 py-3 border-2 border-[#E5E7EB] text-[#6B7280] hover:text-red-500 hover:border-red-100 hover:bg-red-50 rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-sm active:scale-95 group"
+              >
+                <X className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                Withdraw Application
+              </button>
+            )}
           </div>
         </div>
 
@@ -302,6 +318,46 @@ export default function ViewApplicationPage() {
           </div>
         </div>
       </div>
+
+      {/* Withdraw Confirmation Modal */}
+      {isWithdrawModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+          <div className="absolute inset-0 bg-[#111827]/60 backdrop-blur-sm" onClick={() => setIsWithdrawModalOpen(false)} />
+          <div className="relative bg-white rounded-[32px] shadow-2xl w-full max-w-md overflow-hidden border border-[#E5E7EB] animate-in fade-in zoom-in duration-200">
+            <div className="p-8">
+              <div className="w-16 h-16 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mb-6">
+                <AlertTriangle className="w-8 h-8" />
+              </div>
+              
+              <h3 className="text-2xl font-black text-[#111827] tracking-tight mb-3">Withdraw Application?</h3>
+              <p className="text-[#6B7280] text-sm font-bold leading-relaxed mb-8">
+                Are you sure you want to withdraw your application for <span className="text-[#111827]">{job.title}</span> at <span className="text-[#111827]">{job.businessUnit}</span>? 
+                <br /><br />
+                This action cannot be undone. The recruiter will be notified.
+              </p>
+              
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setIsWithdrawModalOpen(false)}
+                  className="flex-1 px-6 py-4 bg-[#F9FAFB] text-[#111827] text-xs font-black rounded-2xl hover:bg-[#F3F4F6] transition-all uppercase tracking-widest border border-[#E5E7EB]"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={() => {
+                    withdrawApplication(application.id);
+                    setIsWithdrawModalOpen(false);
+                    navigate(`/portal/${slug}/profile`);
+                  }}
+                  className="flex-1 px-6 py-4 bg-red-600 text-white text-xs font-black rounded-2xl hover:bg-red-700 transition-all uppercase tracking-widest shadow-lg shadow-red-200 shadow-sm active:scale-95"
+                >
+                  Yes, Withdraw
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </PortalLayout>
   );
 }

@@ -19,14 +19,13 @@ const formatExperience = (exp: string) => {
 
 export default function JobDetailPage() {
   const { jobId } = useParams();
-  const { jobs, currentUser } = useApp();
   const navigate = useNavigate();
+  const { jobs, currentUser, applications, toggleSaveJob } = useApp();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authTab, setAuthTab] = useState<'register' | 'signin'>('register');
   const [copied, setCopied] = useState(false);
   const [showAllSkills, setShowAllSkills] = useState(false);
   const [showReapplyModal, setShowReapplyModal] = useState(false);
-  const { applications } = useApp();
 
   // Find job from state, or fallback to first job
   const job = jobs.find(j => j.id === jobId) || jobs[0];
@@ -219,16 +218,23 @@ export default function JobDetailPage() {
                     </div>
                   )}
 
-                  <div className="flex gap-3">
+                  <div className="flex items-center gap-4">
                     <button 
                       onClick={(e) => {
                         if (!currentUser) {
                           handleSignInClick(e);
+                        } else {
+                          toggleSaveJob(job.id);
                         }
                       }}
-                      className="flex-1 flex items-center justify-center gap-2 py-3.5 border-2 border-[#E5E7EB] text-[#374151] text-xs font-black rounded-xl hover:bg-[#F9FAFB] hover:border-[#D1D5DB] transition-all uppercase tracking-widest group"
+                      className={`flex-1 flex items-center justify-center gap-2 py-3.5 border-2 rounded-xl text-xs font-black transition-all uppercase tracking-widest group ${
+                        currentUser?.savedJobIds?.includes(job.id)
+                          ? 'bg-[#3538CD]/5 border-[#3538CD] text-[#3538CD]'
+                          : 'border-[#E5E7EB] text-[#374151] hover:bg-[#F9FAFB] hover:border-[#D1D5DB]'
+                      }`}
                     >
-                      <Bookmark className="w-4 h-4 group-hover:fill-[#111827]" /> Save
+                      <Bookmark className={`w-4 h-4 ${currentUser?.savedJobIds?.includes(job.id) ? 'fill-[#3538CD]' : 'group-hover:fill-[#111827]'}`} /> 
+                      {currentUser?.savedJobIds?.includes(job.id) ? 'Saved' : 'Save'}
                     </button>
                     <div className="relative">
                       <button 

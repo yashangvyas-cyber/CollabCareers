@@ -12,6 +12,7 @@ const brandStatusStyles: Record<string, string> = {
   'Rejected': 'bg-gray-100 text-gray-400 border-gray-200',
   'Draft': 'bg-[#F4F5FA] text-[#3538CD] border border-[#3538CD]/20',
   'Submitted': 'bg-[#F4F5FA] text-[#3538CD] border-[#3538CD]/20',
+  'Withdrawn': 'bg-gray-50 text-gray-400 border-gray-200 opacity-60',
 };
 
 
@@ -25,12 +26,15 @@ export default function CandidateProfilePage() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'applications' | 'saved'>('applications');
 
-  // Populate mock saved jobs from actual jobs list
-  const savedJobs = [
-    { ...jobs[0], company: jobs[0]?.businessUnit || 'Yopmails', type: jobs[0]?.employmentType },
-    { ...jobs[2], company: jobs[2]?.businessUnit || 'Yopmails', type: jobs[2]?.employmentType },
-    { ...jobs[1], company: jobs[1]?.businessUnit || 'Yopmails', type: jobs[1]?.employmentType, status: 'Close' as const }
-  ].filter(j => !!j.id).slice(0, 3);
+  // Populate saved jobs from actual saved IDs
+  const savedJobs = jobs
+    .filter(j => currentUser?.savedJobIds?.includes(j.id))
+    .map(j => ({ 
+      ...j, 
+      company: j.businessUnit || 'Yopmails', 
+      type: j.employmentType,
+      jobClosed: j.status === 'Close'
+    }));
 
   // Get user applications
   const userApps = applications
@@ -238,7 +242,16 @@ export default function CandidateProfilePage() {
                     </div>
                     
                     <div className="shrink-0">
-                      {app.status === 'Draft' && !app.jobClosed ? (
+                      {app.status === 'Withdrawn' ? (
+                        <div className="text-right">
+                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 italic">
+                            Withdrawn by candidate
+                          </p>
+                          <p className="text-[11px] font-bold text-gray-500">
+                            On {formatDate(app.appliedAt)}
+                          </p>
+                        </div>
+                      ) : app.status === 'Draft' && !app.jobClosed ? (
                         <button 
                           onClick={() => navigate(`/portal/yopmails/apply/${app.jobId}`, { state: { continueDraft: true, draftJobTitle: app.title, lastSaved: app.appliedAt } })}
                           className="flex items-center gap-2 bg-[#3538CD] text-white px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-[#292bb0] transition-all shadow-lg shadow-[#3538CD]/20 active:scale-95 whitespace-nowrap"
@@ -248,9 +261,9 @@ export default function CandidateProfilePage() {
                       ) : (
                         <Link 
                           to={`/portal/yopmails/application/${app.id}`} 
-                          className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-[#E5E7EB] text-[#6B7280] hover:text-[#3538CD] hover:border-[#3538CD]/50 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95 whitespace-nowrap group/btn"
+                          className="flex items-center gap-2 text-[#3538CD] hover:text-[#292bb0] text-[11px] font-black uppercase tracking-widest transition-all group/link"
                         >
-                          View Details <ArrowIcon className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                          View Application <ArrowRight className="w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
                         </Link>
                       )}
                     </div>
