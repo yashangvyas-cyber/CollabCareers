@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CRMLayout from '../components/CRMLayout';
-import { GripVertical, Trash2, Plus, ChevronDown, Info, X, AlertCircle } from 'lucide-react';
+import { GripVertical, Trash2, Plus, ChevronDown, Info, X, AlertCircle, Copy, CheckCheck } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 import { CustomField, FieldType, Job } from '../store/types';
 
@@ -139,6 +139,24 @@ export default function AddJobPage() {
 
   const [publishWebsite, setPublishWebsite] = useState(false);
   const [publishCollabCareers, setPublishCollabCareers] = useState(true);
+  const [copiedLink, setCopiedLink] = useState(false);
+
+  // Helper to generate slug from title
+  const getSlug = (title: string) => {
+    return title.toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  };
+
+  const handleCopyLink = () => {
+    const slug = getSlug(jobData.title) || 'job-slug';
+    const url = `collabcareers.com/yopmails/job/${slug}`;
+    navigator.clipboard.writeText(url);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2000);
+  };
 
   // Dropdown Logic
   const [optionInputs, setOptionInputs] = useState<Record<string, string>>({});
@@ -520,6 +538,35 @@ export default function AddJobPage() {
             </div>
             <Toggle checked={publishCollabCareers} onChange={() => setPublishCollabCareers(!publishCollabCareers)} />
           </div>
+
+          {publishCollabCareers && (
+            <div className="mt-4 pt-4 border-t border-[#F3F4F6] animate-in fade-in slide-in-from-top-2 duration-300">
+               <div className="flex items-center gap-2">
+                  <div className="flex-1 relative">
+                    <input 
+                      type="text" 
+                      readOnly 
+                      value={`collabcareers.com/yopmails/job/${getSlug(jobData.title) || '[job-slug]'}`}
+                      className="w-full bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-3 py-2 text-xs font-medium text-[#6B7280] outline-none"
+                    />
+                  </div>
+                  <div className="relative">
+                    <button 
+                      onClick={handleCopyLink}
+                      className="flex items-center gap-2 px-4 py-2 bg-[#3538CD] text-white text-xs font-bold rounded-lg hover:bg-[#292bb0] transition-colors whitespace-nowrap"
+                    >
+                      {copiedLink ? <CheckCheck className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                      {copiedLink ? 'Copied' : 'Copy'}
+                    </button>
+                    {copiedLink && (
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-[#111827] text-white text-[10px] font-black uppercase tracking-widest rounded whitespace-nowrap shadow-xl z-10 animate-in fade-in slide-in-from-bottom-1 duration-200">
+                        Link copied!
+                      </div>
+                    )}
+                  </div>
+               </div>
+            </div>
+          )}
         </div>
       </FormSection>
     </CRMLayout>
