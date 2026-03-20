@@ -28,9 +28,9 @@ const formatExperience = (exp: string) => {
   return exp;
 };
 
-export default function CareerPage() {
+export default function CareerPage({ openAlumni = false }: { openAlumni?: boolean }) {
   const { jobs, currentUser } = useApp();
-  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(openAlumni);
   const [authTab, setAuthTab] = useState<'register' | 'signin'>('signin');
   const [selectedJob, setSelectedJob] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -285,10 +285,11 @@ export default function CareerPage() {
       <AuthModal 
         isOpen={showAuthModal} 
         onClose={() => setShowAuthModal(false)}
-        jobTitle={selectedJob?.title || 'Job'}
+        jobTitle={selectedJob?.title || 'Portal'} 
         businessUnit={selectedJob?.businessUnit || 'Yopmails'}
         jobId={selectedJob?.id || '1'}
         initialTab={authTab}
+        initialState={openAlumni ? 'alumni-verify' : 'auth'}
       />
     </PortalLayout>
   );

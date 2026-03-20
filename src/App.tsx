@@ -33,6 +33,7 @@ function App() {
         <Route path="/portal/:slug/confirmation/:jobId" element={<ConfirmationPage />} />
         <Route path="/portal/:slug/profile" element={<CandidateProfilePage />} />
         <Route path="/portal/:slug/application/:applicationId" element={<ViewApplicationPage />} />
+        <Route path="/portal/:slug/alumni-verify" element={<CareerPage openAlumni={true} />} />
         <Route path="/portal/:slug/alumni/apply/:jobId" element={<AlumniApplicationPage />} />
         {/* Flow 5: Stitching */}
         <Route path="/flow-map" element={<FlowMapPage />} />

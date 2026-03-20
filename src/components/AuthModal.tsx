@@ -12,15 +12,19 @@ interface AuthModalProps {
   businessUnit: string;
   jobId: string;
   initialTab?: 'register' | 'signin';
+  initialState?: 'auth' | 'alumni-verify' | 'alumni-success';
   redirectTo?: string;
 }
 
-export default function AuthModal({ isOpen, onClose, jobTitle, businessUnit, jobId, initialTab = 'register', redirectTo }: AuthModalProps) {
+export default function AuthModal({ 
+  isOpen, onClose, jobTitle, businessUnit, jobId, 
+  initialTab = 'register', initialState = 'auth', redirectTo 
+}: AuthModalProps) {
   const { registerCandidate, loginCandidate, setAlumniVerified } = useApp();
   const navigate = useNavigate();
   
   // States: 'auth' | 'alumni-verify' | 'alumni-success'
-  const [modalState, setModalState] = useState<'auth' | 'alumni-verify' | 'alumni-success'>('auth');
+  const [modalState, setModalState] = useState<'auth' | 'alumni-verify' | 'alumni-success'>(initialState);
   const [activeTab, setActiveTab] = useState<'register' | 'signin'>(initialTab);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -367,7 +371,7 @@ export default function AuthModal({ isOpen, onClose, jobTitle, businessUnit, job
                 </div>
                 <h3 className="text-xl font-black text-[#111827] mb-2">Alumni Verification</h3>
                 <p className="text-sm text-[#6B7280] font-medium leading-relaxed px-4">
-                  Enter your previous company email. Your application will be flagged with an Alumni badge so the recruiter knows your background.
+                  Enter the work email you used at this company to verify your alumni status.
                 </p>
               </div>
 
@@ -407,18 +411,6 @@ export default function AuthModal({ isOpen, onClose, jobTitle, businessUnit, job
                     <p className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-tight">
                       We'll check this against our employee records. Your data stays private.
                     </p>
-                  </div>
-                </div>
-
-                <div className="p-5 bg-[#3538CD]/5 border border-[#3538CD]/10 rounded-2xl mb-2">
-                  <div className="flex items-start gap-3">
-                    <ShieldCheck className="w-5 h-5 text-[#3538CD] mt-0.5 shrink-0" />
-                    <div>
-                      <h4 className="text-xs font-black text-[#111827] uppercase tracking-widest mb-1">How it works</h4>
-                      <p className="text-[11px] text-[#6B7280] font-bold leading-relaxed">
-                        If matched, your application gets priority status. No separate application needed.
-                      </p>
-                    </div>
                   </div>
                 </div>
 
