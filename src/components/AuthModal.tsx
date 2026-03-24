@@ -14,11 +14,13 @@ interface AuthModalProps {
   initialTab?: 'register' | 'signin';
   initialState?: 'auth' | 'alumni-verify' | 'alumni-success';
   redirectTo?: string;
+  onAuthSuccess?: () => void;
 }
 
 export default function AuthModal({ 
   isOpen, onClose, jobTitle, businessUnit, jobId, 
-  initialTab = 'register', initialState = 'auth', redirectTo 
+  initialTab = 'register', initialState = 'auth', redirectTo,
+  onAuthSuccess 
 }: AuthModalProps) {
   const { registerCandidate, loginCandidate, setAlumniVerified } = useApp();
   const navigate = useNavigate();
@@ -56,6 +58,7 @@ export default function AuthModal({
       phone: '',
       isAlumni: false,
     });
+    onAuthSuccess?.();
     onClose();
     navigate(redirectTo || `/portal/yopmails/apply/${jobId}`);
   };
@@ -63,6 +66,7 @@ export default function AuthModal({
   const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault();
     loginCandidate(formData.email);
+    onAuthSuccess?.();
     onClose();
     navigate(redirectTo || `/portal/yopmails/apply/${jobId}`);
   };
@@ -101,6 +105,7 @@ export default function AuthModal({
       phone: '',
       isAlumni: true,
     });
+    onAuthSuccess?.();
     onClose();
     navigate(redirectTo || `/portal/yopmails/apply/${jobId}`);
   };

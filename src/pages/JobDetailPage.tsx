@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import PortalLayout from '../components/PortalLayout';
 import AuthModal from '../components/AuthModal';
@@ -23,9 +23,12 @@ export default function JobDetailPage() {
   const { jobs, currentUser, applications, toggleSaveJob } = useApp();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authTab, setAuthTab] = useState<'register' | 'signin'>('register');
+  const [authRedirectTo, setAuthRedirectTo] = useState<string | undefined>(undefined);
   const [copied, setCopied] = useState(false);
   const [showAllSkills, setShowAllSkills] = useState(false);
   const [showReapplyModal, setShowReapplyModal] = useState(false);
+  const [saveToast, setSaveToast] = useState(false);
+  const pendingSaveJobId = useRef<string | null>(null);
 
   // Find job from state, or fallback to first job
   const job = jobs.find(j => j.id === jobId) || jobs[0];
@@ -44,9 +47,30 @@ export default function JobDetailPage() {
     );
   }
 
+  // Find existing application for THIS job (non-draft)
+  const existingApplication = applications.find(
+    a => a.candidateId === currentUser?.id && a.jobId === job.id && a.status !== 'Draft'
+  );
+
   const previousApp = applications
     .filter(a => a.candidateId === currentUser?.id && a.status === 'Submitted')
     .sort((a, b) => new Date(b.appliedAt).getTime() - new Date(a.appliedAt).getTime())[0];
+
+  // Auto-save after auth if a pending save was set
+  useEffect(() => {
+    if (currentUser && pendingSaveJobId.current) {
+      const jobIdToSave = pendingSaveJobId.current;
+      pendingSaveJobId.current = null;
+      if (!currentUser.savedJobIds?.includes(jobIdToSave)) {
+        toggleSaveJob(jobIdToSave);
+      }
+      setSaveToast(false);
+    }
+  }, [currentUser]);
+
+  const handleAuthSuccess = () => {
+    // If there's a pending save, the useEffect will handle it
+  };
 
   const handleApplyClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -58,6 +82,7 @@ export default function JobDetailPage() {
       }
     } else {
       setAuthTab('register');
+      setAuthRedirectTo(`/portal/yopmails/apply/${job.id}`);
       setShowAuthModal(true);
     }
   };
@@ -65,7 +90,21 @@ export default function JobDetailPage() {
   const handleSignInClick = (e: React.MouseEvent) => {
     e.preventDefault();
     setAuthTab('signin');
+    setAuthRedirectTo(undefined);
     setShowAuthModal(true);
+  };
+
+  const handleSaveClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!currentUser) {
+      pendingSaveJobId.current = job.id;
+      setSaveToast(true);
+      setAuthTab('signin');
+      setAuthRedirectTo(undefined);
+      setShowAuthModal(true);
+    } else {
+      toggleSaveJob(job.id);
+    }
   };
 
   const handleCopyLink = () => {
@@ -194,39 +233,47 @@ export default function JobDetailPage() {
 
                 <div className="p-8">
                   <div className="mb-8">
-                    <h3 className="text-xl font-black text-[#111827] mb-2">Apply for this role</h3>
+                    <h3 className="text-xl font-black text-[#111827] mb-2">
+                      {existingApplication ? 'You\'ve applied' : 'Apply for this role'}
+                    </h3>
                   </div>
 
-
-
-                  <button
-                    onClick={handleApplyClick}
-                    className="flex items-center justify-center gap-2 w-full py-4 bg-[#3538CD] text-white text-base font-bold rounded-xl hover:bg-[#292bb0] transition-all transform hover:translate-y-[-2px] shadow-lg shadow-[#3538CD]/20 mb-6"
-                  >
-                    Apply Now <ArrowRight className="w-5 h-5" />
-                  </button>
-
-                  {!currentUser && (
-                    <div className="text-center mb-6">
-                      <p className="text-[11px] text-[#9CA3AF] font-bold uppercase tracking-widest mb-3">Already applied here before?</p>
+                  {/* State-based CTA */}
+                  {existingApplication ? (
+                    /* Logged in + already applied */
+                    <button
+                      onClick={() => navigate(`/portal/yopmails/application/${existingApplication.id}`)}
+                      className="flex items-center justify-center gap-2 w-full py-4 bg-[#3538CD] text-white text-base font-bold rounded-xl hover:bg-[#292bb0] transition-all transform hover:translate-y-[-2px] shadow-lg shadow-[#3538CD]/20 mb-6"
+                    >
+                      View My Application <ArrowRight className="w-5 h-5" />
+                    </button>
+                  ) : (
+                    <>
                       <button
-                        onClick={handleSignInClick}
-                        className="text-[13px] font-black text-[#3538CD] hover:underline"
+                        onClick={handleApplyClick}
+                        className="flex items-center justify-center gap-2 w-full py-4 bg-[#3538CD] text-white text-base font-bold rounded-xl hover:bg-[#292bb0] transition-all transform hover:translate-y-[-2px] shadow-lg shadow-[#3538CD]/20 mb-6"
                       >
-                        Sign In
+                        Apply Now <ArrowRight className="w-5 h-5" />
                       </button>
-                    </div>
+
+                      {/* Guest-only: "Have an account? Sign In" */}
+                      {!currentUser && (
+                        <div className="text-center mb-6">
+                          <span className="text-[13px] font-medium text-[#6B7280]">Have an account? </span>
+                          <button
+                            onClick={handleSignInClick}
+                            className="text-[13px] font-black text-[#3538CD] hover:underline"
+                          >
+                            Sign In
+                          </button>
+                        </div>
+                      )}
+                    </>
                   )}
 
                   <div className="flex items-center gap-4">
                     <button 
-                      onClick={(e) => {
-                        if (!currentUser) {
-                          handleSignInClick(e);
-                        } else {
-                          toggleSaveJob(job.id);
-                        }
-                      }}
+                      onClick={handleSaveClick}
                       className={`flex-1 flex items-center justify-center gap-2 py-3.5 border-2 rounded-xl text-xs font-black transition-all uppercase tracking-widest group ${
                         currentUser?.savedJobIds?.includes(job.id)
                           ? 'bg-[#3538CD]/5 border-[#3538CD] text-[#3538CD]'
@@ -236,21 +283,33 @@ export default function JobDetailPage() {
                       <Bookmark className={`w-4 h-4 ${currentUser?.savedJobIds?.includes(job.id) ? 'fill-[#3538CD]' : 'group-hover:fill-[#111827]'}`} /> 
                       {currentUser?.savedJobIds?.includes(job.id) ? 'Saved' : 'Save'}
                     </button>
-                    <div className="relative">
+                    <div className="relative group/copy">
                       <button 
                         onClick={handleCopyLink}
                         className="p-3.5 border-2 border-[#E5E7EB] text-[#6B7280] rounded-xl hover:bg-[#F9FAFB] hover:border-[#D1D5DB] transition-all relative"
                       >
                         {copied ? <CheckCheck className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
                       </button>
-                      {copied && (
-                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-[10px] font-bold rounded whitespace-nowrap animate-in fade-in slide-in-from-bottom-1 duration-200">
-                          Link copied!
-                        </div>
-                      )}
+                      <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-[10px] font-bold rounded whitespace-nowrap transition-all duration-200 pointer-events-none ${
+                        copied
+                          ? 'opacity-100'
+                          : 'opacity-0 group-hover/copy:opacity-100'
+                      }`}>
+                        {copied ? 'Link copied!' : 'Copy job link'}
+                      </div>
                     </div>
                   </div>
                 </div>
+
+                {/* Save Toast */}
+                {saveToast && (
+                  <div className="px-8 pb-6">
+                    <div className="flex items-center gap-2 px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl animate-in fade-in slide-in-from-bottom-2 duration-200">
+                      <Bookmark className="w-4 h-4 text-amber-600 shrink-0" />
+                      <span className="text-[12px] font-bold text-amber-800">Sign in to save jobs</span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -316,11 +375,20 @@ export default function JobDetailPage() {
 
       <AuthModal 
         isOpen={showAuthModal} 
-        onClose={() => setShowAuthModal(false)}
+        onClose={() => {
+          setShowAuthModal(false);
+          // Clear save toast if modal closed without auth
+          if (!currentUser) {
+            pendingSaveJobId.current = null;
+            setSaveToast(false);
+          }
+        }}
         jobTitle={job.title}
         businessUnit={job.businessUnit}
         jobId={job.id}
         initialTab={authTab}
+        redirectTo={authRedirectTo}
+        onAuthSuccess={handleAuthSuccess}
       />
 
       <ReapplyModal 
