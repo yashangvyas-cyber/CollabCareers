@@ -14,6 +14,7 @@ import HandoffPage from './pages/HandoffPage';
 import PrototypeHome from './pages/PrototypeHome';
 import ViewApplicationPage from './pages/ViewApplicationPage';
 import OperationalConfigPage from './pages/OperationalConfigPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
         <Route path="/portal/:slug/application/:applicationId" element={<ViewApplicationPage />} />
         <Route path="/portal/:slug/alumni-verify" element={<CareerPage openAlumni={true} />} />
         <Route path="/portal/:slug/alumni/apply/:jobId" element={<AlumniApplicationPage />} />
+        <Route path="/portal/:slug/reset-password/:token" element={<ResetPasswordPage />} />
         {/* Flow 5: Stitching */}
         <Route path="/flow-map" element={<FlowMapPage />} />
         <Route path="/handoff" element={<HandoffPage />} />

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  X, Eye, EyeOff, Building2, ArrowRight, ShieldCheck, Mail, Lock, ArrowLeft
+  X, Eye, EyeOff, Building2, ArrowRight, ShieldCheck, Mail, Lock, ArrowLeft, KeyRound, CheckCircle2
 } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 
@@ -26,17 +26,20 @@ export default function AuthModal({
   const navigate = useNavigate();
   
   // States: 'auth' | 'alumni-verify' | 'alumni-success'
-  const [modalState, setModalState] = useState<'auth' | 'alumni-verify' | 'alumni-success'>(initialState);
+  const [modalState, setModalState] = useState<'auth' | 'alumni-verify' | 'alumni-success' | 'forgot-password' | 'email-sent'>(initialState);
   const [activeTab, setActiveTab] = useState<'register' | 'signin'>(initialTab);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [verifiedWorkEmail, setVerifiedWorkEmail] = useState('');
+  const [forgotEmail, setForgotEmail] = useState('');
 
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
+    signInEmail: '',
     password: '',
     confirmPassword: '',
     agreeToTerms: false
@@ -78,10 +81,12 @@ export default function AuthModal({
     setTimeout(() => {
       if (formData.email.toLowerCase().includes('yopmails')) {
         setAlumniVerified(true, formData.email);
+        setVerifiedWorkEmail(formData.email);
         setFormData(prev => ({
           ...prev,
           firstName: 'Alex',
-          lastName: 'Patel'
+          lastName: 'Patel',
+          signInEmail: ''
         }));
         setModalState('alumni-success');
       } else {
@@ -101,9 +106,10 @@ export default function AuthModal({
       id: Date.now().toString(),
       firstName: formData.firstName,
       lastName: formData.lastName,
-      email: formData.email,
+      email: formData.signInEmail,
       phone: '',
       isAlumni: true,
+      alumniEmail: verifiedWorkEmail,
     });
     onAuthSuccess?.();
     onClose();
@@ -319,7 +325,7 @@ export default function AuthModal({
                   <div className="space-y-1.5">
                     <div className="flex justify-between">
                       <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Password *</label>
-                      <button type="button" className="text-[10px] font-black text-[#3538CD] uppercase hover:underline">Forgot password?</button>
+                      <button type="button" onClick={() => { setForgotEmail(formData.email); setModalState('forgot-password'); }} className="text-[10px] font-black text-[#3538CD] uppercase hover:underline">Forgot password?</button>
                     </div>
                     <div className="relative">
                       <input
@@ -432,7 +438,7 @@ export default function AuthModal({
                 </button>
               </form>
             </div>
-          ) : (
+          ) : modalState === 'alumni-success' ? (
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
                <button 
                 onClick={() => setModalState('alumni-verify')}
@@ -463,13 +469,31 @@ export default function AuthModal({
               </div>
 
               <form onSubmit={handleAlumniFinalize} className="space-y-4">
+                 {/* Verified Work Email — read-only */}
                  <div className="space-y-1.5 text-left">
-                    <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Email Address</label>
+                    <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1 flex items-center gap-1.5">
+                      Verified Work Email
+                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-[#10b981]/10 text-[#10b981] rounded-md text-[8px] font-black uppercase tracking-widest">
+                        ✅ Verified
+                      </span>
+                    </label>
+                    <input
+                      type="email"
+                      value={verifiedWorkEmail}
+                      readOnly
+                      className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold bg-[#F3F4F6] text-[#6B7280] cursor-not-allowed"
+                    />
+                 </div>
+
+                 {/* New Email Address — editable */}
+                 <div className="space-y-1.5 text-left">
+                    <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">New Email Address *</label>
                     <input
                       type="email"
                       required
-                      value={formData.email}
-                      onChange={e => setFormData({...formData, email: e.target.value})}
+                      value={formData.signInEmail}
+                      onChange={e => setFormData({...formData, signInEmail: e.target.value})}
+                      placeholder="your.email@example.com"
                       className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
                     />
                     <p className="text-[10px] font-bold text-[#9CA3AF] ml-1 mt-1">This will be used to sign in to your CollabCareers account</p>
@@ -538,7 +562,7 @@ export default function AuthModal({
                     </div>
                   </div>
 
-                  <button
+                   <button
                     type="submit"
                     className="w-full py-4 bg-[#3538CD] text-white text-sm font-black rounded-xl hover:bg-[#292bb0] transition-all shadow-lg shadow-[#3538CD]/20 uppercase tracking-widest flex items-center justify-center gap-2 mt-4"
                   >
@@ -546,7 +570,90 @@ export default function AuthModal({
                   </button>
               </form>
             </div>
-          )}
+          ) : modalState === 'forgot-password' ? (
+            /* Screen 1 — Forgot Password Request */
+            <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+              <button
+                onClick={() => { setModalState('auth'); setActiveTab('signin'); }}
+                className="flex items-center gap-1.5 text-[10px] font-black text-[#6B7280] uppercase tracking-widest hover:text-[#3538CD] mb-8 transition-colors"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" /> Back to Sign In
+              </button>
+
+              <div className="text-center mb-8">
+                <div className="w-16 h-16 rounded-2xl bg-[#3538CD]/5 text-[#3538CD] flex items-center justify-center mx-auto mb-4">
+                  <KeyRound className="w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-black text-[#111827] mb-2">Forgot Password?</h3>
+                <p className="text-sm text-[#6B7280] font-medium leading-relaxed px-4">
+                  Enter your registered email address and we'll send you a link to reset your password.
+                </p>
+              </div>
+
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setModalState('email-sent');
+                }}
+                className="space-y-6"
+              >
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1 flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5" /> Email Address *
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={forgotEmail}
+                    onChange={e => setForgotEmail(e.target.value)}
+                    placeholder="your.email@example.com"
+                    className="w-full border border-[#E5E7EB] rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] transition-all"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-4 bg-[#3538CD] text-white text-sm font-black rounded-xl hover:bg-[#292bb0] transition-all shadow-lg shadow-[#3538CD]/20 uppercase tracking-widest flex items-center justify-center gap-2"
+                >
+                  Send Reset Link <ArrowRight className="w-4 h-4" />
+                </button>
+              </form>
+            </div>
+          ) : modalState === 'email-sent' ? (
+            /* Screen 2 — Email Sent Confirmation */
+            <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+              <div className="text-center mb-8">
+                <div className="w-16 h-16 rounded-full bg-[#10b981]/10 text-[#10b981] flex items-center justify-center mx-auto mb-4 border border-[#10b981]/20">
+                  <CheckCircle2 className="w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-black text-[#111827] mb-2">Check your inbox</h3>
+                <p className="text-sm text-[#6B7280] font-medium leading-relaxed px-2">
+                  We've sent a password reset link to{' '}
+                  <span className="font-black text-[#111827]">{forgotEmail}</span>.
+                  <br />The link will expire in 24 hours.
+                </p>
+              </div>
+
+              <div className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl p-4 text-center mb-6">
+                <p className="text-[12px] font-bold text-[#6B7280]">
+                  Didn't receive it? Check your spam folder or{' '}
+                  <button
+                    onClick={() => setModalState('forgot-password')}
+                    className="text-[#3538CD] font-black hover:underline"
+                  >
+                    Resend Email
+                  </button>
+                </p>
+              </div>
+
+              <button
+                onClick={() => { setModalState('auth'); setActiveTab('signin'); }}
+                className="w-full py-4 bg-[#3538CD] text-white text-sm font-black rounded-xl hover:bg-[#292bb0] transition-all shadow-lg shadow-[#3538CD]/20 uppercase tracking-widest flex items-center justify-center gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" /> Back to Sign In
+              </button>
+            </div>
+          ) : null}
         </div>
       </div>
     </div>
