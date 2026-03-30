@@ -346,11 +346,6 @@ export default function ApplicationFormPage() {
               </div>
             </div>
             
-            <div className="mt-10 flex justify-end px-4">
-               <button onClick={() => setStep(1)} className="text-[#3538CD] font-black text-sm hover:underline flex items-center gap-1">
-                 Skip, fill manually →
-               </button>
-            </div>
           </div>
         )}
 
