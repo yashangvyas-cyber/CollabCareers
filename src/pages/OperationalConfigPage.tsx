@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import CRMLayout from '../components/CRMLayout';
 import { ChevronRight, ChevronUp, Copy, CheckCheck, Globe, X } from 'lucide-react';
 
@@ -8,12 +9,14 @@ const moduleItems = [
   { name: 'Interview Rounds', count: 11 },
   { name: 'Sources', count: 14 },
   { name: 'Job Types', count: 6 },
-  { name: 'Operational Config', count: null, active: true },
+  { name: 'Operational Config', count: null, active: true, path: '/crm/config' },
+  { name: 'Career Portal', count: null, path: '/crm/career-portal' },
 ];
 
 const sourceTags = ['Project', 'Business...', 'Admini...', 'HR', 'Adhoc', 'Admin &...', 'Admini...'];
 
 export default function OperationalConfigPage() {
+  const navigate = useNavigate();
   const [portalEnabled, setPortalEnabled] = useState(true);
   const [copied, setCopied] = useState(false);
   const [sourceOpen, setSourceOpen] = useState(true);
@@ -45,6 +48,7 @@ export default function OperationalConfigPage() {
               {moduleItems.map((item) => (
                 <button
                   key={item.name}
+                  onClick={() => item.path && navigate(item.path)}
                   className={`w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors ${
                     item.active
                       ? 'bg-[#3538CD]/5 text-[#3538CD] font-semibold border-l-2 border-[#3538CD]'

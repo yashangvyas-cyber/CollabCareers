@@ -15,6 +15,7 @@ import PrototypeHome from './pages/PrototypeHome';
 import ViewApplicationPage from './pages/ViewApplicationPage';
 import OperationalConfigPage from './pages/OperationalConfigPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import CareerPortalPage from './pages/CareerPortalPage';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
         <Route path="/crm/candidates/:candidateId" element={<CandidateDetailPage />} />
         <Route path="/crm/candidates" element={<CandidateListingPage />} />
         <Route path="/crm/config" element={<OperationalConfigPage />} />
+        <Route path="/crm/career-portal" element={<CareerPortalPage />} />
         {/* Unified Career Portal (Flows 2+3+4) */}
         <Route path="/portal/:slug" element={<CareerPage />} />
         <Route path="/portal/:slug/job/:jobId" element={<JobDetailPage />} />
