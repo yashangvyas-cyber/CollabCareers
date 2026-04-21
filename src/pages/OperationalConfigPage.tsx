@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CRMLayout from '../components/CRMLayout';
-import { ChevronRight, ChevronUp, Copy, CheckCheck, Globe, X } from 'lucide-react';
+import { ChevronRight, ChevronUp, X } from 'lucide-react';
 
 const moduleItems = [
   { name: 'Job Templates', count: 5 },
@@ -17,15 +17,7 @@ const sourceTags = ['Project', 'Business...', 'Admini...', 'HR', 'Adhoc', 'Admin
 
 export default function OperationalConfigPage() {
   const navigate = useNavigate();
-  const [portalEnabled, setPortalEnabled] = useState(true);
-  const [copied, setCopied] = useState(false);
   const [sourceOpen, setSourceOpen] = useState(true);
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText('collabcareers.com/yopmails');
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   return (
     <CRMLayout
@@ -128,75 +120,6 @@ export default function OperationalConfigPage() {
             )}
           </div>
 
-          {/* Section 2: CollabCareers Portal */}
-          <div className="bg-white border border-[#E5E7EB] rounded-xl shadow-sm">
-            <div className="px-6 py-5">
-              <div className="flex items-start justify-between">
-                <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-[#3538CD]/10 flex items-center justify-center shrink-0 mt-0.5">
-                    <Globe className="w-4.5 h-4.5 text-[#3538CD]" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-semibold text-[#1A1A2E]">CollabCareers Portal</h3>
-                    <p className="text-xs text-[#6B7280] mt-0.5 leading-relaxed">
-                      Allow candidates to discover and apply for jobs via your CollabCareers portal
-                    </p>
-                  </div>
-                </div>
-
-                {/* Toggle */}
-                <button
-                  onClick={() => setPortalEnabled(!portalEnabled)}
-                  className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${
-                    portalEnabled ? 'bg-[#3538CD]' : 'bg-[#D1D5DB]'
-                  }`}
-                >
-                  <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform ${
-                    portalEnabled ? 'left-[22px]' : 'left-0.5'
-                  }`} />
-                </button>
-              </div>
-
-              {/* Conditional Content */}
-              {portalEnabled ? (
-                <div className="mt-5 pt-5 border-t border-[#F3F4F6]">
-                  <label className="text-xs font-medium text-[#374151] mb-2 block">
-                    Your CollabCareers Portal URL
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 relative">
-                      <input
-                        type="text"
-                        readOnly
-                        value="collabcareers.com/yopmails"
-                        className="w-full border border-[#E5E7EB] rounded-lg px-4 py-2.5 text-sm font-medium text-[#6B7280] bg-[#F9FAFB] cursor-default focus:outline-none"
-                      />
-                    </div>
-                    <button
-                      onClick={handleCopy}
-                      className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium text-[#3538CD] border border-[#3538CD]/30 rounded-lg hover:bg-[#3538CD]/5 transition-colors"
-                    >
-                      {copied ? (
-                        <>
-                          <CheckCheck className="w-4 h-4" />
-                          Copied!
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-4 h-4" />
-                          Copy
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <p className="mt-4 text-xs text-[#9CA3AF]">
-                  Enable the portal to get your unique CollabCareers URL.
-                </p>
-              )}
-            </div>
-          </div>
         </div>
       </div>
     </CRMLayout>

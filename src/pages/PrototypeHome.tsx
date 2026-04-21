@@ -10,7 +10,7 @@ const flows = [
       { label: 'Create New Job', path: '/crm/add-job', badge: 'Step 1' },
       { label: 'Candidate Listing', path: '/crm/candidates', badge: 'Pipeline' },
       { label: 'Candidate Detail', path: '/crm/candidates/1', badge: 'Review' },
-      { label: 'Operational Config', path: '/crm/config', badge: 'Settings' },
+      { label: 'Portal Settings', path: '/crm/career-portal', badge: 'Config' },
     ],
     icon: <Monitor className="w-6 h-6" />,
     gradient: 'from-[#3538CD] to-[#1e1b4b]',
