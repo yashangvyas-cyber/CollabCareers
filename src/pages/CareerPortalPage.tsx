@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import CRMLayout from '../components/CRMLayout';
 import {
   Code2, Copy, CheckCheck, ExternalLink,
-  ChevronDown, ChevronUp, Globe, ChevronRight,
+  ChevronDown, ChevronUp, ChevronRight,
 } from 'lucide-react';
 
 const moduleItems = [
@@ -95,7 +95,7 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function CareerPortalPage() {
   const navigate = useNavigate();
-  const slug = 'my-inventory';
+  const slug = 'mindinventory';
   const portalBase = 'careers.collabcrm.com';
 
   const [portalEnabled, setPortalEnabled] = useState(true);
@@ -227,17 +227,6 @@ export default function CareerPortalPage() {
           )}
         </Section>
 
-        {/* ── Branded globe icon section placeholder (Global Appearance) ─── */}
-        <Section
-          title="Branding & Appearance"
-          description="Customise the look of your public career portal"
-          icon={Globe}
-          defaultOpen={false}
-        >
-          <p className="text-sm text-[#9CA3AF]">
-            Branding settings coming soon — logo, colours, and banner images.
-          </p>
-        </Section>
 
           {/* More sections can be added here following the same <Section> pattern */}
 
