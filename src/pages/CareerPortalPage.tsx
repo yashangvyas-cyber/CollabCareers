@@ -4,6 +4,7 @@ import CRMLayout from '../components/CRMLayout';
 import {
   Code2, Copy, CheckCheck, ExternalLink,
   ChevronDown, ChevronUp, ChevronRight,
+  SlidersHorizontal, Search, MapPin, Briefcase, TrendingUp,
 } from 'lucide-react';
 
 const moduleItems = [
@@ -100,6 +101,11 @@ export default function CareerPortalPage() {
 
   const [portalEnabled, setPortalEnabled] = useState(true);
   const [copied, setCopied] = useState(false);
+
+  // Job filter toggles
+  const [filterLocation, setFilterLocation] = useState(true);
+  const [filterEmploymentType, setFilterEmploymentType] = useState(true);
+  const [filterExperienceLevel, setFilterExperienceLevel] = useState(false);
 
   const fullUrl = `${portalBase}/${slug}`;
 
@@ -228,7 +234,89 @@ export default function CareerPortalPage() {
         </Section>
 
 
-          {/* More sections can be added here following the same <Section> pattern */}
+          {/* ── Section 2: Job Filters ────────────────────────────────────── */}
+          <Section
+            title="Job Filters"
+            description="Choose which filters appear on your career landing page"
+            icon={SlidersHorizontal}
+            iconBg="bg-violet-50"
+            iconColor="text-violet-600"
+            defaultOpen={true}
+          >
+            <div className="flex flex-col divide-y divide-[#F3F4F6]">
+
+              {/* Keyword Search — always on */}
+              <div className="flex items-center justify-between py-3 first:pt-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-[#3538CD]/10 flex items-center justify-center shrink-0">
+                    <Search className="w-4 h-4 text-[#3538CD]" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-[#1A1A2E]">Keyword search</p>
+                    <p className="text-xs text-[#6B7280] mt-0.5">Always visible — cannot be turned off</p>
+                  </div>
+                </div>
+                <div title="This filter cannot be disabled" className="cursor-not-allowed opacity-50">
+                  <Toggle checked={true} onChange={() => {}} />
+                </div>
+              </div>
+
+              {/* Location filter */}
+              <div className="flex items-center justify-between py-3">
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                    filterLocation ? 'bg-[#3538CD]/10' : 'bg-[#F3F4F6]'
+                  }`}>
+                    <MapPin className={`w-4 h-4 transition-colors ${
+                      filterLocation ? 'text-[#3538CD]' : 'text-[#9CA3AF]'
+                    }`} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-[#1A1A2E]">Location filter</p>
+                    <p className="text-xs text-[#6B7280] mt-0.5">Lets candidates filter jobs by city or region</p>
+                  </div>
+                </div>
+                <Toggle checked={filterLocation} onChange={() => setFilterLocation(v => !v)} />
+              </div>
+
+              {/* Employment Type filter */}
+              <div className="flex items-center justify-between py-3">
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                    filterEmploymentType ? 'bg-[#3538CD]/10' : 'bg-[#F3F4F6]'
+                  }`}>
+                    <Briefcase className={`w-4 h-4 transition-colors ${
+                      filterEmploymentType ? 'text-[#3538CD]' : 'text-[#9CA3AF]'
+                    }`} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-[#1A1A2E]">Employment type</p>
+                    <p className="text-xs text-[#6B7280] mt-0.5">Full-time, part-time, contract, internship, etc.</p>
+                  </div>
+                </div>
+                <Toggle checked={filterEmploymentType} onChange={() => setFilterEmploymentType(v => !v)} />
+              </div>
+
+              {/* Experience Level filter */}
+              <div className="flex items-center justify-between py-3">
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                    filterExperienceLevel ? 'bg-[#3538CD]/10' : 'bg-[#F3F4F6]'
+                  }`}>
+                    <TrendingUp className={`w-4 h-4 transition-colors ${
+                      filterExperienceLevel ? 'text-[#3538CD]' : 'text-[#9CA3AF]'
+                    }`} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-[#1A1A2E]">Experience level</p>
+                    <p className="text-xs text-[#6B7280] mt-0.5">Entry, mid, senior, lead, etc.</p>
+                  </div>
+                </div>
+                <Toggle checked={filterExperienceLevel} onChange={() => setFilterExperienceLevel(v => !v)} />
+              </div>
+
+            </div>
+          </Section>
 
           </div> {/* end flex-col gap-4 */}
         </div> {/* end right column */}
