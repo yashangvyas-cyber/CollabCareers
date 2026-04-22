@@ -4,7 +4,7 @@ import CRMLayout from '../components/CRMLayout';
 import {
   Code2, Copy, CheckCheck, ExternalLink,
   ChevronDown, ChevronUp, ChevronRight,
-  SlidersHorizontal, Search, MapPin, Briefcase, TrendingUp,
+  SlidersHorizontal, Search, MapPin, Briefcase, TrendingUp, Wifi,
 } from 'lucide-react';
 
 const moduleItems = [
@@ -106,6 +106,7 @@ export default function CareerPortalPage() {
   const [filterLocation, setFilterLocation] = useState(true);
   const [filterEmploymentType, setFilterEmploymentType] = useState(true);
   const [filterExperienceLevel, setFilterExperienceLevel] = useState(false);
+  const [filterWorkMode, setFilterWorkMode] = useState(true);
 
   const fullUrl = `${portalBase}/${slug}`;
 
@@ -313,6 +314,24 @@ export default function CareerPortalPage() {
                   </div>
                 </div>
                 <Toggle checked={filterExperienceLevel} onChange={() => setFilterExperienceLevel(v => !v)} />
+              </div>
+
+              {/* Work Mode filter */}
+              <div className="flex items-center justify-between py-3">
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                    filterWorkMode ? 'bg-[#3538CD]/10' : 'bg-[#F3F4F6]'
+                  }`}>
+                    <Wifi className={`w-4 h-4 transition-colors ${
+                      filterWorkMode ? 'text-[#3538CD]' : 'text-[#9CA3AF]'
+                    }`} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-[#1A1A2E]">Job type</p>
+                    <p className="text-xs text-[#6B7280] mt-0.5">Remote, hybrid, on-site, etc.</p>
+                  </div>
+                </div>
+                <Toggle checked={filterWorkMode} onChange={() => setFilterWorkMode(v => !v)} />
               </div>
 
             </div>
