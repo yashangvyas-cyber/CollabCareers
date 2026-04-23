@@ -30,6 +30,7 @@ export default function AuthModal({
   const [modalState, setModalState] = useState<'auth' | 'alumni-verify' | 'alumni-success' | 'forgot-password' | 'email-sent'>(initialState);
   const [activeTab, setActiveTab] = useState<'register' | 'signin'>(initialTab);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [verifiedWorkEmail, setVerifiedWorkEmail] = useState('');
@@ -41,6 +42,7 @@ export default function AuthModal({
     email: '',
     signInEmail: '',
     password: '',
+    confirmPassword: '',
     agreeToTerms: false
   });
   const [profileVisibility, setProfileVisibility] = useState<'visible' | 'private'>('visible');
@@ -50,6 +52,11 @@ export default function AuthModal({
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+    setError(null);
     registerCandidate({
       id: Date.now().toString(),
       firstName: formData.firstName,
@@ -195,6 +202,7 @@ export default function AuthModal({
                         lastName: 'Patel',
                         email: 'alex.patel@example.com',
                         password: 'P@ssw0rd!',
+                        confirmPassword: 'P@ssw0rd!',
                         agreeToTerms: true
                       })}
                       className="px-2.5 py-1 bg-[#3538CD]/5 border border-[#3538CD]/10 rounded-lg text-[9px] font-black text-[#3538CD] uppercase tracking-widest hover:bg-[#3538CD] hover:text-white transition-all shadow-sm"
@@ -268,6 +276,35 @@ export default function AuthModal({
                         </div>
                       );
                     })()}
+                  </div>
+
+                  {/* Confirm Password */}
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Re-enter Password *</label>
+                    <div className="relative">
+                      <input
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        required
+                        placeholder=""
+                        value={formData.confirmPassword}
+                        onChange={e => setFormData({...formData, confirmPassword: e.target.value})}
+                        className={`w-full border rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] pr-12 ${
+                          formData.confirmPassword.length > 0 && formData.confirmPassword !== formData.password
+                            ? 'border-red-300 focus:ring-red-100 focus:border-red-400'
+                            : 'border-[#E5E7EB]'
+                        }`}
+                      />
+                      <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#3538CD]">
+                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    {formData.confirmPassword.length > 0 && formData.confirmPassword !== formData.password && (
+                      <p className="text-[10px] text-red-500 font-semibold ml-1">Passwords don't match</p>
+                    )}
+                    {formData.confirmPassword.length > 0 && formData.confirmPassword === formData.password && (
+                      <p className="text-[10px] text-green-600 font-semibold ml-1">✓ Passwords match</p>
+                    )}
                   </div>
 
                   {/* Profile Visibility */}
