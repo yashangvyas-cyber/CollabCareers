@@ -6,6 +6,7 @@ interface AppContextType extends AppState {
   registerCandidate: (candidate: Candidate) => void;
   loginCandidate: (email: string) => void;
   logoutCandidate: () => void;
+  updateCurrentUser: (updates: Partial<Candidate>) => void;
   submitApplication: (application: Application) => void;
   saveDraft: (application: Application) => void;
   setAlumniVerified: (verified: boolean, email: string | null) => void;
@@ -50,7 +51,7 @@ const initialState: AppState = {
       publishOnCollabCareers: true,
       customFields: [{ id: '2', label: 'Behance link', type: 'Text', required: true }],
       evaluationCriteria: ['Design systems mastery'],
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
       description: 'Join our design team to build consistent user experiences.'
     },
     {
@@ -68,7 +69,7 @@ const initialState: AppState = {
       publishOnCollabCareers: true,
       customFields: [],
       evaluationCriteria: ['App store delivery experience'],
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(Date.now() - 86400000 * 1).toISOString(),
       description: 'Build cross-platform mobile apps using Flutter.'
     },
     {
@@ -86,7 +87,7 @@ const initialState: AppState = {
       publishOnCollabCareers: true,
       customFields: [],
       evaluationCriteria: ['Agile certification'],
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
       description: 'Lead high-impact projects from ideation to delivery.'
     },
     {
@@ -104,7 +105,7 @@ const initialState: AppState = {
       publishOnCollabCareers: true,
       customFields: [],
       evaluationCriteria: ['Analytical thinking'],
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
       description: 'Bridging the gap between business needs and technical solutions.'
     },
     {
@@ -122,7 +123,7 @@ const initialState: AppState = {
       publishOnCollabCareers: true,
       customFields: [],
       evaluationCriteria: ['System architecture skills'],
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(Date.now() - 86400000 * 7).toISOString(),
       description: 'Build scalable backend services for our applications.'
     },
     {
@@ -140,7 +141,7 @@ const initialState: AppState = {
       publishOnCollabCareers: true,
       customFields: [],
       evaluationCriteria: ['Infrastructure automation experience'],
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(Date.now() - 86400000 * 12).toISOString(),
       description: 'Cloud infrastructure management and CI/CD pipelines.'
     },
     {
@@ -158,7 +159,7 @@ const initialState: AppState = {
       publishOnCollabCareers: true,
       customFields: [],
       evaluationCriteria: ['Bug detection skills'],
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(Date.now() - 86400000 * 15).toISOString(),
       description: 'Ensure software quality through automated and manual testing.'
     },
     {
@@ -176,7 +177,7 @@ const initialState: AppState = {
       publishOnCollabCareers: true,
       customFields: [],
       evaluationCriteria: ['Case studies quality'],
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(Date.now() - 86400000 * 4).toISOString(),
       description: 'Drive product vision through design.'
     },
     {
@@ -194,7 +195,7 @@ const initialState: AppState = {
       publishOnCollabCareers: true,
       customFields: [],
       evaluationCriteria: ['Data manipulation proficiency'],
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(Date.now() - 86400000 * 6).toISOString(),
       description: 'Translate raw data into actionable insights.'
     },
     {
@@ -212,7 +213,7 @@ const initialState: AppState = {
       publishOnCollabCareers: true,
       customFields: [],
       evaluationCriteria: ['iOS application lifecycle mastery'],
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
       description: 'Build native iOS applications with Swift.'
     },
     {
@@ -230,7 +231,7 @@ const initialState: AppState = {
       publishOnCollabCareers: true,
       customFields: [],
       evaluationCriteria: ['Android architecture components knowledge'],
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(Date.now() - 86400000 * 9).toISOString(),
       description: 'Build robust native Android apps.'
     }
   ],
@@ -442,6 +443,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  const updateCurrentUser = (updates: Partial<Candidate>) => {
+    if (!state.currentUser) return;
+    setState(prev => {
+      const updated = { ...prev.currentUser!, ...updates };
+      return {
+        ...prev,
+        currentUser: updated,
+        candidates: prev.candidates.map(c => c.id === updated.id ? updated : c),
+      };
+    });
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -450,6 +463,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         registerCandidate,
         loginCandidate,
         logoutCandidate,
+        updateCurrentUser,
         submitApplication,
         saveDraft,
         setAlumniVerified,

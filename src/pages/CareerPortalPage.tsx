@@ -4,7 +4,7 @@ import CRMLayout from '../components/CRMLayout';
 import {
   Code2, Copy, CheckCheck, ExternalLink,
   ChevronDown, ChevronUp, ChevronRight,
-  SlidersHorizontal, Search, MapPin, Briefcase, TrendingUp, Wifi,
+  SlidersHorizontal, Search, MapPin, Briefcase, TrendingUp, Wifi, Link2,
 } from 'lucide-react';
 
 const moduleItems = [
@@ -101,6 +101,17 @@ export default function CareerPortalPage() {
 
   const [portalEnabled, setPortalEnabled] = useState(true);
   const [copied, setCopied] = useState(false);
+
+  // Footer links state
+  const [footerLinks, setFooterLinks] = useState<Record<string, string>>({
+    linkedin: '',
+    twitter: '',
+    instagram: '',
+    facebook: '',
+    youtube: '',
+    privacyPolicy: '',
+    termsConditions: '',
+  });
 
   // Job filter toggles
   const [filterLocation, setFilterLocation] = useState(true);
@@ -334,6 +345,72 @@ export default function CareerPortalPage() {
                 <Toggle checked={filterWorkMode} onChange={() => setFilterWorkMode(v => !v)} />
               </div>
 
+            </div>
+          </Section>
+
+          {/* ── Section 3: Footer Customization ──────────────────────────── */}
+          <Section
+            title="Footer Customization"
+            description="Configure links shown in your career portal footer"
+            icon={Link2}
+            iconBg="bg-emerald-50"
+            iconColor="text-emerald-600"
+            defaultOpen={false}
+          >
+            <div className="space-y-6">
+              {/* Social Media */}
+              <div>
+                <h4 className="text-xs font-semibold text-[#374151] uppercase tracking-wider mb-3">Social Media Links</h4>
+                <div className="space-y-3">
+                  {([
+                    { platform: 'LinkedIn', key: 'linkedin', placeholder: 'https://linkedin.com/company/your-company' },
+                    { platform: 'Twitter / X', key: 'twitter', placeholder: 'https://twitter.com/yourhandle' },
+                    { platform: 'Instagram', key: 'instagram', placeholder: 'https://instagram.com/yourhandle' },
+                    { platform: 'Facebook', key: 'facebook', placeholder: 'https://facebook.com/yourpage' },
+                    { platform: 'YouTube', key: 'youtube', placeholder: 'https://youtube.com/@yourchannel' },
+                  ] as { platform: string; key: string; placeholder: string }[]).map(({ platform, key, placeholder }) => (
+                    <div key={key} className="flex items-center gap-4">
+                      <span className="w-28 shrink-0 text-xs font-medium text-[#6B7280]">{platform}</span>
+                      <input
+                        type="url"
+                        placeholder={placeholder}
+                        value={footerLinks[key] || ''}
+                        onChange={(e) => setFooterLinks({ ...footerLinks, [key]: e.target.value })}
+                        className="flex-1 border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3538CD]/20 focus:border-[#3538CD] bg-white placeholder:text-[#D1D5DB] text-[#111827]"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Legal Links */}
+              <div className="pt-4 border-t border-[#F3F4F6]">
+                <h4 className="text-xs font-semibold text-[#374151] uppercase tracking-wider mb-3">Legal & Policy Links</h4>
+                <div className="space-y-3">
+                  {([
+                    { label: 'Privacy Policy URL', key: 'privacyPolicy', placeholder: 'https://yoursite.com/privacy-policy' },
+                    { label: 'Terms & Conditions URL', key: 'termsConditions', placeholder: 'https://yoursite.com/terms' },
+                  ] as { label: string; key: string; placeholder: string }[]).map(({ label, key, placeholder }) => (
+                    <div key={key} className="flex items-center gap-4">
+                      <span className="w-28 shrink-0 text-xs font-medium text-[#6B7280]">{label}</span>
+                      <input
+                        type="url"
+                        placeholder={placeholder}
+                        value={footerLinks[key] || ''}
+                        onChange={(e) => setFooterLinks({ ...footerLinks, [key]: e.target.value })}
+                        className="flex-1 border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3538CD]/20 focus:border-[#3538CD] bg-white placeholder:text-[#D1D5DB] text-[#111827]"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Preview hint */}
+              <div className="pt-4 border-t border-[#F3F4F6]">
+                <p className="text-xs text-[#9CA3AF] leading-relaxed">
+                  Links filled in above will appear in the footer of your career portal. Leave a field blank to hide that link.
+                </p>
+              </div>
             </div>
           </Section>
 

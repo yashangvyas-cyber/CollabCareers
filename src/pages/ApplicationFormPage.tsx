@@ -816,7 +816,7 @@ export default function ApplicationFormPage() {
 
         {/* Global Footer */}
         <div className="py-10 border-t border-[#E5E7EB] mt-auto flex justify-between items-center text-[10px] font-black text-[#9CA3AF] uppercase tracking-[0.2em] px-2">
-           <div>Powered by CollabCareers</div>
+           <div>Powered by CollabCRM</div>
            <div className="flex gap-10">
               <button className="hover:text-[#3538CD] transition-colors">Privacy Policy</button>
               <span className="cursor-default">© {new Date().getFullYear()}</span>

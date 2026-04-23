@@ -48,6 +48,8 @@ export interface Candidate {
   isAlumni: boolean;
   alumniEmail?: string;
   savedJobIds?: string[];
+  profileVisibility?: 'visible' | 'private';
+  allowRecruiterContact?: boolean;
 }
 
 export interface Application {

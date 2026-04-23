@@ -3,6 +3,7 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import PortalLayout from '../components/PortalLayout';
 import { Eye, EyeOff, Zap, ArrowRight } from 'lucide-react';
 import { useApp } from '../store/AppContext';
+import CollabCRMIcon from '../components/CollabCRMIcon';
 
 export default function RegisterPage() {
   const { registerCandidate, loginCandidate } = useApp();
@@ -57,6 +58,23 @@ export default function RegisterPage() {
         {/* Centered Form Card */}
         <div className="w-full max-w-[480px]">
           <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-2xl overflow-hidden">
+
+            {/* Org + CollabCRM logos together */}
+            <div className="px-8 pt-7 pb-5 flex items-center gap-3 border-b border-[#F3F4F6]">
+              {/* Org logo */}
+              <div className="w-12 h-12 rounded-2xl bg-[#3538CD] flex items-center justify-center text-white text-xl font-black shadow-md shrink-0">
+                Y
+              </div>
+              {/* Org name + CollabCRM stacked */}
+              <div className="flex flex-col">
+                <h2 className="text-base font-black text-[#111827] tracking-tight leading-tight">Yopmails</h2>
+                <div className="flex items-center gap-1 mt-0.5">
+                  <CollabCRMIcon size={12} />
+                  <span className="text-[10px] font-medium text-[#9CA3AF]">CollabCRM</span>
+                </div>
+              </div>
+            </div>
+
             {/* Tabs */}
             <div className="flex border-b border-[#E5E7EB]">
               <button

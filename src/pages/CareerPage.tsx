@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import PortalLayout from '../components/PortalLayout';
-import { Search, MapPin, Briefcase, Clock, ChevronDown, X, Building2, Bookmark } from 'lucide-react';
+import { Search, MapPin, Briefcase, Clock, ChevronDown, X, Building2, Bookmark, LayoutGrid, List } from 'lucide-react';
 import AuthModal from '../components/AuthModal';
 import { useApp } from '../store/AppContext';
 
@@ -28,6 +28,17 @@ const formatExperience = (exp: string) => {
   return exp;
 };
 
+const formatPostedDate = (dateStr?: string): string => {
+  if (!dateStr) return 'Posted Recently';
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffDays = Math.floor((now.getTime() - date.getTime()) / 86400000);
+  if (diffDays === 0) return 'Posted Today';
+  if (diffDays === 1) return 'Posted Yesterday';
+  if (diffDays < 7) return `Posted ${diffDays} days ago`;
+  return `Posted ${date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+};
+
 export default function CareerPage({ openAlumni = false }: { openAlumni?: boolean }) {
   const { jobs, currentUser } = useApp();
   const [showAuthModal, setShowAuthModal] = useState(openAlumni);
@@ -38,7 +49,9 @@ export default function CareerPage({ openAlumni = false }: { openAlumni?: boolea
   const [employmentFilter, setEmploymentFilter] = useState('');
   const [jobTypeFilter, setJobTypeFilter] = useState('');
   const [experienceFilter, setExperienceFilter] = useState('');
+  const [buFilter, setBuFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const itemsPerPage = 6;
 
   // Combine store jobs with defaults if store is sparse
@@ -54,6 +67,7 @@ export default function CareerPage({ openAlumni = false }: { openAlumni?: boolea
     if (employmentFilter && job.employmentType !== employmentFilter) return false;
     if (jobTypeFilter && job.jobType !== jobTypeFilter) return false;
     if (experienceFilter && job.experience !== experienceFilter) return false;
+    if (buFilter && job.businessUnit !== buFilter) return false;
     return true;
   });
 
@@ -71,35 +85,33 @@ export default function CareerPage({ openAlumni = false }: { openAlumni?: boolea
     setEmploymentFilter('');
     setJobTypeFilter('');
     setExperienceFilter('');
+    setBuFilter('');
     setCurrentPage(1);
   };
 
   const locations = Array.from(new Set(displayJobs.map(j => j.location))).filter(Boolean);
   const experienceLevels = Array.from(new Set(displayJobs.map(j => j.experience))).filter(Boolean);
+  const businessUnits = Array.from(new Set(displayJobs.map(j => j.businessUnit))).filter(Boolean);
 
   return (
     <PortalLayout>
-      {/* Company Hero Banner */}
-      <div className="bg-gradient-to-br from-primary via-[#4040d9] to-[#2828a8] text-white">
-        <div className="max-w-7xl mx-auto px-6 py-12">
-          <div className="flex items-center gap-5 mb-4">
-            <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-2xl font-bold shadow-lg border border-white/20">
-              Y
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Yopmails</h1>
-            </div>
-          </div>
-          <div className="flex items-center gap-4 text-sm text-white/60 mt-2">
-            <span className="flex items-center gap-1.5"><Briefcase className="w-4 h-4" /> {displayJobs.length} Open Positions</span>
-          </div>
+      {/* Compact Hero Strip */}
+      <div className="bg-gradient-to-r from-[#3538CD] to-[#2828a8]">
+        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+          <p className="text-sm text-white/80 font-medium">
+            Explore opportunities at <span className="font-bold text-white">Yopmails</span>
+          </p>
+          <span className="text-xs text-white/60 flex items-center gap-1.5">
+            <Briefcase className="w-3.5 h-3.5" />
+            {displayJobs.length} Open Positions
+          </span>
         </div>
       </div>
 
       {/* Search + Filter Bar */}
-      <div className="bg-white border-b border-[#E5E7EB] sticky top-[57px] z-40 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-5 space-y-6">
-          {/* Search Row - Integrated & Focused */}
+      <div className="bg-white border-b border-[#E5E7EB] sticky top-[49px] z-40 shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 py-4 space-y-4">
+          {/* Search Row */}
           <div className="relative max-w-4xl">
             <Search className="w-5 h-5 text-[#9CA3AF] absolute left-4 top-1/2 -translate-y-1/2" />
             <input
@@ -107,50 +119,47 @@ export default function CareerPage({ openAlumni = false }: { openAlumni?: boolea
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search job title, skills, or keywords..."
-              className="w-full bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl pl-12 pr-6 py-3.5 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-sm placeholder:text-[#9CA3AF] hover:border-[#D1D5DB]"
+              className="w-full bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl pl-12 pr-6 py-3 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-sm placeholder:text-[#9CA3AF] hover:border-[#D1D5DB]"
             />
           </div>
 
-          {/* Filters Row - Clean & Aligned */}
+          {/* Filters Row + View Toggle */}
           <div className="flex flex-wrap items-center gap-3">
-            <FilterPill
-              label="Location"
-              icon={<MapPin className="w-3.5 h-3.5" />}
-              value={locationFilter}
-              options={locations}
-              onChange={setLocationFilter}
-            />
-            <FilterPill
-              label="Experience"
-              icon={<Clock className="w-3.5 h-3.5" />}
-              value={experienceFilter}
-              options={experienceLevels}
-              onChange={setExperienceFilter}
-            />
-            <FilterPill
-              label="Employment"
-              icon={<Briefcase className="w-3.5 h-3.5" />}
-              value={employmentFilter}
-              options={Array.from(new Set(displayJobs.map(j => j.employmentType)))}
-              onChange={setEmploymentFilter}
-            />
-            <FilterPill
-              label="Type"
-              icon={<Building2 className="w-3.5 h-3.5" />}
-              value={jobTypeFilter}
-              options={Array.from(new Set(displayJobs.map(j => j.jobType)))}
-              onChange={setJobTypeFilter}
-            />
-            
-            { (locationFilter || experienceFilter || employmentFilter || jobTypeFilter) && (
-              <button
-                onClick={clearFilters}
-                className="flex items-center gap-1.5 ml-2 px-3 py-1.5 text-[10px] font-black text-[#6B7280] hover:text-red-500 transition-colors uppercase tracking-widest bg-[#F3F4F6] hover:bg-red-50 rounded-lg group"
-              >
-                <X className="w-3 h-3 group-hover:rotate-90 transition-transform" />
-                Clear Filters
+            <FilterPill label="Location" icon={<MapPin className="w-3.5 h-3.5" />} value={locationFilter} options={locations} onChange={setLocationFilter} />
+            <FilterPill label="Experience" icon={<Clock className="w-3.5 h-3.5" />} value={experienceFilter} options={experienceLevels} onChange={setExperienceFilter} />
+            <FilterPill label="Employment" icon={<Briefcase className="w-3.5 h-3.5" />} value={employmentFilter} options={Array.from(new Set(displayJobs.map(j => j.employmentType)))} onChange={setEmploymentFilter} />
+            <FilterPill label="Type" icon={<Building2 className="w-3.5 h-3.5" />} value={jobTypeFilter} options={Array.from(new Set(displayJobs.map(j => j.jobType)))} onChange={setJobTypeFilter} />
+            {businessUnits.length > 1 && (
+              <FilterPill label="Department" icon={<Building2 className="w-3.5 h-3.5" />} value={buFilter} options={businessUnits} onChange={setBuFilter} />
+            )}
+
+            {(locationFilter || experienceFilter || employmentFilter || jobTypeFilter || buFilter) && (
+              <button onClick={clearFilters} className="flex items-center gap-1.5 ml-2 px-3 py-1.5 text-[10px] font-black text-[#6B7280] hover:text-red-500 transition-colors uppercase tracking-widest bg-[#F3F4F6] hover:bg-red-50 rounded-lg group">
+                <X className="w-3 h-3 group-hover:rotate-90 transition-transform" /> Clear Filters
               </button>
             )}
+
+            {/* View Toggle */}
+            <div className="ml-auto flex items-center gap-1 bg-[#F3F4F6] rounded-lg p-1">
+              <button
+                onClick={() => setViewMode('grid')}
+                title="Grid view"
+                className={`p-1.5 rounded-md transition-all ${
+                  viewMode === 'grid' ? 'bg-white text-[#3538CD] shadow-sm' : 'text-[#9CA3AF] hover:text-[#6B7280]'
+                }`}
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                title="List view"
+                className={`p-1.5 rounded-md transition-all ${
+                  viewMode === 'list' ? 'bg-white text-[#3538CD] shadow-sm' : 'text-[#9CA3AF] hover:text-[#6B7280]'
+                }`}
+              >
+                <List className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -158,85 +167,111 @@ export default function CareerPage({ openAlumni = false }: { openAlumni?: boolea
       {/* Job Listings */}
       <div className="max-w-7xl mx-auto px-6 py-8">
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {currentJobs.length > 0 ? currentJobs.map((job) => (
-            <div
-              key={job.id}
-              className="bg-white rounded-xl border border-[#E5E7EB] p-6 hover:shadow-lg hover:border-primary/30 transition-all duration-200 group"
-            >
-              <div className="flex items-start justify-between mb-3">
-                <Link
-                  to={`/portal/yopmails/job/${job.id}`}
-                  className="text-lg font-semibold text-primary group-hover:text-[#292bb0] transition-colors"
-                >
-                  {job.title}
-                </Link>
-                <button 
-                  onClick={() => {
-                    if (!currentUser) {
-                      setSelectedJob(job);
-                      setAuthTab('signin');
-                      setShowAuthModal(true);
-                    }
-                  }}
-                  className="p-2 text-[#9CA3AF] hover:text-[#3538CD] hover:bg-[#3538CD]/5 rounded-lg transition-all"
-                  title="Save Job"
-                >
-                  <Bookmark className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Tags */}
-              <div className="flex flex-wrap items-center gap-2 mb-4">
-                <Chip>
-                  <MapPin className="w-3 h-3 mr-1" />{job.location}
-                </Chip>
-                {job.jobType !== job.location && <Chip>{job.jobType}</Chip>}
-                <Chip>{job.employmentType}</Chip>
-              </div>
-
-              {/* Experience & Salary */}
-              <div className="space-y-2 mb-5">
-                <div className="flex items-center gap-2 text-[13px] font-bold text-[#6B7280]">
-                  <Clock className="w-3.5 h-3.5 text-primary" />
-                  <span>{formatExperience(job.experience)}</span>
+        {/* ── Grid View ── */}
+        {viewMode === 'grid' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {currentJobs.length > 0 ? currentJobs.map((job) => (
+              <div key={job.id} className="bg-white rounded-xl border border-[#E5E7EB] p-6 hover:shadow-lg hover:border-primary/30 transition-all duration-200 group">
+                <div className="flex items-start justify-between mb-3">
+                  <Link to={`/portal/yopmails/job/${job.id}`} className="text-lg font-semibold text-primary group-hover:text-[#292bb0] transition-colors">
+                    {job.title}
+                  </Link>
+                  <button onClick={() => { if (!currentUser) { setSelectedJob(job); setAuthTab('signin'); setShowAuthModal(true); } }} className="p-2 text-[#9CA3AF] hover:text-[#3538CD] hover:bg-[#3538CD]/5 rounded-lg transition-all" title="Save Job">
+                    <Bookmark className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 mb-4">
+                  <Chip><MapPin className="w-3 h-3 mr-1" />{job.location}</Chip>
+                  {job.jobType !== job.location && <Chip>{job.jobType}</Chip>}
+                  <Chip>{job.employmentType}</Chip>
+                </div>
+                <div className="space-y-2 mb-5">
+                  <div className="flex items-center gap-2 text-[13px] font-bold text-[#6B7280]">
+                    <Clock className="w-3.5 h-3.5 text-primary" />
+                    <span>{formatExperience(job.experience)}</span>
+                  </div>
+                </div>
+                {/* Skills — hidden when empty */}
+                {(job.skills?.length ?? 0) > 0 && (
+                  <>
+                    <div className="border-t border-[#F3F4F6] pt-4 mb-4" />
+                    <div className="flex flex-wrap items-center gap-1.5 mb-5">
+                      <span className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mr-1">Skills:</span>
+                      {job.skills.slice(0, 3).map((skill) => (
+                        <Chip key={skill} variant="skill">{skill}</Chip>
+                      ))}
+                      {job.skills.length > 3 && (
+                        <span className="text-[11px] font-black text-[#3538CD] uppercase tracking-widest ml-1">+{job.skills.length - 3} More</span>
+                      )}
+                    </div>
+                  </>
+                )}
+                <div className="flex items-center justify-between pt-4 border-t border-[#F3F4F6]">
+                  <span className="text-[11px] font-black text-[#9CA3AF] uppercase tracking-widest">{formatPostedDate(job.createdAt)}</span>
+                  <Link to={`/portal/yopmails/job/${job.id}`} className="px-6 py-2.5 bg-[#3538CD] text-white text-[12px] font-black rounded-xl hover:bg-[#292bb0] transition-all uppercase tracking-widest shadow-md shadow-[#3538CD]/10">
+                    View & Apply
+                  </Link>
                 </div>
               </div>
-
-              <div className="border-t border-[#F3F4F6] pt-5 mb-5" />
-
-              {/* Skills */}
-              <div className="flex flex-wrap items-center gap-1.5 mb-6">
-                <span className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mr-1">Skills:</span>
-                {job.skills?.slice(0, 3).map((skill) => (
-                  <Chip key={skill} variant="skill">{skill}</Chip>
-                ))}
-                {(job.skills?.length ?? 0) > 3 && (
-                  <span className="text-[11px] font-black text-[#3538CD] uppercase tracking-widest ml-1">
-                    +{(job.skills?.length ?? 0) - 3} More
-                  </span>
-                )}
+            )) : (
+              <div className="col-span-full py-12 text-center bg-white rounded-xl border border-dashed border-[#E5E7EB]">
+                <p className="text-[#6B7280] text-sm italic">No jobs matching your criteria.</p>
               </div>
+            )}
+          </div>
+        )}
 
-              {/* Bottom Row */}
-              <div className="flex items-center justify-between pt-5 border-t border-[#F3F4F6]">
-                <span className="text-[11px] font-black text-[#9CA3AF] uppercase tracking-widest">
-                  Posted Today
-                </span>
-                <Link
-                  to={`/portal/yopmails/job/${job.id}`}
-                  className="px-6 py-2.5 bg-[#3538CD] text-white text-[12px] font-black rounded-xl hover:bg-[#292bb0] transition-all uppercase tracking-widest shadow-md shadow-[#3538CD]/10"
-                >
-                  View & Apply
-                </Link>
+        {/* ── List View ── */}
+        {viewMode === 'list' && (
+          <div className="flex flex-col gap-2">
+            {currentJobs.length > 0 ? currentJobs.map((job) => (
+              <div key={job.id} className="bg-white rounded-xl border border-[#E5E7EB] px-5 py-4 hover:shadow-md hover:border-primary/30 transition-all duration-200 group">
+                <div className="flex items-center gap-4">
+                  {/* Left: Title + tags */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-2 flex-wrap">
+                      <Link to={`/portal/yopmails/job/${job.id}`} className="text-base font-semibold text-primary group-hover:text-[#292bb0] transition-colors">
+                        {job.title}
+                      </Link>
+                      {(job.skills?.length ?? 0) > 0 && job.skills.slice(0, 2).map((skill) => (
+                        <Chip key={skill} variant="skill">{skill}</Chip>
+                      ))}
+                      {(job.skills?.length ?? 0) > 2 && (
+                        <span className="text-[11px] font-black text-[#3538CD] uppercase tracking-widest">+{(job.skills?.length ?? 0) - 2} More</span>
+                      )}
+                    </div>
+                    <div className="flex items-center flex-wrap gap-2">
+                      <Chip><MapPin className="w-3 h-3 mr-1" />{job.location}</Chip>
+                      {job.jobType !== job.location && <Chip>{job.jobType}</Chip>}
+                      <Chip>{job.employmentType}</Chip>
+                      {job.experience && (
+                        <span className="flex items-center gap-1 text-[12px] text-[#6B7280] font-bold">
+                          <Clock className="w-3 h-3 text-primary" />{formatExperience(job.experience)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  {/* Right: Date + actions */}
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="text-[11px] font-black text-[#9CA3AF] uppercase tracking-widest whitespace-nowrap hidden sm:block">
+                      {formatPostedDate(job.createdAt)}
+                    </span>
+                    <button onClick={() => { if (!currentUser) { setSelectedJob(job); setAuthTab('signin'); setShowAuthModal(true); } }} className="p-2 text-[#9CA3AF] hover:text-[#3538CD] hover:bg-[#3538CD]/5 rounded-lg transition-all" title="Save Job">
+                      <Bookmark className="w-4 h-4" />
+                    </button>
+                    <Link to={`/portal/yopmails/job/${job.id}`} className="px-4 py-2 bg-[#3538CD] text-white text-[11px] font-black rounded-lg hover:bg-[#292bb0] transition-all uppercase tracking-widest whitespace-nowrap">
+                      View & Apply
+                    </Link>
+                  </div>
+                </div>
               </div>
-            </div>
-          )) : (
-            <div className="col-span-full py-12 text-center bg-white rounded-xl border border-dashed border-[#E5E7EB]">
-              <p className="text-[#6B7280] text-sm italic">No jobs matching your criteria.</p>
-            </div>
-          )}
-        </div>
+            )) : (
+              <div className="py-12 text-center bg-white rounded-xl border border-dashed border-[#E5E7EB]">
+                <p className="text-[#6B7280] text-sm italic">No jobs matching your criteria.</p>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Pagination Controls */}
         {totalPages > 1 && (

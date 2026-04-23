@@ -4,6 +4,7 @@ import {
   X, Eye, EyeOff, Building2, ArrowRight, ShieldCheck, Mail, Lock, ArrowLeft, KeyRound, CheckCircle2
 } from 'lucide-react';
 import { useApp } from '../store/AppContext';
+import CollabCRMIcon from './CollabCRMIcon';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -29,7 +30,6 @@ export default function AuthModal({
   const [modalState, setModalState] = useState<'auth' | 'alumni-verify' | 'alumni-success' | 'forgot-password' | 'email-sent'>(initialState);
   const [activeTab, setActiveTab] = useState<'register' | 'signin'>(initialTab);
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [verifiedWorkEmail, setVerifiedWorkEmail] = useState('');
@@ -41,18 +41,15 @@ export default function AuthModal({
     email: '',
     signInEmail: '',
     password: '',
-    confirmPassword: '',
     agreeToTerms: false
   });
+  const [profileVisibility, setProfileVisibility] = useState<'visible' | 'private'>('visible');
+  const [allowRecruiterContact, setAllowRecruiterContact] = useState(false);
 
   if (!isOpen) return null;
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match.");
-      return;
-    }
     registerCandidate({
       id: Date.now().toString(),
       firstName: formData.firstName,
@@ -60,6 +57,8 @@ export default function AuthModal({
       email: formData.email,
       phone: '',
       isAlumni: false,
+      profileVisibility,
+      allowRecruiterContact,
     });
     onAuthSuccess?.();
     onClose();
@@ -98,10 +97,6 @@ export default function AuthModal({
 
   const handleAlumniFinalize = (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match.");
-      return;
-    }
     registerCandidate({
       id: Date.now().toString(),
       firstName: formData.firstName,
@@ -126,11 +121,19 @@ export default function AuthModal({
       
       {/* Modal */}
       <div className="relative w-full max-w-[480px] bg-white rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-        {/* Header */}
+        {/* Header — Org + CollabCRM logos together */}
         <div className="px-8 pt-8 pb-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-[#3538CD] rounded-lg flex items-center justify-center text-white font-black text-lg">C</div>
-            <span className="text-lg font-black text-[#111827] tracking-tight">CollabCareers</span>
+          <div className="flex items-center gap-3">
+            {/* Org logo */}
+            <div className="w-10 h-10 rounded-xl bg-[#3538CD] flex items-center justify-center text-white text-base font-black shadow-sm shrink-0">Y</div>
+            {/* Org name + CollabCRM small attribution stacked */}
+            <div className="flex flex-col">
+              <span className="text-sm font-black text-[#111827] tracking-tight leading-tight">{businessUnit}</span>
+              <div className="flex items-center gap-1 mt-0.5">
+                <CollabCRMIcon size={11} />
+                <span className="text-[10px] font-medium text-[#9CA3AF]">CollabCRM</span>
+              </div>
+            </div>
           </div>
           <button 
             onClick={onClose}
@@ -154,27 +157,29 @@ export default function AuthModal({
 
         {/* Tabs - Hidden in Alumni States */}
         {modalState === 'auth' && (
-          <div className="flex border-b border-[#E5E7EB]">
-            <button
-              onClick={() => setActiveTab('register')}
-              className={`flex-1 py-4 text-xs font-black text-center transition-all uppercase tracking-widest border-b-2 ${
-                activeTab === 'register'
-                  ? 'text-[#3538CD] border-[#3538CD] bg-[#3538CD]/5'
-                  : 'text-[#6B7280] border-transparent hover:text-[#374151]'
-              }`}
-            >
-              Sign Up
-            </button>
-            <button
-              onClick={() => setActiveTab('signin')}
-              className={`flex-1 py-4 text-xs font-black text-center transition-all uppercase tracking-widest border-b-2 ${
-                activeTab === 'signin'
-                  ? 'text-[#3538CD] border-[#3538CD] bg-[#3538CD]/5'
-                  : 'text-[#6B7280] border-transparent hover:text-[#374151]'
-              }`}
-            >
-              Sign In
-            </button>
+          <div className="px-8 pb-4">
+            <div className="flex bg-[#F4F5FA] p-1 rounded-2xl gap-1">
+              <button
+                onClick={() => setActiveTab('register')}
+                className={`flex-1 py-2.5 text-[11px] font-black text-center transition-all uppercase tracking-widest rounded-xl ${
+                  activeTab === 'register'
+                    ? 'bg-white text-[#3538CD] shadow-sm'
+                    : 'text-[#6B7280] hover:text-[#111827]'
+                }`}
+              >
+                Sign Up
+              </button>
+              <button
+                onClick={() => setActiveTab('signin')}
+                className={`flex-1 py-2.5 text-[11px] font-black text-center transition-all uppercase tracking-widest rounded-xl ${
+                  activeTab === 'signin'
+                    ? 'bg-white text-[#3538CD] shadow-sm'
+                    : 'text-[#6B7280] hover:text-[#111827]'
+                }`}
+              >
+                Sign In
+              </button>
+            </div>
           </div>
         )}
 
@@ -183,118 +188,134 @@ export default function AuthModal({
             <>
               {activeTab === 'register' ? (
                 <form onSubmit={handleRegister} className="space-y-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Account Details</label>
-                    <button 
-                      type="button"
-                      onClick={() => setFormData({
-                        ...formData,
-                        firstName: 'Alex',
-                        lastName: 'Patel',
-                        email: 'alex.patel@example.com',
-                        password: 'password123',
-                        confirmPassword: 'password123',
-                        agreeToTerms: true
-                      })}
-                      className="px-2.5 py-1 bg-[#3538CD]/5 border border-[#3538CD]/10 rounded-lg text-[9px] font-black text-[#3538CD] uppercase tracking-widest hover:bg-[#3538CD] hover:text-white transition-all shadow-sm"
-                    >
-                      Auto-fill for Demo
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
+
+
+                  {/* Name row — 2-col */}
+                  <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
                       <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">First Name *</label>
-                      <input
-                        type="text"
-                        required
-                        value={formData.firstName}
+                      <input type="text" required value={formData.firstName}
                         onChange={e => setFormData({...formData, firstName: e.target.value})}
-                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
+                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
                       />
                     </div>
                     <div className="space-y-1.5">
                       <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Last Name *</label>
-                      <input
-                        type="text"
-                        required
-                        value={formData.lastName}
+                      <input type="text" required value={formData.lastName}
                         onChange={e => setFormData({...formData, lastName: e.target.value})}
-                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
+                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Email Address *</label>
-                    <input
-                      type="email"
-                      required
-                      value={formData.email}
+                    <input type="email" required value={formData.email}
                       onChange={e => setFormData({...formData, email: e.target.value})}
-                      className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
+                      className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
                     />
                   </div>
 
+
+                  {/* Password + strength */}
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Password *</label>
                     <div className="relative">
                       <input
                         type={showPassword ? 'text' : 'password'}
                         required
+                        minLength={8}
                         value={formData.password}
                         onChange={e => setFormData({...formData, password: e.target.value})}
-                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] pr-12"
+                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] pr-12"
                       />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#3538CD]"
-                      >
+                      <button type="button" onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#3538CD]">
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
+                    {/* Strength bar */}
+                    {formData.password.length > 0 && (() => {
+                      let score = 0;
+                      if (formData.password.length >= 8) score++;
+                      if (/[A-Z]/.test(formData.password)) score++;
+                      if (/[0-9]/.test(formData.password)) score++;
+                      if (/[^A-Za-z0-9]/.test(formData.password)) score++;
+                      const labels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
+                      const colors = ['', 'bg-red-400', 'bg-orange-400', 'bg-yellow-400', 'bg-green-500'];
+                      const textColors = ['', 'text-red-500', 'text-orange-500', 'text-yellow-600', 'text-green-600'];
+                      return (
+                        <div className="mt-2">
+                          <div className="flex gap-1 mb-1">
+                            {[1,2,3,4].map(i => (
+                              <div key={i} className={`h-1 flex-1 rounded-full transition-all ${i <= score ? colors[score] : 'bg-[#E5E7EB]'}`} />
+                            ))}
+                          </div>
+                          <p className={`text-[10px] font-black ml-0.5 ${textColors[score]}`}>{labels[score]}</p>
+                        </div>
+                      );
+                    })()}
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Confirm Password *</label>
-                    <div className="relative">
-                      <input
-                        type={showConfirmPassword ? 'text' : 'password'}
-                        required
-                        value={formData.confirmPassword}
-                        onChange={e => setFormData({...formData, confirmPassword: e.target.value})}
-                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] pr-12"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#3538CD]"
-                      >
-                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {/* Profile Visibility */}
+                  <div className="pt-1">
+                    <p className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest mb-3">Profile Visibility</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button type="button" onClick={() => setProfileVisibility('visible')}
+                        className={`relative text-left p-4 rounded-2xl border-2 transition-all ${profileVisibility === 'visible' ? 'border-[#3538CD] bg-[#3538CD]/5' : 'border-[#E5E7EB] bg-white hover:border-[#C7C9F0]'}`}>
+                        <div className={`absolute top-3 right-3 w-4 h-4 rounded-full border-2 flex items-center justify-center ${profileVisibility === 'visible' ? 'border-[#3538CD]' : 'border-[#D1D5DB]'}`}>
+                          {profileVisibility === 'visible' && <div className="w-2 h-2 rounded-full bg-[#3538CD]" />}
+                        </div>
+                        <Eye className="w-5 h-5 text-[#3538CD] mb-2" />
+                        <p className="text-xs font-black text-[#111827] leading-tight mb-1">Visible to recruiters</p>
+                        <p className="text-[10px] text-[#6B7280] leading-snug">Discoverable without an application</p>
+                      </button>
+                      <button type="button" onClick={() => setProfileVisibility('private')}
+                        className={`relative text-left p-4 rounded-2xl border-2 transition-all ${profileVisibility === 'private' ? 'border-[#3538CD] bg-[#3538CD]/5' : 'border-[#E5E7EB] bg-white hover:border-[#C7C9F0]'}`}>
+                        <div className={`absolute top-3 right-3 w-4 h-4 rounded-full border-2 flex items-center justify-center ${profileVisibility === 'private' ? 'border-[#3538CD]' : 'border-[#D1D5DB]'}`}>
+                          {profileVisibility === 'private' && <div className="w-2 h-2 rounded-full bg-[#3538CD]" />}
+                        </div>
+                        <EyeOff className="w-5 h-5 text-[#6B7280] mb-2" />
+                        <p className="text-xs font-black text-[#111827] leading-tight mb-1">Browse privately</p>
+                        <p className="text-[10px] text-[#6B7280] leading-snug">Only visible on active applications</p>
                       </button>
                     </div>
-                  </div>
-
-                  <div className="pt-2">
-                    <label className="flex items-center gap-2.5 cursor-pointer">
-                      <input 
-                        type="checkbox" 
-                        required
-                        checked={formData.agreeToTerms}
-                        onChange={e => setFormData({...formData, agreeToTerms: e.target.checked})}
-                        className="w-4 h-4 border-2 border-[#D1D5DB] rounded accent-[#3538CD]" 
-                      />
-                      <span className="text-[11px] font-black text-[#6B7280] uppercase tracking-tight">I agree to the <span className="text-[#3538CD] hover:underline">Terms of Service</span> and <span className="text-[#3538CD] hover:underline">Privacy Policy</span></span>
+                    {/* Dynamic info banner */}
+                    <div className="mt-3 flex items-start gap-2 px-3 py-2.5 bg-[#F4F5FA] rounded-xl border border-[#E5E7EB]">
+                      <span className="text-[#3538CD] mt-0.5 shrink-0 text-sm">ℹ</span>
+                      <p className="text-[11px] text-[#374151] leading-snug">
+                        {profileVisibility === 'visible'
+                          ? 'Your profile, CV, and contact details will be visible to the recruitment team.'
+                          : 'Your profile is hidden. Recruiters can only see your info after you apply.'}
+                      </p>
+                    </div>
+                    {/* Recruiter contact toggle — surfaced within the section */}
+                    <label className="flex items-center justify-between gap-3 mt-3 cursor-pointer">
+                      <span className="text-[11px] font-bold text-[#374151]">Allow recruiters to contact me for future roles</span>
+                      <button type="button" onClick={() => setAllowRecruiterContact(v => !v)}
+                        className={`relative rounded-full transition-colors shrink-0 ${allowRecruiterContact ? 'bg-[#3538CD]' : 'bg-[#D1D5DB]'}`}
+                        style={{ minWidth: '2.5rem', height: '1.375rem' }}>
+                        <span className={`absolute top-0.5 left-0.5 bg-white rounded-full shadow transition-transform ${allowRecruiterContact ? 'translate-x-[1.125rem]' : ''}`}
+                          style={{ width: '1.125rem', height: '1.125rem' }} />
+                      </button>
                     </label>
                   </div>
 
-                  <button
-                    type="submit"
-                    className="w-full py-4 bg-[#3538CD] text-white text-sm font-black rounded-xl hover:bg-[#292bb0] transition-all shadow-lg shadow-[#3538CD]/20 uppercase tracking-widest flex items-center justify-center gap-2"
-                  >
-                    Create Account & Continue <ArrowRight className="w-4 h-4" />
+                  {/* T&C just above CTA */}
+                  <label className="flex items-center gap-2.5 cursor-pointer pt-1">
+                    <input type="checkbox" required checked={formData.agreeToTerms}
+                      onChange={e => setFormData({...formData, agreeToTerms: e.target.checked})}
+                      className="w-4 h-4 border-2 border-[#D1D5DB] rounded accent-[#3538CD]" />
+                    <span className="text-[11px] font-bold text-[#6B7280]">I agree to the <span className="text-[#3538CD] hover:underline">Terms of Service</span> and <span className="text-[#3538CD] hover:underline">Privacy Policy</span></span>
+                  </label>
+
+                  <button type="submit"
+                    className="w-full py-4 bg-[#3538CD] text-white text-sm font-black rounded-xl hover:bg-[#292bb0] transition-all shadow-lg shadow-[#3538CD]/20 uppercase tracking-widest flex items-center justify-center gap-2">
+                    Create Account <ArrowRight className="w-4 h-4" />
                   </button>
                 </form>
+
+
               ) : (
                 <form onSubmit={handleSignIn} className="space-y-5">
                   <div className="flex justify-between items-center mb-1">
@@ -496,7 +517,7 @@ export default function AuthModal({
                       placeholder="your.email@example.com"
                       className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
                     />
-                    <p className="text-[10px] font-bold text-[#9CA3AF] ml-1 mt-1">This will be used to sign in to your CollabCareers account</p>
+                    <p className="text-[10px] font-bold text-[#9CA3AF] ml-1 mt-1">This will be used to sign in to your CollabCRM account</p>
                  </div>
 
                  <div className="grid grid-cols-2 gap-4">
@@ -542,25 +563,6 @@ export default function AuthModal({
                     </div>
                   </div>
 
-                  <div className="space-y-1.5 text-left">
-                    <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Confirm Password *</label>
-                    <div className="relative">
-                      <input
-                        type={showConfirmPassword ? 'text' : 'password'}
-                        required
-                        value={formData.confirmPassword}
-                        onChange={e => setFormData({...formData, confirmPassword: e.target.value})}
-                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] pr-12"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#3538CD]"
-                      >
-                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                  </div>
 
                    <button
                     type="submit"
@@ -654,6 +656,13 @@ export default function AuthModal({
               </button>
             </div>
           ) : null}
+
+          {/* Powered by CollabCRM — subtle attribution */}
+          <div className="flex items-center justify-center gap-1.5 pt-4">
+            <span className="text-[10px] text-[#D1D5DB]">Powered by</span>
+            <CollabCRMIcon size={12} />
+            <span className="text-[10px] font-medium text-[#C4C9D4]">CollabCRM</span>
+          </div>
         </div>
       </div>
     </div>

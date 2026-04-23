@@ -23,7 +23,7 @@ const candidatesData = [
     noticePeriod: '30 days',
     interviewDate: 'Schedule',
     status: 'Active',
-    source: 'CollabCareers',
+    source: 'CollabCRM',
     businessUnit: 'Yopmails',
     recon: '-',
     isAlumni: true
@@ -38,7 +38,7 @@ const candidatesData = [
     noticePeriod: '15 days',
     interviewDate: 'Schedule',
     status: 'Active',
-    source: 'CollabCareers',
+    source: 'CollabCRM',
     businessUnit: 'Yopmails',
     recon: '-',
     isAlumni: true
@@ -53,7 +53,7 @@ const candidatesData = [
     noticePeriod: 'Immediate joiner',
     interviewDate: 'Schedule',
     status: 'Active',
-    source: 'CollabCareers',
+    source: 'CollabCRM',
     businessUnit: 'Yopmails',
     recon: '-',
     isAlumni: false
@@ -68,7 +68,7 @@ const candidatesData = [
     noticePeriod: '30 days',
     interviewDate: 'Schedule',
     status: 'Active',
-    source: 'CollabCareers',
+    source: 'CollabCRM',
     businessUnit: 'Yopmails',
     recon: '-',
     isAlumni: false
@@ -83,7 +83,7 @@ const candidatesData = [
     noticePeriod: '60 days',
     interviewDate: 'Schedule',
     status: 'Active',
-    source: 'CollabCareers',
+    source: 'CollabCRM',
     businessUnit: 'Yopmails',
     recon: '-',
     isAlumni: false
@@ -98,7 +98,7 @@ const candidatesData = [
     noticePeriod: 'Immediate joiner',
     interviewDate: 'Schedule',
     status: 'Active',
-    source: 'CollabCareers',
+    source: 'CollabCRM',
     businessUnit: 'Yopmails',
     recon: '-',
     isAlumni: false
@@ -177,7 +177,7 @@ export default function CandidateListingPage() {
                 <Plus className="w-3.5 h-3.5 text-[#3538CD]" />
                 <span className="text-[#3538CD] font-semibold">Source</span>
                 <span className="text-[#9CA3AF]">Is</span>
-                <span className="text-[#3538CD] font-semibold">CollabCareers</span>
+                <span className="text-[#3538CD] font-semibold">CollabCRM</span>
                 <X className="w-3 h-3 text-[#3538CD] cursor-pointer" />
               </div>
 

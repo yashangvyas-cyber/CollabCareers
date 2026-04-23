@@ -419,7 +419,7 @@ export default function AddJobPage() {
       {/* Application Form Fields */}
       <FormSection
         title="Application Form Fields"
-        subtitle="Add extra fields for candidates to fill when applying for this job on CollabCareers"
+        subtitle="Add extra fields for candidates to fill when applying for this job on CollabCRM"
       >
         <div className="space-y-4">
           {customFields.map((field) => (
@@ -533,8 +533,8 @@ export default function AddJobPage() {
           <div className="border-t border-[#E5E7EB]" />
           <div className="flex items-start justify-between">
             <div>
-              <h4 className="text-sm font-bold text-[#374151]">Publish on CollabCareers</h4>
-              <p className="text-xs text-[#6B7280] mt-0.5 max-w-md font-medium">Candidates can discover and apply for this job on your CollabCareers portal</p>
+              <h4 className="text-sm font-bold text-[#374151]">Publish on CollabCRM</h4>
+              <p className="text-xs text-[#6B7280] mt-0.5 max-w-md font-medium">Candidates can discover and apply for this job on your CollabCRM portal</p>
             </div>
             <Toggle checked={publishCollabCareers} onChange={() => setPublishCollabCareers(!publishCollabCareers)} />
           </div>

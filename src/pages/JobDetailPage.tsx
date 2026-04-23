@@ -200,20 +200,7 @@ export default function JobDetailPage() {
                 </div>
               </div>
 
-              {/* Evaluation Criteria */}
-              {job.evaluationCriteria && job.evaluationCriteria.length > 0 && (
-                <div className="mb-12 border-l-2 border-[#3538CD] pl-8">
-                  <h2 className="text-xl font-black text-[#111827] mb-6">Evaluation Criteria</h2>
-                  <ul className="space-y-4">
-                    {job.evaluationCriteria.map((item, i) => (
-                      <li key={i} className="flex items-start gap-4 text-[15px] text-[#374151] font-medium leading-relaxed">
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#3538CD] mt-2.5 shrink-0" />
-                        {(item as any)}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+
 
 
             </div>
@@ -332,8 +319,6 @@ export default function JobDetailPage() {
                   <h3 className="text-base font-black text-[#111827] group-hover:text-[#3538CD] transition-colors line-clamp-1">{js.title}</h3>
                   <span className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-wider whitespace-nowrap">Posted Today</span>
                 </div>
-                
-                <p className="text-xs font-bold text-[#6B7280] mb-4">{js.businessUnit}</p>
                 
                 <div className="flex flex-wrap gap-2 mb-4">
                   <span className="px-2 py-1 bg-[#F9FAFB] text-[#6B7280] text-[10px] font-black rounded uppercase">{js.location}</span>

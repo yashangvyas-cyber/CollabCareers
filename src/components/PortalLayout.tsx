@@ -1,6 +1,6 @@
 import { ReactNode, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Briefcase } from 'lucide-react';
+import CollabCRMIcon from './CollabCRMIcon';
 import { useApp } from '../store/AppContext';
 import AuthModal from './AuthModal';
 
@@ -34,11 +34,19 @@ export default function PortalLayout({
     <div className="min-h-screen bg-[#F9FAFB] flex flex-col">
       {/* Top Bar */}
       <header className="bg-white border-b border-[#E5E7EB] sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          {/* Left: Navigation */}
-          <div className="flex items-center gap-6">
-            <Link 
-              to="/portal/yopmails" 
+        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+          {/* Left: Logo + Navigation */}
+          <div className="flex items-center gap-5">
+            {/* Company Logo */}
+            <Link to="/portal/yopmails" className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-[#3538CD] flex items-center justify-center text-white text-sm font-black shadow-sm">
+                Y
+              </div>
+              <span className="text-sm font-black text-[#111827] tracking-tight">Yopmails</span>
+            </Link>
+            <div className="w-px h-5 bg-[#E5E7EB]" />
+            <Link
+              to="/portal/yopmails"
               className={`text-sm font-black uppercase tracking-widest transition-colors ${
                 location.pathname === '/portal/yopmails' || location.pathname === '/portal/yopmails/'
                   ? 'text-[#3538CD]'
@@ -53,19 +61,19 @@ export default function PortalLayout({
           <div className="flex items-center gap-3">
             {currentUser ? (
               <>
+                <div className="text-right">
+                  <p className="text-sm font-semibold text-[#111827] leading-tight">
+                    {currentUser.firstName} {currentUser.lastName}
+                  </p>
+                  <p className="text-xs text-[#6B7280] leading-tight">({currentUser.email})</p>
+                </div>
                 <Link
                   to="/portal/yopmails/profile"
-                  className={`text-sm font-medium transition-colors ${
-                    location.pathname.includes('/profile')
-                      ? 'text-[#3538CD]'
-                      : 'text-[#6B7280] hover:text-[#3538CD]'
-                  }`}
+                  className="w-8 h-8 rounded-full bg-[#3538CD]/10 text-[#3538CD] flex items-center justify-center text-xs font-bold hover:bg-[#3538CD]/20 transition-colors"
+                  title="My Profile"
                 >
-                  My Profile
-                </Link>
-                <div className="w-8 h-8 rounded-full bg-[#3538CD]/10 text-[#3538CD] flex items-center justify-center text-xs font-bold">
                   {currentUser.firstName.charAt(0)}
-                </div>
+                </Link>
               </>
             ) : showAuth ? (
               <>
@@ -89,6 +97,7 @@ export default function PortalLayout({
 
       {/* Auth Modal (Global) */}
       <AuthModal 
+        key={authTab}
         isOpen={showAuthModal} 
         onClose={() => setShowAuthModal(false)}
         jobTitle="Portal"
@@ -106,9 +115,19 @@ export default function PortalLayout({
       {/* Footer */}
       <footer className="bg-white border-t border-[#E5E7EB] py-6 mt-auto">
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-[#9CA3AF] text-xs">
-            <Briefcase className="w-3.5 h-3.5" />
-            <span>Powered by <span className="font-semibold text-[#6B7280]">CollabCareers</span></span>
+          <div className="flex items-center gap-1.5 text-[#9CA3AF] text-xs">
+            <CollabCRMIcon size={14} />
+            <span>
+              Powered by{' '}
+              <a
+                href="https://collabcrm.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-[#3538CD] hover:underline"
+              >
+                CollabCRM
+              </a>
+            </span>
           </div>
           <a href="#" className="text-xs text-[#9CA3AF] hover:text-[#6B7280] transition-colors">
             Privacy Policy

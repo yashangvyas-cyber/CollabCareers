@@ -33,7 +33,7 @@ export default function ResetPasswordPage() {
           <div className="px-8 pt-8 pb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-[#3538CD] rounded-lg flex items-center justify-center text-white font-black text-lg">C</div>
-              <span className="text-lg font-black text-[#111827] tracking-tight">CollabCareers</span>
+              <span className="text-lg font-black text-[#111827] tracking-tight">CollabCRM</span>
             </div>
           </div>
 
