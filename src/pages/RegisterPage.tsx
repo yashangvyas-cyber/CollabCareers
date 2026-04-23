@@ -67,7 +67,7 @@ export default function RegisterPage() {
               </div>
               {/* Org name + CollabCRM stacked */}
               <div className="flex flex-col">
-                <h2 className="text-base font-black text-[#111827] tracking-tight leading-tight">Yopmails</h2>
+                <h2 className="text-base font-black text-[#111827] tracking-tight leading-tight">MindInventory</h2>
                 <div className="flex items-center gap-1 mt-0.5">
                   <CollabCRMIcon size={12} />
                   <span className="text-[10px] font-medium text-[#9CA3AF]">CollabCRM</span>

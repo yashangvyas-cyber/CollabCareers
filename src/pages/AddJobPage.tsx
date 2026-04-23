@@ -110,7 +110,7 @@ export default function AddJobPage() {
   // Component State
   const [jobData, setJobData] = useState({
     title: '',
-    businessUnit: 'Yopmails',
+    businessUnit: 'MindInventory',
     recruiter: '',
     location: '',
     experience: '',
@@ -284,7 +284,7 @@ export default function AddJobPage() {
       {/* Team & Ownership */}
       <FormSection title="Team & Ownership" subtitle="Choose the business unit, recruiter(s), and interview panel managing this job.">
         <div className="grid grid-cols-3 gap-4">
-          <FormSelect label="Business Unit" required info value={jobData.businessUnit} options={[{label: 'Yopmails', value: 'Yopmails'}]} />
+          <FormSelect label="Business Unit" required info value={jobData.businessUnit} options={[{label: 'MindInventory', value: 'MindInventory'}]} />
           <FormInput label="Recruiter(s)" required info value={jobData.recruiter} onChange={v => setJobData({...jobData, recruiter: v})} />
           <FormSelect label="Interview Panel" placeholder="Select" info options={[]} />
         </div>

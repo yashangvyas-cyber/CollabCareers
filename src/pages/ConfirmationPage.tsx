@@ -19,7 +19,7 @@ export default function ConfirmationPage() {
           Application Submitted Successfully!
         </h1>
         <p className="text-[#6B7280] text-base leading-relaxed max-w-lg mb-8">
-          You've applied for <span className="text-[#111827] font-bold">React Developer</span> at <span className="text-[#111827] font-bold">Yopmails</span>. 
+          You've applied for <span className="text-[#111827] font-bold">React Developer</span> at <span className="text-[#111827] font-bold">MindInventory</span>. 
           The recruiter will review your application and reach out if shortlisted.
         </p>
 

@@ -35,6 +35,8 @@ export default function CandidateProfilePage() {
     currentOrg: '',
     currentDesignation: '',
     noticePeriod: '',
+    location: '',
+    linkedin: '',
   });
   const [editSkills, setEditSkills] = useState<string[]>([]);
   const [skillInput, setSkillInput] = useState('');
@@ -51,6 +53,8 @@ export default function CandidateProfilePage() {
       currentOrg: currentUser?.currentOrg || derivedProfile.currentOrg || '',
       currentDesignation: currentUser?.currentDesignation || derivedProfile.designation || '',
       noticePeriod: currentUser?.noticePeriod || derivedProfile.noticePeriod || '',
+      location: currentUser?.location || derivedProfile.location || '',
+      linkedin: currentUser?.linkedin || derivedProfile.linkedin || '',
     });
     setEditSkills(currentUser?.skills?.length ? currentUser.skills : derivedProfile.skills);
     setSkillInput('');
@@ -78,7 +82,7 @@ export default function CandidateProfilePage() {
     .filter(j => currentUser?.savedJobIds?.includes(j.id))
     .map(j => ({
       ...j,
-      company: j.businessUnit || 'Yopmails',
+      company: j.businessUnit || 'MindInventory',
       type: j.employmentType,
       jobClosed: j.status === 'Close'
     }));
@@ -92,7 +96,7 @@ export default function CandidateProfilePage() {
     const job = jobs.find(j => j.id === a.jobId);
     return {
       ...a,
-      company: job?.businessUnit || 'Yopmails',
+      company: job?.businessUnit || 'MindInventory',
       title: job?.title || 'Job Opportunity',
       jobClosed: job?.status === 'Close',
     };
@@ -104,10 +108,10 @@ export default function CandidateProfilePage() {
 
   const derivedProfile = {
     phone: profileData?.personal?.contactNumber || null,
-    location: profileData?.address?.city
+    location: currentUser?.location || (profileData?.address?.city
       ? `${profileData.address.city}, ${profileData.address.country}`
-      : null,
-    linkedin: profileData?.personal?.linkedin || null,
+      : null),
+    linkedin: currentUser?.linkedin || profileData?.personal?.linkedin || null,
     designation: currentUser?.currentDesignation || profileData?.professional?.currentDesignation || null,
     currentOrg: currentUser?.currentOrg || profileData?.professional?.currentOrg || null,
     noticePeriod: currentUser?.noticePeriod || profileData?.professional?.noticePeriod || null,
@@ -228,7 +232,7 @@ export default function CandidateProfilePage() {
                       {derivedProfile.noticePeriod && (
                         <div className="flex items-center gap-3 text-sm font-medium text-[#374151]">
                           <span title="Notice Period"><Clock className="w-4 h-4 text-[#6B7280] shrink-0" /></span>
-                          <span>{derivedProfile.noticePeriod} days</span>
+                          <span>{derivedProfile.noticePeriod}</span>
                         </div>
                       )}
                     </div>
@@ -419,7 +423,7 @@ export default function CandidateProfilePage() {
       {showEditProfile && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-[#111827]/60 backdrop-blur-sm" onClick={() => setShowEditProfile(false)} />
-          <div className="relative bg-white w-full max-w-md rounded-3xl shadow-2xl flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
+          <div className="relative bg-white w-full max-w-2xl rounded-3xl shadow-2xl flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-200">
 
             {/* Header */}
             <div className="flex items-center justify-between px-6 pt-5 pb-3 border-b border-[#F3F4F6] shrink-0">
@@ -449,6 +453,8 @@ export default function CandidateProfilePage() {
                   currentDesignation: editForm.currentDesignation.trim(),
                   noticePeriod: editForm.noticePeriod,
                   skills: pendingSkills,
+                  location: editForm.location.trim() || undefined,
+                  linkedin: editForm.linkedin.trim() || undefined,
                   ...(editResumeName ? { resumeUrl: editResumeName } : {}),
                   profileVisibility: editVisibility,
                   allowRecruiterContact: editAllowContact,
@@ -552,6 +558,35 @@ export default function CandidateProfilePage() {
                   </select>
                 </div>
 
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Location</label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#9CA3AF]" />
+                      <input
+                        type="text"
+                        value={editForm.location}
+                        onChange={e => setEditForm({ ...editForm, location: e.target.value })}
+                        placeholder="City, Country"
+                        className="w-full border border-[#E5E7EB] rounded-xl pl-9 pr-3 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] placeholder:text-[#D1D5DB] placeholder:font-normal"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">LinkedIn</label>
+                    <div className="relative">
+                      <Linkedin className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#0A66C2]" />
+                      <input
+                        type="text"
+                        value={editForm.linkedin}
+                        onChange={e => setEditForm({ ...editForm, linkedin: e.target.value })}
+                        placeholder="linkedin.com/in/..."
+                        className="w-full border border-[#E5E7EB] rounded-xl pl-9 pr-3 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] placeholder:text-[#D1D5DB] placeholder:font-normal"
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 {/* Skills Tag Input */}
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Skills</label>
@@ -641,6 +676,7 @@ export default function CandidateProfilePage() {
                     <p className="text-[9px] text-[#6B7280] leading-snug">Only visible on active applications</p>
                   </button>
                 </div>
+                {editVisibility === 'visible' && (
                 <label className="flex items-center justify-between gap-3 mt-3 cursor-pointer">
                   <span className="text-xs font-bold text-[#374151]">Allow recruiters to contact me for future roles</span>
                   <button type="button" onClick={() => setEditAllowContact(v => !v)}
@@ -649,6 +685,7 @@ export default function CandidateProfilePage() {
                     <span className={`absolute top-0.5 left-0.5 bg-white rounded-full shadow transition-transform ${editAllowContact ? 'translate-x-[1.125rem]' : ''}`} style={{ width: '1.125rem', height: '1.125rem' }} />
                   </button>
                 </label>
+                )}
               </div>
 
               <div className="flex gap-3">

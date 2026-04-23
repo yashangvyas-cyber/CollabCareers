@@ -12,7 +12,7 @@ interface PortalLayoutProps {
 
 export default function PortalLayout({
   children,
-  companyName = 'Yopmails',
+  companyName = 'MindInventory',
   showAuth = true,
 }: PortalLayoutProps) {
   const { currentUser } = useApp();
@@ -41,7 +41,7 @@ export default function PortalLayout({
               <div className="w-8 h-8 rounded-xl bg-[#3538CD] flex items-center justify-center text-white text-sm font-black shadow-sm">
                 Y
               </div>
-              <span className="text-sm font-black text-[#111827] tracking-tight">Yopmails</span>
+              <span className="text-sm font-black text-[#111827] tracking-tight">MindInventory</span>
             </Link>
           </div>
 

@@ -36,13 +36,13 @@ const formatPostedDate = (dateStr?: string): string => {
   if (diffDays === 0) return 'Posted Today';
   if (diffDays === 1) return 'Posted Yesterday';
   if (diffDays < 7) return `Posted ${diffDays} days ago`;
-  return `Posted ${date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+  return `Posted on ${date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`;
 };
 
-export default function CareerPage({ openAlumni = false }: { openAlumni?: boolean }) {
-  const { jobs, currentUser } = useApp();
-  const [showAuthModal, setShowAuthModal] = useState(openAlumni);
-  const [authTab, setAuthTab] = useState<'register' | 'signin'>('signin');
+export default function CareerPage({ openAlumni = false, openRegister = false }: { openAlumni?: boolean, openRegister?: boolean }) {
+  const { jobs, currentUser, applications } = useApp();
+  const [showAuthModal, setShowAuthModal] = useState(openAlumni || openRegister);
+  const [authTab, setAuthTab] = useState<'register' | 'signin'>(openRegister ? 'register' : 'signin');
   const [selectedJob, setSelectedJob] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [locationFilter, setLocationFilter] = useState('');
@@ -99,11 +99,10 @@ export default function CareerPage({ openAlumni = false }: { openAlumni?: boolea
       <div className="bg-gradient-to-r from-[#3538CD] to-[#2828a8]">
         <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
           <p className="text-sm text-white/80 font-medium">
-            Explore opportunities at <span className="font-bold text-white">Yopmails</span>
+            Explore opportunities at <span className="font-bold text-white">MindInventory</span>
           </p>
-          <span className="text-xs text-white/60 flex items-center gap-1.5">
-            <Briefcase className="w-3.5 h-3.5" />
-            {displayJobs.length} Open Positions
+          <span className="px-3 py-1 bg-white/10 text-white text-[11px] font-bold tracking-wide rounded-full border border-white/20 shadow-sm">
+            {filteredJobs.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, filteredJobs.length)} of {filteredJobs.length} Jobs
           </span>
         </div>
       </div>
@@ -129,9 +128,7 @@ export default function CareerPage({ openAlumni = false }: { openAlumni?: boolea
             <FilterPill label="Experience" icon={<Clock className="w-3.5 h-3.5" />} value={experienceFilter} options={experienceLevels} onChange={setExperienceFilter} />
             <FilterPill label="Employment" icon={<Briefcase className="w-3.5 h-3.5" />} value={employmentFilter} options={Array.from(new Set(displayJobs.map(j => j.employmentType)))} onChange={setEmploymentFilter} />
             <FilterPill label="Type" icon={<Building2 className="w-3.5 h-3.5" />} value={jobTypeFilter} options={Array.from(new Set(displayJobs.map(j => j.jobType)))} onChange={setJobTypeFilter} />
-            {businessUnits.length > 1 && (
-              <FilterPill label="Department" icon={<Building2 className="w-3.5 h-3.5" />} value={buFilter} options={businessUnits} onChange={setBuFilter} />
-            )}
+            <FilterPill label="Business Unit" icon={<Building2 className="w-3.5 h-3.5" />} value={buFilter} options={businessUnits} onChange={setBuFilter} />
 
             {(locationFilter || experienceFilter || employmentFilter || jobTypeFilter || buFilter) && (
               <button onClick={clearFilters} className="flex items-center gap-1.5 ml-2 px-3 py-1.5 text-[10px] font-black text-[#6B7280] hover:text-red-500 transition-colors uppercase tracking-widest bg-[#F3F4F6] hover:bg-red-50 rounded-lg group">
@@ -165,12 +162,14 @@ export default function CareerPage({ openAlumni = false }: { openAlumni?: boolea
       </div>
 
       {/* Job Listings */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-6 pt-6 pb-8">
 
         {/* ── Grid View ── */}
         {viewMode === 'grid' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {currentJobs.length > 0 ? currentJobs.map((job) => (
+            {currentJobs.length > 0 ? currentJobs.map((job) => {
+              const hasApplied = currentUser && applications.some(app => app.candidateId === currentUser.id && app.jobId === job.id);
+              return (
               <div key={job.id} className="bg-white rounded-xl border border-[#E5E7EB] p-6 hover:shadow-lg hover:border-primary/30 transition-all duration-200 group">
                 <div className="flex items-start justify-between mb-3">
                   <Link to={`/portal/yopmails/job/${job.id}`} className="text-lg font-semibold text-primary group-hover:text-[#292bb0] transition-colors">
@@ -208,12 +207,13 @@ export default function CareerPage({ openAlumni = false }: { openAlumni?: boolea
                 )}
                 <div className="flex items-center justify-between pt-4 border-t border-[#F3F4F6]">
                   <span className="text-[11px] font-black text-[#9CA3AF] uppercase tracking-widest">{formatPostedDate(job.createdAt)}</span>
-                  <Link to={`/portal/yopmails/job/${job.id}`} className="px-6 py-2.5 bg-[#3538CD] text-white text-[12px] font-black rounded-xl hover:bg-[#292bb0] transition-all uppercase tracking-widest shadow-md shadow-[#3538CD]/10">
-                    View & Apply
+                  <Link to={`/portal/yopmails/job/${job.id}`} className={`px-6 py-2.5 text-[12px] font-black rounded-xl transition-all uppercase tracking-widest shadow-md ${hasApplied ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 shadow-emerald-500/5' : 'bg-[#3538CD] text-white hover:bg-[#292bb0] shadow-[#3538CD]/10'}`}>
+                    {hasApplied ? 'Applied' : 'View & Apply'}
                   </Link>
                 </div>
               </div>
-            )) : (
+              );
+            }) : (
               <div className="col-span-full py-12 text-center bg-white rounded-xl border border-dashed border-[#E5E7EB]">
                 <p className="text-[#6B7280] text-sm italic">No jobs matching your criteria.</p>
               </div>
@@ -224,7 +224,9 @@ export default function CareerPage({ openAlumni = false }: { openAlumni?: boolea
         {/* ── List View ── */}
         {viewMode === 'list' && (
           <div className="flex flex-col gap-2">
-            {currentJobs.length > 0 ? currentJobs.map((job) => (
+            {currentJobs.length > 0 ? currentJobs.map((job) => {
+              const hasApplied = currentUser && applications.some(app => app.candidateId === currentUser.id && app.jobId === job.id);
+              return (
               <div key={job.id} className="bg-white rounded-xl border border-[#E5E7EB] px-5 py-4 hover:shadow-md hover:border-primary/30 transition-all duration-200 group">
                 <div className="flex items-center gap-4">
                   {/* Left: Title + tags */}
@@ -256,16 +258,19 @@ export default function CareerPage({ openAlumni = false }: { openAlumni?: boolea
                     <span className="text-[11px] font-black text-[#9CA3AF] uppercase tracking-widest whitespace-nowrap hidden sm:block">
                       {formatPostedDate(job.createdAt)}
                     </span>
-                    <button onClick={() => { if (!currentUser) { setSelectedJob(job); setAuthTab('signin'); setShowAuthModal(true); } }} className="p-2 text-[#9CA3AF] hover:text-[#3538CD] hover:bg-[#3538CD]/5 rounded-lg transition-all" title="Save Job">
-                      <Bookmark className="w-4 h-4" />
-                    </button>
-                    <Link to={`/portal/yopmails/job/${job.id}`} className="px-4 py-2 bg-[#3538CD] text-white text-[11px] font-black rounded-lg hover:bg-[#292bb0] transition-all uppercase tracking-widest whitespace-nowrap">
-                      View & Apply
+                    {!hasApplied && (
+                      <button onClick={() => { if (!currentUser) { setSelectedJob(job); setAuthTab('signin'); setShowAuthModal(true); } }} className="p-2 text-[#9CA3AF] hover:text-[#3538CD] hover:bg-[#3538CD]/5 rounded-lg transition-all" title="Save Job">
+                        <Bookmark className="w-4 h-4" />
+                      </button>
+                    )}
+                    <Link to={`/portal/yopmails/job/${job.id}`} className={`px-5 py-2 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all ${hasApplied ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100' : 'bg-[#F4F5FA] text-[#3538CD] hover:bg-[#3538CD] hover:text-white'}`}>
+                      {hasApplied ? 'Applied' : 'View'}
                     </Link>
                   </div>
                 </div>
               </div>
-            )) : (
+              );
+            }) : (
               <div className="py-12 text-center bg-white rounded-xl border border-dashed border-[#E5E7EB]">
                 <p className="text-[#6B7280] text-sm italic">No jobs matching your criteria.</p>
               </div>
@@ -321,7 +326,7 @@ export default function CareerPage({ openAlumni = false }: { openAlumni?: boolea
         isOpen={showAuthModal} 
         onClose={() => setShowAuthModal(false)}
         jobTitle={selectedJob?.title || 'Portal'} 
-        businessUnit={selectedJob?.businessUnit || 'Yopmails'}
+        businessUnit={selectedJob?.businessUnit || 'MindInventory'}
         jobId={selectedJob?.id || '1'}
         initialTab={authTab}
         initialState={openAlumni ? 'alumni-verify' : 'auth'}

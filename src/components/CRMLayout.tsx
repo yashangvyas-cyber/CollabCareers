@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
-  LayoutDashboard, Briefcase, Users, MessageSquare,
+  LayoutDashboard, Briefcase, Users, UserSearch, MessageSquare,
   Settings, Clock, ChevronLeft, Search, Bell, CheckSquare,
   Menu
 } from 'lucide-react';
@@ -10,6 +10,7 @@ const navItems = [
   { name: 'Dashboard', icon: LayoutDashboard, path: '/' },
   { name: 'Jobs', icon: Briefcase, path: '/crm/add-job', hasAdd: true },
   { name: 'Candidates', icon: Users, path: '/crm/candidates', hasAdd: true },
+  { name: 'Talent Pool', icon: UserSearch, path: '/crm/talent-pool' },
   { name: 'Interviews', icon: MessageSquare, path: '#' },
   { name: 'Config', icon: Settings, path: '/crm/config' },
   { name: 'Timeline', icon: Clock, path: '#' },

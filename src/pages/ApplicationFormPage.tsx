@@ -29,7 +29,7 @@ export default function ApplicationFormPage() {
   
   // Find job from state
   const job = jobs.find(j => j.id === jobId) || jobs[0] || {
-    id: 'd1', title: 'React Developer', businessUnit: 'Yopmails', customFields: [
+    id: 'd1', title: 'React Developer', businessUnit: 'MindInventory', customFields: [
       { id: '1', label: 'Portfolio URL', type: 'Text', required: true },
       { id: '2', label: 'Are you open to relocate?', type: 'Yes/No', required: false }
     ]

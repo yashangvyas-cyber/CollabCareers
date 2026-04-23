@@ -54,6 +54,8 @@ export interface Candidate {
   noticePeriod?: string;
   currentOrg?: string;
   currentDesignation?: string;
+  location?: string;
+  linkedin?: string;
 }
 
 export interface Application {

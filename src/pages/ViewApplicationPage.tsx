@@ -31,7 +31,7 @@ export default function ViewApplicationPage() {
 
   const appData = {
     jobTitle: job?.title || 'React Developer',
-    company: job?.businessUnit || 'Yopmails',
+    company: job?.businessUnit || 'MindInventory',
     location: job?.location || 'Ahmedabad',
     employmentType: job?.employmentType || 'Full-time',
     jobType: job?.jobType || 'On-site',

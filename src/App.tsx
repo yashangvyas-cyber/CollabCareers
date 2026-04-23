@@ -3,7 +3,7 @@ import AddJobPage from './pages/AddJobPage';
 import CandidateDetailPage from './pages/CandidateDetailPage';
 import CareerPage from './pages/CareerPage';
 import JobDetailPage from './pages/JobDetailPage';
-import RegisterPage from './pages/RegisterPage';
+// import RegisterPage from './pages/RegisterPage';
 import ApplicationFormPage from './pages/ApplicationFormPage';
 import ConfirmationPage from './pages/ConfirmationPage';
 import CandidateProfilePage from './pages/CandidateProfilePage';
@@ -16,6 +16,8 @@ import ViewApplicationPage from './pages/ViewApplicationPage';
 import OperationalConfigPage from './pages/OperationalConfigPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import CareerPortalPage from './pages/CareerPortalPage';
+import TalentPoolPage from './pages/TalentPoolPage';
+import TalentPoolDetailsPage from './pages/TalentPoolDetailsPage';
 
 function App() {
   return (
@@ -26,12 +28,14 @@ function App() {
         <Route path="/crm/add-job" element={<AddJobPage />} />
         <Route path="/crm/candidates/:candidateId" element={<CandidateDetailPage />} />
         <Route path="/crm/candidates" element={<CandidateListingPage />} />
+        <Route path="/crm/talent-pool/:candidateId" element={<TalentPoolDetailsPage />} />
+        <Route path="/crm/talent-pool" element={<TalentPoolPage />} />
         <Route path="/crm/config" element={<OperationalConfigPage />} />
         <Route path="/crm/career-portal" element={<CareerPortalPage />} />
         {/* Unified Career Portal (Flows 2+3+4) */}
         <Route path="/portal/:slug" element={<CareerPage />} />
         <Route path="/portal/:slug/job/:jobId" element={<JobDetailPage />} />
-        <Route path="/portal/:slug/register" element={<RegisterPage />} />
+        <Route path="/portal/:slug/register" element={<CareerPage openRegister={true} />} />
         <Route path="/portal/:slug/apply/:jobId" element={<ApplicationFormPage />} />
         <Route path="/portal/:slug/confirmation/:jobId" element={<ConfirmationPage />} />
         <Route path="/portal/:slug/profile" element={<CandidateProfilePage />} />

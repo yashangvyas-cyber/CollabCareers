@@ -15,14 +15,14 @@ interface AppContextType extends AppState {
   updatePortalConfig: (updates: Partial<PortalConfig>) => void;
 }
 
-const STORAGE_KEY = 'collab_careers_state';
+const STORAGE_KEY = 'collab_careers_state_v2';
 
 const initialState: AppState = {
   jobs: [
     {
       id: 'd1',
       title: 'React Developer',
-      businessUnit: 'Yopmails',
+      businessUnit: 'MindInventory',
       recruiter: 'Sarah Chen',
       location: 'Ahmedabad',
       experience: '2+ Years Experience',
@@ -35,12 +35,29 @@ const initialState: AppState = {
       customFields: [{ id: '1', label: 'Portfolio URL', type: 'Text', required: true }],
       evaluationCriteria: ['React expert', 'UI skills'],
       createdAt: new Date().toISOString(),
-      description: 'Expert React developer needed for performance-critical web applications.'
+      description: `We are looking for an experienced React Developer to join our frontend team and help build high-performance, scalable web applications. You will work closely with product managers, designers, and backend engineers to deliver polished, accessible user experiences.
+
+What you'll do:
+• Build and maintain responsive, high-performance React applications
+• Collaborate with designers to implement pixel-perfect, accessible UI components
+• Write clean, reusable component libraries with TypeScript
+• Optimise application performance through profiling, lazy loading, and code-splitting
+• Participate in code reviews and contribute to engineering best practices
+
+What you'll bring:
+• 2+ years of commercial experience with React and the broader JavaScript ecosystem
+• Strong proficiency in TypeScript, HTML5, and modern CSS
+• Experience with state management libraries (Redux, Zustand, or React Query)
+• Familiarity with modern tooling — Vite, ESLint, Prettier
+• Comfortable working in fast-paced, agile cross-functional teams
+
+Why MindInventory:
+We build tools used by thousands of teams. Our frontend squad is small, collaborative, and obsessed with quality. You will have genuine ownership over product decisions and a clear path to grow into senior engineering roles.`
     },
     {
       id: 'd2',
       title: 'UI/UX Designer',
-      businessUnit: 'Yopmails',
+      businessUnit: '300Mind',
       recruiter: 'Michael Park',
       location: 'Remote',
       experience: '2+ Years Experience',
@@ -53,12 +70,28 @@ const initialState: AppState = {
       customFields: [{ id: '2', label: 'Behance link', type: 'Text', required: true }],
       evaluationCriteria: ['Design systems mastery'],
       createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-      description: 'Join our design team to build consistent user experiences.'
+      description: `We are looking for a talented UI/UX Designer to join our product design team. You will be the voice of the user in every product decision — crafting interfaces that are both beautiful and intuitive, and ensuring design quality from concept to shipped code.
+
+What you'll do:
+• Own the end-to-end design process — from discovery and wireframes to high-fidelity prototypes
+• Build and maintain a scalable, consistent design system in Figma
+• Conduct user research and usability tests, synthesising insights into actionable design decisions
+• Partner closely with engineering to ensure implementation quality and fidelity
+• Advocate for accessibility and inclusive design practices across all products
+
+What you'll bring:
+• 2+ years of product design experience in a technology environment
+• Mastery of Figma, including components, variables, and auto-layout
+• A portfolio demonstrating both strong visual craft and deep UX thinking
+• Ability to clearly articulate and justify every design decision to stakeholders
+
+Why MindInventory:
+Design is a first-class citizen at MindInventory. You will work on products that touch real users every day, with the latitude to set the design direction end-to-end and see your work ship within weeks.`
     },
     {
       id: 'd3',
       title: 'Flutter Developer',
-      businessUnit: 'Yopmails',
+      businessUnit: 'MindInventory',
       recruiter: 'James Wilson',
       location: 'Remote',
       experience: '1+ Years Experience',
@@ -71,12 +104,28 @@ const initialState: AppState = {
       customFields: [],
       evaluationCriteria: ['App store delivery experience'],
       createdAt: new Date(Date.now() - 86400000 * 1).toISOString(),
-      description: 'Build cross-platform mobile apps using Flutter.'
+      description: `We are looking for a Flutter Developer to help us deliver seamless mobile experiences across iOS and Android from a single codebase. You will work on consumer-facing features used daily by our growing user base, with direct ownership from design handoff to App Store release.
+
+What you'll do:
+• Design, build, and maintain cross-platform mobile applications using Flutter and Dart
+• Integrate RESTful APIs and Firebase services into the application layer
+• Ensure smooth 60fps animations and responsive layouts across a wide range of device sizes
+• Write unit and widget tests to ensure code reliability and prevent regressions
+• Collaborate in two-week sprints with daily standups, demos, and retrospectives
+
+What you'll bring:
+• 1+ years of commercial Flutter development experience
+• Solid understanding of Dart and Flutter's widget and state lifecycle
+• Experience with Firebase (Auth, Firestore, Cloud Storage) strongly preferred
+• Familiarity with App Store and Google Play submission and review processes
+
+Why MindInventory:
+Ship fast, learn faster. Our mobile team is small and the codebase is well-maintained — you will have end-to-end ownership of features from day one, with experienced mentors to support your growth.`
     },
     {
       id: 'd4',
       title: 'Project Manager',
-      businessUnit: 'Yopmails',
+      businessUnit: 'CollabCRM',
       recruiter: 'Lisa Ray',
       location: 'Ahmedabad',
       experience: '5+ Years Experience',
@@ -89,12 +138,29 @@ const initialState: AppState = {
       customFields: [],
       evaluationCriteria: ['Agile certification'],
       createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
-      description: 'Lead high-impact projects from ideation to delivery.'
+      description: `We are looking for a seasoned Project Manager to lead cross-functional initiatives from ideation to delivery. You will be the connective tissue between business stakeholders, engineering, and design — ensuring we build the right things, the right way, on time.
+
+What you'll do:
+• Define project scope, milestones, and success metrics in collaboration with stakeholders
+• Run agile ceremonies — sprint planning, standups, retrospectives, and stakeholder demos
+• Proactively identify and mitigate risks before they become delivery blockers
+• Maintain clear, consistent communication of project status and decisions to all levels
+• Continuously improve team delivery processes, tooling, and documentation standards
+
+What you'll bring:
+• 5+ years of project management experience in a software product environment
+• Hands-on experience facilitating Agile and Kanban methodologies
+• Proficiency in Jira, Confluence, and project tracking tools
+• Strong written and verbal communication — you can distil complex situations clearly
+• Agile, Scrum Master, or PMP certification is a plus
+
+Why MindInventory:
+We run lean and ship often. As a PM here, your decisions have direct product impact — no layers of bureaucracy, just you, the team, and the problem to solve. You will work with engineers who care deeply about delivery quality.`
     },
     {
       id: 'd5',
       title: 'Business Analyst',
-      businessUnit: 'Yopmails',
+      businessUnit: '300Mind',
       recruiter: 'David Kim',
       location: 'Ahmedabad',
       experience: '2+ Years Experience',
@@ -112,7 +178,7 @@ const initialState: AppState = {
     {
       id: 'd6',
       title: 'Node.js Backend Engineer',
-      businessUnit: 'Yopmails',
+      businessUnit: 'MindInventory',
       recruiter: 'James Wilson',
       location: 'Remote',
       experience: '3+ Years Experience',
@@ -130,7 +196,7 @@ const initialState: AppState = {
     {
       id: 'd7',
       title: 'DevOps Engineer',
-      businessUnit: 'Yopmails',
+      businessUnit: 'MindInventory',
       recruiter: 'Michael Park',
       location: 'Remote',
       experience: '4+ Years Experience',
@@ -148,7 +214,7 @@ const initialState: AppState = {
     {
       id: 'd8',
       title: 'QA Engineer',
-      businessUnit: 'Yopmails',
+      businessUnit: 'CollabCRM',
       recruiter: 'Sarah Chen',
       location: 'Ahmedabad',
       experience: '1+ Years Experience',
@@ -166,7 +232,7 @@ const initialState: AppState = {
     {
       id: 'd9',
       title: 'Product Designer',
-      businessUnit: 'Yopmails',
+      businessUnit: '300Mind',
       recruiter: 'Lisa Ray',
       location: 'Remote',
       experience: '3+ Years Experience',
@@ -184,7 +250,7 @@ const initialState: AppState = {
     {
       id: 'd10',
       title: 'Data Analyst',
-      businessUnit: 'Yopmails',
+      businessUnit: '300Mind',
       recruiter: 'David Kim',
       location: 'Ahmedabad',
       experience: '2+ Years Experience',
@@ -202,7 +268,7 @@ const initialState: AppState = {
     {
       id: 'd11',
       title: 'iOS Developer',
-      businessUnit: 'Yopmails',
+      businessUnit: 'CollabCRM',
       recruiter: 'Sarah Chen',
       location: 'Remote',
       experience: '2+ Years Experience',
@@ -220,7 +286,7 @@ const initialState: AppState = {
     {
       id: 'd12',
       title: 'Android Developer',
-      businessUnit: 'Yopmails',
+      businessUnit: 'CollabCRM',
       recruiter: 'Michael Park',
       location: 'Remote',
       experience: '2+ Years Experience',
@@ -259,6 +325,8 @@ const initialState: AppState = {
       currentDesignation: 'Frontend Engineer',
       noticePeriod: '30 days',
       skills: ['React', 'TypeScript', 'Tailwind CSS', 'Node.js'],
+      location: 'Pune, India',
+      linkedin: 'linkedin.com/in/riyadesai',
     },
     {
       id: 'c3',
@@ -268,11 +336,13 @@ const initialState: AppState = {
       phone: '+91 76543 21098',
       isAlumni: false,
       profileVisibility: 'visible' as const,
-      allowRecruiterContact: false,
+      allowRecruiterContact: true,
       currentOrg: 'Wipro',
       currentDesignation: 'Product Manager',
       noticePeriod: '60 days',
       skills: ['Product Strategy', 'Agile', 'SQL', 'Figma'],
+      location: 'Bangalore, India',
+      linkedin: 'linkedin.com/in/karanmehta',
     },
     {
       id: 'c4',
@@ -288,6 +358,8 @@ const initialState: AppState = {
       currentDesignation: 'UX Designer',
       noticePeriod: 'Immediate',
       skills: ['Figma', 'User Research', 'Prototyping', 'Design Systems'],
+      location: 'Mumbai, India',
+      linkedin: 'linkedin.com/in/ananyasharma',
     },
   ],
   applications: [
@@ -342,16 +414,48 @@ const initialState: AppState = {
       appliedAt: new Date(Date.now() - 86400000 * 15).toISOString(),
       answers: { _fullFormData: { personal: { contactNumber: '+91 98765 43210' } } },
       resumeUrl: 'Alex_Patel_Resume.pdf'
-    }
+    },
+    // Riya Desai (c2) — 3 applications, different statuses
+    {
+      id: 'a6',
+      candidateId: 'c2',
+      jobId: 'd1', // React Developer
+      status: 'Under Review',
+      appliedAt: new Date(Date.now() - 86400000 * 3).toISOString(),
+      answers: { _fullFormData: { personal: { contactNumber: '+91 87654 32109' } } },
+      resumeUrl: 'Riya_Desai_Resume.pdf'
+    },
+    {
+      id: 'a7',
+      candidateId: 'c2',
+      jobId: 'd6', // Node.js Backend Engineer
+      status: 'Interview in Progress',
+      appliedAt: new Date(Date.now() - 86400000 * 10).toISOString(),
+      answers: { _fullFormData: { personal: { contactNumber: '+91 87654 32109' } } },
+      resumeUrl: 'Riya_Desai_Resume.pdf'
+    },
+    {
+      id: 'a8',
+      candidateId: 'c2',
+      jobId: 'd11', // iOS Developer
+      status: 'Rejected',
+      appliedAt: new Date(Date.now() - 86400000 * 25).toISOString(),
+      answers: { _fullFormData: { personal: { contactNumber: '+91 87654 32109' } } },
+      resumeUrl: 'Riya_Desai_Resume.pdf'
+    },
+    // Karan Mehta (c3) — 1 application
+    {
+      id: 'a9',
+      candidateId: 'c3',
+      jobId: 'd4', // Project Manager
+      status: 'Decision Made',
+      appliedAt: new Date(Date.now() - 86400000 * 7).toISOString(),
+      answers: { _fullFormData: { personal: { contactNumber: '+91 76543 21098' } } },
+      resumeUrl: 'Karan_Mehta_Resume.pdf'
+    },
+    // Ananya Sharma (c4) — no applications (empty state demo)
   ],
-  currentUser: {
-    id: 'c1',
-    firstName: 'Alex',
-    lastName: 'Patel',
-    email: 'alex.patel@example.com',
-    phone: '+91 98765 43210',
-    isAlumni: false
-  },
+  currentUser: null,
   alumniVerified: {
     verified: false,
     email: null,
@@ -383,19 +487,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
       });
 
-      // Ensure mock applications are present and linked to the actual current user ID
+      // Ensure mock applications are present — keep their original candidateIds (do NOT override to currentUser)
       const currentApps = parsed.applications || [];
       const mergedApps = [...currentApps];
-      const actualCandidateId = parsed.currentUser?.id || 'c1';
 
       initialState.applications.forEach(defaultApp => {
-        const appToMerge = { ...defaultApp, candidateId: actualCandidateId };
-        const existingIdx = mergedApps.findIndex(a => a.id === appToMerge.id);
+        const existingIdx = mergedApps.findIndex(a => a.id === defaultApp.id);
         if (existingIdx === -1) {
-          mergedApps.push(appToMerge);
-        } else {
-          mergedApps[existingIdx] = appToMerge;
+          mergedApps.push(defaultApp); // preserve original candidateId
         }
+        // Don't overwrite existing apps — user may have updated them in session
       });
 
       // Ensure mock candidate is present

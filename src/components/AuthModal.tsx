@@ -127,7 +127,7 @@ export default function AuthModal({
       />
       
       {/* Modal */}
-      <div className="relative w-full max-w-[480px] bg-white rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+      <div className="relative w-full max-w-[680px] bg-white rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[92vh]">
         {/* Header — Org + CollabCRM logos together */}
         <div className="px-8 pt-8 pb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -186,7 +186,7 @@ export default function AuthModal({
           </div>
         )}
 
-        <div className="p-8">
+        <div className="p-8 overflow-y-auto flex-1">
           {modalState === 'auth' ? (
             <>
               {activeTab === 'register' ? (
@@ -339,7 +339,8 @@ export default function AuthModal({
                           : 'Your profile is hidden. Recruiters can only see your info after you apply.'}
                       </p>
                     </div>
-                    {/* Recruiter contact toggle — surfaced within the section */}
+                    {/* Recruiter contact toggle — only shown for visible profiles */}
+                    {profileVisibility === 'visible' && (
                     <label className="flex items-center justify-between gap-3 mt-3 cursor-pointer">
                       <span className="text-[11px] font-bold text-[#374151]">Allow recruiters to contact me for future roles</span>
                       <button type="button" onClick={() => setAllowRecruiterContact(v => !v)}
@@ -349,6 +350,7 @@ export default function AuthModal({
                           style={{ width: '1.125rem', height: '1.125rem' }} />
                       </button>
                     </label>
+                    )}
                   </div>
 
                   {/* T&C just above CTA */}
