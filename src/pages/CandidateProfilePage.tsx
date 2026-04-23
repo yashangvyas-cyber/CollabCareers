@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import PortalLayout from '../components/PortalLayout';
-import { Briefcase, Mail, Phone, MapPin, FileText, ExternalLink, Linkedin, LogOut, ArrowRight, Clock, Pencil, X, Check, Eye, EyeOff, Bookmark } from 'lucide-react';
+import { Briefcase, Mail, Phone, MapPin, FileText, ExternalLink, Linkedin, LogOut, ArrowRight, Clock, Pencil, X, Check, Eye, EyeOff, Bookmark, Upload } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 
 const brandStatusStyles: Record<string, string> = {
@@ -32,7 +32,13 @@ export default function CandidateProfilePage() {
     lastName: currentUser?.lastName || '',
     email: currentUser?.email || '',
     phone: currentUser?.phone || '',
+    currentOrg: '',
+    currentDesignation: '',
+    noticePeriod: '',
   });
+  const [editSkills, setEditSkills] = useState<string[]>([]);
+  const [skillInput, setSkillInput] = useState('');
+  const [editResumeName, setEditResumeName] = useState('');
   const [editVisibility, setEditVisibility] = useState<'visible' | 'private'>('visible');
   const [editAllowContact, setEditAllowContact] = useState(false);
 
@@ -42,7 +48,13 @@ export default function CandidateProfilePage() {
       lastName: currentUser?.lastName || '',
       email: currentUser?.email || '',
       phone: currentUser?.phone || derivedProfile.phone || '',
+      currentOrg: currentUser?.currentOrg || derivedProfile.currentOrg || '',
+      currentDesignation: currentUser?.currentDesignation || derivedProfile.designation || '',
+      noticePeriod: currentUser?.noticePeriod || derivedProfile.noticePeriod || '',
     });
+    setEditSkills(currentUser?.skills?.length ? currentUser.skills : derivedProfile.skills);
+    setSkillInput('');
+    setEditResumeName(derivedProfile.resumeName || '');
     setEditVisibility(currentUser?.profileVisibility || 'visible');
     setEditAllowContact(currentUser?.allowRecruiterContact || false);
     setShowEditProfile(true);
@@ -96,11 +108,11 @@ export default function CandidateProfilePage() {
       ? `${profileData.address.city}, ${profileData.address.country}`
       : null,
     linkedin: profileData?.personal?.linkedin || null,
-    designation: profileData?.professional?.currentDesignation || null,
-    currentOrg: profileData?.professional?.currentOrg || null,
-    noticePeriod: profileData?.professional?.noticePeriod || null,
-    skills: profileData?.professional?.skills || [],
-    resumeName: latestApp?.resumeUrl || null,
+    designation: currentUser?.currentDesignation || profileData?.professional?.currentDesignation || null,
+    currentOrg: currentUser?.currentOrg || profileData?.professional?.currentOrg || null,
+    noticePeriod: currentUser?.noticePeriod || profileData?.professional?.noticePeriod || null,
+    skills: currentUser?.skills?.length ? currentUser.skills : (profileData?.professional?.skills || []),
+    resumeName: currentUser?.resumeUrl || latestApp?.resumeUrl || null,
   };
 
   const handleLogout = () => {
@@ -407,10 +419,10 @@ export default function CandidateProfilePage() {
       {showEditProfile && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-[#111827]/60 backdrop-blur-sm" onClick={() => setShowEditProfile(false)} />
-          <div className="relative bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+          <div className="relative bg-white w-full max-w-md rounded-3xl shadow-2xl flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
 
             {/* Header */}
-            <div className="flex items-center justify-between px-8 pt-8 pb-4 border-b border-[#F3F4F6]">
+            <div className="flex items-center justify-between px-6 pt-5 pb-3 border-b border-[#F3F4F6] shrink-0">
               <div>
                 <h3 className="text-lg font-black text-[#111827]">Edit Profile</h3>
                 <p className="text-xs text-[#9CA3AF] mt-0.5">Update your personal information</p>
@@ -422,95 +434,214 @@ export default function CandidateProfilePage() {
 
             {/* Form */}
             <form
-              className="p-8 space-y-5"
+              className="px-6 py-5 space-y-4 overflow-y-auto"
               onSubmit={(e) => {
                 e.preventDefault();
+                const pendingSkills = skillInput.trim()
+                  ? [...editSkills, skillInput.trim()]
+                  : editSkills;
                 updateCurrentUser({
                   firstName: editForm.firstName.trim(),
                   lastName: editForm.lastName.trim(),
                   email: editForm.email.trim(),
                   phone: editForm.phone.trim(),
+                  currentOrg: editForm.currentOrg.trim(),
+                  currentDesignation: editForm.currentDesignation.trim(),
+                  noticePeriod: editForm.noticePeriod,
+                  skills: pendingSkills,
+                  ...(editResumeName ? { resumeUrl: editResumeName } : {}),
                   profileVisibility: editVisibility,
                   allowRecruiterContact: editAllowContact,
                 });
                 setShowEditProfile(false);
               }}
             >
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
                   <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">First Name <span className="text-red-500">*</span></label>
                   <input
                     type="text"
                     required
                     value={editForm.firstName}
                     onChange={e => setEditForm({ ...editForm, firstName: e.target.value })}
-                    className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
+                    className="w-full border border-[#E5E7EB] rounded-xl px-4 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
                   />
                 </div>
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                   <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Last Name <span className="text-red-500">*</span></label>
                   <input
                     type="text"
                     required
                     value={editForm.lastName}
                     onChange={e => setEditForm({ ...editForm, lastName: e.target.value })}
-                    className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
+                    className="w-full border border-[#E5E7EB] rounded-xl px-4 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
                   />
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Email Address <span className="text-red-500">*</span></label>
-                <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9CA3AF]" />
-                  <input
-                    type="email"
-                    required
-                    value={editForm.email}
-                    onChange={e => setEditForm({ ...editForm, email: e.target.value })}
-                    className="w-full border border-[#E5E7EB] rounded-xl pl-10 pr-4 py-3 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
-                  />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Email Address <span className="text-red-500">*</span></label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#9CA3AF]" />
+                    <input
+                      type="email"
+                      required
+                      value={editForm.email}
+                      onChange={e => setEditForm({ ...editForm, email: e.target.value })}
+                      className="w-full border border-[#E5E7EB] rounded-xl pl-9 pr-3 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Phone Number</label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#9CA3AF]" />
+                    <input
+                      type="tel"
+                      value={editForm.phone}
+                      onChange={e => setEditForm({ ...editForm, phone: e.target.value })}
+                      placeholder="+91 00000 00000"
+                      className="w-full border border-[#E5E7EB] rounded-xl pl-9 pr-3 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] placeholder:text-[#D1D5DB]"
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Phone Number</label>
-                <div className="relative">
-                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9CA3AF]" />
-                  <input
-                    type="tel"
-                    value={editForm.phone}
-                    onChange={e => setEditForm({ ...editForm, phone: e.target.value })}
-                    placeholder="+91 00000 00000"
-                    className="w-full border border-[#E5E7EB] rounded-xl pl-10 pr-4 py-3 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] placeholder:text-[#D1D5DB]"
-                  />
+              {/* Professional Details */}
+              <div className="border-t border-[#F3F4F6] pt-3 space-y-3">
+                <p className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest">Professional Details</p>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Organisation</label>
+                    <input
+                      type="text"
+                      value={editForm.currentOrg}
+                      onChange={e => setEditForm({ ...editForm, currentOrg: e.target.value })}
+                      placeholder="e.g. Acme Corp"
+                      className="w-full border border-[#E5E7EB] rounded-xl px-3 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] placeholder:text-[#D1D5DB] placeholder:font-normal"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Designation</label>
+                    <input
+                      type="text"
+                      value={editForm.currentDesignation}
+                      onChange={e => setEditForm({ ...editForm, currentDesignation: e.target.value })}
+                      placeholder="e.g. Sr. Engineer"
+                      className="w-full border border-[#E5E7EB] rounded-xl px-3 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] placeholder:text-[#D1D5DB] placeholder:font-normal"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Notice Period</label>
+                  <select
+                    value={editForm.noticePeriod}
+                    onChange={e => setEditForm({ ...editForm, noticePeriod: e.target.value })}
+                    className="w-full border border-[#E5E7EB] rounded-xl px-3 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] text-[#374151]"
+                  >
+                    <option value="">Select notice period</option>
+                    <option value="Immediate">Immediate</option>
+                    <option value="15 days">15 days</option>
+                    <option value="30 days">30 days</option>
+                    <option value="45 days">45 days</option>
+                    <option value="60 days">60 days</option>
+                    <option value="90 days">90 days</option>
+                  </select>
+                </div>
+
+                {/* Skills Tag Input */}
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Skills</label>
+                  <div className="border border-[#E5E7EB] rounded-xl px-3 py-2 bg-[#F9FAFB] focus-within:ring-4 focus-within:ring-[#3538CD]/10 focus-within:border-[#3538CD] min-h-[40px]">
+                    {editSkills.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mb-1.5">
+                        {editSkills.map((skill, i) => (
+                          <span key={i} className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold bg-[#3538CD]/10 text-[#3538CD] rounded-full">
+                            {skill}
+                            <button type="button" onClick={() => setEditSkills(editSkills.filter((_, j) => j !== i))} className="hover:text-red-500 transition-colors">
+                              <X className="w-3 h-3" />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    <input
+                      type="text"
+                      value={skillInput}
+                      onChange={e => setSkillInput(e.target.value)}
+                      onKeyDown={e => {
+                        if ((e.key === 'Enter' || e.key === ',') && skillInput.trim()) {
+                          e.preventDefault();
+                          setEditSkills([...editSkills, skillInput.trim()]);
+                          setSkillInput('');
+                        }
+                      }}
+                      onBlur={() => {
+                        if (skillInput.trim()) {
+                          setEditSkills([...editSkills, skillInput.trim()]);
+                          setSkillInput('');
+                        }
+                      }}
+                      placeholder="Type a skill and press Enter"
+                      className="w-full bg-transparent text-sm font-bold focus:outline-none placeholder:text-[#D1D5DB] placeholder:font-normal"
+                    />
+                  </div>
+                </div>
+
+                {/* Resume Upload */}
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Resume</label>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 flex items-center gap-2 px-3 py-2 border border-[#E5E7EB] rounded-xl bg-[#F9FAFB] min-w-0">
+                      <FileText className="w-3.5 h-3.5 text-[#9CA3AF] shrink-0" />
+                      <span className={`text-xs truncate ${editResumeName ? 'font-bold text-[#374151]' : 'font-normal text-[#D1D5DB]'}`}>
+                        {editResumeName || 'No resume uploaded'}
+                      </span>
+                    </div>
+                    <label className="cursor-pointer shrink-0 flex items-center gap-1.5 px-3 py-2 border border-[#3538CD] text-[#3538CD] text-[11px] font-black rounded-xl hover:bg-[#3538CD]/5 transition-colors uppercase tracking-widest">
+                      <Upload className="w-3.5 h-3.5" />
+                      Upload
+                      <input
+                        type="file"
+                        accept=".pdf,.doc,.docx"
+                        className="hidden"
+                        onChange={e => {
+                          const file = e.target.files?.[0];
+                          if (file) setEditResumeName(file.name);
+                        }}
+                      />
+                    </label>
+                  </div>
                 </div>
               </div>
 
               {/* Profile Visibility */}
-              <div className="pt-1 border-t border-[#F3F4F6]">
-                <p className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest mb-3">Profile Visibility</p>
-                <div className="grid grid-cols-2 gap-3">
+              <div className="border-t border-[#F3F4F6] pt-3">
+                <p className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest mb-2">Profile Visibility</p>
+                <div className="grid grid-cols-2 gap-2">
                   <button type="button" onClick={() => setEditVisibility('visible')}
-                    className={`relative text-left p-3 rounded-xl border-2 transition-all ${editVisibility === 'visible' ? 'border-[#3538CD] bg-[#3538CD]/5' : 'border-[#E5E7EB] hover:border-[#C7C9F0]'}`}>
-                    <div className={`absolute top-2.5 right-2.5 w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center ${editVisibility === 'visible' ? 'border-[#3538CD]' : 'border-[#D1D5DB]'}`}>
+                    className={`relative text-left p-2.5 rounded-xl border-2 transition-all ${editVisibility === 'visible' ? 'border-[#3538CD] bg-[#3538CD]/5' : 'border-[#E5E7EB] hover:border-[#C7C9F0]'}`}>
+                    <div className={`absolute top-2 right-2 w-3 h-3 rounded-full border-2 flex items-center justify-center ${editVisibility === 'visible' ? 'border-[#3538CD]' : 'border-[#D1D5DB]'}`}>
                       {editVisibility === 'visible' && <div className="w-1.5 h-1.5 rounded-full bg-[#3538CD]" />}
                     </div>
-                    <Eye className="w-4 h-4 text-[#3538CD] mb-1.5" />
+                    <Eye className="w-3.5 h-3.5 text-[#3538CD] mb-1" />
                     <p className="text-[11px] font-black text-[#111827] leading-tight mb-0.5">Visible to recruiters</p>
-                    <p className="text-[10px] text-[#6B7280] leading-snug">Profile discoverable without application</p>
+                    <p className="text-[9px] text-[#6B7280] leading-snug">Discoverable without application</p>
                   </button>
                   <button type="button" onClick={() => setEditVisibility('private')}
-                    className={`relative text-left p-3 rounded-xl border-2 transition-all ${editVisibility === 'private' ? 'border-[#3538CD] bg-[#3538CD]/5' : 'border-[#E5E7EB] hover:border-[#C7C9F0]'}`}>
-                    <div className={`absolute top-2.5 right-2.5 w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center ${editVisibility === 'private' ? 'border-[#3538CD]' : 'border-[#D1D5DB]'}`}>
+                    className={`relative text-left p-2.5 rounded-xl border-2 transition-all ${editVisibility === 'private' ? 'border-[#3538CD] bg-[#3538CD]/5' : 'border-[#E5E7EB] hover:border-[#C7C9F0]'}`}>
+                    <div className={`absolute top-2 right-2 w-3 h-3 rounded-full border-2 flex items-center justify-center ${editVisibility === 'private' ? 'border-[#3538CD]' : 'border-[#D1D5DB]'}`}>
                       {editVisibility === 'private' && <div className="w-1.5 h-1.5 rounded-full bg-[#3538CD]" />}
                     </div>
-                    <EyeOff className="w-4 h-4 text-[#6B7280] mb-1.5" />
+                    <EyeOff className="w-3.5 h-3.5 text-[#6B7280] mb-1" />
                     <p className="text-[11px] font-black text-[#111827] leading-tight mb-0.5">Browse privately</p>
-                    <p className="text-[10px] text-[#6B7280] leading-snug">Only visible on active applications</p>
+                    <p className="text-[9px] text-[#6B7280] leading-snug">Only visible on active applications</p>
                   </button>
                 </div>
-                <label className="flex items-center justify-between gap-3 mt-4 cursor-pointer">
+                <label className="flex items-center justify-between gap-3 mt-3 cursor-pointer">
                   <span className="text-xs font-bold text-[#374151]">Allow recruiters to contact me for future roles</span>
                   <button type="button" onClick={() => setEditAllowContact(v => !v)}
                     className={`relative rounded-full transition-colors shrink-0 ${editAllowContact ? 'bg-[#3538CD]' : 'bg-[#D1D5DB]'}`}
@@ -520,17 +651,17 @@ export default function CandidateProfilePage() {
                 </label>
               </div>
 
-              <div className="flex gap-3 pt-2">
+              <div className="flex gap-3">
                 <button
                   type="button"
                   onClick={() => setShowEditProfile(false)}
-                  className="flex-1 py-3 border border-[#E5E7EB] text-[#6B7280] text-sm font-black rounded-xl hover:bg-[#F9FAFB] transition-colors uppercase tracking-widest"
+                  className="flex-1 py-2.5 border border-[#E5E7EB] text-[#6B7280] text-sm font-black rounded-xl hover:bg-[#F9FAFB] transition-colors uppercase tracking-widest"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-[#3538CD] text-white text-sm font-black rounded-xl hover:bg-[#292bb0] transition-all shadow-lg shadow-[#3538CD]/20 uppercase tracking-widest"
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-[#3538CD] text-white text-sm font-black rounded-xl hover:bg-[#292bb0] transition-all shadow-lg shadow-[#3538CD]/20 uppercase tracking-widest"
                 >
                   <Check className="w-4 h-4" /> Save Changes
                 </button>

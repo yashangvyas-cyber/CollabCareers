@@ -50,6 +50,10 @@ export interface Candidate {
   savedJobIds?: string[];
   profileVisibility?: 'visible' | 'private';
   allowRecruiterContact?: boolean;
+  skills?: string[];
+  noticePeriod?: string;
+  currentOrg?: string;
+  currentDesignation?: string;
 }
 
 export interface Application {
