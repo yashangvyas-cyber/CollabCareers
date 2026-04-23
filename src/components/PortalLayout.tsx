@@ -1,5 +1,5 @@
 import { ReactNode, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import CollabCRMIcon from './CollabCRMIcon';
 import { useApp } from '../store/AppContext';
 import AuthModal from './AuthModal';
@@ -15,7 +15,6 @@ export default function PortalLayout({
   companyName = 'Yopmails',
   showAuth = true,
 }: PortalLayoutProps) {
-  const location = useLocation();
   const { currentUser } = useApp();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authTab, setAuthTab] = useState<'register' | 'signin'>('register');
@@ -44,36 +43,28 @@ export default function PortalLayout({
               </div>
               <span className="text-sm font-black text-[#111827] tracking-tight">Yopmails</span>
             </Link>
-            <div className="w-px h-5 bg-[#E5E7EB]" />
-            <Link
-              to="/portal/yopmails"
-              className={`text-sm font-black uppercase tracking-widest transition-colors ${
-                location.pathname === '/portal/yopmails' || location.pathname === '/portal/yopmails/'
-                  ? 'text-[#3538CD]'
-                  : 'text-[#6B7280] hover:text-[#111827]'
-              }`}
-            >
-              Open Positions
-            </Link>
           </div>
 
           {/* Right: Auth */}
           <div className="flex items-center gap-3">
             {currentUser ? (
               <>
+              <Link
+                to="/portal/yopmails/profile"
+                className="flex items-center gap-2.5 group hover:opacity-80 transition-opacity"
+                title="My Profile"
+              >
                 <div className="text-right">
-                  <p className="text-sm font-semibold text-[#111827] leading-tight">
+                  <p className="text-sm font-semibold text-[#111827] leading-tight group-hover:text-[#3538CD] transition-colors">
                     {currentUser.firstName} {currentUser.lastName}
                   </p>
                   <p className="text-xs text-[#6B7280] leading-tight">({currentUser.email})</p>
                 </div>
-                <Link
-                  to="/portal/yopmails/profile"
-                  className="w-8 h-8 rounded-full bg-[#3538CD]/10 text-[#3538CD] flex items-center justify-center text-xs font-bold hover:bg-[#3538CD]/20 transition-colors"
-                  title="My Profile"
-                >
+                <div className="w-8 h-8 rounded-full bg-[#3538CD]/10 text-[#3538CD] flex items-center justify-center text-xs font-bold group-hover:bg-[#3538CD]/20 transition-colors shrink-0">
                   {currentUser.firstName.charAt(0)}
-                </Link>
+                </div>
+              </Link>
+
               </>
             ) : showAuth ? (
               <>

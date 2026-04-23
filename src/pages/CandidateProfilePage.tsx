@@ -26,6 +26,7 @@ export default function CandidateProfilePage() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'applications' | 'saved'>('applications');
   const [showEditProfile, setShowEditProfile] = useState(false);
+  const [forceEmptyApps, setForceEmptyApps] = useState(false);
   const [editForm, setEditForm] = useState({
     firstName: currentUser?.firstName || '',
     lastName: currentUser?.lastName || '',
@@ -269,8 +270,24 @@ export default function CandidateProfilePage() {
               )}
 
               <div className="space-y-4">
+                {activeTab === 'applications' && (
+                  <div className="flex items-center gap-2 mb-2">
+                    <button
+                      onClick={() => setForceEmptyApps(false)}
+                      className="px-3 py-1.5 bg-[#3538CD]/5 border border-[#3538CD]/10 rounded-lg text-[9px] font-black text-[#3538CD] uppercase tracking-widest hover:bg-[#3538CD] hover:text-white transition-all"
+                    >
+                      Show Applications
+                    </button>
+                    <button
+                      onClick={() => setForceEmptyApps(true)}
+                      className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-[9px] font-black text-gray-500 uppercase tracking-widest hover:bg-gray-200 transition-all"
+                    >
+                      Click to view no data case
+                    </button>
+                  </div>
+                )}
                 {activeTab === 'applications' ? (
-                  displayApps.map((app: any) => (
+                  (!forceEmptyApps ? displayApps : []).map((app: any) =>(
                     <div key={app.id} className="bg-white rounded-2xl border border-[#E5E7EB] p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:border-[#3538CD]/40 hover:shadow-xl hover:shadow-[#3538CD]/5 transition-all duration-300 relative group">
                       <div className="absolute top-0 left-0 w-1 h-full bg-[#3538CD]/5 group-hover:bg-[#3538CD]/20 transition-all" />
 
@@ -373,7 +390,7 @@ export default function CandidateProfilePage() {
                   })
                 )}
 
-                {(activeTab === 'applications' ? displayApps.length : savedJobs.length) === 0 && (
+                {(activeTab === 'applications' ? (forceEmptyApps ? 0 : displayApps.length) : savedJobs.length) === 0 && (
                   <div className="py-20 text-center bg-white rounded-2xl border border-dashed border-[#E5E7EB]">
                     <Briefcase className="w-12 h-12 text-[#E5E7EB] mx-auto mb-4" />
                     <p className="text-sm font-bold text-[#9CA3AF]">No {activeTab === 'applications' ? 'applications' : 'saved jobs'} found.</p>

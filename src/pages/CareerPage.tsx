@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import PortalLayout from '../components/PortalLayout';
 import { Search, MapPin, Briefcase, Clock, ChevronDown, X, Building2, Bookmark, LayoutGrid, List } from 'lucide-react';
@@ -201,7 +201,7 @@ export default function CareerPage({ openAlumni = false }: { openAlumni?: boolea
                         <Chip key={skill} variant="skill">{skill}</Chip>
                       ))}
                       {job.skills.length > 3 && (
-                        <span className="text-[11px] font-black text-[#3538CD] uppercase tracking-widest ml-1">+{job.skills.length - 3} More</span>
+                        <SkillsOverflow skills={job.skills} shown={3} />
                       )}
                     </div>
                   </>
@@ -237,7 +237,7 @@ export default function CareerPage({ openAlumni = false }: { openAlumni?: boolea
                         <Chip key={skill} variant="skill">{skill}</Chip>
                       ))}
                       {(job.skills?.length ?? 0) > 2 && (
-                        <span className="text-[11px] font-black text-[#3538CD] uppercase tracking-widest">+{(job.skills?.length ?? 0) - 2} More</span>
+                        <SkillsOverflow skills={job.skills ?? []} shown={2} />
                       )}
                     </div>
                     <div className="flex items-center flex-wrap gap-2">
@@ -407,5 +407,54 @@ function FilterPill({ label, icon, value, options, onChange }: {
         </>
       )}
     </div>
+  );
+}
+
+function SkillsOverflow({ skills, shown }: { skills: string[]; shown: number }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
+  const isTouchRef = useRef(false); // track if last interaction was touch
+  const extra = skills.slice(shown);
+
+  // Close on outside tap (mobile only — desktop closes via mouseleave)
+  useEffect(() => {
+    if (!open || !isTouchRef.current) return;
+    const handler = (e: TouchEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('touchstart', handler);
+    return () => document.removeEventListener('touchstart', handler);
+  }, [open]);
+
+  if (extra.length === 0) return null;
+
+  return (
+    <span
+      ref={ref}
+      className="relative"
+      onTouchStart={() => {
+        isTouchRef.current = true;   // mark as touch device
+        setOpen(v => !v);            // toggle on tap
+      }}
+      onMouseEnter={() => {
+        if (!isTouchRef.current) setOpen(true);   // hover open (desktop only)
+      }}
+      onMouseLeave={() => {
+        if (!isTouchRef.current) setOpen(false);  // hover close (desktop only)
+      }}
+    >
+      <button
+        type="button"
+        className="text-[11px] font-black text-[#3538CD] uppercase tracking-widest ml-1 select-none cursor-default"
+      >
+        +{extra.length} More
+      </button>
+      {open && (
+        <div className="absolute bottom-full left-0 mb-2 flex flex-col gap-1 bg-[#111827] text-white text-[10px] font-bold rounded-xl px-3 py-2.5 shadow-xl z-50 whitespace-nowrap min-w-max">
+          {extra.map(s => <span key={s}>{s}</span>)}
+          <div className="absolute top-full left-4 border-4 border-transparent border-t-[#111827]" />
+        </div>
+      )}
+    </span>
   );
 }

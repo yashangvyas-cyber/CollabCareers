@@ -23,7 +23,7 @@ export default function AuthModal({
   initialTab = 'register', initialState = 'auth', redirectTo,
   onAuthSuccess 
 }: AuthModalProps) {
-  const { registerCandidate, loginCandidate, setAlumniVerified } = useApp();
+  const { registerCandidate, loginCandidate, setAlumniVerified, portalConfig } = useApp();
   const navigate = useNavigate();
   
   // States: 'auth' | 'alumni-verify' | 'alumni-success'
@@ -129,10 +129,6 @@ export default function AuthModal({
             {/* Org name + CollabCRM small attribution stacked */}
             <div className="flex flex-col">
               <span className="text-sm font-black text-[#111827] tracking-tight leading-tight">{businessUnit}</span>
-              <div className="flex items-center gap-1 mt-0.5">
-                <CollabCRMIcon size={11} />
-                <span className="text-[10px] font-medium text-[#9CA3AF]">CollabCRM</span>
-              </div>
             </div>
           </div>
           <button 
@@ -189,6 +185,23 @@ export default function AuthModal({
               {activeTab === 'register' ? (
                 <form onSubmit={handleRegister} className="space-y-4">
 
+                  {/* Demo auto-fill */}
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setFormData({
+                        ...formData,
+                        firstName: 'Alex',
+                        lastName: 'Patel',
+                        email: 'alex.patel@example.com',
+                        password: 'P@ssw0rd!',
+                        agreeToTerms: true
+                      })}
+                      className="px-2.5 py-1 bg-[#3538CD]/5 border border-[#3538CD]/10 rounded-lg text-[9px] font-black text-[#3538CD] uppercase tracking-widest hover:bg-[#3538CD] hover:text-white transition-all shadow-sm"
+                    >
+                      Auto-fill for Demo
+                    </button>
+                  </div>
 
                   {/* Name row — 2-col */}
                   <div className="grid grid-cols-2 gap-3">
@@ -302,11 +315,28 @@ export default function AuthModal({
                   </div>
 
                   {/* T&C just above CTA */}
-                  <label className="flex items-center gap-2.5 cursor-pointer pt-1">
+                   <label className="flex items-center gap-2.5 cursor-pointer pt-1">
                     <input type="checkbox" required checked={formData.agreeToTerms}
                       onChange={e => setFormData({...formData, agreeToTerms: e.target.checked})}
                       className="w-4 h-4 border-2 border-[#D1D5DB] rounded accent-[#3538CD]" />
-                    <span className="text-[11px] font-bold text-[#6B7280]">I agree to the <span className="text-[#3538CD] hover:underline">Terms of Service</span> and <span className="text-[#3538CD] hover:underline">Privacy Policy</span></span>
+                    <span className="text-[11px] font-bold text-[#6B7280]">
+                      I agree to the{' '}
+                      {portalConfig?.termsUrl ? (
+                        <a href={portalConfig.termsUrl} target="_blank" rel="noopener noreferrer" className="text-[#3538CD] hover:underline">
+                          Terms of Service
+                        </a>
+                      ) : (
+                        <span className="text-[#374151]">Terms of Service</span>
+                      )}
+                      {portalConfig?.privacyPolicyUrl && (
+                        <>
+                          {' '}and{' '}
+                          <a href={portalConfig.privacyPolicyUrl} target="_blank" rel="noopener noreferrer" className="text-[#3538CD] hover:underline">
+                            Privacy Policy
+                          </a>
+                        </>
+                      )}
+                    </span>
                   </label>
 
                   <button type="submit"
@@ -314,7 +344,6 @@ export default function AuthModal({
                     Create Account <ArrowRight className="w-4 h-4" />
                   </button>
                 </form>
-
 
               ) : (
                 <form onSubmit={handleSignIn} className="space-y-5">

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { AppState, Job, Candidate, Application } from './types';
+import { AppState, Job, Candidate, Application, PortalConfig } from './types';
 
 interface AppContextType extends AppState {
   addJob: (job: Job) => void;
@@ -12,6 +12,7 @@ interface AppContextType extends AppState {
   setAlumniVerified: (verified: boolean, email: string | null) => void;
   toggleSaveJob: (jobId: string) => void;
   withdrawApplication: (applicationId: string) => void;
+  updatePortalConfig: (updates: Partial<PortalConfig>) => void;
 }
 
 const STORAGE_KEY = 'collab_careers_state';
@@ -311,6 +312,10 @@ const initialState: AppState = {
     verified: false,
     email: null,
   },
+  portalConfig: {
+    termsUrl: '',
+    privacyPolicyUrl: '',
+  },
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -361,7 +366,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
       });
 
-      return { ...parsed, jobs: mergedJobs, applications: mergedApps, candidates: mergedCandidates };
+      return {
+        ...parsed,
+        jobs: mergedJobs,
+        applications: mergedApps,
+        candidates: mergedCandidates,
+        // Ensure new top-level fields always have defaults if missing from old localStorage
+        portalConfig: parsed.portalConfig ?? initialState.portalConfig,
+      };
     }
     return initialState;
   });
@@ -455,6 +467,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const updatePortalConfig = (updates: Partial<PortalConfig>) => {
+    setState(prev => ({
+      ...prev,
+      portalConfig: { ...prev.portalConfig, ...updates },
+    }));
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -469,6 +488,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setAlumniVerified,
         toggleSaveJob,
         withdrawApplication,
+        updatePortalConfig,
       }}
     >
       {children}

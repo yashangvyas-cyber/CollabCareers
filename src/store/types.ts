@@ -62,6 +62,11 @@ export interface Application {
   resumeUrl: string;
 }
 
+export interface PortalConfig {
+  termsUrl: string;
+  privacyPolicyUrl: string;
+}
+
 export interface AppState {
   jobs: Job[];
   candidates: Candidate[];
@@ -71,4 +76,5 @@ export interface AppState {
     verified: boolean;
     email: string | null;
   };
+  portalConfig: PortalConfig;
 }
