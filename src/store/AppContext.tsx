@@ -331,7 +331,7 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
       skills: ['React', 'TypeScript', 'Tailwind CSS', 'Node.js'],
       location: 'Pune, India',
       linkedin: 'linkedin.com/in/riyadesai',
-      availabilityStatus: 'Open to Opportunities' as const,
+      availabilityStatus: 'Open to Good Offers' as const,
     },
     {
       id: 'c3',
@@ -348,7 +348,7 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
       skills: ['Product Strategy', 'Agile', 'SQL', 'Figma'],
       location: 'Bangalore, India',
       linkedin: 'linkedin.com/in/karanmehta',
-      availabilityStatus: 'Currently Employed' as const,
+      availabilityStatus: 'Not Interested' as const,
     },
     {
       id: 'c4',
@@ -366,7 +366,7 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
       skills: ['Figma', 'User Research', 'Prototyping', 'Design Systems'],
       location: 'Mumbai, India',
       linkedin: 'linkedin.com/in/ananyasharma',
-      availabilityStatus: 'Available' as const,
+      availabilityStatus: 'Immediate Joiner' as const,
     },
     {
       id: 'c5',
@@ -383,7 +383,7 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
       skills: ['Java', 'Spring Boot', 'Microservices', 'AWS'],
       location: 'Hyderabad, India',
       linkedin: 'linkedin.com/in/vikramnair',
-      availabilityStatus: 'Currently Employed' as const,
+      availabilityStatus: 'Serving Notice Period' as const,
     },
   ],
   applications: [

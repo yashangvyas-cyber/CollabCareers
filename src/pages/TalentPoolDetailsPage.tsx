@@ -34,15 +34,19 @@ function SectionCard({ title, children }: { title: string; children: React.React
 }
 
 const AVAILABILITY_OPTIONS: TalentAvailabilityStatus[] = [
-  'Available', 'Open to Opportunities', 'Currently Employed', 'Placed', 'Not Looking',
+  'Immediate Joiner',
+  'Serving Notice Period',
+  'Open to Good Offers',
+  'Offer in Hand',
+  'Not Interested'
 ];
 
 const availabilityStyle: Record<TalentAvailabilityStatus, string> = {
-  'Available':              'bg-green-50 text-green-700 border-green-200',
-  'Open to Opportunities':  'bg-blue-50 text-blue-700 border-blue-200',
-  'Currently Employed':     'bg-[#F4F5FA] text-[#3538CD] border-[#3538CD]/10',
-  'Placed':                 'bg-purple-50 text-purple-700 border-purple-200',
-  'Not Looking':            'bg-gray-100 text-gray-500 border-gray-200',
+  'Immediate Joiner':      'bg-green-50 text-green-700 border-green-200',
+  'Serving Notice Period': 'bg-yellow-50 text-yellow-700 border-yellow-200',
+  'Open to Good Offers':   'bg-blue-50 text-blue-700 border-blue-200',
+  'Offer in Hand':         'bg-purple-50 text-purple-700 border-purple-200',
+  'Not Interested':        'bg-gray-100 text-gray-500 border-gray-200',
 };
 
 const inviteStatusStyle: Record<TalentInviteStatus, { pill: string; label: string }> = {

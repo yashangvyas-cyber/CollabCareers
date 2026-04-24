@@ -34,11 +34,11 @@ const ACTIVE_APP_STATUSES = new Set([
 ]);
 
 const availabilityStyle: Record<TalentAvailabilityStatus, string> = {
-  'Available':             'bg-green-50 text-green-700 border-green-200',
-  'Open to Opportunities': 'bg-blue-50 text-blue-700 border-blue-200',
-  'Currently Employed':    'bg-[#F4F5FA] text-[#3538CD] border-[#3538CD]/10',
-  'Placed':                'bg-purple-50 text-purple-700 border-purple-200',
-  'Not Looking':           'bg-gray-100 text-gray-500 border-gray-200',
+  'Immediate Joiner':      'bg-green-50 text-green-700 border-green-200',
+  'Serving Notice Period': 'bg-yellow-50 text-yellow-700 border-yellow-200',
+  'Open to Good Offers':   'bg-blue-50 text-blue-700 border-blue-200',
+  'Offer in Hand':         'bg-purple-50 text-purple-700 border-purple-200',
+  'Not Interested':        'bg-gray-100 text-gray-500 border-gray-200',
 };
 
 // ── Page ─────────────────────────────────────────────────────────────────────
@@ -87,7 +87,7 @@ export default function TalentPoolPage() {
 
   // Column config (values computed from data where needed)
   const COLUMNS: { key: FilterColumn; label: string; icon: React.ElementType; values: string[] }[] = [
-    { key: 'Availability Status', label: 'Availability Status', icon: Activity,      values: ['Available', 'Open to Opportunities', 'Currently Employed', 'Placed', 'Not Looking'] },
+    { key: 'Availability Status', label: 'Availability Status', icon: Activity,      values: ['Immediate Joiner', 'Serving Notice Period', 'Open to Good Offers', 'Not Interested', 'Offer in Hand'] },
     { key: 'Contact Preference',  label: 'Contact Preference',  icon: Phone,         values: ['Open to Contact', 'Invite First'] },
     { key: 'Source',              label: 'Source',              icon: Search,        values: ['LinkedIn', 'Referral', 'Job Fair', 'Direct Approach', 'Naukri', 'Internshala', 'CollabCareers', 'Other'] },
     { key: 'Business Unit',       label: 'Business Unit',       icon: Briefcase,     values: businessUnits },
@@ -170,7 +170,7 @@ export default function TalentPoolPage() {
   // ── Stats ──
   const tpStats = [
     { label: 'Talent Pool',      value: talentPool.length,                                                                                        icon: Users },
-    { label: 'Available Now',    value: talentPool.filter(c => c.availabilityStatus === 'Available').length,                                       icon: UserCheck },
+    { label: 'Available Now',    value: talentPool.filter(c => c.availabilityStatus === 'Immediate Joiner').length,                                       icon: UserCheck },
     { label: 'Invited',          value: invites.filter(i => talentPool.some(c => c.id === i.candidateId)).length,                                  icon: Send },
     { label: 'Alumni',           value: talentPool.filter(c => c.isAlumni).length,                                                                icon: GraduationCap },
   ];

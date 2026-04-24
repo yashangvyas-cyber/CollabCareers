@@ -1,11 +1,11 @@
 export type FieldType = 'Text' | 'Number' | 'Dropdown' | 'Date' | 'File Upload' | 'Yes/No';
 
 export type TalentAvailabilityStatus =
-  | 'Available'
-  | 'Open to Opportunities'
-  | 'Currently Employed'
-  | 'Placed'
-  | 'Not Looking';
+  | 'Immediate Joiner'
+  | 'Serving Notice Period'
+  | 'Open to Good Offers'
+  | 'Not Interested'
+  | 'Offer in Hand';
 
 export type TalentInviteStatus = 'Sent' | 'Interested' | 'Not Interested' | 'Applied' | 'Expired';
 
