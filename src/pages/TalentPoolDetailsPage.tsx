@@ -241,8 +241,14 @@ export default function TalentPoolDetailsPage() {
                     <div className="flex-1 min-w-0">
                       <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Email</p>
                       <div className="flex items-center gap-1">
-                        <span className="text-sm font-bold text-[#374151] truncate">{candidate.email}</span>
-                        <Copy className="w-3.5 h-3.5 text-[#9CA3AF] hover:text-[#3538CD] shrink-0 cursor-pointer" />
+                        {canContact ? (
+                          <>
+                            <span className="text-sm font-bold text-[#374151] truncate">{candidate.email}</span>
+                            <Copy className="w-3.5 h-3.5 text-[#9CA3AF] hover:text-[#3538CD] shrink-0 cursor-pointer" />
+                          </>
+                        ) : (
+                          <span className="text-sm font-bold text-[#9CA3AF] tracking-widest">••••••@••••••.com</span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -254,7 +260,11 @@ export default function TalentPoolDetailsPage() {
                       </div>
                       <div>
                         <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Phone</p>
-                        <span className="text-sm font-bold text-[#374151]">{candidate.phone}</span>
+                        {canContact ? (
+                          <span className="text-sm font-bold text-[#374151]">{candidate.phone}</span>
+                        ) : (
+                          <span className="text-sm font-bold text-[#9CA3AF] tracking-widest">••••• •••••</span>
+                        )}
                       </div>
                     </div>
                   )}
@@ -390,12 +400,14 @@ export default function TalentPoolDetailsPage() {
                 })}
               </div>
               <div className="flex items-center gap-2 pr-1">
-                <button
-                  onClick={() => setShowInvite(true)}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-[#3538CD] text-white text-xs font-black rounded-xl hover:bg-[#292bb0] transition-all shadow-md shadow-[#3538CD]/20 uppercase tracking-widest"
-                >
-                  <Send className="w-3.5 h-3.5" /> Invite to Apply
-                </button>
+                {canContact && (
+                  <button
+                    onClick={() => setShowInvite(true)}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-[#3538CD] text-white text-xs font-black rounded-xl hover:bg-[#292bb0] transition-all shadow-md shadow-[#3538CD]/20 uppercase tracking-widest"
+                  >
+                    <Send className="w-3.5 h-3.5" /> Invite to Apply
+                  </button>
+                )}
                 <div ref={kebabRef} className="relative">
                   <button
                     onClick={() => setShowKebab(v => !v)}

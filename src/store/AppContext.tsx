@@ -368,6 +368,23 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
       linkedin: 'linkedin.com/in/ananyasharma',
       availabilityStatus: 'Available' as const,
     },
+    {
+      id: 'c5',
+      firstName: 'Vikram',
+      lastName: 'Nair',
+      email: 'vikram.nair@example.com',
+      phone: '+91 99887 76655',
+      isAlumni: false,
+      profileVisibility: 'visible' as const,
+      allowRecruiterContact: false,
+      currentOrg: 'TCS',
+      currentDesignation: 'Senior Backend Engineer',
+      noticePeriod: '90 days',
+      skills: ['Java', 'Spring Boot', 'Microservices', 'AWS'],
+      location: 'Hyderabad, India',
+      linkedin: 'linkedin.com/in/vikramnair',
+      availabilityStatus: 'Currently Employed' as const,
+    },
   ],
   applications: [
     {

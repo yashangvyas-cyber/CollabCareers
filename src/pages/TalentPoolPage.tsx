@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import CRMLayout from '../components/CRMLayout';
 import {
-  ChevronDown, X, Eye, Check, Users, UserCheck, Briefcase,
-  GraduationCap, UserPlus, Search, Phone, Tag, Activity, ChevronLeft, Pencil,
+  ChevronDown, X, Eye, Check, Users, UserCheck, Send, Briefcase,
+  GraduationCap, UserPlus, Search, Phone, Tag, Activity, ChevronLeft, Pencil, EyeOff,
 } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 import type { Candidate, TalentAvailabilityStatus } from '../store/types';
@@ -44,7 +44,7 @@ const availabilityStyle: Record<TalentAvailabilityStatus, string> = {
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 export default function TalentPoolPage() {
-  const { candidates, jobs, applications } = useApp();
+  const { candidates, jobs, applications, invites } = useApp();
   const location = useLocation();
 
   // ── Invite state ──
@@ -169,10 +169,10 @@ export default function TalentPoolPage() {
 
   // ── Stats ──
   const tpStats = [
-    { label: 'Talent Pool',       value: talentPool.length,                                                icon: Users },
-    { label: 'Open to Contact',   value: talentPool.filter(c => c.allowRecruiterContact).length,          icon: UserCheck },
-    { label: 'With Applications', value: talentPool.filter(c => applications.some(a => a.candidateId === c.id)).length, icon: Briefcase },
-    { label: 'Alumni',            value: talentPool.filter(c => c.isAlumni).length,                       icon: GraduationCap },
+    { label: 'Talent Pool',      value: talentPool.length,                                                                                        icon: Users },
+    { label: 'Available Now',    value: talentPool.filter(c => c.availabilityStatus === 'Available').length,                                       icon: UserCheck },
+    { label: 'Invited',          value: invites.filter(i => talentPool.some(c => c.id === i.candidateId)).length,                                  icon: Send },
+    { label: 'Alumni',           value: talentPool.filter(c => c.isAlumni).length,                                                                icon: GraduationCap },
   ];
 
   const handleInviteSent = (name: string) => {
@@ -456,7 +456,9 @@ export default function TalentPoolPage() {
                           <td className="px-4 py-4 text-sm text-[#6B7280]">{idx + 1}</td>
                           <td className="px-4 py-4">
                             <p className="text-sm font-semibold text-[#111827]">{candidate.firstName} {candidate.lastName}</p>
-                            <p className="text-xs text-[#6B7280]">{candidate.email}</p>
+                            <p className="text-xs text-[#6B7280]">
+                              {candidate.allowRecruiterContact ? candidate.email : '••••••@••••••.com'}
+                            </p>
                             <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                               {candidate.isAlumni && (
                                 <span className="text-[9px] font-black text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-full uppercase tracking-widest">Alumni</span>
@@ -468,8 +470,15 @@ export default function TalentPoolPage() {
                                 <span className="text-[9px] font-black text-[#3538CD] bg-[#F4F5FA] border border-[#3538CD]/10 px-1.5 py-0.5 rounded-full uppercase tracking-widest">Applied</span>
                               )}
                             </div>
+                            {!candidate.allowRecruiterContact && (
+                              <p className="flex items-center gap-1 text-[10px] text-[#9CA3AF] mt-0.5">
+                                <EyeOff className="w-3 h-3" /> Prefers to apply first
+                              </p>
+                            )}
                           </td>
-                          <td className="px-4 py-4 text-sm text-[#374151] whitespace-nowrap">{candidate.phone || '—'}</td>
+                          <td className="px-4 py-4 text-sm text-[#374151] whitespace-nowrap">
+                            {candidate.allowRecruiterContact ? (candidate.phone || '—') : '••••• •••••'}
+                          </td>
                           <td className="px-4 py-4 text-sm text-[#374151]">{candidate.currentOrg || '—'}</td>
                           <td className="px-4 py-4 text-sm text-[#374151]">{candidate.currentDesignation || '—'}</td>
                           <td className="px-4 py-4">
@@ -495,12 +504,14 @@ export default function TalentPoolPage() {
                           </td>
                           <td className="px-4 py-4">
                               <div className="flex items-center justify-end gap-2">
-                               <button
-                                 onClick={() => setInviteTarget(candidate)}
-                                 className="px-3 py-1.5 text-[11px] font-black text-[#3538CD] border border-[#3538CD]/20 rounded-lg hover:bg-[#3538CD]/5 transition-colors uppercase tracking-widest whitespace-nowrap"
-                               >
-                                 Invite
-                               </button>
+                               {candidate.allowRecruiterContact && (
+                                 <button
+                                   onClick={() => setInviteTarget(candidate)}
+                                   className="px-3 py-1.5 text-[11px] font-black text-[#3538CD] border border-[#3538CD]/20 rounded-lg hover:bg-[#3538CD]/5 transition-colors uppercase tracking-widest whitespace-nowrap"
+                                 >
+                                   Invite
+                                 </button>
+                               )}
                                <Link
                                  to={`/crm/talent-pool/${candidate.id}/edit`}
                                  className="p-1.5 text-[#6B7280] hover:text-[#3538CD] hover:bg-white rounded-md shadow-sm border border-transparent hover:border-[#E5E7EB]"

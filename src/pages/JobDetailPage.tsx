@@ -160,9 +160,9 @@ export default function JobDetailPage() {
     { label: 'Posted', value: formatPostedDate(job.createdAt) },
     { label: 'Job ID', value: jobCode(job.id) },
     { label: 'Location', value: job.location, icon: <MapPin className="w-3.5 h-3.5 text-[#3538CD]" /> },
-    { label: 'Department', value: job.businessUnit, icon: <Building2 className="w-3.5 h-3.5 text-[#3538CD]" /> },
+    { label: 'Business Unit', value: job.businessUnit, icon: <Building2 className="w-3.5 h-3.5 text-[#3538CD]" /> },
     { label: 'Employment Type', value: job.employmentType, icon: <Briefcase className="w-3.5 h-3.5 text-[#3538CD]" /> },
-    { label: 'Work Mode', value: job.jobType, icon: <Building2 className="w-3.5 h-3.5 text-[#3538CD]" /> },
+    { label: 'Job Type', value: job.jobType, icon: <Building2 className="w-3.5 h-3.5 text-[#3538CD]" /> },
     { label: 'Experience', value: job.experience, icon: <Clock className="w-3.5 h-3.5 text-[#3538CD]" /> },
   ];
 

@@ -11,6 +11,7 @@ const flows = [
       { label: 'Candidate Listing', path: '/crm/candidates', badge: 'Pipeline' },
       { label: 'Candidate Detail', path: '/crm/candidates/1', badge: 'Review' },
       { label: 'Portal Settings', path: '/crm/career-portal', badge: 'Config' },
+      { label: 'Talent Pool', path: '/crm/talent-pool', badge: 'New' },
     ],
     icon: <Monitor className="w-6 h-6" />,
     gradient: 'from-[#3538CD] to-[#1e1b4b]',
