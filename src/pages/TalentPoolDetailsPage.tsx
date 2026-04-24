@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import CRMLayout from '../components/CRMLayout';
 import {
   Mail, Phone, MapPin, Copy, FileText, ExternalLink,
-  Briefcase, Check, X, MessageSquare, PhoneCall,
+  Briefcase, Check, X, MessageSquare,
   CalendarDays, Send, MoreVertical, UserCheck, EyeOff, ChevronDown,
   Pencil, Ban,
 } from 'lucide-react';
@@ -64,7 +64,7 @@ const appStatusStyle: Record<string, string> = {
   'Withdrawn':             'bg-gray-50 text-gray-400 border-gray-200',
 };
 
-const ACTIVE_STATUSES = new Set(['Submitted', 'Under Review', 'Interview in Progress', 'Decision Made', 'Offer Made']);
+
 
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -117,9 +117,6 @@ export default function TalentPoolDetailsPage() {
   const candidateApps = applications
     .filter(a => a.candidateId === candidate.id)
     .sort((a, b) => new Date(b.appliedAt).getTime() - new Date(a.appliedAt).getTime());
-
-  const activeApps = candidateApps.filter(a => ACTIVE_STATUSES.has(a.status));
-  const isInPipeline = activeApps.length > 0;
 
   const candidateInvites = invites
     .filter(i => i.candidateId === candidate.id)

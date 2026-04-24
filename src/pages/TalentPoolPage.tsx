@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import CRMLayout from '../components/CRMLayout';
 import {
   ChevronDown, X, Eye, Check, Users, UserCheck, Briefcase,
-  GraduationCap, UserPlus, Search, Clock, Phone, Tag, Activity, ChevronLeft, Pencil,
+  GraduationCap, UserPlus, Search, Phone, Tag, Activity, ChevronLeft, Pencil,
 } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 import type { Candidate, TalentAvailabilityStatus } from '../store/types';
