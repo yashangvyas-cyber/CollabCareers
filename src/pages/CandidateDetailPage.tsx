@@ -407,7 +407,9 @@ export default function CandidateDetailPage() {
                               <td className="px-6 py-4 text-[#374151] font-medium">{app.recruiter}</td>
                               <td className="px-6 py-4 text-[#6B7280] italic">{app.lastInterview}</td>
                               <td className="px-6 py-4">
-                                <button className="text-[#3538CD] font-bold text-xs hover:underline uppercase tracking-widest">View</button>
+                                <button className="p-1.5 text-[#6B7280] hover:text-[#3538CD] rounded-md hover:bg-[#F3F4F6] transition-colors">
+                                  <Eye className="w-4 h-4" />
+                                </button>
                               </td>
                             </tr>
                           ))
@@ -433,7 +435,9 @@ export default function CandidateDetailPage() {
                                 <td className="px-6 py-4 text-[#374151] font-medium">Super User</td>
                                 <td className="px-6 py-4 text-[#6B7280] italic">Not scheduled</td>
                                 <td className="px-6 py-4">
-                                  <button className="text-[#3538CD] font-bold text-xs hover:underline uppercase tracking-widest">View</button>
+                                  <button className="p-1.5 text-[#6B7280] hover:text-[#3538CD] rounded-md hover:bg-[#F3F4F6] transition-colors">
+                                    <Eye className="w-4 h-4" />
+                                  </button>
                                 </td>
                               </tr>
                             );

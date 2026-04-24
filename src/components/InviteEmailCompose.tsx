@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { ChevronRight, Check, X, Plus, Pencil, FileText } from 'lucide-react';
+import { ChevronRight, Check, X, Plus, Pencil, FileText, AlertTriangle } from 'lucide-react';
 import type { Candidate, Job } from '../store/types';
+import { useApp } from '../store/AppContext';
 
 type EmailMode = 'template' | 'custom';
 
@@ -15,6 +16,8 @@ export default function InviteEmailCompose({
   onClose: () => void;
   onSent: (name: string) => void;
 }) {
+  const { invites, sendInvite } = useApp();
+
   const [jobId, setJobId] = useState('');
   const [ccEmails, setCcEmails] = useState<string[]>([]);
   const [ccInput, setCcInput] = useState('');
@@ -28,6 +31,11 @@ export default function InviteEmailCompose({
   const templateSubject = selectedJob
     ? `Invitation to Apply — ${selectedJob.title} at ${selectedJob.businessUnit}`
     : '';
+
+  // Duplicate pending invite check
+  const hasPendingInvite = !!jobId && invites.some(
+    i => i.candidateId === candidate.id && i.jobId === jobId && i.status === 'Sent'
+  );
 
   const switchToCustom = () => {
     if (!customSubject) setCustomSubject(templateSubject || 'Invitation to Apply');
@@ -46,12 +54,37 @@ export default function InviteEmailCompose({
     }
   };
 
-  const canSend = emailMode === 'template'
-    ? !!jobId
-    : (!!customSubject.trim() && !!customBody.trim());
+  const canSend = !hasPendingInvite && (
+    emailMode === 'template'
+      ? !!jobId
+      : (!!customSubject.trim() && !!customBody.trim())
+  );
 
   const handleSend = () => {
-    onClose();
+    if (selectedJob) {
+      sendInvite({
+        id: `inv_${Date.now()}`,
+        candidateId: candidate.id,
+        jobId: selectedJob.id,
+        jobTitle: selectedJob.title,
+        sentAt: new Date().toISOString(),
+        sentBy: 'Super User',
+        status: 'Sent',
+        emailMode,
+      });
+    } else if (emailMode === 'custom') {
+      // Custom email with no specific job — still record it without jobId
+      sendInvite({
+        id: `inv_${Date.now()}`,
+        candidateId: candidate.id,
+        jobId: '',
+        jobTitle: customSubject,
+        sentAt: new Date().toISOString(),
+        sentBy: 'Super User',
+        status: 'Sent',
+        emailMode: 'custom',
+      });
+    }
     onSent(candidate.firstName);
   };
 
@@ -61,9 +94,7 @@ export default function InviteEmailCompose({
       {/* Top bar */}
       <div className="bg-white border-b border-[#E5E7EB] px-6 py-3.5 flex items-center justify-between shrink-0 shadow-sm">
         <div className="flex items-center gap-2 text-sm text-[#6B7280]">
-          <span className="hover:text-[#3538CD] cursor-pointer transition-colors" onClick={onClose}>
-            Back
-          </span>
+          <span className="hover:text-[#3538CD] cursor-pointer transition-colors" onClick={onClose}>Back</span>
           <ChevronRight className="w-3.5 h-3.5" />
           <span className="text-[#111827] font-semibold">Invite to Apply</span>
         </div>
@@ -85,10 +116,22 @@ export default function InviteEmailCompose({
       <div className="flex-1 overflow-y-auto py-8 px-6">
         <div className="max-w-3xl mx-auto space-y-4">
 
+          {/* Duplicate invite warning */}
+          {hasPendingInvite && (
+            <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-5 py-4">
+              <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-black text-amber-800">Invite already pending</p>
+                <p className="text-xs text-amber-600 mt-0.5">
+                  An invite for this job is already waiting for a response from {candidate.firstName}. Sending another one may feel like spam — update the status in Invite History if needed.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Compose fields */}
           <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm divide-y divide-[#F3F4F6] overflow-hidden">
 
-            {/* From */}
             <div className="flex items-center gap-4 px-6 py-3">
               <span className="text-sm text-[#9CA3AF] w-16 shrink-0 font-medium">From</span>
               <div className="flex items-center gap-2">
@@ -97,7 +140,6 @@ export default function InviteEmailCompose({
               </div>
             </div>
 
-            {/* Send To */}
             <div className="flex items-center gap-4 px-6 py-3">
               <span className="text-sm text-[#9CA3AF] w-16 shrink-0 font-medium">Send To</span>
               <div className="flex items-center gap-2 flex-wrap">
@@ -113,7 +155,6 @@ export default function InviteEmailCompose({
               </div>
             </div>
 
-            {/* Cc */}
             <div className="flex items-center gap-4 px-6 py-3">
               <span className="text-sm text-[#9CA3AF] w-16 shrink-0 font-medium">Cc</span>
               <div className="flex items-center gap-2 flex-wrap flex-1">
@@ -129,9 +170,7 @@ export default function InviteEmailCompose({
                   </div>
                 ))}
                 <input
-                  type="text"
-                  value={ccInput}
-                  onChange={e => setCcInput(e.target.value)}
+                  type="text" value={ccInput} onChange={e => setCcInput(e.target.value)}
                   onKeyDown={e => { if ((e.key === 'Enter' || e.key === ',') && ccInput.trim()) { e.preventDefault(); addCc(); } }}
                   onBlur={addCc}
                   placeholder="Type email and press enter..."
@@ -140,19 +179,15 @@ export default function InviteEmailCompose({
               </div>
             </div>
 
-            {/* Bcc */}
             <div className="flex items-center gap-4 px-6 py-3">
               <span className="text-sm text-[#9CA3AF] w-16 shrink-0 font-medium">Bcc</span>
               <input
-                type="text"
-                value={bccInput}
-                onChange={e => setBccInput(e.target.value)}
+                type="text" value={bccInput} onChange={e => setBccInput(e.target.value)}
                 placeholder="Type email and press enter..."
                 className="text-sm flex-1 focus:outline-none placeholder:text-[#D1D5DB]"
               />
             </div>
 
-            {/* Job selector — always shown so recruiter has context in custom mode too */}
             <div className="flex items-center gap-4 px-6 py-3">
               <span className="text-sm text-[#9CA3AF] w-16 shrink-0 font-medium">Job</span>
               <select
@@ -167,7 +202,6 @@ export default function InviteEmailCompose({
               </select>
             </div>
 
-            {/* Subject — read-only in template, editable in custom */}
             <div className="flex items-center gap-4 px-6 py-3">
               <span className="text-sm text-[#9CA3AF] w-16 shrink-0 font-medium">Subject</span>
               {emailMode === 'template' ? (
@@ -176,9 +210,7 @@ export default function InviteEmailCompose({
                 </span>
               ) : (
                 <input
-                  type="text"
-                  value={customSubject}
-                  onChange={e => setCustomSubject(e.target.value)}
+                  type="text" value={customSubject} onChange={e => setCustomSubject(e.target.value)}
                   placeholder="Enter email subject..."
                   className="text-sm flex-1 text-[#374151] font-medium focus:outline-none placeholder:text-[#D1D5DB]"
                 />
@@ -186,16 +218,14 @@ export default function InviteEmailCompose({
             </div>
           </div>
 
-          {/* Mode toggle + body section */}
+          {/* Mode toggle */}
           <div className="flex items-center justify-between">
             <p className="text-xs font-black text-[#9CA3AF] uppercase tracking-widest">Email Body</p>
             <div className="flex items-center gap-1 bg-white border border-[#E5E7EB] rounded-lg p-1 shadow-sm">
               <button
                 onClick={() => setEmailMode('template')}
                 className={`px-3 py-1.5 text-[11px] font-black rounded-md transition-all uppercase tracking-widest flex items-center gap-1.5 ${
-                  emailMode === 'template'
-                    ? 'bg-[#3538CD] text-white shadow-sm'
-                    : 'text-[#9CA3AF] hover:text-[#6B7280]'
+                  emailMode === 'template' ? 'bg-[#3538CD] text-white shadow-sm' : 'text-[#9CA3AF] hover:text-[#6B7280]'
                 }`}
               >
                 <FileText className="w-3 h-3" /> Template
@@ -203,9 +233,7 @@ export default function InviteEmailCompose({
               <button
                 onClick={switchToCustom}
                 className={`px-3 py-1.5 text-[11px] font-black rounded-md transition-all uppercase tracking-widest flex items-center gap-1.5 ${
-                  emailMode === 'custom'
-                    ? 'bg-[#3538CD] text-white shadow-sm'
-                    : 'text-[#9CA3AF] hover:text-[#6B7280]'
+                  emailMode === 'custom' ? 'bg-[#3538CD] text-white shadow-sm' : 'text-[#9CA3AF] hover:text-[#6B7280]'
                 }`}
               >
                 <Pencil className="w-3 h-3" /> Custom
@@ -213,7 +241,7 @@ export default function InviteEmailCompose({
             </div>
           </div>
 
-          {/* ── TEMPLATE MODE ── */}
+          {/* Template mode */}
           {emailMode === 'template' && (
             <div className="bg-[#E5E7EB] rounded-xl p-5">
               <div className="bg-white rounded-xl max-w-2xl mx-auto shadow-sm border border-[#E5E7EB] overflow-hidden">
@@ -223,9 +251,7 @@ export default function InviteEmailCompose({
                 </div>
                 <div className="px-8 py-6 space-y-4 text-sm text-[#374151] leading-relaxed">
                   <p>Hi <strong>{candidate.firstName} {candidate.lastName}</strong>,</p>
-                  <p>
-                    We came across your profile in the CollabCRM Career Portal. Based on your background and the skills you have highlighted, we think you would be a strong match for an open role on our team.
-                  </p>
+                  <p>We came across your profile in the CollabCRM Career Portal. Based on your background and the skills you have highlighted, we think you would be a strong match for an open role on our team.</p>
                   <p>We would like to invite you to apply for the following position:</p>
                   {selectedJob ? (
                     <table className="w-full border border-[#E5E7EB] rounded-lg overflow-hidden text-sm border-collapse">
@@ -250,16 +276,10 @@ export default function InviteEmailCompose({
                   )}
                   <p>To apply for this position, please click the button below:</p>
                   <div className="text-center py-2">
-                    <span className="inline-block px-8 py-3 bg-[#3538CD] text-white font-black text-sm rounded-xl cursor-pointer">
-                      Apply Now →
-                    </span>
+                    <span className="inline-block px-8 py-3 bg-[#3538CD] text-white font-black text-sm rounded-xl cursor-pointer">Apply Now →</span>
                   </div>
-                  <p className="text-[#6B7280]">
-                    If you have any questions about the role or the application process, feel free to reply to this email.
-                  </p>
-                  <p className="text-[#6B7280] text-xs">
-                    We request you to add <span className="text-[#3538CD] font-medium">noreply@yopmails.com</span> to your whitelist so you can receive timely updates.
-                  </p>
+                  <p className="text-[#6B7280]">If you have any questions about the role or the application process, feel free to reply to this email.</p>
+                  <p className="text-[#6B7280] text-xs">We request you to add <span className="text-[#3538CD] font-medium">noreply@yopmails.com</span> to your whitelist so you can receive timely updates.</p>
                   <div className="pt-4 border-t border-[#F3F4F6]">
                     <p>Regards,</p>
                     <p className="font-bold">HR Team</p>
@@ -270,30 +290,23 @@ export default function InviteEmailCompose({
             </div>
           )}
 
-          {/* ── CUSTOM MODE ── */}
+          {/* Custom mode */}
           {emailMode === 'custom' && (
             <div className="bg-[#E5E7EB] rounded-xl p-5">
               <div className="bg-white rounded-xl max-w-2xl mx-auto shadow-sm border border-[#E5E7EB] overflow-hidden">
                 <div className="px-8 py-5 border-b border-[#F3F4F6] flex items-center justify-between">
-                  <h2 className="text-lg font-black text-[#3538CD]">
-                    {customSubject || 'Untitled Email'}
-                  </h2>
+                  <h2 className="text-lg font-black text-[#3538CD]">{customSubject || 'Untitled Email'}</h2>
                   <span className="text-sm font-black text-[#111827] tracking-tight">CollabCRM</span>
                 </div>
-
-                {/* Editable body — minimal textarea styled to feel like the email itself */}
                 <div className="px-8 py-6">
                   <textarea
-                    value={customBody}
-                    onChange={e => setCustomBody(e.target.value)}
+                    value={customBody} onChange={e => setCustomBody(e.target.value)}
                     placeholder={`Hi ${candidate.firstName} ${candidate.lastName},\n\nWrite your custom message here...`}
                     rows={14}
                     className="w-full text-sm text-[#374151] leading-relaxed focus:outline-none resize-none placeholder:text-[#C4C9D4]"
                   />
                 </div>
               </div>
-
-              {/* Helper note */}
               <p className="text-center text-[11px] text-[#9CA3AF] font-medium mt-3">
                 This email will be sent as plain text. Write naturally — no formatting required.
               </p>

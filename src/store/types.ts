@@ -1,5 +1,25 @@
 export type FieldType = 'Text' | 'Number' | 'Dropdown' | 'Date' | 'File Upload' | 'Yes/No';
 
+export type TalentAvailabilityStatus =
+  | 'Available'
+  | 'Open to Opportunities'
+  | 'Currently Employed'
+  | 'Placed'
+  | 'Not Looking';
+
+export type TalentInviteStatus = 'Sent' | 'Interested' | 'Not Interested' | 'Applied' | 'Expired';
+
+export interface TalentInvite {
+  id: string;
+  candidateId: string;
+  jobId: string;
+  jobTitle: string;
+  sentAt: string;
+  sentBy: string;
+  status: TalentInviteStatus;
+  emailMode: 'template' | 'custom';
+}
+
 export interface DropdownOption {
   id: string;
   value: string;
@@ -45,6 +65,7 @@ export interface Candidate {
   email: string;
   phone: string;
   resumeUrl?: string;
+  resumeLink?: string;
   isAlumni: boolean;
   alumniEmail?: string;
   savedJobIds?: string[];
@@ -56,6 +77,31 @@ export interface Candidate {
   currentDesignation?: string;
   location?: string;
   linkedin?: string;
+  // Recruiter-added fields
+  gender?: string;
+  dateOfBirth?: string;
+  maritalStatus?: string;
+  isFresher?: boolean;
+  totalExperienceYears?: number;
+  totalExperienceMonths?: number;
+  highestQualification?: string;
+  currentCtc?: string;
+  expectedCtc?: string;
+  ctcType?: string;
+  ctcCurrency?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  zipCode?: string;
+  source?: string;
+  recruiterNotes?: string;
+  businessUnit?: string;
+  recordOwner?: string;
+  targetRole?: string;
+  addedByRecruiter?: boolean;
+  addedAt?: string;
+  availabilityStatus?: TalentAvailabilityStatus;
 }
 
 export interface Application {
@@ -77,6 +123,7 @@ export interface AppState {
   jobs: Job[];
   candidates: Candidate[];
   applications: Application[];
+  invites: TalentInvite[];
   currentUser: Candidate | null;
   alumniVerified: {
     verified: boolean;

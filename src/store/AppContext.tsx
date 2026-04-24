@@ -1,8 +1,9 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { AppState, Job, Candidate, Application, PortalConfig } from './types';
+import { AppState, Job, Candidate, Application, PortalConfig, TalentInvite, TalentInviteStatus, TalentAvailabilityStatus } from './types';
 
 interface AppContextType extends AppState {
   addJob: (job: Job) => void;
+  addCandidate: (candidate: Candidate) => void;
   registerCandidate: (candidate: Candidate) => void;
   loginCandidate: (email: string) => void;
   logoutCandidate: () => void;
@@ -13,6 +14,9 @@ interface AppContextType extends AppState {
   toggleSaveJob: (jobId: string) => void;
   withdrawApplication: (applicationId: string) => void;
   updatePortalConfig: (updates: Partial<PortalConfig>) => void;
+  sendInvite: (invite: TalentInvite) => void;
+  updateInviteStatus: (inviteId: string, status: TalentInviteStatus) => void;
+  updateCandidateAvailability: (candidateId: string, status: TalentAvailabilityStatus) => void;
 }
 
 const STORAGE_KEY = 'collab_careers_state_v2';
@@ -327,6 +331,7 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
       skills: ['React', 'TypeScript', 'Tailwind CSS', 'Node.js'],
       location: 'Pune, India',
       linkedin: 'linkedin.com/in/riyadesai',
+      availabilityStatus: 'Open to Opportunities' as const,
     },
     {
       id: 'c3',
@@ -343,6 +348,7 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
       skills: ['Product Strategy', 'Agile', 'SQL', 'Figma'],
       location: 'Bangalore, India',
       linkedin: 'linkedin.com/in/karanmehta',
+      availabilityStatus: 'Currently Employed' as const,
     },
     {
       id: 'c4',
@@ -360,6 +366,7 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
       skills: ['Figma', 'User Research', 'Prototyping', 'Design Systems'],
       location: 'Mumbai, India',
       linkedin: 'linkedin.com/in/ananyasharma',
+      availabilityStatus: 'Available' as const,
     },
   ],
   applications: [
@@ -455,6 +462,41 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
     },
     // Ananya Sharma (c4) — no applications (empty state demo)
   ],
+  invites: [
+    // Riya Desai (c2) — invited for Node.js role, she said Interested
+    {
+      id: 'inv1',
+      candidateId: 'c2',
+      jobId: 'd6',
+      jobTitle: 'Node.js Backend Engineer',
+      sentAt: new Date(Date.now() - 86400000 * 8).toISOString(),
+      sentBy: 'Sarah Chen',
+      status: 'Interested' as const,
+      emailMode: 'template' as const,
+    },
+    // Karan Mehta (c3) — invited for Project Manager, no response yet
+    {
+      id: 'inv2',
+      candidateId: 'c3',
+      jobId: 'd4',
+      jobTitle: 'Project Manager',
+      sentAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+      sentBy: 'Lisa Ray',
+      status: 'Sent' as const,
+      emailMode: 'template' as const,
+    },
+    // Ananya Sharma (c4) — invited for UI/UX Designer, she declined
+    {
+      id: 'inv3',
+      candidateId: 'c4',
+      jobId: 'd2',
+      jobTitle: 'UI/UX Designer',
+      sentAt: new Date(Date.now() - 86400000 * 5).toISOString(),
+      sentBy: 'Michael Park',
+      status: 'Not Interested' as const,
+      emailMode: 'custom' as const,
+    },
+  ],
   currentUser: null,
   alumniVerified: {
     verified: false,
@@ -511,12 +553,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
       });
 
+      // Ensure mock invites are present
+      const currentInvites = parsed.invites || [];
+      const mergedInvites = [...currentInvites];
+      initialState.invites.forEach(defaultInvite => {
+        if (!mergedInvites.find(i => i.id === defaultInvite.id)) {
+          mergedInvites.push(defaultInvite);
+        }
+      });
+
       return {
         ...parsed,
         jobs: mergedJobs,
         applications: mergedApps,
         candidates: mergedCandidates,
-        // Ensure new top-level fields always have defaults if missing from old localStorage
+        invites: mergedInvites,
         portalConfig: parsed.portalConfig ?? initialState.portalConfig,
       };
     }
@@ -531,6 +582,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setState(prev => ({
       ...prev,
       jobs: [...prev.jobs.filter(j => j.id !== job.id), job],
+    }));
+  };
+
+  const addCandidate = (candidate: Candidate) => {
+    setState(prev => ({
+      ...prev,
+      candidates: [...prev.candidates.filter(c => c.email !== candidate.email), candidate],
     }));
   };
 
@@ -619,11 +677,33 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  const sendInvite = (invite: TalentInvite) => {
+    setState(prev => ({
+      ...prev,
+      invites: [...prev.invites, invite],
+    }));
+  };
+
+  const updateInviteStatus = (inviteId: string, status: TalentInviteStatus) => {
+    setState(prev => ({
+      ...prev,
+      invites: prev.invites.map(i => i.id === inviteId ? { ...i, status } : i),
+    }));
+  };
+
+  const updateCandidateAvailability = (candidateId: string, status: TalentAvailabilityStatus) => {
+    setState(prev => ({
+      ...prev,
+      candidates: prev.candidates.map(c => c.id === candidateId ? { ...c, availabilityStatus: status } : c),
+    }));
+  };
+
   return (
     <AppContext.Provider
       value={{
         ...state,
         addJob,
+        addCandidate,
         registerCandidate,
         loginCandidate,
         logoutCandidate,
@@ -634,6 +714,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         toggleSaveJob,
         withdrawApplication,
         updatePortalConfig,
+        sendInvite,
+        updateInviteStatus,
+        updateCandidateAvailability,
       }}
     >
       {children}

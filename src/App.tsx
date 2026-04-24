@@ -18,6 +18,7 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import CareerPortalPage from './pages/CareerPortalPage';
 import TalentPoolPage from './pages/TalentPoolPage';
 import TalentPoolDetailsPage from './pages/TalentPoolDetailsPage';
+import AddTalentPage from './pages/AddTalentPage';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
         <Route path="/crm/add-job" element={<AddJobPage />} />
         <Route path="/crm/candidates/:candidateId" element={<CandidateDetailPage />} />
         <Route path="/crm/candidates" element={<CandidateListingPage />} />
+        <Route path="/crm/talent-pool/add" element={<AddTalentPage />} />
         <Route path="/crm/talent-pool/:candidateId" element={<TalentPoolDetailsPage />} />
         <Route path="/crm/talent-pool" element={<TalentPoolPage />} />
         <Route path="/crm/config" element={<OperationalConfigPage />} />

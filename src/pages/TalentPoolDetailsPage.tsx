@@ -1,46 +1,101 @@
 import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import CRMLayout from '../components/CRMLayout';
 import {
-  Mail, Phone, MapPin, FileText, ExternalLink,
-  Briefcase, Clock, Check, X, MessageSquare, PhoneCall,
-  CalendarDays, ChevronRight
+  Mail, Phone, MapPin, Copy, FileText, ExternalLink,
+  Briefcase, Check, X, MessageSquare, PhoneCall,
+  CalendarDays, Send, MoreVertical, UserCheck, EyeOff, ChevronDown,
 } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 import InviteEmailCompose from '../components/InviteEmailCompose';
+import type { TalentAvailabilityStatus, TalentInviteStatus } from '../store/types';
 
-const appStatusStyles: Record<string, { bg: string; text: string; dot: string }> = {
-  'Under Review':         { bg: 'bg-[#F4F5FA]',    text: 'text-[#3538CD]',  dot: 'bg-[#3538CD]' },
-  'Interview in Progress':{ bg: 'bg-[#F4F5FA]',    text: 'text-[#3538CD]',  dot: 'bg-[#3538CD]' },
-  'Decision Made':        { bg: 'bg-[#F9FAFB]',    text: 'text-[#6B7280]',  dot: 'bg-[#9CA3AF]' },
-  'Offer Made':           { bg: 'bg-[#3538CD]',    text: 'text-white',      dot: 'bg-white' },
-  'Rejected':             { bg: 'bg-gray-100',     text: 'text-gray-400',   dot: 'bg-gray-300' },
-  'Draft':                { bg: 'bg-amber-50',     text: 'text-amber-600',  dot: 'bg-amber-400' },
-  'Submitted':            { bg: 'bg-[#F4F5FA]',    text: 'text-[#3538CD]',  dot: 'bg-[#3538CD]' },
-  'Withdrawn':            { bg: 'bg-gray-50',      text: 'text-gray-400',   dot: 'bg-gray-300' },
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function DetailField({ label, value }: { label: string; value?: string | null }) {
+  return (
+    <div className="space-y-1">
+      <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">{label}</p>
+      <p className="text-sm font-bold text-[#1A1A2E]">{value || '–'}</p>
+    </div>
+  );
+}
+
+function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden">
+      <div className="px-6 py-4 bg-[#F9FAFB] border-b border-[#E5E7EB]">
+        <h3 className="text-sm font-black text-[#1A1A2E] uppercase tracking-wider">{title}</h3>
+      </div>
+      <div className="p-6">{children}</div>
+    </div>
+  );
+}
+
+const AVAILABILITY_OPTIONS: TalentAvailabilityStatus[] = [
+  'Available', 'Open to Opportunities', 'Currently Employed', 'Placed', 'Not Looking',
+];
+
+const availabilityStyle: Record<TalentAvailabilityStatus, string> = {
+  'Available':              'bg-green-50 text-green-700 border-green-200',
+  'Open to Opportunities':  'bg-blue-50 text-blue-700 border-blue-200',
+  'Currently Employed':     'bg-[#F4F5FA] text-[#3538CD] border-[#3538CD]/10',
+  'Placed':                 'bg-purple-50 text-purple-700 border-purple-200',
+  'Not Looking':            'bg-gray-100 text-gray-500 border-gray-200',
 };
 
-const formatRelativeDate = (dateStr: string) => {
-  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
+const inviteStatusStyle: Record<TalentInviteStatus, { pill: string; label: string }> = {
+  'Sent':          { pill: 'bg-[#F4F5FA] text-[#3538CD] border-[#3538CD]/10',  label: 'Awaiting Response' },
+  'Interested':    { pill: 'bg-green-50 text-green-700 border-green-200',       label: 'Interested' },
+  'Not Interested':{ pill: 'bg-gray-100 text-gray-500 border-gray-200',         label: 'Not Interested' },
+  'Applied':       { pill: 'bg-[#3538CD] text-white border-[#3538CD]',          label: 'Applied' },
+  'Expired':       { pill: 'bg-amber-50 text-amber-600 border-amber-200',       label: 'Expired' },
+};
+
+const appStatusStyle: Record<string, string> = {
+  'Under Review':          'bg-[#F4F5FA] text-[#3538CD] border-[#3538CD]/10',
+  'Interview in Progress': 'bg-[#F4F5FA] text-[#3538CD] border-[#3538CD]/10',
+  'Decision Made':         'bg-[#F9FAFB] text-[#6B7280] border-[#E5E7EB]',
+  'Offer Made':            'bg-[#3538CD] text-white border-[#3538CD]',
+  'Rejected':              'bg-gray-100 text-gray-400 border-gray-200',
+  'Draft':                 'bg-amber-50 text-amber-600 border-amber-200',
+  'Submitted':             'bg-[#F4F5FA] text-[#3538CD] border-[#3538CD]/10',
+  'Withdrawn':             'bg-gray-50 text-gray-400 border-gray-200',
+};
+
+const ACTIVE_STATUSES = new Set(['Submitted', 'Under Review', 'Interview in Progress', 'Decision Made', 'Offer Made']);
+
+const formatDate = (iso: string) =>
+  new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+const formatRelative = (iso: string) => {
+  const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
   if (diff === 0) return 'Today';
   if (diff === 1) return 'Yesterday';
   if (diff < 7) return `${diff}d ago`;
-  return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  return formatDate(iso);
 };
+
+// ── Page ─────────────────────────────────────────────────────────────────────
+
+const TABS = ['Profile', 'Applications', 'Invite History', 'Notes'] as const;
+type Tab = typeof TABS[number];
 
 export default function TalentPoolDetailsPage() {
   const { candidateId } = useParams();
-  const { candidates, jobs, applications } = useApp();
+  const { candidates, jobs, applications, invites, updateInviteStatus, updateCandidateAvailability } = useApp();
 
+  const [activeTab, setActiveTab] = useState<Tab>('Profile');
   const [showInvite, setShowInvite] = useState(false);
   const [inviteSent, setInviteSent] = useState<string | null>(null);
+  const [editingAvailability, setEditingAvailability] = useState(false);
 
   const candidate = candidates.find(c => c.id === candidateId);
 
   if (!candidate) {
     return (
       <CRMLayout breadcrumbs={[{ label: 'Talent Pool', path: '/crm/talent-pool' }, { label: 'Not Found' }]}>
-        <div className="p-8 text-center text-[#6B7280]">Candidate not found.</div>
+        <div className="py-20 text-center text-[#6B7280]">Candidate not found.</div>
       </CRMLayout>
     );
   }
@@ -49,13 +104,32 @@ export default function TalentPoolDetailsPage() {
     .filter(a => a.candidateId === candidate.id)
     .sort((a, b) => new Date(b.appliedAt).getTime() - new Date(a.appliedAt).getTime());
 
+  const activeApps = candidateApps.filter(a => ACTIVE_STATUSES.has(a.status));
+  const isInPipeline = activeApps.length > 0;
+
+  const candidateInvites = invites
+    .filter(i => i.candidateId === candidate.id)
+    .sort((a, b) => new Date(b.sentAt).getTime() - new Date(a.sentAt).getTime());
+
+  const pendingInviteCount = candidateInvites.filter(i => i.status === 'Sent').length;
+
+  const canContact = !!candidate.allowRecruiterContact;
+
   const handleInviteSent = (name: string) => {
     setShowInvite(false);
     setInviteSent(name);
     setTimeout(() => setInviteSent(null), 4000);
   };
 
-  const canContact = candidate.allowRecruiterContact;
+  const totalExp = (() => {
+    const y = candidate.totalExperienceYears;
+    const m = candidate.totalExperienceMonths;
+    if (!y && !m) return null;
+    const parts = [];
+    if (y) parts.push(`${y} yr${y !== 1 ? 's' : ''}`);
+    if (m) parts.push(`${m} mo${m !== 1 ? 's' : ''}`);
+    return parts.join(', ');
+  })();
 
   return (
     <>
@@ -65,236 +139,527 @@ export default function TalentPoolDetailsPage() {
           { label: `${candidate.firstName} ${candidate.lastName}` },
         ]}
       >
-        <div className="max-w-5xl mx-auto space-y-5 pt-2 pb-10">
+        <div className="flex gap-8 items-start pb-16">
 
-          {/* ── Header ── */}
-          <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden">
-            <div className="h-1.5 bg-gradient-to-r from-[#3538CD] to-[#6366F1]" />
-            <div className="px-6 py-5 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 bg-[#3538CD]/10 text-[#3538CD] rounded-2xl flex items-center justify-center text-xl font-black shrink-0">
+          {/* ── LEFT SIDEBAR ── */}
+          <div className="w-[280px] shrink-0 sticky top-[80px] space-y-4">
+
+            <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden">
+              <div className="h-1 bg-gradient-to-r from-[#3538CD] to-[#6366F1]" />
+              <div className="p-6 flex flex-col items-center">
+
+                {/* Avatar */}
+                <div className="w-20 h-20 rounded-full bg-[#3538CD]/5 border-4 border-white shadow-sm flex items-center justify-center text-[#3538CD] font-black text-3xl mb-4">
                   {candidate.firstName[0]}{candidate.lastName[0]}
                 </div>
-                <div>
-                  <h2 className="text-xl font-black text-[#111827]">
-                    {candidate.firstName} {candidate.lastName}
-                  </h2>
-                  <p className="text-sm text-[#6B7280] font-medium mt-0.5">
-                    {[candidate.currentDesignation, candidate.currentOrg].filter(Boolean).join(' · ') || 'No designation set'}
-                  </p>
-                  <div className="flex items-center gap-2 mt-2">
-                    {candidate.isAlumni && (
-                      <span className="text-[10px] font-black text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full uppercase tracking-widest">
-                        Verified Alumni
-                      </span>
-                    )}
-                    {candidate.profileVisibility === 'visible' && (
-                      <span className="text-[10px] font-black text-green-600 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full uppercase tracking-widest">
-                        Open to Opportunities
-                      </span>
-                    )}
-                    {candidateApps.length > 0 && (
-                      <span className="text-[10px] font-black text-[#3538CD] bg-[#F4F5FA] border border-[#3538CD]/10 px-2 py-0.5 rounded-full uppercase tracking-widest">
-                        {candidateApps.length} Application{candidateApps.length !== 1 ? 's' : ''}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowInvite(true)}
-                className="shrink-0 px-6 py-2.5 bg-[#3538CD] text-white text-[11px] font-black rounded-xl hover:bg-[#292bb0] transition-all shadow-md shadow-[#3538CD]/20 uppercase tracking-widest"
-              >
-                Invite to Apply
-              </button>
-            </div>
-          </div>
 
-          <div className="flex flex-col lg:flex-row gap-5 items-start">
-
-            {/* ── LEFT SIDEBAR ── */}
-            <div className="w-full lg:w-[300px] shrink-0 space-y-5">
-
-              {/* Contact Info */}
-              <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-5">
-                <h3 className="text-[11px] font-black text-[#6B7280] uppercase tracking-widest mb-4">Contact Information</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 text-sm font-medium text-[#374151]">
-                    <Mail className="w-4 h-4 text-[#6B7280] shrink-0" />
-                    <span className="truncate">{candidate.email}</span>
-                  </div>
-                  {candidate.phone && (
-                    <div className="flex items-center gap-3 text-sm font-medium text-[#374151]">
-                      <Phone className="w-4 h-4 text-[#6B7280] shrink-0" />
-                      <span>{candidate.phone}</span>
-                    </div>
-                  )}
-                  {candidate.location && (
-                    <div className="flex items-center gap-3 text-sm font-medium text-[#374151]">
-                      <MapPin className="w-4 h-4 text-[#6B7280] shrink-0" />
-                      <span className="truncate">{candidate.location}</span>
-                    </div>
-                  )}
-                  {candidate.linkedin && (
-                    <div className="flex items-center gap-3">
-                      <svg className="w-4 h-4 text-[#0A66C2] shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
-                      <a
-                        href={`https://${candidate.linkedin.replace('https://', '')}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-sm font-bold text-[#3538CD] hover:underline truncate"
-                      >
-                        LinkedIn Profile
-                      </a>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Contact Preference */}
-              <div className={`rounded-2xl border shadow-sm p-5 ${canContact ? 'bg-green-50 border-green-200' : 'bg-amber-50 border-amber-200'}`}>
-                <h3 className={`text-[11px] font-black uppercase tracking-widest mb-3 ${canContact ? 'text-green-700' : 'text-amber-700'}`}>
-                  Contact Preference
-                </h3>
-                {canContact ? (
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 bg-green-100 border border-green-300 rounded-xl flex items-center justify-center shrink-0 mt-0.5">
-                      <PhoneCall className="w-4 h-4 text-green-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-black text-green-800">Open to direct contact</p>
-                      <p className="text-xs text-green-600 mt-0.5 leading-relaxed">
-                        You can reach out via email or phone without sending a formal invite first.
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 bg-amber-100 border border-amber-300 rounded-xl flex items-center justify-center shrink-0 mt-0.5">
-                      <MessageSquare className="w-4 h-4 text-amber-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-black text-amber-800">Prefers invite first</p>
-                      <p className="text-xs text-amber-600 mt-0.5 leading-relaxed">
-                        Send a formal invite — candidate will respond if interested.
-                      </p>
-                    </div>
-                  </div>
+                <h2 className="text-lg font-black text-[#1A1A2E] text-center leading-tight">
+                  {candidate.firstName} {candidate.lastName}
+                </h2>
+                {candidate.currentDesignation && (
+                  <p className="text-sm font-bold text-[#3538CD] mt-1 text-center">{candidate.currentDesignation}</p>
                 )}
-              </div>
-
-              {/* Resume */}
-              <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-5">
-                <h3 className="text-[11px] font-black text-[#6B7280] uppercase tracking-widest mb-4">Resume</h3>
-                {candidate.resumeUrl ? (
-                  <div className="flex items-center gap-3 p-3 bg-[#F9FAFB] rounded-xl border border-[#E5E7EB] hover:bg-white hover:border-[#3538CD]/30 cursor-pointer transition-all group">
-                    <FileText className="w-5 h-5 text-[#3538CD] shrink-0" />
-                    <p className="text-xs font-bold text-[#111827] truncate flex-1">{candidate.resumeUrl}</p>
-                    <ExternalLink className="w-4 h-4 text-[#3538CD] group-hover:scale-110 transition-transform shrink-0" />
-                  </div>
-                ) : (
-                  <p className="text-xs font-bold text-[#9CA3AF] italic">No resume uploaded</p>
+                {candidate.currentOrg && (
+                  <p className="text-xs text-[#9CA3AF] mt-0.5 text-center">{candidate.currentOrg}</p>
                 )}
-              </div>
-            </div>
 
-            {/* ── RIGHT MAIN ── */}
-            <div className="flex-1 min-w-0 space-y-5">
-
-              {/* Professional Profile */}
-              <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-6">
-                <h3 className="text-[11px] font-black text-[#6B7280] uppercase tracking-widest mb-5">Professional Profile</h3>
-                <div className="grid grid-cols-3 gap-5">
-                  <div>
-                    <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
-                      <Briefcase className="w-3 h-3" /> Organisation
-                    </p>
-                    <p className="text-sm font-bold text-[#111827]">{candidate.currentOrg || '—'}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-1.5">Designation</p>
-                    <p className="text-sm font-bold text-[#111827]">{candidate.currentDesignation || '—'}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
-                      <Clock className="w-3 h-3" /> Notice Period
-                    </p>
-                    <p className="text-sm font-bold text-[#111827]">{candidate.noticePeriod || '—'}</p>
-                  </div>
-                </div>
-
-                <div className="border-t border-[#F3F4F6] mt-5 pt-5">
-                  <p className="text-[11px] font-black text-[#6B7280] uppercase tracking-widest mb-3">Skills</p>
-                  {candidate.skills?.length ? (
-                    <div className="flex flex-wrap gap-2">
-                      {candidate.skills.map(skill => (
-                        <span key={skill} className="px-3 py-1.5 text-[11px] font-bold bg-[#F4F5FA] text-[#3538CD] border border-[#3538CD]/10 rounded-full">
-                          {skill}
-                        </span>
-                      ))}
-                    </div>
+                {/* Availability status */}
+                <div className="mt-3 w-full">
+                  {editingAvailability ? (
+                    <select
+                      autoFocus
+                      value={candidate.availabilityStatus ?? ''}
+                      onChange={e => {
+                        updateCandidateAvailability(candidate.id, e.target.value as TalentAvailabilityStatus);
+                        setEditingAvailability(false);
+                      }}
+                      onBlur={() => setEditingAvailability(false)}
+                      className="w-full text-xs font-bold border border-[#3538CD]/30 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#3538CD]/15 bg-white text-[#374151]"
+                    >
+                      <option value="">— Set Availability —</option>
+                      {AVAILABILITY_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+                    </select>
                   ) : (
-                    <p className="text-xs font-bold text-[#9CA3AF] italic">No skills listed</p>
+                    <button
+                      onClick={() => setEditingAvailability(true)}
+                      className={`w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg border text-xs font-black uppercase tracking-widest transition-all hover:opacity-80 ${
+                        candidate.availabilityStatus
+                          ? availabilityStyle[candidate.availabilityStatus]
+                          : 'bg-[#F9FAFB] text-[#9CA3AF] border-[#E5E7EB]'
+                      }`}
+                    >
+                      <span>{candidate.availabilityStatus ?? 'Set Availability'}</span>
+                      <ChevronDown className="w-3.5 h-3.5 shrink-0" />
+                    </button>
                   )}
                 </div>
-              </div>
 
-              {/* Application History */}
-              <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-6">
-                <div className="flex items-center justify-between mb-5">
-                  <h3 className="text-[11px] font-black text-[#6B7280] uppercase tracking-widest">Application History</h3>
-                  {candidateApps.length > 0 && (
-                    <span className="text-[10px] font-black text-[#3538CD] bg-[#F4F5FA] border border-[#3538CD]/10 px-2.5 py-1 rounded-full">
-                      {candidateApps.length} total
+                {/* Badges */}
+                <div className="flex flex-wrap items-center justify-center gap-1.5 mt-3">
+                  {candidate.isAlumni && (
+                    <span className="px-2.5 py-1 text-[10px] font-black bg-amber-50 text-amber-600 border border-amber-200 rounded-full uppercase tracking-widest">
+                      Verified Alumni
                     </span>
                   )}
+                  {candidate.addedByRecruiter && (
+                    <span className="px-2.5 py-1 text-[10px] font-black bg-[#F4F5FA] text-[#3538CD] border border-[#3538CD]/10 rounded-full uppercase tracking-widest">
+                      Recruiter Added
+                    </span>
+                  )}
+                  {isInPipeline && (
+                    <span className="px-2.5 py-1 text-[10px] font-black bg-purple-50 text-purple-700 border border-purple-200 rounded-full uppercase tracking-widest">
+                      In Pipeline
+                    </span>
+                  )}
+                  <span className={`flex items-center gap-1 px-2.5 py-1 text-[10px] font-black rounded-full border uppercase tracking-widest ${
+                    canContact
+                      ? 'bg-green-50 text-green-600 border-green-200'
+                      : 'bg-gray-50 text-gray-500 border-gray-200'
+                  }`}>
+                    {canContact
+                      ? <><UserCheck className="w-3 h-3" /> Open to contact</>
+                      : <><EyeOff className="w-3 h-3" /> Invite first</>
+                    }
+                  </span>
                 </div>
 
-                {candidateApps.length === 0 ? (
-                  <div className="py-6 flex flex-col items-center gap-2 text-center">
-                    <div className="w-10 h-10 bg-[#F4F5FA] rounded-xl flex items-center justify-center">
-                      <CalendarDays className="w-5 h-5 text-[#D1D5DB]" />
+                <div className="w-full border-t border-[#E5E7EB] my-5" />
+
+                {/* Contact info */}
+                <div className="w-full space-y-3">
+                  <div className="flex items-center gap-3 group cursor-pointer">
+                    <div className="w-8 h-8 rounded-lg bg-[#F9FAFB] flex items-center justify-center">
+                      <Mail className="w-4 h-4 text-[#6B7280]" />
                     </div>
-                    <p className="text-sm font-bold text-[#9CA3AF]">No applications yet</p>
-                    <p className="text-xs text-[#C4C9D4]">This candidate is in the talent pool but hasn't applied to any jobs.</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Email</p>
+                      <div className="flex items-center gap-1">
+                        <span className="text-sm font-bold text-[#374151] truncate">{candidate.email}</span>
+                        <Copy className="w-3.5 h-3.5 text-[#9CA3AF] hover:text-[#3538CD] shrink-0 cursor-pointer" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {candidate.phone && (
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-[#F9FAFB] flex items-center justify-center">
+                        <Phone className="w-4 h-4 text-[#6B7280]" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Phone</p>
+                        <span className="text-sm font-bold text-[#374151]">{candidate.phone}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {candidate.location && (
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-[#F9FAFB] flex items-center justify-center">
+                        <MapPin className="w-4 h-4 text-[#6B7280]" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Location</p>
+                        <span className="text-sm font-bold text-[#374151]">{candidate.location}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {candidate.linkedin && (
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-[#F9FAFB] flex items-center justify-center">
+                        <svg className="w-4 h-4 text-[#0A66C2]" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+                          <rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">LinkedIn</p>
+                        <a
+                          href={`https://${candidate.linkedin.replace(/^https?:\/\//, '')}`}
+                          target="_blank" rel="noreferrer"
+                          className="text-sm font-bold text-[#3538CD] hover:underline flex items-center gap-1"
+                        >
+                          Profile <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setActiveTab('Applications')}>
+                    <div className="w-8 h-8 rounded-lg bg-[#F9FAFB] flex items-center justify-center">
+                      <Briefcase className="w-4 h-4 text-[#6B7280] group-hover:text-[#3538CD] transition-colors" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Applications</p>
+                      <span className="text-sm font-bold text-[#3538CD] underline decoration-[#3538CD]/30 underline-offset-4 hover:decoration-[#3538CD]">
+                        {candidateApps.length}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="w-full border-t border-[#E5E7EB] my-5" />
+
+                {/* Resume */}
+                {(candidate.resumeUrl || candidate.resumeLink) ? (
+                  <a
+                    href={candidate.resumeLink || '#'} target="_blank" rel="noreferrer"
+                    className="w-full flex items-center gap-2.5 px-4 py-3 border border-[#E5E7EB] rounded-2xl text-xs font-black text-[#374151] hover:bg-[#F9FAFB] hover:border-[#3538CD]/30 transition-all uppercase tracking-widest"
+                  >
+                    <FileText className="w-4 h-4 text-[#3538CD]" />
+                    View Resume
+                    <ExternalLink className="w-3.5 h-3.5 ml-auto text-[#9CA3AF]" />
+                  </a>
+                ) : (
+                  <p className="text-xs font-bold text-[#C4C9D4] italic text-center">No resume uploaded</p>
+                )}
+
+                <div className="w-full border-t border-[#E5E7EB] my-5" />
+
+                {/* Meta */}
+                <div className="w-full space-y-2.5">
+                  {candidate.source && (
+                    <div>
+                      <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Source</p>
+                      <span className="inline-flex mt-1 px-2.5 py-1 bg-[#3538CD] text-white text-[10px] font-black rounded-lg uppercase tracking-wider">
+                        {candidate.source}
+                      </span>
+                    </div>
+                  )}
+                  {candidate.businessUnit && (
+                    <div>
+                      <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Business Unit</p>
+                      <p className="text-xs font-bold text-[#374151] mt-0.5">{candidate.businessUnit}</p>
+                    </div>
+                  )}
+                  {candidate.recordOwner && (
+                    <div>
+                      <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Record Owner</p>
+                      <p className="text-xs font-bold text-[#374151] mt-0.5">{candidate.recordOwner}</p>
+                    </div>
+                  )}
+                  {candidate.addedAt && (
+                    <div>
+                      <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Added On</p>
+                      <p className="text-xs font-bold text-[#374151] mt-0.5">{formatDate(candidate.addedAt)}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Contact preference card */}
+            <div className={`rounded-2xl border p-4 ${canContact ? 'bg-green-50 border-green-200' : 'bg-amber-50 border-amber-200'}`}>
+              <div className="flex items-start gap-3">
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${canContact ? 'bg-green-100 border border-green-300' : 'bg-amber-100 border border-amber-300'}`}>
+                  {canContact ? <PhoneCall className="w-4 h-4 text-green-600" /> : <MessageSquare className="w-4 h-4 text-amber-600" />}
+                </div>
+                <div>
+                  <p className={`text-xs font-black ${canContact ? 'text-green-800' : 'text-amber-800'}`}>
+                    {canContact ? 'Open to direct contact' : 'Prefers invite first'}
+                  </p>
+                  <p className={`text-[11px] mt-0.5 leading-relaxed ${canContact ? 'text-green-600' : 'text-amber-600'}`}>
+                    {canContact
+                      ? 'Reach out via email or phone directly.'
+                      : 'Send a formal invite before reaching out.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* ── MAIN CONTENT ── */}
+          <div className="flex-1 min-w-0">
+
+            {/* Tab bar + actions */}
+            <div className="flex items-center justify-between mb-6 bg-white p-2 rounded-2xl border border-[#E5E7EB] shadow-sm">
+              <div className="flex items-center">
+                {TABS.map(tab => {
+                  const badge =
+                    tab === 'Applications' && candidateApps.length > 0 ? candidateApps.length :
+                    tab === 'Invite History' && pendingInviteCount > 0 ? pendingInviteCount :
+                    null;
+                  const isActive = tab === activeTab;
+                  return (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab)}
+                      className={`px-5 py-2.5 text-xs font-black uppercase tracking-widest rounded-xl transition-all flex items-center gap-1.5 ${
+                        isActive
+                          ? 'bg-[#3538CD] text-white shadow-md shadow-[#3538CD]/20'
+                          : 'text-[#6B7280] hover:text-[#111827] hover:bg-[#F9FAFB]'
+                      }`}
+                    >
+                      {tab}
+                      {badge !== null && (
+                        <span className={`px-1.5 py-0.5 text-[9px] rounded-full font-black ${isActive ? 'bg-white/20 text-white' : 'bg-[#F4F5FA] text-[#3538CD]'}`}>
+                          {badge}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="flex items-center gap-2 pr-1">
+                <button
+                  onClick={() => setShowInvite(true)}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-[#3538CD] text-white text-xs font-black rounded-xl hover:bg-[#292bb0] transition-all shadow-md shadow-[#3538CD]/20 uppercase tracking-widest"
+                >
+                  <Send className="w-3.5 h-3.5" /> Invite to Apply
+                </button>
+                <button className="p-2.5 rounded-xl border border-[#E5E7EB] hover:bg-[#F9FAFB] transition-all">
+                  <MoreVertical className="w-4 h-4 text-[#6B7280]" />
+                </button>
+              </div>
+            </div>
+
+            {/* ── Profile tab ── */}
+            {activeTab === 'Profile' && (
+              <div className="space-y-5">
+
+                {/* In Pipeline banner */}
+                {isInPipeline && (
+                  <div className="bg-purple-50 border border-purple-200 rounded-2xl px-5 py-4 flex items-center gap-3">
+                    <span className="inline-flex px-2.5 py-1 bg-purple-600 text-white text-[10px] font-black rounded-lg uppercase tracking-widest shrink-0">
+                      In Pipeline
+                    </span>
+                    <p className="text-xs font-bold text-purple-700">
+                      This talent has {activeApps.length} active application{activeApps.length !== 1 ? 's' : ''} in progress. They remain in the talent pool regardless of pipeline status.
+                    </p>
+                  </div>
+                )}
+
+                <SectionCard title="Professional Details">
+                  <div className="grid grid-cols-3 gap-8">
+                    <DetailField label="Current Organisation" value={candidate.currentOrg} />
+                    <DetailField label="Designation" value={candidate.currentDesignation} />
+                    <DetailField label="Notice Period" value={candidate.noticePeriod} />
+                    <DetailField label="Total Experience" value={candidate.isFresher ? 'Fresher' : totalExp} />
+                    <DetailField label="Highest Qualification" value={candidate.highestQualification} />
+                  </div>
+
+                  {candidate.skills?.length ? (
+                    <div className="border-t border-[#F3F4F6] mt-6 pt-5">
+                      <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest mb-3">Skills</p>
+                      <div className="flex flex-wrap gap-2">
+                        {candidate.skills.map(s => (
+                          <span key={s} className="px-3 py-1.5 bg-[#F4F5FA] border border-[#3538CD]/10 text-[#3538CD] text-[11px] font-bold rounded-full">
+                            {s}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+                </SectionCard>
+
+                {(candidate.currentCtc || candidate.expectedCtc) && (
+                  <SectionCard title="Compensation">
+                    <div className="grid grid-cols-4 gap-8">
+                      <DetailField label="CTC Type" value={candidate.ctcType} />
+                      <DetailField label="Currency" value={candidate.ctcCurrency} />
+                      <DetailField label="Current CTC" value={candidate.currentCtc} />
+                      <DetailField label="Expected CTC" value={candidate.expectedCtc} />
+                    </div>
+                  </SectionCard>
+                )}
+
+                {(candidate.city || candidate.state || candidate.country) && (
+                  <SectionCard title="Location">
+                    <div className="grid grid-cols-3 gap-8">
+                      <DetailField label="City" value={candidate.city} />
+                      <DetailField label="State" value={candidate.state} />
+                      <DetailField label="Country" value={candidate.country} />
+                    </div>
+                  </SectionCard>
+                )}
+
+                <SectionCard title="Recruiter Notes">
+                  {candidate.recruiterNotes ? (
+                    <p className="text-sm text-[#374151] leading-relaxed">{candidate.recruiterNotes}</p>
+                  ) : (
+                    <p className="text-sm text-[#C4C9D4] italic">No notes added yet.</p>
+                  )}
+                </SectionCard>
+
+              </div>
+            )}
+
+            {/* ── Applications tab ── */}
+            {activeTab === 'Applications' && (
+              <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-sm whitespace-nowrap">
+                    <thead>
+                      <tr className="border-b border-[#E5E7EB] bg-[#F9FAFB]">
+                        {['#', 'Applied Date', 'Job Title', 'Business Unit', 'Status', 'Actions'].map(h => (
+                          <th key={h} className="px-6 py-4 font-black text-[#6B7280] text-[10px] uppercase tracking-widest">{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#E5E7EB]">
+                      {candidateApps.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="px-6 py-16 text-center">
+                            <CalendarDays className="w-8 h-8 text-[#E5E7EB] mx-auto mb-3" />
+                            <p className="text-sm font-bold text-[#9CA3AF]">No applications yet</p>
+                            <p className="text-xs text-[#C4C9D4] mt-1">This talent hasn't applied to any role.</p>
+                          </td>
+                        </tr>
+                      ) : candidateApps.map((app, i) => {
+                        const job = jobs.find(j => j.id === app.jobId);
+                        const st = appStatusStyle[app.status] ?? 'bg-[#F9FAFB] text-[#6B7280] border-[#E5E7EB]';
+                        return (
+                          <tr key={app.id} className="hover:bg-[#F9FAFB] transition-colors">
+                            <td className="px-6 py-4 font-bold text-[#9CA3AF]">{i + 1}</td>
+                            <td className="px-6 py-4 text-[#374151] font-medium">{formatDate(app.appliedAt)}</td>
+                            <td className="px-6 py-4 font-bold text-[#3538CD]">{job?.title || '—'}</td>
+                            <td className="px-6 py-4 text-[#374151] font-medium">{job?.businessUnit || '—'}</td>
+                            <td className="px-6 py-4">
+                              <span className={`inline-flex items-center px-2.5 py-1 text-[10px] font-black uppercase tracking-widest rounded-md border ${st}`}>
+                                {app.status}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4">
+                              <button className="text-[#3538CD] font-black text-[11px] hover:underline uppercase tracking-widest">View</button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* ── Invite History tab ── */}
+            {activeTab === 'Invite History' && (
+              <div className="space-y-3">
+                {candidateInvites.length === 0 ? (
+                  <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm py-20 flex flex-col items-center gap-3 text-center px-8">
+                    <div className="w-12 h-12 bg-[#F4F5FA] rounded-2xl flex items-center justify-center">
+                      <Send className="w-5 h-5 text-[#D1D5DB]" />
+                    </div>
+                    <p className="text-sm font-black text-[#9CA3AF]">No invites sent yet</p>
+                    <p className="text-xs text-[#C4C9D4] max-w-xs">
+                      When you invite this person to apply for a role, a record will appear here.
+                    </p>
+                    <button
+                      onClick={() => setShowInvite(true)}
+                      className="mt-2 flex items-center gap-2 px-5 py-2.5 bg-[#3538CD] text-white text-xs font-black rounded-xl hover:bg-[#292bb0] transition-all shadow-md shadow-[#3538CD]/20 uppercase tracking-widest"
+                    >
+                      <Send className="w-3.5 h-3.5" /> Send First Invite
+                    </button>
                   </div>
                 ) : (
-                  <div className="space-y-2">
-                    {candidateApps.map(app => {
-                      const job = jobs.find(j => j.id === app.jobId);
-                      const style = appStatusStyles[app.status] ?? { bg: 'bg-[#F9FAFB]', text: 'text-[#6B7280]', dot: 'bg-[#9CA3AF]' };
+                  <>
+                    <p className="text-xs font-black text-[#9CA3AF] uppercase tracking-widest px-1">
+                      {candidateInvites.length} invite{candidateInvites.length !== 1 ? 's' : ''} sent
+                    </p>
+                    {candidateInvites.map(invite => {
+                      const st = inviteStatusStyle[invite.status];
+                      const isApplied = invite.status === 'Applied';
+                      const isSent = invite.status === 'Sent';
                       return (
-                        <div key={app.id} className="flex items-center gap-4 p-3.5 rounded-xl bg-[#F9FAFB] border border-[#F3F4F6] hover:border-[#3538CD]/20 hover:bg-white transition-all group">
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold text-[#111827] truncate group-hover:text-[#3538CD] transition-colors">
-                              {job?.title || 'Unknown Job'}
-                            </p>
-                            <p className="text-xs text-[#9CA3AF] mt-0.5">{job?.businessUnit || ''}</p>
+                        <div key={invite.id} className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden">
+                          {/* Top row — invite info */}
+                          <div className="px-5 pt-5 pb-4 flex items-start justify-between gap-4">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <p className="text-sm font-black text-[#111827]">
+                                  {invite.jobTitle || 'General Invite'}
+                                </p>
+                                <span className={`inline-flex px-2 py-0.5 text-[10px] font-black rounded-full border uppercase tracking-widest ${st.pill}`}>
+                                  {st.label}
+                                </span>
+                                {invite.emailMode === 'custom' && (
+                                  <span className="inline-flex px-2 py-0.5 text-[10px] font-bold text-[#9CA3AF] bg-[#F9FAFB] border border-[#E5E7EB] rounded-full uppercase tracking-widest">
+                                    Custom Email
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs text-[#9CA3AF] mt-1.5">
+                                Sent by <span className="font-bold text-[#6B7280]">{invite.sentBy}</span>
+                                {' · '}{formatRelative(invite.sentAt)}
+                              </p>
+                            </div>
+                            {/* Resend — only when already resolved */}
+                            {!isSent && !isApplied && (
+                              <button
+                                onClick={() => setShowInvite(true)}
+                                className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-black text-[#3538CD] bg-[#F4F5FA] border border-[#3538CD]/10 rounded-lg hover:bg-[#3538CD]/10 transition-colors uppercase tracking-widest shrink-0"
+                              >
+                                <Send className="w-3 h-3" /> Resend
+                              </button>
+                            )}
                           </div>
-                          <div className="flex items-center gap-3 shrink-0">
-                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-transparent ${style.bg} ${style.text}`}>
-                              <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${style.dot}`} />
-                              {app.status}
-                            </span>
-                            <span className="text-[10px] font-bold text-[#9CA3AF] whitespace-nowrap">
-                              {formatRelativeDate(app.appliedAt)}
-                            </span>
-                            <Link
-                              to={`/crm/candidates/${candidate.id}`}
-                              className="p-1 text-[#D1D5DB] hover:text-[#3538CD] transition-colors"
-                              title="View in candidate detail"
-                            >
-                              <ChevronRight className="w-4 h-4" />
-                            </Link>
-                          </div>
+
+                          {/* Update Response row — always shown unless Applied */}
+                          {!isApplied && (
+                            <div className="px-5 pb-4 flex items-center gap-2">
+                              <p className="text-[10px] font-black text-[#C4C9D4] uppercase tracking-widest mr-1 shrink-0">
+                                {isSent ? 'Update when you hear back:' : 'Override:'}
+                              </p>
+                              <button
+                                onClick={() => updateInviteStatus(invite.id, 'Interested')}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-black rounded-lg border transition-colors uppercase tracking-widest ${
+                                  invite.status === 'Interested'
+                                    ? 'bg-green-100 text-green-700 border-green-300 cursor-default ring-1 ring-green-400'
+                                    : 'text-green-700 bg-green-50 border-green-200 hover:bg-green-100'
+                                }`}
+                              >
+                                <Check className="w-3.5 h-3.5" />
+                                Interested
+                                {invite.status === 'Interested' && <span className="ml-0.5 text-[9px]">✓</span>}
+                              </button>
+                              <button
+                                onClick={() => updateInviteStatus(invite.id, 'Not Interested')}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-black rounded-lg border transition-colors uppercase tracking-widest ${
+                                  invite.status === 'Not Interested'
+                                    ? 'bg-gray-200 text-gray-600 border-gray-300 cursor-default ring-1 ring-gray-400'
+                                    : 'text-gray-500 bg-gray-50 border-gray-200 hover:bg-gray-100'
+                                }`}
+                              >
+                                <X className="w-3.5 h-3.5" />
+                                Not Interested
+                                {invite.status === 'Not Interested' && <span className="ml-0.5 text-[9px]">✓</span>}
+                              </button>
+                            </div>
+                          )}
+
+                          {/* Applied — terminal, no override */}
+                          {isApplied && (
+                            <div className="px-5 pb-4">
+                              <p className="text-[11px] text-[#9CA3AF] italic">
+                                Candidate applied — no further action needed on this invite.
+                              </p>
+                            </div>
+                          )}
                         </div>
                       );
                     })}
-                  </div>
+                  </>
                 )}
               </div>
+            )}
 
-            </div>
+            {/* ── Notes tab ── */}
+            {activeTab === 'Notes' && (
+              <SectionCard title="Recruiter Notes">
+                {candidate.recruiterNotes ? (
+                  <p className="text-sm text-[#374151] leading-relaxed whitespace-pre-wrap">{candidate.recruiterNotes}</p>
+                ) : (
+                  <div className="py-12 flex flex-col items-center gap-2 text-center">
+                    <div className="w-10 h-10 bg-[#F4F5FA] rounded-xl flex items-center justify-center">
+                      <MessageSquare className="w-5 h-5 text-[#D1D5DB]" />
+                    </div>
+                    <p className="text-sm font-bold text-[#9CA3AF]">No notes yet</p>
+                    <p className="text-xs text-[#C4C9D4]">Notes about this talent will appear here.</p>
+                  </div>
+                )}
+              </SectionCard>
+            )}
+
           </div>
         </div>
       </CRMLayout>
@@ -309,7 +674,7 @@ export default function TalentPoolDetailsPage() {
       )}
 
       {inviteSent && (
-        <div className="fixed bottom-6 right-6 z-[200] bg-[#111827] text-white px-5 py-3.5 rounded-xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-4 duration-300">
+        <div className="fixed bottom-6 right-6 z-[200] bg-[#111827] text-white px-5 py-3.5 rounded-xl shadow-2xl flex items-center gap-3">
           <Check className="w-4 h-4 text-green-400 shrink-0" />
           <span className="text-sm font-bold">Invite sent to {inviteSent}</span>
           <button onClick={() => setInviteSent(null)} className="ml-1 text-white/40 hover:text-white transition-colors">
