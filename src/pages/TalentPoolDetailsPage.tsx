@@ -1,10 +1,11 @@
-import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import CRMLayout from '../components/CRMLayout';
 import {
   Mail, Phone, MapPin, Copy, FileText, ExternalLink,
   Briefcase, Check, X, MessageSquare, PhoneCall,
   CalendarDays, Send, MoreVertical, UserCheck, EyeOff, ChevronDown,
+  Pencil, Ban,
 } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 import InviteEmailCompose from '../components/InviteEmailCompose';
@@ -83,12 +84,25 @@ type Tab = typeof TABS[number];
 
 export default function TalentPoolDetailsPage() {
   const { candidateId } = useParams();
+  const navigate = useNavigate();
   const { candidates, jobs, applications, invites, updateInviteStatus, updateCandidateAvailability } = useApp();
 
   const [activeTab, setActiveTab] = useState<Tab>('Profile');
   const [showInvite, setShowInvite] = useState(false);
   const [inviteSent, setInviteSent] = useState<string | null>(null);
   const [editingAvailability, setEditingAvailability] = useState(false);
+  const [showKebab, setShowKebab] = useState(false);
+  const kebabRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (kebabRef.current && !kebabRef.current.contains(e.target as Node)) {
+        setShowKebab(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   const candidate = candidates.find(c => c.id === candidateId);
 
@@ -206,11 +220,7 @@ export default function TalentPoolDetailsPage() {
                       Recruiter Added
                     </span>
                   )}
-                  {isInPipeline && (
-                    <span className="px-2.5 py-1 text-[10px] font-black bg-purple-50 text-purple-700 border border-purple-200 rounded-full uppercase tracking-widest">
-                      In Pipeline
-                    </span>
-                  )}
+
                   <span className={`flex items-center gap-1 px-2.5 py-1 text-[10px] font-black rounded-full border uppercase tracking-widest ${
                     canContact
                       ? 'bg-green-50 text-green-600 border-green-200'
@@ -348,25 +358,6 @@ export default function TalentPoolDetailsPage() {
               </div>
             </div>
 
-            {/* Contact preference card */}
-            <div className={`rounded-2xl border p-4 ${canContact ? 'bg-green-50 border-green-200' : 'bg-amber-50 border-amber-200'}`}>
-              <div className="flex items-start gap-3">
-                <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${canContact ? 'bg-green-100 border border-green-300' : 'bg-amber-100 border border-amber-300'}`}>
-                  {canContact ? <PhoneCall className="w-4 h-4 text-green-600" /> : <MessageSquare className="w-4 h-4 text-amber-600" />}
-                </div>
-                <div>
-                  <p className={`text-xs font-black ${canContact ? 'text-green-800' : 'text-amber-800'}`}>
-                    {canContact ? 'Open to direct contact' : 'Prefers invite first'}
-                  </p>
-                  <p className={`text-[11px] mt-0.5 leading-relaxed ${canContact ? 'text-green-600' : 'text-amber-600'}`}>
-                    {canContact
-                      ? 'Reach out via email or phone directly.'
-                      : 'Send a formal invite before reaching out.'}
-                  </p>
-                </div>
-              </div>
-            </div>
-
           </div>
 
           {/* ── MAIN CONTENT ── */}
@@ -408,9 +399,31 @@ export default function TalentPoolDetailsPage() {
                 >
                   <Send className="w-3.5 h-3.5" /> Invite to Apply
                 </button>
-                <button className="p-2.5 rounded-xl border border-[#E5E7EB] hover:bg-[#F9FAFB] transition-all">
-                  <MoreVertical className="w-4 h-4 text-[#6B7280]" />
-                </button>
+                <div ref={kebabRef} className="relative">
+                  <button
+                    onClick={() => setShowKebab(v => !v)}
+                    className="p-2.5 rounded-xl border border-[#E5E7EB] hover:bg-[#F9FAFB] transition-all"
+                  >
+                    <MoreVertical className="w-4 h-4 text-[#6B7280]" />
+                  </button>
+                  {showKebab && (
+                    <div className="absolute right-0 mt-1.5 w-44 bg-white rounded-xl border border-[#E5E7EB] shadow-xl z-50 overflow-hidden">
+                      <button
+                        onClick={() => { setShowKebab(false); navigate(`/crm/talent-pool/${candidateId}/edit`); }}
+                        className="w-full flex items-center gap-2.5 px-4 py-3 text-xs font-black text-[#374151] hover:bg-[#F9FAFB] transition-colors uppercase tracking-widest"
+                      >
+                        <Pencil className="w-3.5 h-3.5 text-[#6B7280]" /> Edit
+                      </button>
+                      <div className="h-px bg-[#F3F4F6]" />
+                      <button
+                        onClick={() => { setShowKebab(false); }}
+                        className="w-full flex items-center gap-2.5 px-4 py-3 text-xs font-black text-red-600 hover:bg-red-50 transition-colors uppercase tracking-widest"
+                      >
+                        <Ban className="w-3.5 h-3.5" /> Blacklist
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -418,17 +431,7 @@ export default function TalentPoolDetailsPage() {
             {activeTab === 'Profile' && (
               <div className="space-y-5">
 
-                {/* In Pipeline banner */}
-                {isInPipeline && (
-                  <div className="bg-purple-50 border border-purple-200 rounded-2xl px-5 py-4 flex items-center gap-3">
-                    <span className="inline-flex px-2.5 py-1 bg-purple-600 text-white text-[10px] font-black rounded-lg uppercase tracking-widest shrink-0">
-                      In Pipeline
-                    </span>
-                    <p className="text-xs font-bold text-purple-700">
-                      This talent has {activeApps.length} active application{activeApps.length !== 1 ? 's' : ''} in progress. They remain in the talent pool regardless of pipeline status.
-                    </p>
-                  </div>
-                )}
+
 
                 <SectionCard title="Professional Details">
                   <div className="grid grid-cols-3 gap-8">

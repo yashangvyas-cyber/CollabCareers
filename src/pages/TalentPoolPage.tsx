@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import CRMLayout from '../components/CRMLayout';
 import {
   ChevronDown, X, Eye, Check, Users, UserCheck, Briefcase,
-  GraduationCap, UserPlus, Search, Clock, Phone, Tag, Activity, ChevronLeft,
+  GraduationCap, UserPlus, Search, Clock, Phone, Tag, Activity, ChevronLeft, Pencil,
 } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 import type { Candidate, TalentAvailabilityStatus } from '../store/types';
@@ -494,20 +494,28 @@ export default function TalentPoolPage() {
                             )}
                           </td>
                           <td className="px-4 py-4">
-                            <div className="flex items-center justify-end gap-2">
-                              <button
-                                onClick={() => setInviteTarget(candidate)}
-                                className="px-3 py-1.5 text-[11px] font-black text-[#3538CD] border border-[#3538CD]/20 rounded-lg hover:bg-[#3538CD]/5 transition-colors uppercase tracking-widest whitespace-nowrap"
-                              >
-                                Invite
-                              </button>
-                              <Link
-                                to={`/crm/talent-pool/${candidate.id}`}
-                                className="p-1.5 text-[#6B7280] hover:text-[#3538CD] hover:bg-white rounded-md shadow-sm border border-transparent hover:border-[#E5E7EB]"
-                              >
-                                <Eye className="w-4 h-4" />
-                              </Link>
-                            </div>
+                              <div className="flex items-center justify-end gap-2">
+                               <button
+                                 onClick={() => setInviteTarget(candidate)}
+                                 className="px-3 py-1.5 text-[11px] font-black text-[#3538CD] border border-[#3538CD]/20 rounded-lg hover:bg-[#3538CD]/5 transition-colors uppercase tracking-widest whitespace-nowrap"
+                               >
+                                 Invite
+                               </button>
+                               <Link
+                                 to={`/crm/talent-pool/${candidate.id}/edit`}
+                                 className="p-1.5 text-[#6B7280] hover:text-[#3538CD] hover:bg-white rounded-md shadow-sm border border-transparent hover:border-[#E5E7EB]"
+                                 title="Edit talent"
+                               >
+                                 <Pencil className="w-4 h-4" />
+                               </Link>
+                               <Link
+                                 to={`/crm/talent-pool/${candidate.id}`}
+                                 className="p-1.5 text-[#6B7280] hover:text-[#3538CD] hover:bg-white rounded-md shadow-sm border border-transparent hover:border-[#E5E7EB]"
+                                 title="View talent"
+                               >
+                                 <Eye className="w-4 h-4" />
+                               </Link>
+                             </div>
                           </td>
                         </tr>
                       );
