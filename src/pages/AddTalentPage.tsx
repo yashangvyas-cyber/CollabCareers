@@ -303,8 +303,8 @@ export default function AddTalentPage() {
             <input type="url" value={form.resumeLink} onChange={e => set('resumeLink', e.target.value)} placeholder="https://drive.google.com/..." className={inputCls} />
           </Section>
 
-          {/* ── 5. Compensation ── */}
-          <Section title="Compensation" hint="Helps match this talent against role budgets before reaching out.">
+          {/* ── 5. Salary Information ── */}
+          <Section title="Salary Information" hint="Helps match this talent against role budgets before reaching out.">
             <div className="grid grid-cols-4 gap-4">
               <Field label="Currency">
                 <select value={form.ctcCurrency} onChange={e => set('ctcCurrency', e.target.value)} className={selectCls}>
@@ -318,9 +318,11 @@ export default function AddTalentPage() {
                   {CTC_TYPES.map(t => <option key={t}>{t}</option>)}
                 </select>
               </Field>
-              <Field label="Current CTC">
-                <input type="text" value={form.currentCtc} onChange={e => set('currentCtc', e.target.value)} placeholder="e.g. 8,00,000" className={inputCls} />
-              </Field>
+              {!form.isFresher && (
+                <Field label="Current CTC">
+                  <input type="text" value={form.currentCtc} onChange={e => set('currentCtc', e.target.value)} placeholder="e.g. 8,00,000" className={inputCls} />
+                </Field>
+              )}
               <Field label="Expected CTC">
                 <input type="text" value={form.expectedCtc} onChange={e => set('expectedCtc', e.target.value)} placeholder="e.g. 12,00,000" className={inputCls} />
               </Field>

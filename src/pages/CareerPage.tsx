@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import PortalLayout from '../components/PortalLayout';
-import { Search, MapPin, Briefcase, Clock, ChevronDown, X, Building2, Bookmark, LayoutGrid, List } from 'lucide-react';
+import { Search, MapPin, Briefcase, Clock, ChevronDown, X, Building2, Bookmark, LayoutGrid, List, ArrowRight, UserCircle2 } from 'lucide-react';
 import AuthModal from '../components/AuthModal';
 import { useApp } from '../store/AppContext';
 
@@ -39,10 +39,20 @@ const formatPostedDate = (dateStr?: string): string => {
   return `Posted on ${date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`;
 };
 
+const PROFILE_FIELDS = [
+  { key: 'phone', label: 'Phone Number', check: (u: any) => !!u.phone },
+  { key: 'currentDesignation', label: 'Designation', check: (u: any) => !!u.currentDesignation },
+  { key: 'currentOrg', label: 'Organisation', check: (u: any) => !!u.currentOrg },
+  { key: 'skills', label: 'Skills', check: (u: any) => (u.skills?.length ?? 0) > 0 },
+  { key: 'noticePeriod', label: 'Notice Period', check: (u: any) => !!u.noticePeriod },
+  { key: 'resumeUrl', label: 'Resume', check: (u: any) => !!u.resumeUrl },
+];
+
 export default function CareerPage({ openAlumni = false, openRegister = false }: { openAlumni?: boolean, openRegister?: boolean }) {
   const { jobs, currentUser, applications } = useApp();
   const [showAuthModal, setShowAuthModal] = useState(openAlumni || openRegister);
   const [authTab, setAuthTab] = useState<'register' | 'signin'>(openRegister ? 'register' : 'signin');
+  const [nudgeDismissed, setNudgeDismissed] = useState(false);
   const [selectedJob, setSelectedJob] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [locationFilter, setLocationFilter] = useState('');
@@ -106,6 +116,41 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
           </span>
         </div>
       </div>
+
+      {/* Profile completion nudge */}
+      {(() => {
+        if (!currentUser || nudgeDismissed) return null;
+        const missing = PROFILE_FIELDS.filter(f => !f.check(currentUser));
+        if (missing.length === 0) return null;
+        const completed = PROFILE_FIELDS.length - missing.length;
+        const pct = Math.round((completed / PROFILE_FIELDS.length) * 100);
+        return (
+          <div className="bg-gradient-to-r from-[#3538CD] to-[#4F46E5] px-6 py-3">
+            <div className="max-w-7xl mx-auto flex items-center gap-4">
+              <UserCircle2 className="w-5 h-5 text-white/70 shrink-0" />
+              <div className="flex-1 min-w-0 flex items-center gap-3">
+                <p className="text-sm font-black text-white shrink-0">Your profile is {pct}% complete</p>
+                <div className="flex-1 max-w-[240px] h-1.5 bg-white/20 rounded-full overflow-hidden">
+                  <div className="h-full bg-white rounded-full transition-all" style={{ width: `${pct}%` }} />
+                </div>
+              </div>
+              <Link
+                to="/portal/yopmails/profile"
+                className="shrink-0 flex items-center gap-1.5 px-4 py-2 bg-white text-[#3538CD] text-[11px] font-black rounded-lg uppercase tracking-widest hover:bg-white/90 transition-colors shadow-sm"
+              >
+                Complete Profile <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+              <button
+                onClick={() => setNudgeDismissed(true)}
+                className="shrink-0 p-1.5 text-white/50 hover:text-white transition-colors rounded-md hover:bg-white/10"
+                title="Dismiss"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Search + Filter Bar */}
       <div className="bg-white border-b border-[#E5E7EB] sticky top-[49px] z-40 shadow-sm">

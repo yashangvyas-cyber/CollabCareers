@@ -21,6 +21,38 @@ const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString(undefined, options);
 };
 
+const COUNTRY_CODES = [
+  { code: '+91', flag: '🇮🇳', name: 'India' },
+  { code: '+1', flag: '🇺🇸', name: 'United States / Canada' },
+  { code: '+44', flag: '🇬🇧', name: 'United Kingdom' },
+  { code: '+61', flag: '🇦🇺', name: 'Australia' },
+  { code: '+971', flag: '🇦🇪', name: 'UAE' },
+  { code: '+65', flag: '🇸🇬', name: 'Singapore' },
+  { code: '+60', flag: '🇲🇾', name: 'Malaysia' },
+  { code: '+49', flag: '🇩🇪', name: 'Germany' },
+  { code: '+33', flag: '🇫🇷', name: 'France' },
+  { code: '+81', flag: '🇯🇵', name: 'Japan' },
+  { code: '+86', flag: '🇨🇳', name: 'China' },
+  { code: '+55', flag: '🇧🇷', name: 'Brazil' },
+  { code: '+27', flag: '🇿🇦', name: 'South Africa' },
+  { code: '+234', flag: '🇳🇬', name: 'Nigeria' },
+  { code: '+92', flag: '🇵🇰', name: 'Pakistan' },
+  { code: '+880', flag: '🇧🇩', name: 'Bangladesh' },
+  { code: '+94', flag: '🇱🇰', name: 'Sri Lanka' },
+  { code: '+977', flag: '🇳🇵', name: 'Nepal' },
+];
+
+function parsePhone(stored: string): { code: string; number: string } {
+  if (!stored) return { code: '+91', number: '' };
+  const sorted = [...COUNTRY_CODES].sort((a, b) => b.code.length - a.code.length);
+  for (const c of sorted) {
+    if (stored.startsWith(c.code)) {
+      return { code: c.code, number: stored.slice(c.code.length).trim() };
+    }
+  }
+  return { code: '+91', number: stored };
+}
+
 export default function CandidateProfilePage() {
   const { currentUser, logoutCandidate, updateCurrentUser, applications, jobs } = useApp();
   const navigate = useNavigate();
@@ -43,13 +75,17 @@ export default function CandidateProfilePage() {
   const [editResumeName, setEditResumeName] = useState('');
   const [editVisibility, setEditVisibility] = useState<'visible' | 'private'>('visible');
   const [editAllowContact, setEditAllowContact] = useState(false);
+  const [phoneCode, setPhoneCode] = useState('+91');
 
   const openEditProfile = () => {
+    const stored = currentUser?.phone || derivedProfile.phone || '';
+    const parsed = parsePhone(stored);
+    setPhoneCode(parsed.code);
     setEditForm({
       firstName: currentUser?.firstName || '',
       lastName: currentUser?.lastName || '',
       email: currentUser?.email || '',
-      phone: currentUser?.phone || derivedProfile.phone || '',
+      phone: parsed.number,
       currentOrg: currentUser?.currentOrg || derivedProfile.currentOrg || '',
       currentDesignation: currentUser?.currentDesignation || derivedProfile.designation || '',
       noticePeriod: currentUser?.noticePeriod || derivedProfile.noticePeriod || '',
@@ -448,7 +484,7 @@ export default function CandidateProfilePage() {
                   firstName: editForm.firstName.trim(),
                   lastName: editForm.lastName.trim(),
                   email: editForm.email.trim(),
-                  phone: editForm.phone.trim(),
+                  phone: editForm.phone.trim() ? `${phoneCode} ${editForm.phone.trim()}` : '',
                   currentOrg: editForm.currentOrg.trim(),
                   currentDesignation: editForm.currentDesignation.trim(),
                   noticePeriod: editForm.noticePeriod,
@@ -501,14 +537,27 @@ export default function CandidateProfilePage() {
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Phone Number</label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#9CA3AF]" />
+                  <div className="flex items-stretch border border-[#E5E7EB] rounded-xl bg-[#F9FAFB] focus-within:ring-4 focus-within:ring-[#3538CD]/10 focus-within:border-[#3538CD] overflow-hidden transition-all">
+                    <div className="flex items-center gap-1 pl-3 pr-2 border-r border-[#E5E7EB] shrink-0">
+                      <Phone className="w-3.5 h-3.5 text-[#9CA3AF]" />
+                      <select
+                        value={phoneCode}
+                        onChange={e => setPhoneCode(e.target.value)}
+                        className="text-sm font-bold text-[#374151] bg-transparent focus:outline-none cursor-pointer py-2 pr-1"
+                      >
+                        {COUNTRY_CODES.map(c => (
+                          <option key={c.code + c.name} value={c.code}>
+                            {c.flag} {c.code}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                     <input
                       type="tel"
                       value={editForm.phone}
                       onChange={e => setEditForm({ ...editForm, phone: e.target.value })}
-                      placeholder="+91 00000 00000"
-                      className="w-full border border-[#E5E7EB] rounded-xl pl-9 pr-3 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] placeholder:text-[#D1D5DB]"
+                      placeholder="00000 00000"
+                      className="flex-1 px-3 py-2 text-sm font-bold bg-transparent focus:outline-none placeholder:text-[#D1D5DB] placeholder:font-normal"
                     />
                   </div>
                 </div>

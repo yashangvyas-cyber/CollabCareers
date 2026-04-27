@@ -29,10 +29,6 @@ interface PoolFilter {
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const ACTIVE_APP_STATUSES = new Set([
-  'Submitted', 'Under Review', 'Interview in Progress', 'Decision Made', 'Offer Made',
-]);
-
 const availabilityStyle: Record<TalentAvailabilityStatus, string> = {
   'Immediate Joiner':      'bg-green-50 text-green-700 border-green-200',
   'Serving Notice Period': 'bg-yellow-50 text-yellow-700 border-yellow-200',
@@ -44,7 +40,7 @@ const availabilityStyle: Record<TalentAvailabilityStatus, string> = {
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 export default function TalentPoolPage() {
-  const { candidates, jobs, applications, invites } = useApp();
+  const { candidates, jobs, invites } = useApp();
   const location = useLocation();
 
   // ── Invite state ──
@@ -447,10 +443,6 @@ export default function TalentPoolPage() {
                   </thead>
                   <tbody className="divide-y divide-[#F3F4F6]">
                     {filteredPool.map((candidate, idx) => {
-                      const isInPipeline = applications.some(
-                        a => a.candidateId === candidate.id && ACTIVE_APP_STATUSES.has(a.status)
-                      );
-                      const hasAnyApp = applications.some(a => a.candidateId === candidate.id);
                       return (
                         <tr key={candidate.id} className="hover:bg-[#F9FAFB] transition-colors group">
                           <td className="px-4 py-4 text-sm text-[#6B7280]">{idx + 1}</td>
@@ -459,17 +451,11 @@ export default function TalentPoolPage() {
                             <p className="text-xs text-[#6B7280]">
                               {candidate.allowRecruiterContact ? candidate.email : '••••••@••••••.com'}
                             </p>
-                            <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                              {candidate.isAlumni && (
+                            {candidate.isAlumni && (
+                              <div className="flex items-center gap-1.5 mt-0.5">
                                 <span className="text-[9px] font-black text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-full uppercase tracking-widest">Alumni</span>
-                              )}
-                              {isInPipeline && (
-                                <span className="text-[9px] font-black text-purple-700 bg-purple-50 border border-purple-200 px-1.5 py-0.5 rounded-full uppercase tracking-widest">In Pipeline</span>
-                              )}
-                              {!isInPipeline && hasAnyApp && (
-                                <span className="text-[9px] font-black text-[#3538CD] bg-[#F4F5FA] border border-[#3538CD]/10 px-1.5 py-0.5 rounded-full uppercase tracking-widest">Applied</span>
-                              )}
-                            </div>
+                              </div>
+                            )}
                             {!candidate.allowRecruiterContact && (
                               <p className="flex items-center gap-1 text-[10px] text-[#9CA3AF] mt-0.5">
                                 <EyeOff className="w-3 h-3" /> Prefers to apply first

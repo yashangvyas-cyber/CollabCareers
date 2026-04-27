@@ -470,11 +470,11 @@ export default function TalentPoolDetailsPage() {
                 </SectionCard>
 
                 {(candidate.currentCtc || candidate.expectedCtc) && (
-                  <SectionCard title="Compensation">
+                  <SectionCard title="Salary Information">
                     <div className="grid grid-cols-4 gap-8">
                       <DetailField label="CTC Type" value={candidate.ctcType} />
                       <DetailField label="Currency" value={candidate.ctcCurrency} />
-                      <DetailField label="Current CTC" value={candidate.currentCtc} />
+                      {!candidate.isFresher && <DetailField label="Current CTC" value={candidate.currentCtc} />}
                       <DetailField label="Expected CTC" value={candidate.expectedCtc} />
                     </div>
                   </SectionCard>
