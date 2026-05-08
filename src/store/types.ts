@@ -77,6 +77,8 @@ export interface Candidate {
   currentDesignation?: string;
   location?: string;
   linkedin?: string;
+  experiences?: any[];
+  appliedJob?: string;
   // Recruiter-added fields
   gender?: string;
   dateOfBirth?: string;

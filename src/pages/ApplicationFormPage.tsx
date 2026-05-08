@@ -631,7 +631,7 @@ export default function ApplicationFormPage() {
                            </div>
                         ))}
                         <button 
-                          onClick={() => setFormData(p => ({...p, professional: {...p.professional, experiences: [...p.professional.experiences, {id: Date.now(), company: '', designation: '', from: '', to: '', description: ''}]}}))}
+                          onClick={() => setFormData(p => ({...p, professional: {...p.professional, experiences: [...p.professional.experiences, {id: Date.now(), company: '', designation: '', from: '', to: '', description: '', isCurrent: false}]}}))}
                           className="flex items-center gap-2 text-[#3538CD] text-xs font-black uppercase tracking-widest hover:underline mt-2"
                         >
                           <Plus className="w-4 h-4"/> Add Experience
