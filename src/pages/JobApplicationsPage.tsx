@@ -2,14 +2,13 @@ import { Link } from 'react-router-dom';
 import CRMLayout from '../components/CRMLayout';
 import {
   ChevronDown, Plus, X, MoreHorizontal,
-  Eye, Edit2, LayoutGrid
+  Eye, LayoutGrid
 } from 'lucide-react';
 
 const candidateStats = [
   { label: 'Total Applications', value: '2497', change: '+12%' },
   { label: 'In Interview Process', value: '183' },
   { label: 'Joining Soon', value: '73' },
-  { label: 'Future Applications', value: '19' },
 ];
 
 const candidatesData = [
@@ -21,13 +20,13 @@ const candidatesData = [
   { no: 6, name: 'Kavya Rao', email: 'kavya@gmail.com', contact: '+91 93210 98765', job: '2D Artist (Open)', experience: '1 yr', noticePeriod: 'Immediate joiner', status: 'Active', source: 'CollabCRM', businessUnit: 'MindInventory', recon: '-', isAlumni: false },
 ];
 
-export default function CandidateListingPage() {
+export default function JobApplicationsPage() {
 
   return (
     <CRMLayout breadcrumbs={[{ label: 'Job Applications' }]}>
       <div className="space-y-6 pt-2">
         {/* Stats Row */}
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           {candidateStats.map((stat, i) => (
             <div key={i} className="bg-white p-5 rounded-xl border border-[#E5E7EB] shadow-sm">
               <div className="flex items-start justify-between mb-3">
@@ -91,7 +90,6 @@ export default function CandidateListingPage() {
                     <td className="px-4 py-4">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Link to={`/crm/candidates/${c.no}`} className="p-1.5 text-[#6B7280] hover:text-[#3538CD] hover:bg-white rounded-md shadow-sm border border-transparent hover:border-[#E5E7EB]"><Eye className="w-4 h-4" /></Link>
-                        <button className="p-1.5 text-[#6B7280] hover:text-[#3538CD] hover:bg-white rounded-md shadow-sm border border-transparent hover:border-[#E5E7EB]"><Edit2 className="w-4 h-4" /></button>
                       </div>
                     </td>
                   </tr>

@@ -8,7 +8,7 @@ import ApplicationFormPage from './pages/ApplicationFormPage';
 import ConfirmationPage from './pages/ConfirmationPage';
 import CandidateProfilePage from './pages/CandidateProfilePage';
 import AlumniApplicationPage from './pages/AlumniApplicationPage';
-import CandidateListingPage from './pages/CandidateListingPage';
+import JobApplicationsPage from './pages/JobApplicationsPage';
 import FlowMapPage from './pages/FlowMapPage';
 import HandoffPage from './pages/HandoffPage';
 import PrototypeHome from './pages/PrototypeHome';
@@ -28,7 +28,7 @@ function App() {
         {/* Flow 1: Recruiter (CRM) */}
         <Route path="/crm/add-job" element={<AddJobPage />} />
         <Route path="/crm/candidates/:candidateId" element={<CandidateDetailPage />} />
-        <Route path="/crm/candidates" element={<CandidateListingPage />} />
+        <Route path="/crm/candidates" element={<JobApplicationsPage />} />
         <Route path="/crm/talent-pool/add" element={<AddTalentPage />} />
         <Route path="/crm/talent-pool/:candidateId" element={<TalentPoolDetailsPage />} />
         <Route path="/crm/talent-pool" element={<TalentPoolPage />} />
