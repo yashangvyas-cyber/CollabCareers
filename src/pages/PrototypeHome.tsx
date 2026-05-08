@@ -3,13 +3,13 @@ import { ArrowRight, Monitor, Globe, ChevronRight } from 'lucide-react';
 
 const flows = [
   {
-    title: 'Recruiter (CRM)',
+    title: 'Recruiter',
     subtitle: 'Internal recruiter workspace',
     description: 'Create jobs, manage pipelines, and review candidate applications.',
     screens: [
       { label: 'Create New Job', path: '/crm/add-job', badge: 'Step 1' },
-      { label: 'Candidate Listing', path: '/crm/candidates', badge: 'Pipeline' },
-      { label: 'Candidate Detail', path: '/crm/candidates/1', badge: 'Review' },
+      { label: 'Job Applications Listing', path: '/crm/candidates', badge: 'Pipeline' },
+      { label: "Job Applicant's Details", path: '/crm/candidates/1', badge: 'Review' },
       { label: 'Portal Settings', path: '/crm/career-portal', badge: 'Config' },
       { label: 'Talent Pool', path: '/crm/talent-pool', badge: 'New' },
     ],

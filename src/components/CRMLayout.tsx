@@ -9,7 +9,7 @@ import {
 const navItems = [
   { name: 'Dashboard', icon: LayoutDashboard, path: '/' },
   { name: 'Jobs', icon: Briefcase, path: '/crm/add-job', hasAdd: true },
-  { name: 'Candidates', icon: Users, path: '/crm/candidates', hasAdd: true },
+  { name: 'Job Applications', icon: Users, path: '/crm/candidates' },
   { name: 'Talent Pool', icon: UserSearch, path: '/crm/talent-pool' },
   { name: 'Interviews', icon: MessageSquare, path: '#' },
   { name: 'Config', icon: Settings, path: '/crm/config' },
@@ -29,7 +29,7 @@ export default function CRMLayout({ children, breadcrumbs, title, actions }: CRM
   return (
     <div className="min-h-screen bg-[#F4F5FA] flex">
       {/* Sidebar */}
-      <aside className="w-[150px] bg-[#3538CD] text-white flex flex-col shrink-0 fixed top-0 left-0 h-screen z-30">
+      <aside className="w-[220px] bg-[#3538CD] text-white flex flex-col shrink-0 fixed top-0 left-0 h-screen z-30">
         {/* Logo */}
         <div className="px-4 py-4 flex items-center gap-2 border-b border-white/10">
           <div className="w-7 h-7 bg-white/20 rounded-lg flex items-center justify-center">
@@ -80,7 +80,7 @@ export default function CRMLayout({ children, breadcrumbs, title, actions }: CRM
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 ml-[150px]">
+      <div className="flex-1 ml-[220px]">
         {/* Top Bar */}
         <header className="bg-white border-b border-[#E5E7EB] px-6 py-3 flex items-center justify-between sticky top-0 z-20">
           <div className="flex items-center gap-4">

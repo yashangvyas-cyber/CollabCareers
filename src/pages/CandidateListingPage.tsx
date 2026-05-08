@@ -6,10 +6,10 @@ import {
 } from 'lucide-react';
 
 const candidateStats = [
-  { label: 'Total Candidates', value: '2497', change: '+12%' },
+  { label: 'Total Applications', value: '2497', change: '+12%' },
   { label: 'In Interview Process', value: '183' },
   { label: 'Joining Soon', value: '73' },
-  { label: 'Future Candidates', value: '19' },
+  { label: 'Future Applications', value: '19' },
 ];
 
 const candidatesData = [
@@ -24,7 +24,7 @@ const candidatesData = [
 export default function CandidateListingPage() {
 
   return (
-    <CRMLayout breadcrumbs={[{ label: 'Candidates' }]}>
+    <CRMLayout breadcrumbs={[{ label: 'Job Applications' }]}>
       <div className="space-y-6 pt-2">
         {/* Stats Row */}
         <div className="grid grid-cols-4 gap-4">
@@ -32,11 +32,6 @@ export default function CandidateListingPage() {
             <div key={i} className="bg-white p-5 rounded-xl border border-[#E5E7EB] shadow-sm">
               <div className="flex items-start justify-between mb-3">
                 <p className="text-[12px] font-medium text-[#6B7280]">{stat.label}</p>
-                {i === 0 && (
-                  <div className="w-8 h-8 bg-[#3538CD]/5 rounded-lg flex items-center justify-center text-[#3538CD] cursor-pointer hover:bg-[#3538CD]/10 transition-colors">
-                    <Plus className="w-4 h-4" />
-                  </div>
-                )}
               </div>
               <div className="flex items-end justify-between">
                 <span className="text-3xl font-bold text-[#111827]">{stat.value}</span>
@@ -50,11 +45,10 @@ export default function CandidateListingPage() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-[#111827]">Candidates</h2>
-              <span className="px-2 py-0.5 bg-[#F3F4F6] text-[#6B7280] text-[11px] font-medium rounded-full">1 - 10 of 712 Candidates</span>
+              <h2 className="text-lg font-bold text-[#111827]">Applications</h2>
+              <span className="px-2 py-0.5 bg-[#F3F4F6] text-[#6B7280] text-[11px] font-medium rounded-full">1 - 10 of 712 Applications</span>
             </div>
             <div className="flex items-center gap-2">
-              <button className="bg-[#3538CD] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#292bb0] transition-colors">Add Candidate</button>
               <button className="p-2 border border-[#E5E7EB] rounded-lg text-[#6B7280] hover:bg-[#F9FAFB]"><LayoutGrid className="w-4 h-4" /></button>
               <button className="p-2 border border-[#E5E7EB] rounded-lg text-[#6B7280] hover:bg-[#F9FAFB]"><MoreHorizontal className="w-4 h-4" /></button>
             </div>

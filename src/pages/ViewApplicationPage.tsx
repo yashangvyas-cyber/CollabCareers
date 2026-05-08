@@ -48,8 +48,9 @@ export default function ViewApplicationPage() {
       linkedin: 'linkedin.com/in/alexpatel'
     },
     professionalDetails: {
-      currentOrg: 'TechSolutions Inc.',
-      currentDesignation: 'Senior Frontend Engineer',
+      experiences: [
+        { id: 1, from: '2021-Aug', to: '2026-May', description: 'I am passionate about building accessible and performant web applications.', company: 'TechSolutions Inc.', designation: 'Senior Frontend Engineer', isCurrent: false }
+      ],
       totalExperience: '5 Years',
       highestQualification: 'B.Tech in Computer Science',
       noticePeriod: '30 Days',
@@ -158,8 +159,22 @@ export default function ViewApplicationPage() {
 
           <AccordionCard title="Professional Details">
             <div className="grid grid-cols-2 gap-x-10 gap-y-5">
-              <InfoItem label="Current Organization" value={appData.professionalDetails.currentOrg} />
-              <InfoItem label="Current Designation" value={appData.professionalDetails.currentDesignation} />
+              <div className="col-span-2 space-y-4">
+                {appData.professionalDetails.experiences.map((exp: any) => (
+                  <div key={exp.id} className="bg-[#F9FAFB] p-4 rounded-xl border border-[#E5E7EB]">
+                    <div className="flex justify-between items-start">
+                       <div>
+                         <h4 className="text-sm font-black text-[#111827]">{exp.designation}</h4>
+                         <p className="text-xs font-bold text-[#3538CD]">{exp.company}</p>
+                       </div>
+                       <span className="text-[10px] font-black uppercase tracking-widest text-[#6B7280] bg-white border border-[#E5E7EB] px-2.5 py-1 rounded-md">
+                         {exp.from} - {exp.to}
+                       </span>
+                    </div>
+                    {exp.description && <p className="text-xs font-medium text-[#4B5563] mt-3 leading-relaxed">{exp.description}</p>}
+                  </div>
+                ))}
+              </div>
               <InfoItem label="Total Experience" value={appData.professionalDetails.totalExperience} />
               <InfoItem label="Highest Qualification" value={appData.professionalDetails.highestQualification} />
               <InfoItem label="Notice Period" value={appData.professionalDetails.noticePeriod} />

@@ -4,7 +4,7 @@ import PortalLayout from '../components/PortalLayout';
 import { 
   ChevronDown, CheckCircle, Upload, Zap, Sparkles, 
   Lock, ArrowRight, Download, X, FileText,
-  Plus, ExternalLink
+  Plus, ExternalLink, ArrowUp, ArrowDown, Trash2
 } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 import { Job, CustomField } from '../store/types';
@@ -54,8 +54,9 @@ export default function ApplicationFormPage() {
       maritalStatus: 'Single',
     },
     professional: {
-      currentOrg: 'MindInventory',
-      currentDesignation: 'UI Developer',
+      experiences: [
+        { id: Date.now(), from: '2022-Jan', to: '2026-May', description: 'Developing core features using React and TailwindCSS. Leading a team of 3 developers.', company: 'MindInventory', designation: 'UI Developer', isCurrent: false }
+      ],
       expYears: '3',
       expMonths: '2',
       highestQualification: 'B.Tech Computer Science',
@@ -135,8 +136,9 @@ export default function ApplicationFormPage() {
           maritalStatus: 'Single',
         },
         professional: {
-          currentOrg: 'TechSolutions Inc.',
-          currentDesignation: 'Senior Frontend Engineer',
+          experiences: [
+            { id: Date.now(), from: '2021-Aug', to: '2026-May', description: 'I am passionate about building accessible and performant web applications.', company: 'TechSolutions Inc.', designation: 'Senior Frontend Engineer', isCurrent: false }
+          ],
           expYears: '5',
           expMonths: '0',
           highestQualification: 'B.Tech',
@@ -518,19 +520,122 @@ export default function ApplicationFormPage() {
 
                   {!isFresher && (
                     <>
-                      <div className="grid grid-cols-2 gap-6">
-                        <FormInput 
-                          label="Current Organization" 
-                          value={formData.professional.currentOrg} 
-                          isExtracted={!!resumeName} 
-                          onChange={(val: string) => setFormData(p => ({ ...p, professional: { ...p.professional, currentOrg: val }}))}
-                        />
-                        <FormInput 
-                          label="Current Designation" 
-                          value={formData.professional.currentDesignation} 
-                          isExtracted={!!resumeName} 
-                          onChange={(val: string) => setFormData(p => ({ ...p, professional: { ...p.professional, currentDesignation: val }}))}
-                        />
+                      <div className="space-y-4">
+                        <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest block mb-2">Experience</label>
+                        {formData.professional.experiences.map((exp: any, i: number) => (
+                           <div key={exp.id} className="p-5 border border-[#E5E7EB] rounded-2xl bg-[#F9FAFB] relative group">
+                             <div className="absolute top-4 right-4 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                               {i > 0 && (
+                                 <button onClick={() => {
+                                   const newExp = [...formData.professional.experiences];
+                                   [newExp[i-1], newExp[i]] = [newExp[i], newExp[i-1]];
+                                   setFormData(p => ({...p, professional: {...p.professional, experiences: newExp}}));
+                                 }} className="p-1 text-[#6B7280] hover:bg-[#E5E7EB] rounded"><ArrowUp className="w-4 h-4"/></button>
+                               )}
+                               {i < formData.professional.experiences.length - 1 && (
+                                 <button onClick={() => {
+                                   const newExp = [...formData.professional.experiences];
+                                   [newExp[i+1], newExp[i]] = [newExp[i], newExp[i+1]];
+                                   setFormData(p => ({...p, professional: {...p.professional, experiences: newExp}}));
+                                 }} className="p-1 text-[#6B7280] hover:bg-[#E5E7EB] rounded"><ArrowDown className="w-4 h-4"/></button>
+                               )}
+                               <button onClick={() => {
+                                 setFormData(p => ({...p, professional: {...p.professional, experiences: p.professional.experiences.filter((_, idx) => idx !== i)}}));
+                               }} className="p-1 text-red-500 hover:bg-red-50 rounded"><Trash2 className="w-4 h-4"/></button>
+                             </div>
+                             
+                             <div className="grid grid-cols-2 gap-4 mb-4 pr-20">
+                               <FormInput 
+                                 label="Company" 
+                                 value={exp.company} 
+                                 onChange={(val: string) => {
+                                    const newExp = [...formData.professional.experiences];
+                                    newExp[i].company = val;
+                                    setFormData(p => ({...p, professional: {...p.professional, experiences: newExp}}));
+                                 }}
+                               />
+                               <FormInput 
+                                 label="Designation" 
+                                 value={exp.designation} 
+                                 onChange={(val: string) => {
+                                    const newExp = [...formData.professional.experiences];
+                                    newExp[i].designation = val;
+                                    setFormData(p => ({...p, professional: {...p.professional, experiences: newExp}}));
+                                 }}
+                               />
+                             </div>
+                             <div className="grid grid-cols-2 gap-4 mb-2 pr-20">
+                               <FormMonthYearPicker 
+                                 label="From (Year/Month)" 
+                                 value={exp.from} 
+                                 onChange={(val: string) => {
+                                    const newExp = [...formData.professional.experiences];
+                                    newExp[i].from = val;
+                                    setFormData(p => ({...p, professional: {...p.professional, experiences: newExp}}));
+                                 }}
+                               />
+                               <div>
+                                 <FormMonthYearPicker 
+                                   label="To (Year/Month)" 
+                                   value={exp.to} 
+                                   isLocked={exp.isCurrent}
+                                   onChange={(val: string) => {
+                                      const newExp = [...formData.professional.experiences];
+                                      newExp[i].to = val;
+                                      setFormData(p => ({...p, professional: {...p.professional, experiences: newExp}}));
+                                   }}
+                                 />
+                               </div>
+                             </div>
+                             <div className="mb-4 flex items-center">
+                               <label className="flex items-center gap-2 cursor-pointer group">
+                                  <div className="relative flex items-center">
+                                    <input 
+                                      type="checkbox" 
+                                      checked={exp.isCurrent} 
+                                      onChange={(e) => {
+                                         let newExp = [...formData.professional.experiences];
+                                         if (e.target.checked) {
+                                            newExp.forEach((ex) => {
+                                              ex.isCurrent = false;
+                                              if (ex.to === 'Present') ex.to = '';
+                                            });
+                                            newExp[i].isCurrent = true;
+                                            newExp[i].to = 'Present';
+                                            
+                                            // Move to the top
+                                            const currentItem = newExp.splice(i, 1)[0];
+                                            newExp.unshift(currentItem);
+                                         } else {
+                                            newExp[i].isCurrent = false;
+                                            newExp[i].to = '';
+                                         }
+                                         setFormData(p => ({...p, professional: {...p.professional, experiences: newExp}}));
+                                      }}
+                                      className="w-4 h-4 border-2 border-[#D1D5DB] rounded checked:bg-[#3538CD] checked:border-[#3538CD] appearance-none transition-all cursor-pointer" 
+                                    />
+                                    <CheckCircle className={`absolute inset-0 m-auto w-2.5 h-2.5 text-white transition-opacity ${exp.isCurrent ? 'opacity-100' : 'opacity-0'}`} />
+                                  </div>
+                                  <span className="text-xs font-bold text-[#6B7280] group-hover:text-[#111827]">I currently work here</span>
+                               </label>
+                             </div>
+                             <FormTextarea 
+                               label="Description" 
+                               value={exp.description} 
+                               onChange={(val: string) => {
+                                  const newExp = [...formData.professional.experiences];
+                                  newExp[i].description = val;
+                                  setFormData(p => ({...p, professional: {...p.professional, experiences: newExp}}));
+                               }}
+                             />
+                           </div>
+                        ))}
+                        <button 
+                          onClick={() => setFormData(p => ({...p, professional: {...p.professional, experiences: [...p.professional.experiences, {id: Date.now(), company: '', designation: '', from: '', to: '', description: ''}]}}))}
+                          className="flex items-center gap-2 text-[#3538CD] text-xs font-black uppercase tracking-widest hover:underline mt-2"
+                        >
+                          <Plus className="w-4 h-4"/> Add Experience
+                        </button>
                       </div>
                       <FormInput 
                         label="Notice Period (Days)" 
@@ -571,7 +676,7 @@ export default function ApplicationFormPage() {
                  <div className={`grid gap-4 ${isFresher ? 'grid-cols-3' : 'grid-cols-4'}`}>
                     <FormSelect 
                       label="CTC Type" 
-                      options={['Annual', 'Monthly', 'Hourly']} 
+                      options={['Annual', 'Monthly']} 
                       value={formData.salary.ctcType} 
                       onChange={(val: string) => setFormData(p => ({ ...p, salary: { ...p.salary, ctcType: val }}))}
                     />
@@ -715,8 +820,16 @@ export default function ApplicationFormPage() {
                ]} />
 
                <ReviewCard title="PROFESSIONAL DETAILS" onEdit={() => setStep(1)} data={[
-                  { label: 'Current Organization', value: isFresher ? '-' : formData.professional.currentOrg },
-                  { label: 'Current Designation', value: isFresher ? '-' : formData.professional.currentDesignation },
+                  ...(!isFresher ? formData.professional.experiences.map((exp: any, i: number) => ({
+                    label: `Experience ${i+1}`,
+                    value: (
+                      <div className="text-sm">
+                        <div className="font-bold text-[#111827]">{exp.designation} at {exp.company}</div>
+                        <div className="text-xs text-[#6B7280]">{exp.from} - {exp.to}</div>
+                        {exp.description && <div className="text-xs text-[#4B5563] mt-1">{exp.description}</div>}
+                      </div>
+                    )
+                  })) : []),
                   { label: 'Total Experience', value: isFresher ? 'Fresher' : `${formData.professional.expYears} Years, ${formData.professional.expMonths} Months` },
                   { label: 'Highest Qualification', value: formData.professional.highestQualification },
                   { label: 'Notice Period', value: formData.professional.noticePeriod },
@@ -933,6 +1046,60 @@ function FormInput(props: any) {
           {options.map((opt: string) => <option key={opt} value={opt === 'Select' ? '' : opt}>{opt}</option>)}
         </select>
         <ChevronDown className="w-4 h-4 text-[#9CA3AF] absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none" />
+      </div>
+    </div>
+  );
+}
+
+function FormMonthYearPicker({ label, required, value, isLocked, onChange }: any) {
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 40 }, (_, i) => String(currentYear - i));
+
+  const [year, month] = value ? value.split('-') : ['', ''];
+
+  const handleMonthChange = (newMonth: string) => {
+    if (!year && newMonth) onChange(`${currentYear}-${newMonth}`);
+    else onChange(`${year}-${newMonth}`);
+  };
+
+  const handleYearChange = (newYear: string) => {
+    if (!month && newYear) onChange(`${newYear}-Jan`);
+    else onChange(`${newYear}-${month}`);
+  };
+
+  if (isLocked) {
+     return <FormInput label={label} value="Present" isLocked={true} type="text" onChange={() => {}} />
+  }
+
+  return (
+    <div className="space-y-2 group">
+      <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1 flex items-center gap-1.5 min-h-[1.2rem]">
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
+      <div className="flex gap-2">
+        <div className="relative flex-1">
+          <select
+            value={month || ''}
+            onChange={(e) => handleMonthChange(e.target.value)}
+            className="w-full border border-[#E5E7EB] bg-white rounded-xl px-4 py-3.5 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] appearance-none text-[#111827] hover:border-[#D1D5DB] transition-all"
+          >
+            <option value="" disabled>Month</option>
+            {months.map(m => <option key={m} value={m}>{m}</option>)}
+          </select>
+          <ChevronDown className="w-4 h-4 text-[#9CA3AF] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+        </div>
+        <div className="relative flex-1">
+          <select
+            value={year || ''}
+            onChange={(e) => handleYearChange(e.target.value)}
+            className="w-full border border-[#E5E7EB] bg-white rounded-xl px-4 py-3.5 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] appearance-none text-[#111827] hover:border-[#D1D5DB] transition-all"
+          >
+            <option value="" disabled>Year</option>
+            {years.map(y => <option key={y} value={y}>{y}</option>)}
+          </select>
+          <ChevronDown className="w-4 h-4 text-[#9CA3AF] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+        </div>
       </div>
     </div>
   );

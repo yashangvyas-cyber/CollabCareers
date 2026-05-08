@@ -30,15 +30,15 @@ function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }
 
 const mockCandidatesMap: Record<string, {
   firstName: string; lastName: string; email: string; phone: string;
-  isAlumni: boolean; currentOrg?: string; currentDesignation?: string;
+  isAlumni: boolean; experiences?: any[];
   noticePeriod?: string; skills: string[];
 }> = {
-  '1': { firstName: 'Mahesh', lastName: 'Patel', email: 'Mahesh@gmail.com', phone: '+91 98765 43210', isAlumni: true, currentOrg: 'MindInventory', currentDesignation: 'React Developer', noticePeriod: '30 days', skills: ['React', 'JavaScript', 'TypeScript'] },
-  '2': { firstName: 'Priya', lastName: 'Shah', email: 'priya@gmail.com', phone: '+91 97654 32109', isAlumni: true, currentOrg: 'DesignCo', currentDesignation: 'UI/UX Designer', noticePeriod: '15 days', skills: ['Figma', 'Design Systems', 'Prototyping'] },
-  '3': { firstName: 'Arjun', lastName: 'Mehta', email: 'arjun@gmail.com', phone: '+91 96543 21098', isAlumni: false, currentOrg: 'FlutterApps', currentDesignation: 'Flutter Developer', noticePeriod: 'Immediate joiner', skills: ['Dart', 'Firebase', 'Flutter'] },
-  '4': { firstName: 'Sneha', lastName: 'Patel', email: 'sneha@gmail.com', phone: '+91 95432 10987', isAlumni: false, currentOrg: 'BizAnalytics', currentDesignation: 'Business Analyst', noticePeriod: '30 days', skills: ['Agile', 'JIRA', 'SQL'] },
-  '5': { firstName: 'Rahul', lastName: 'Joshi', email: 'rahul@gmail.com', phone: '+91 94321 09876', isAlumni: false, currentOrg: 'ProjMasters', currentDesignation: 'Project Manager', noticePeriod: '60 days', skills: ['Agile', 'Jira', 'Kanban'] },
-  '6': { firstName: 'Kavya', lastName: 'Rao', email: 'kavya@gmail.com', phone: '+91 93210 98765', isAlumni: false, currentOrg: 'ArtStudio', currentDesignation: '2D Artist', noticePeriod: 'Immediate joiner', skills: ['Illustrator', 'Photoshop', 'After Effects'] },
+  '1': { firstName: 'Mahesh', lastName: 'Patel', email: 'Mahesh@gmail.com', phone: '+91 98765 43210', isAlumni: true, experiences: [{ id: 1, company: 'MindInventory', designation: 'React Developer', from: '2022-Jan', to: 'Present', isCurrent: true, description: 'Developing core features.' }], noticePeriod: '30 days', skills: ['React', 'JavaScript', 'TypeScript'] },
+  '2': { firstName: 'Priya', lastName: 'Shah', email: 'priya@gmail.com', phone: '+91 97654 32109', isAlumni: true, experiences: [{ id: 1, company: 'DesignCo', designation: 'UI/UX Designer', from: '2020-Mar', to: 'Present', isCurrent: true, description: 'Leading UI team.' }], noticePeriod: '15 days', skills: ['Figma', 'Design Systems', 'Prototyping'] },
+  '3': { firstName: 'Arjun', lastName: 'Mehta', email: 'arjun@gmail.com', phone: '+91 96543 21098', isAlumni: false, experiences: [{ id: 1, company: 'FlutterApps', designation: 'Flutter Developer', from: '2021-Jul', to: 'Present', isCurrent: true, description: 'Building cross-platform apps.' }], noticePeriod: 'Immediate joiner', skills: ['Dart', 'Firebase', 'Flutter'] },
+  '4': { firstName: 'Sneha', lastName: 'Patel', email: 'sneha@gmail.com', phone: '+91 95432 10987', isAlumni: false, experiences: [{ id: 1, company: 'BizAnalytics', designation: 'Business Analyst', from: '2019-Feb', to: 'Present', isCurrent: true, description: 'Analyzing market trends.' }], noticePeriod: '30 days', skills: ['Agile', 'JIRA', 'SQL'] },
+  '5': { firstName: 'Rahul', lastName: 'Joshi', email: 'rahul@gmail.com', phone: '+91 94321 09876', isAlumni: false, experiences: [{ id: 1, company: 'ProjMasters', designation: 'Project Manager', from: '2018-Aug', to: 'Present', isCurrent: true, description: 'Managing enterprise projects.' }], noticePeriod: '60 days', skills: ['Agile', 'Jira', 'Kanban'] },
+  '6': { firstName: 'Kavya', lastName: 'Rao', email: 'kavya@gmail.com', phone: '+91 93210 98765', isAlumni: false, experiences: [{ id: 1, company: 'ArtStudio', designation: '2D Artist', from: '2022-Nov', to: 'Present', isCurrent: true, description: 'Creating game assets.' }], noticePeriod: 'Immediate joiner', skills: ['Illustrator', 'Photoshop', 'After Effects'] },
 };
 
 type MockAppRow = { no: number; appliedDate: string; jobTitle: string; businessUnit: string; source: string; status: string; recruiter: string; lastInterview: string; };
@@ -81,8 +81,7 @@ export default function CandidateDetailPage() {
   const phone = portalCandidate?.phone ?? mockData?.phone ?? '-';
   const isAlumni = portalCandidate?.isAlumni ?? mockData?.isAlumni ?? false;
   const alumniEmail = portalCandidate?.alumniEmail ?? 'verified@yopmails.com';
-  const currentOrg = portalCandidate?.currentOrg ?? mockData?.currentOrg;
-  const currentDesignation = portalCandidate?.currentDesignation ?? mockData?.currentDesignation;
+  const experiences = portalCandidate?.experiences ?? mockData?.experiences ?? [];
   const noticePeriod = portalCandidate?.noticePeriod ?? mockData?.noticePeriod;
   const skills = portalCandidate?.skills ?? mockData?.skills ?? [];
   const allowRecruiterContact = portalCandidate?.allowRecruiterContact;
@@ -95,13 +94,13 @@ export default function CandidateDetailPage() {
   const mockAppsForThisCandidate: MockAppRow[] = (isMockCandidate && candidateId) ? (mockAppliedJobsMap[candidateId] ?? []) : [];
   const totalApplicationCount = isMockCandidate ? mockAppsForThisCandidate.length : candidateApplications.length;
 
-  const tabs = ['Candidate Details', 'Applied Jobs', 'Interview Details', 'Notes', 'History'];
-  const [activeTab, setActiveTab] = useState('Candidate Details');
+  const tabs = ['Applicant Details', 'Applied Jobs', 'Interview Details', 'Notes', 'History'];
+  const [activeTab, setActiveTab] = useState('Applicant Details');
 
   return (
     <CRMLayout
       breadcrumbs={[
-        { label: 'Candidates', path: '/crm/candidates' },
+        { label: 'Job Applications', path: '/crm/candidates' },
         { label: `${firstName} ${lastName}` },
       ]}
     >
@@ -115,8 +114,8 @@ export default function CandidateDetailPage() {
               </div>
 
               <h2 className="text-xl font-black text-[#1A1A2E] text-center tracking-tight">{firstName} {lastName}</h2>
-              {currentDesignation && (
-                <p className="text-sm font-bold text-[#3538CD] mt-1 text-center">{currentDesignation}</p>
+              {experiences.length > 0 && (
+                <p className="text-sm font-bold text-[#3538CD] mt-1 text-center">{experiences[0].designation}</p>
               )}
 
               <div className="flex flex-col items-center gap-2 mt-4">
@@ -247,7 +246,7 @@ export default function CandidateDetailPage() {
           </div>
 
           <div className="space-y-6">
-            {activeTab === 'Candidate Details' && (
+            {activeTab === 'Applicant Details' && (
               <>
                 {/* Talent Pool notice banner */}
                 {!isMockCandidate && !appliedJob && (
@@ -287,9 +286,25 @@ export default function CandidateDetailPage() {
             <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden">
               <SectionHeader title="Professional Details" />
               <div className="p-6 space-y-8">
+                {experiences.length > 0 && (
+                  <div className="space-y-4">
+                    {experiences.map((exp: any, i: number) => (
+                      <div key={i} className="bg-[#F9FAFB] p-4 rounded-xl border border-[#E5E7EB]">
+                        <div className="flex justify-between items-start">
+                           <div>
+                             <h4 className="text-sm font-black text-[#111827]">{exp.designation}</h4>
+                             <p className="text-xs font-bold text-[#3538CD]">{exp.company}</p>
+                           </div>
+                           <span className="text-[10px] font-black uppercase tracking-widest text-[#6B7280] bg-white border border-[#E5E7EB] px-2.5 py-1 rounded-md">
+                             {exp.from} - {exp.to}
+                           </span>
+                        </div>
+                        {exp.description && <p className="text-xs font-medium text-[#4B5563] mt-3 leading-relaxed">{exp.description}</p>}
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <div className="grid grid-cols-3 gap-8">
-                  <DetailField label="Current Organization" value={currentOrg} />
-                  <DetailField label="Current Designation" value={currentDesignation} />
                   <DetailField label="Notice Period" value={noticePeriod} />
                   <DetailField label="Total Experience" value={isMockCandidate ? '3 Years, 2 Months' : undefined} />
                   <DetailField label="Highest Qualification" value={isMockCandidate ? 'B.Tech Computer Science' : undefined} />
