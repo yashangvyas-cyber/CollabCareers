@@ -16,8 +16,6 @@ export default function AddTalentPage() {
   const navigate = useNavigate();
   const { jobs, addCandidate, submitApplication } = useApp();
 
-  const businessUnits = Array.from(new Set(jobs.map(j => j.businessUnit))).filter(Boolean);
-
   const [form, setForm] = useState({
     businessUnit: '',
     recordOwner: '',
@@ -161,50 +159,26 @@ export default function AddTalentPage() {
               </div>
             </div>
 
-            {/* Business Unit */}
+            {/* Record Details */}
             <div className="flex lg:flex-row flex-col gap-2">
-              <SideLabel title="Business Unit" hint="Select the appropriate business unit." />
+              <SideLabel title="Record Details" hint="Assign ownership and link to a job if applicable." />
               <div className="w-full p-3 pt-2 bg-white border rounded-lg border-gray-200 2xl:w-3/4 2xl-to-xl:w-[80%] w-[80%] 2xl:p-5 2xl:pt-3">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                   <div>
                     <div className="mb-1.5 flex items-end min-h-6">
-                      <label className={labelClass}>Business Unit&nbsp;</label>
-                      <span className={reqClass}>*</span>
+                      <label className={labelClass}>Record Owner</label>
                     </div>
                     <div className="relative">
-                      <select required value={form.businessUnit} onChange={e => set('businessUnit', e.target.value)} className={selectClass}>
-                        <option value="">Select</option>
-                        {businessUnits.map(bu => <option key={bu}>{bu}</option>)}
-                      </select>
-                      <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    </div>
-                  </div>
-                  <div>
-                    <div className="mb-1.5 flex items-end min-h-6">
-                      <label className={labelClass}>Record Owner&nbsp;</label>
-                      <span className={reqClass}>*</span>
-                    </div>
-                    <div className="relative">
-                      <select required value={form.recordOwner} onChange={e => set('recordOwner', e.target.value)} className={selectClass}>
-                        <option value="">Select</option>
+                      <select value={form.recordOwner} onChange={e => set('recordOwner', e.target.value)} className={selectClass}>
+                        <option value="">Select (Optional)</option>
                         {['Sarah Chen', 'Michael Park', 'James Wilson', 'Lisa Ray', 'David Kim'].map(o => <option key={o}>{o}</option>)}
                       </select>
                       <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Application Information */}
-            <div className="flex lg:flex-row flex-col gap-2">
-              <SideLabel title="Application Information" hint="Choose the relevant job title." />
-              <div className="w-full p-3 pt-2 bg-white border rounded-lg border-gray-200 2xl:w-3/4 2xl-to-xl:w-[80%] w-[80%] 2xl:p-5 2xl:pt-3">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
                   <div>
                     <div className="mb-1.5 flex items-end min-h-6">
-                      <label className={labelClass}>Job Title&nbsp;</label>
-                      {/* Removed mandatory star */}
+                      <label className={labelClass}>Job Title</label>
                     </div>
                     <div className="relative">
                       <select value={form.appliedJob} onChange={e => set('appliedJob', e.target.value)} className={selectClass}>
@@ -229,7 +203,7 @@ export default function AddTalentPage() {
                   </div>
                   <div>
                     <div className="mb-1.5 flex items-end min-h-6">
-                      <label className={labelClass}>Remark&nbsp;</label>
+                      <label className={labelClass}>Remark</label>
                     </div>
                     <input type="text" value={form.remark} onChange={e => set('remark', e.target.value)} className={inputClass} maxLength={50} />
                   </div>
@@ -435,12 +409,12 @@ export default function AddTalentPage() {
                             </div>
 
                             <div className="grid grid-cols-2 gap-3 mb-3">
-                              <FormMonthYearPicker label="From" required value={exp.from} onChange={(val: string) => {
+                              <FormMonthYearPicker label="From" value={exp.from} onChange={(val: string) => {
                                 const newExp = [...form.experiences];
                                 newExp[i].from = val;
                                 set('experiences', newExp);
                               }} />
-                              <FormMonthYearPicker label="To" required value={exp.to} isLocked={exp.isCurrent} onChange={(val: string) => {
+                              <FormMonthYearPicker label="To" value={exp.to} isLocked={exp.isCurrent} onChange={(val: string) => {
                                 const newExp = [...form.experiences];
                                 newExp[i].to = val;
                                 set('experiences', newExp);
