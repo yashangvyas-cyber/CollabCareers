@@ -3,7 +3,8 @@ import { Link, useLocation } from 'react-router-dom';
 import CRMLayout from '../components/CRMLayout';
 import {
   ChevronDown, X, Eye, Check, Users, UserCheck, Send, Briefcase,
-  GraduationCap, UserPlus, Search, Phone, Tag, Activity, ChevronLeft, Pencil, EyeOff,
+  GraduationCap, UserPlus, Search, Tag, Activity, ChevronLeft, Pencil, EyeOff,
+  Clock, MapPin, Building2, TrendingUp, User,
 } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 import type { Candidate, TalentAvailabilityStatus } from '../store/types';
@@ -13,18 +14,34 @@ import InviteEmailCompose from '../components/InviteEmailCompose';
 
 type FilterColumn =
   | 'Availability Status'
-  | 'Contact Preference'
-  | 'Source'
-  | 'Business Unit'
+  | 'Notice Period'
+  | 'Experience'
   | 'Skills'
-  | 'Alumni';
+  | 'Source'
+  | 'Location'
+  | 'Organisation'
+  | 'Designation'
+  | 'Record Owner'
+  | 'Alumni'
+  | 'Added By';
 
-type FilterStep = 'closed' | 'type-select' | 'column-select' | 'value-select';
+type FilterOperator = 'Is' | 'Contains' | 'Greater Than' | 'Less Than';
+
+type FilterStep = 'closed' | 'type-select' | 'column-select' | 'operator-select' | 'value-select';
 
 interface PoolFilter {
   id: string;
   column: FilterColumn;
+  operator: FilterOperator;
   values: string[];
+}
+
+interface ColumnDef {
+  key: FilterColumn;
+  label: string;
+  icon: React.ElementType;
+  operators: FilterOperator[];
+  values?: string[];
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -63,6 +80,7 @@ export default function TalentPoolPage() {
   const [showQuickSearch, setShowQuickSearch] = useState(false);
   const [columnSearch, setColumnSearch]     = useState('');
   const [pendingCol, setPendingCol]         = useState<FilterColumn | null>(null);
+  const [pendingOp, setPendingOp]           = useState<FilterOperator | null>(null);
   const [pendingVals, setPendingVals]       = useState<string[]>([]);
 
   // Close dropdown on outside click
@@ -77,37 +95,57 @@ export default function TalentPoolPage() {
   }, []);
 
   // ── Data ──
-  const talentPool   = candidates.filter(c => c.profileVisibility === 'visible');
-  const businessUnits = Array.from(new Set(talentPool.map(c => c.businessUnit).filter(Boolean) as string[])).sort();
-  const allSkills    = Array.from(new Set(talentPool.flatMap(c => c.skills ?? []))).sort();
+  const talentPool    = candidates.filter(c => c.profileVisibility === 'visible');
+  const recordOwners  = Array.from(new Set(talentPool.map(c => c.recordOwner).filter(Boolean) as string[])).sort();
 
-  // Column config (values computed from data where needed)
-  const COLUMNS: { key: FilterColumn; label: string; icon: React.ElementType; values: string[] }[] = [
-    { key: 'Availability Status', label: 'Availability Status', icon: Activity,      values: ['Immediate Joiner', 'Serving Notice Period', 'Open to Good Offers', 'Not Interested', 'Offer in Hand'] },
-    { key: 'Contact Preference',  label: 'Contact Preference',  icon: Phone,         values: ['Open to Contact', 'Invite First'] },
-    { key: 'Source',              label: 'Source',              icon: Search,        values: ['LinkedIn', 'Referral', 'Job Fair', 'Direct Approach', 'Naukri', 'Internshala', 'CollabCareers', 'Other'] },
-    { key: 'Business Unit',       label: 'Business Unit',       icon: Briefcase,     values: businessUnits },
-    { key: 'Skills',              label: 'Skills',              icon: Tag,           values: allSkills },
-    { key: 'Alumni',              label: 'Alumni',              icon: GraduationCap, values: ['Yes', 'No'] },
+  // Column config
+  const COLUMNS: ColumnDef[] = [
+    { key: 'Availability Status', label: 'Availability Status', icon: Activity,      operators: ['Is'],                           values: ['Immediate Joiner', 'Serving Notice Period', 'Open to Good Offers', 'Offer in Hand', 'Not Interested'] },
+    { key: 'Notice Period',       label: 'Notice Period',       icon: Clock,         operators: ['Is'],                           values: ['Immediate', '15 days', '30 days', '45 days', '60 days', '90 days'] },
+    { key: 'Experience',          label: 'Experience (Years)',  icon: TrendingUp,    operators: ['Greater Than', 'Less Than', 'Is'] },
+    { key: 'Skills',              label: 'Skills',              icon: Tag,           operators: ['Contains'] },
+    { key: 'Source',              label: 'Source',              icon: Search,        operators: ['Is'],                           values: ['LinkedIn', 'Referral', 'Job Fair', 'Direct Approach', 'Naukri', 'Internshala', 'CollabCareers', 'Other'] },
+    { key: 'Location',            label: 'Location',            icon: MapPin,        operators: ['Contains'] },
+    { key: 'Organisation',        label: 'Organisation',        icon: Building2,     operators: ['Contains'] },
+    { key: 'Designation',         label: 'Designation',         icon: Briefcase,     operators: ['Contains'] },
+    { key: 'Record Owner',        label: 'Record Owner',        icon: User,          operators: ['Is'],                           values: recordOwners.length ? recordOwners : ['Sarah Chen', 'Michael Park', 'James Wilson', 'Lisa Ray', 'David Kim'] },
+    { key: 'Alumni',              label: 'Alumni',              icon: GraduationCap, operators: ['Is'],                           values: ['Yes', 'No'] },
+    { key: 'Added By',            label: 'Added By',            icon: UserCheck,     operators: ['Is'],                           values: ['Recruiter Added', 'Self Registered'] },
   ];
 
   // ── Filter helpers ──
-  const openValuePicker = (col: FilterColumn) => {
+  const openFilter = (col: FilterColumn) => {
+    const colDef = COLUMNS.find(c => c.key === col)!;
     const existing = activeFilters.find(f => f.column === col);
     setPendingCol(col);
     setPendingVals(existing?.values ?? []);
+    if (colDef.operators.length === 1) {
+      setPendingOp(colDef.operators[0]);
+      setFilterStep('value-select');
+    } else {
+      setPendingOp(existing?.operator ?? null);
+      setFilterStep('operator-select');
+    }
+  };
+
+  const selectOperator = (op: FilterOperator) => {
+    setPendingOp(op);
+    // Reset values when operator changes
+    const existing = activeFilters.find(f => f.column === pendingCol);
+    setPendingVals(existing?.operator === op ? existing.values : []);
     setFilterStep('value-select');
   };
 
   const applyFilter = () => {
-    if (!pendingCol) return;
+    if (!pendingCol || !pendingOp) return;
     setActiveFilters(prev => {
       const without = prev.filter(f => f.column !== pendingCol);
       if (pendingVals.length === 0) return without;
-      return [...without, { id: `f_${Date.now()}`, column: pendingCol, values: pendingVals }];
+      return [...without, { id: `f_${Date.now()}`, column: pendingCol, operator: pendingOp, values: pendingVals }];
     });
     setFilterStep('closed');
     setPendingCol(null);
+    setPendingOp(null);
     setPendingVals([]);
   };
 
@@ -115,6 +153,7 @@ export default function TalentPoolPage() {
     setActiveFilters(prev =>
       prev.map(f => {
         if (f.id !== filterId) return f;
+        if (f.operator !== 'Is') return null; // single-value operators — remove whole filter
         const next = f.values.filter(v => v !== val);
         return next.length ? { ...f, values: next } : null;
       }).filter(Boolean) as PoolFilter[]
@@ -140,23 +179,44 @@ export default function TalentPoolPage() {
         c.skills?.some(s => s.toLowerCase().includes(q));
       if (!hit) return false;
     }
-    // Active look-up filters (AND across columns, OR within values)
+    // Active look-up filters (AND across columns)
     for (const f of activeFilters) {
       if (f.values.length === 0) continue;
       let match = false;
+      const v0 = f.values[0]?.toLowerCase() ?? '';
       switch (f.column) {
         case 'Availability Status':
           match = !!c.availabilityStatus && f.values.includes(c.availabilityStatus); break;
-        case 'Contact Preference':
-          match = f.values.includes(c.allowRecruiterContact ? 'Open to Contact' : 'Invite First'); break;
+        case 'Notice Period':
+          match = !!c.noticePeriod && f.values.includes(c.noticePeriod); break;
+        case 'Experience': {
+          const yrs = c.isFresher ? 0 : (c.totalExperienceYears ?? undefined);
+          if (yrs === undefined) break;
+          const n = Number(f.values[0]);
+          if (isNaN(n)) break;
+          if (f.operator === 'Is') match = yrs === n;
+          else if (f.operator === 'Greater Than') match = yrs > n;
+          else if (f.operator === 'Less Than') match = yrs < n;
+          break;
+        }
+        case 'Skills':
+          match = !!c.skills?.some(s => s.toLowerCase().includes(v0)); break;
         case 'Source':
           match = !!c.source && f.values.includes(c.source); break;
-        case 'Business Unit':
-          match = !!c.businessUnit && f.values.includes(c.businessUnit); break;
-        case 'Skills':
-          match = !!c.skills?.some(s => f.values.includes(s)); break;
+        case 'Location': {
+          const loc = (c.city || c.location || '').toLowerCase();
+          match = loc.includes(v0); break;
+        }
+        case 'Organisation':
+          match = (c.currentOrg || '').toLowerCase().includes(v0); break;
+        case 'Designation':
+          match = (c.currentDesignation || '').toLowerCase().includes(v0); break;
+        case 'Record Owner':
+          match = !!c.recordOwner && f.values.includes(c.recordOwner); break;
         case 'Alumni':
           match = f.values.includes(c.isAlumni ? 'Yes' : 'No'); break;
+        case 'Added By':
+          match = f.values.includes(c.addedByRecruiter ? 'Recruiter Added' : 'Self Registered'); break;
       }
       if (!match) return false;
     }
@@ -177,8 +237,12 @@ export default function TalentPoolPage() {
     setTimeout(() => setInviteSent(null), 4000);
   };
 
-  // ── Value picker values for current column ──
-  const pickerValues = pendingCol ? (COLUMNS.find(c => c.key === pendingCol)?.values ?? []) : [];
+  // ── Value picker helpers ──
+  const pendingColDef  = pendingCol ? COLUMNS.find(c => c.key === pendingCol) : null;
+  const pickerValues   = (pendingOp === 'Is' && pendingColDef?.values) ? pendingColDef.values : [];
+  const isTextOp       = pendingOp === 'Contains';
+  const isNumericOp    = pendingOp === 'Greater Than' || pendingOp === 'Less Than';
+  const canApply       = pendingOp === 'Is' ? pendingVals.length > 0 : (pendingVals[0] || '').trim().length > 0;
   const visibleColumns = COLUMNS.filter(c =>
     !columnSearch.trim() || c.label.toLowerCase().includes(columnSearch.toLowerCase())
   );
@@ -242,13 +306,13 @@ export default function TalentPoolPage() {
                   <div key={filter.id} className="flex items-center gap-1 flex-wrap">
                     {/* Column chip — click to re-edit */}
                     <button
-                      onClick={() => openValuePicker(filter.column)}
+                      onClick={() => openFilter(filter.column)}
                       className="px-2.5 py-1 text-[11px] font-black text-white bg-[#3538CD] rounded-lg uppercase tracking-widest hover:bg-[#292bb0] transition-colors"
                     >
                       {filter.column}
                     </button>
                     <span className="px-2 py-1 text-[11px] font-bold text-[#6B7280] bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg">
-                      Is
+                      {filter.operator}
                     </span>
                     {filter.values.map(val => (
                       <div key={val} className="flex items-center gap-1 px-2.5 py-1 bg-[#F4F5FA] border border-[#3538CD]/20 rounded-lg">
@@ -334,7 +398,7 @@ export default function TalentPoolPage() {
                     {visibleColumns.map(col => (
                       <button
                         key={col.key}
-                        onClick={() => openValuePicker(col.key)}
+                        onClick={() => openFilter(col.key)}
                         className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[#F9FAFB] transition-colors text-left"
                       >
                         <col.icon className="w-4 h-4 text-[#9CA3AF] shrink-0" />
@@ -351,45 +415,96 @@ export default function TalentPoolPage() {
                 </div>
               )}
 
+              {/* ── Operator select ── */}
+              {filterStep === 'operator-select' && pendingCol && (
+                <div className="absolute top-full left-0 mt-1.5 bg-white border border-[#E5E7EB] rounded-xl shadow-xl z-50 w-64 overflow-hidden">
+                  <div className="px-4 py-3 border-b border-[#F3F4F6] flex items-center gap-2">
+                    <button onClick={() => setFilterStep('column-select')} className="p-0.5 rounded hover:bg-[#F3F4F6] text-[#9CA3AF] hover:text-[#374151] transition-colors">
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <span className="text-xs font-black text-[#374151] uppercase tracking-widest flex-1 truncate">{pendingCol}</span>
+                  </div>
+                  <div className="py-1">
+                    <p className="px-4 pt-2 pb-1 text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">Select Operator</p>
+                    {pendingColDef?.operators.map(op => (
+                      <button
+                        key={op}
+                        onClick={() => selectOperator(op)}
+                        className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-[#F9FAFB] transition-colors text-sm font-bold text-[#374151]"
+                      >
+                        {op}
+                        {pendingOp === op && <Check className="w-4 h-4 text-[#3538CD]" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* ── Value picker ── */}
-              {filterStep === 'value-select' && pendingCol && (
+              {filterStep === 'value-select' && pendingCol && pendingOp && (
                 <div className="absolute top-full left-0 mt-1.5 bg-white border border-[#E5E7EB] rounded-xl shadow-xl z-50 w-64 overflow-hidden">
                   {/* Header */}
                   <div className="px-4 py-3 border-b border-[#F3F4F6] flex items-center gap-2">
                     <button
-                      onClick={() => setFilterStep('column-select')}
+                      onClick={() => setFilterStep(pendingColDef && pendingColDef.operators.length > 1 ? 'operator-select' : 'column-select')}
                       className="p-0.5 rounded hover:bg-[#F3F4F6] text-[#9CA3AF] hover:text-[#374151] transition-colors"
                     >
                       <ChevronLeft className="w-4 h-4" />
                     </button>
-                    <span className="text-xs font-black text-[#374151] uppercase tracking-widest flex-1 truncate">
-                      {pendingCol}
-                    </span>
+                    <span className="text-xs font-black text-[#374151] uppercase tracking-widest flex-1 truncate">{pendingCol}</span>
                     <span className="px-2 py-0.5 text-[10px] font-bold text-[#6B7280] bg-[#F9FAFB] border border-[#E5E7EB] rounded shrink-0">
-                      Is
+                      {pendingOp}
                     </span>
                   </div>
 
-                  {/* Values */}
-                  <div className="py-1 max-h-64 overflow-y-auto">
-                    {pickerValues.length === 0 ? (
-                      <p className="px-4 py-4 text-sm text-[#C4C9D4] text-center italic">No values available</p>
-                    ) : pickerValues.map(val => (
-                      <label key={val} className="flex items-center gap-3 px-4 py-2.5 hover:bg-[#F9FAFB] cursor-pointer transition-colors">
+                  {/* Values — vary by operator type */}
+                  {pendingOp === 'Is' && (
+                    <div className="py-1 max-h-64 overflow-y-auto">
+                      {pickerValues.map(val => (
+                        <label key={val} className="flex items-center gap-3 px-4 py-2.5 hover:bg-[#F9FAFB] cursor-pointer transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={pendingVals.includes(val)}
+                            onChange={() => setPendingVals(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val])}
+                            className="w-4 h-4 accent-[#3538CD] rounded shrink-0"
+                          />
+                          <span className="text-sm text-[#374151] font-bold">{val}</span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+
+                  {isTextOp && (
+                    <div className="p-3">
+                      <input
+                        autoFocus
+                        type="text"
+                        value={pendingVals[0] || ''}
+                        onChange={e => setPendingVals(e.target.value ? [e.target.value] : [])}
+                        placeholder={`Type to filter ${pendingCol}...`}
+                        className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#3538CD] focus:ring-2 focus:ring-[#3538CD]/10"
+                        onKeyDown={e => { if (e.key === 'Enter' && canApply) applyFilter(); }}
+                      />
+                    </div>
+                  )}
+
+                  {isNumericOp && (
+                    <div className="p-3">
+                      <div className="flex items-center gap-2">
                         <input
-                          type="checkbox"
-                          checked={pendingVals.includes(val)}
-                          onChange={() =>
-                            setPendingVals(prev =>
-                              prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val]
-                            )
-                          }
-                          className="w-4 h-4 accent-[#3538CD] rounded shrink-0"
+                          autoFocus
+                          type="number"
+                          min="0"
+                          value={pendingVals[0] || ''}
+                          onChange={e => setPendingVals(e.target.value ? [e.target.value] : [])}
+                          placeholder="Enter years..."
+                          className="flex-1 border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#3538CD] focus:ring-2 focus:ring-[#3538CD]/10"
+                          onKeyDown={e => { if (e.key === 'Enter' && canApply) applyFilter(); }}
                         />
-                        <span className="text-sm text-[#374151] font-bold">{val}</span>
-                      </label>
-                    ))}
-                  </div>
+                        <span className="text-xs text-[#9CA3AF] font-bold shrink-0">yrs</span>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Footer */}
                   <div className="p-3 border-t border-[#F3F4F6] flex gap-2">
@@ -397,6 +512,7 @@ export default function TalentPoolPage() {
                       onClick={() => {
                         setActiveFilters(prev => prev.filter(f => f.column !== pendingCol));
                         setPendingVals([]);
+                        setPendingOp(null);
                         setFilterStep('closed');
                         setPendingCol(null);
                       }}
@@ -406,7 +522,7 @@ export default function TalentPoolPage() {
                     </button>
                     <button
                       onClick={applyFilter}
-                      disabled={pendingVals.length === 0}
+                      disabled={!canApply}
                       className="flex-1 py-2 text-xs font-black text-white bg-[#3538CD] rounded-lg hover:bg-[#292bb0] transition-colors disabled:opacity-40 disabled:cursor-not-allowed uppercase tracking-widest"
                     >
                       Apply
