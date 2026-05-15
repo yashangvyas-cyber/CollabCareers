@@ -5,7 +5,7 @@ import {
   Mail, Phone, MapPin, Copy, FileText, ExternalLink,
   Briefcase, Check, X, MessageSquare,
   CalendarDays, Send, MoreVertical, UserCheck, EyeOff, ChevronDown,
-  Pencil, Ban,
+  Pencil, Ban, Info,
 } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 import InviteEmailCompose from '../components/InviteEmailCompose';
@@ -89,7 +89,7 @@ type Tab = typeof TABS[number];
 export default function TalentPoolDetailsPage() {
   const { candidateId } = useParams();
   const navigate = useNavigate();
-  const { candidates, jobs, applications, invites, updateInviteStatus, updateCandidateAvailability } = useApp();
+  const { candidates, jobs, applications, invites, updateInviteStatus, updateCandidateAvailability, blacklistCandidate } = useApp();
 
   const [activeTab, setActiveTab] = useState<Tab>('Profile');
   const [showInvite, setShowInvite] = useState(false);
@@ -97,6 +97,8 @@ export default function TalentPoolDetailsPage() {
   const [editingAvailability, setEditingAvailability] = useState(false);
   const [showKebab, setShowKebab] = useState(false);
   const kebabRef = useRef<HTMLDivElement>(null);
+  const [showBlacklist, setShowBlacklist] = useState(false);
+  const [blacklistRemarks, setBlacklistRemarks] = useState('');
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -429,7 +431,7 @@ export default function TalentPoolDetailsPage() {
                       </button>
                       <div className="h-px bg-[#F3F4F6]" />
                       <button
-                        onClick={() => { setShowKebab(false); }}
+                        onClick={() => { setShowKebab(false); setShowBlacklist(true); }}
                         className="w-full flex items-center gap-2.5 px-4 py-3 text-xs font-black text-red-600 hover:bg-red-50 transition-colors uppercase tracking-widest"
                       >
                         <Ban className="w-3.5 h-3.5" /> Blacklist
@@ -696,6 +698,80 @@ export default function TalentPoolDetailsPage() {
           <button onClick={() => setInviteSent(null)} className="ml-1 text-white/40 hover:text-white transition-colors">
             <X className="w-4 h-4" />
           </button>
+        </div>
+      )}
+
+      {showBlacklist && (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between pl-4 pr-4 py-4">
+              <p className="text-gray-900 font-semibold text-xl">
+                Confirm — <span className="text-indigo-600">Blacklist candidate</span>
+              </p>
+              <button
+                onClick={() => { setShowBlacklist(false); setBlacklistRemarks(''); }}
+                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <hr className="border-t border-gray-200" />
+
+            <div className="p-4 space-y-4">
+              {/* Info banner */}
+              <div className="flex rounded-xl border border-indigo-300 bg-indigo-50 text-indigo-700 text-sm">
+                <div className="p-3 flex items-center">
+                  <div className="border-2 border-indigo-300 rounded-full p-1.5 flex items-center justify-center">
+                    <div className="border-2 border-indigo-400 rounded-full p-1 flex items-center justify-center">
+                      <Info className="w-4 h-4 text-indigo-700" />
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 pl-0 flex items-center">
+                  <h3 className="font-semibold">Are you sure you want to blacklist this candidate?</h3>
+                </div>
+              </div>
+
+              {/* Remarks */}
+              <div>
+                <div className="flex items-center gap-1 mb-1.5">
+                  <label className="text-xs font-medium text-gray-700">Remarks</label>
+                  <span className="text-red-500 text-xs">*</span>
+                </div>
+                <textarea
+                  rows={4}
+                  value={blacklistRemarks}
+                  onChange={e => setBlacklistRemarks(e.target.value)}
+                  placeholder="Reason for blacklisting..."
+                  className="w-full rounded-lg py-2 px-3 border border-gray-300 focus:border-indigo-300 focus:outline-none bg-white text-sm resize-none h-[90px]"
+                />
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3 px-4 pb-4">
+              <button
+                type="button"
+                onClick={() => { setShowBlacklist(false); setBlacklistRemarks(''); }}
+                className="flex-1 h-9 rounded-lg border border-gray-300 text-gray-700 text-sm font-semibold hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={!blacklistRemarks.trim()}
+                onClick={() => {
+                  blacklistCandidate(candidate.id, blacklistRemarks.trim());
+                  setShowBlacklist(false);
+                  setBlacklistRemarks('');
+                }}
+                className="flex-1 h-9 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Yes
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </>

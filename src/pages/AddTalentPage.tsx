@@ -61,7 +61,53 @@ export default function AddTalentPage() {
     setFillMode(mode);
     if (mode === 'autofill') {
       setAutoFilling(true);
-      setTimeout(() => setAutoFilling(false), 2200);
+      setTimeout(() => {
+        setAutoFilling(false);
+        setForm(f => ({
+          ...f,
+          firstName: 'Priya',
+          lastName: 'Mehta',
+          gender: 'Female',
+          phone: '+91 98765 43210',
+          email: 'priya.mehta@gmail.com',
+          dateOfBirth: '1995-03-15',
+          linkedin: 'linkedin.com/in/priya-mehta-dev',
+          maritalStatus: 'Single',
+          isFresher: false,
+          expYears: '5',
+          expMonths: '3',
+          highestQualification: 'B.Tech — Computer Science',
+          noticePeriod: '30 days',
+          skills: ['React', 'TypeScript', 'Node.js', 'Tailwind CSS', 'MongoDB'],
+          currentCtc: '12,00,000',
+          expectedCtc: '18,00,000',
+          ctcType: 'Annual',
+          ctcCurrency: 'INR (₹)',
+          city: 'Pune',
+          state: 'Maharashtra',
+          country: 'India',
+          experiences: [
+            {
+              id: Date.now(),
+              company: 'TechCorp Solutions Pvt. Ltd.',
+              designation: 'Senior Frontend Developer',
+              from: '2022-Jan',
+              to: 'Present',
+              isCurrent: true,
+              description: 'Led development of enterprise-grade React applications. Mentored junior developers and drove adoption of TypeScript across the team.',
+            },
+            {
+              id: Date.now() + 1,
+              company: 'Infosys Limited',
+              designation: 'Software Engineer',
+              from: '2019-Jul',
+              to: '2021-Dec',
+              isCurrent: false,
+              description: 'Built and maintained internal tools using React and Node.js. Collaborated with cross-functional teams to deliver product features on schedule.',
+            },
+          ],
+        }));
+      }, 2200);
     }
   };
 
@@ -208,7 +254,8 @@ export default function AddTalentPage() {
                   <input type="url" value={form.resumeLink} onChange={e => set('resumeLink', e.target.value)} placeholder="Paste resume link here" className={inputClass} />
                 </div>
 
-                {/* Fill mode toggle */}
+                {/* Fill mode toggle — only shown when a file is uploaded */}
+                {form.resumeFile && (
                 <div className="mt-4 pt-4 border-t border-gray-100">
                   <p className="text-xs font-medium text-gray-600 mb-2">How would you like to fill candidate details?</p>
                   <div className="flex rounded-lg border border-gray-200 bg-gray-50 p-0.5 gap-0.5">
@@ -218,7 +265,7 @@ export default function AddTalentPage() {
                       className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md text-xs font-medium transition-all ${fillMode === 'manual' ? 'bg-white text-gray-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                     >
                       <Pencil className="w-3.5 h-3.5" />
-                      Manual Entry
+                      Fill Manually
                     </button>
                     <button
                       type="button"
@@ -236,6 +283,7 @@ export default function AddTalentPage() {
                     </div>
                   )}
                 </div>
+                )}
               </div>
             </div>
 
@@ -377,7 +425,7 @@ export default function AddTalentPage() {
                   </div>
 
                   <div>
-                    <div className="flex items-end min-h-6">
+                    <div className="mb-1.5 flex items-end min-h-6">
                       <label className={labelClass}>Highest Qualification</label>
                     </div>
                     <input type="text" value={form.highestQualification} onChange={e => set('highestQualification', e.target.value)} className={inputClass} maxLength={50} />
@@ -386,15 +434,17 @@ export default function AddTalentPage() {
                   {!form.isFresher && (
                     <>
                       <div>
-                        <label className={labelClass}>Total Experience</label>
-                        <div className="mt-1.5 flex rounded-md shadow-sm">
+                        <div className="mb-1.5 flex items-end min-h-6">
+                          <label className={labelClass}>Total Experience</label>
+                        </div>
+                        <div className="flex rounded-md shadow-sm">
                           <input type="number" min="0" value={form.expYears} onChange={e => set('expYears', e.target.value)} className="w-full rounded-l-lg outline-none py-1.5 px-3 2xl:h-10 2xl-to-xl:h-9 h-9 border 2xl:text-sm 2xl-to-xl:text-xs text-xs border-gray-300 focus:border-indigo-300 bg-white" />
                           <div className="relative -ml-px inline-flex items-center px-3 2xl:text-sm 2xl-to-xl:text-xs text-xs 2xl:h-10 2xl-to-xl:h-9 h-9 text-gray-500 bg-gray-100 border border-gray-300 rounded-r-md">Years</div>
                         </div>
                       </div>
                       <div>
-                        <div className="h-4"></div>
-                        <div className="mt-1.5 flex rounded-md shadow-sm">
+                        <div className="mb-1.5 min-h-6"></div>
+                        <div className="flex rounded-md shadow-sm">
                           <input type="number" min="0" max="11" value={form.expMonths} onChange={e => set('expMonths', e.target.value)} className="w-full rounded-l-lg outline-none py-1.5 px-3 2xl:h-10 2xl-to-xl:h-9 h-9 border 2xl:text-sm 2xl-to-xl:text-xs text-xs border-gray-300 focus:border-indigo-300 bg-white" />
                           <div className="relative -ml-px inline-flex items-center px-3 2xl:text-sm 2xl-to-xl:text-xs text-xs 2xl:h-10 2xl-to-xl:h-9 h-9 text-gray-500 bg-gray-100 border border-gray-300 rounded-r-md">Months</div>
                         </div>

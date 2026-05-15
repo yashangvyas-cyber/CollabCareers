@@ -17,6 +17,7 @@ interface AppContextType extends AppState {
   sendInvite: (invite: TalentInvite) => void;
   updateInviteStatus: (inviteId: string, status: TalentInviteStatus) => void;
   updateCandidateAvailability: (candidateId: string, status: TalentAvailabilityStatus) => void;
+  blacklistCandidate: (candidateId: string, reason: string) => void;
 }
 
 const STORAGE_KEY = 'collab_careers_state_v3';
@@ -753,6 +754,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  const blacklistCandidate = (candidateId: string, reason: string) => {
+    setState(prev => ({
+      ...prev,
+      candidates: prev.candidates.map(c =>
+        c.id === candidateId
+          ? { ...c, candidateStatus: 'Blacklisted' as const, statusReason: reason, isBlacklisted: true }
+          : c
+      ),
+    }));
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -772,6 +784,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         sendInvite,
         updateInviteStatus,
         updateCandidateAvailability,
+        blacklistCandidate,
       }}
     >
       {children}
