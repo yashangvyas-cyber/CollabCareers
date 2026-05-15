@@ -80,7 +80,7 @@ export default function CRMLayout({ children, breadcrumbs, title, actions }: CRM
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 ml-[220px]">
+      <div className="flex-1 ml-[220px] min-w-0">
         {/* Top Bar */}
         <header className="bg-white border-b border-[#E5E7EB] px-6 py-3 flex items-center justify-between sticky top-0 z-20">
           <div className="flex items-center gap-4">

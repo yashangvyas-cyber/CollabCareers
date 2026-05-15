@@ -4,11 +4,18 @@ import CRMLayout from '../components/CRMLayout';
 import {
   ChevronDown, X, Eye, Check, Briefcase, Users, UserCheck,
   GraduationCap, UserPlus, Search, Tag, Activity, ChevronLeft, Pencil, EyeOff,
-  Clock, MapPin, Building2, TrendingUp, User, Plus,
+  Clock, MapPin, Building2, TrendingUp, User, Plus, ArrowUpDown, ArrowUp, ArrowDown, Send,
 } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 import type { Candidate, TalentAvailabilityStatus } from '../store/types';
+
+type CandidateStatus = 'Active' | 'Blacklisted' | 'Discarded' | 'Joined';
 import InviteEmailCompose from '../components/InviteEmailCompose';
+
+// ── Sort types ────────────────────────────────────────────────────────────────
+
+type SortKey = 'name' | 'experience' | 'noticePeriod' | 'status' | 'source' | 'recordOwner' | 'lastLoginAt' | 'createdBy' | 'modifiedBy';
+type SortDir = 'asc' | 'desc';
 
 // ── Filter types ─────────────────────────────────────────────────────────────
 
@@ -46,12 +53,11 @@ interface ColumnDef {
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const availabilityStyle: Record<TalentAvailabilityStatus, string> = {
-  'Immediate Joiner':      'bg-green-50 text-green-700 border-green-200',
-  'Serving Notice Period': 'bg-yellow-50 text-yellow-700 border-yellow-200',
-  'Open to Good Offers':   'bg-blue-50 text-blue-700 border-blue-200',
-  'Offer in Hand':         'bg-purple-50 text-purple-700 border-purple-200',
-  'Not Interested':        'bg-gray-100 text-gray-500 border-gray-200',
+const candidateStatusStyle: Record<CandidateStatus, string> = {
+  'Active':      'bg-[#EEF4FF] text-[#3538CD] border-[#3538CD]/30',
+  'Blacklisted': 'bg-[#EAECF5] text-[#363F72] border-[#363F72]/30',
+  'Discarded':   'bg-[#F9FAFB] text-[#344054] border-[#D0D5DD]',
+  'Joined':      'bg-[#F8F9FC] text-[#363F72] border-[#D5D9EB]',
 };
 
 // ── Page ─────────────────────────────────────────────────────────────────────
@@ -65,6 +71,13 @@ export default function TalentPoolPage() {
   const [inviteTarget, setInviteTarget] = useState<Candidate | null>(null);
   const [inviteSent, setInviteSent]     = useState<string | null>(null);
   const [addedToast, setAddedToast]     = useState<string | null>((location.state as any)?.addedName ?? null);
+
+  // ── Tooltip state (fixed-position, bypasses overflow clipping) ──
+  const [tooltip, setTooltip] = useState<{ text: string; x: number; y: number } | null>(null);
+  const showTooltip = (e: React.MouseEvent, text: string) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    setTooltip({ text, x: r.left + r.width / 2, y: r.top });
+  };
 
   useEffect(() => {
     if (addedToast) {
@@ -83,6 +96,8 @@ export default function TalentPoolPage() {
   const [pendingVals, setPendingVals]       = useState<string[]>([]);
   const [quickSearch, setQuickSearch]       = useState('');
   const [showQuickSearch, setShowQuickSearch] = useState(false);
+  const [sortKey, setSortKey]               = useState<SortKey | null>(null);
+  const [sortDir, setSortDir]               = useState<SortDir>('asc');
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -255,6 +270,45 @@ export default function TalentPoolPage() {
     setInviteSent(name);
     setTimeout(() => setInviteSent(null), 4000);
   };
+
+  // ── Sort helpers ──
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortKey(key); setSortDir('asc'); }
+  };
+  const noticeDays = (np?: string): number => {
+    if (!np) return Infinity;
+    if (np === 'Immediate') return 0;
+    return parseInt(np) || Infinity;
+  };
+  const formatExp = (c: Candidate): string => {
+    if (c.isFresher) return 'Fresher';
+    const y = c.totalExperienceYears; const m = c.totalExperienceMonths;
+    if (!y && !m) return '—';
+    return [y ? `${y}y` : '', m ? `${m}m` : ''].filter(Boolean).join(' ');
+  };
+  const SortIcon = ({ sKey }: { sKey: SortKey }) => {
+    if (sortKey !== sKey) return <ArrowUpDown className="w-3 h-3 text-[#D1D5DB]" />;
+    return sortDir === 'asc' ? <ArrowUp className="w-3 h-3 text-[#3538CD]" /> : <ArrowDown className="w-3 h-3 text-[#3538CD]" />;
+  };
+  const sortedPool = sortKey ? [...filteredPool].sort((a, b) => {
+    let av: string | number, bv: string | number;
+    switch (sortKey) {
+      case 'name':        av = `${a.firstName} ${a.lastName}`.toLowerCase(); bv = `${b.firstName} ${b.lastName}`.toLowerCase(); break;
+      case 'experience':  av = a.isFresher ? 0 : (a.totalExperienceYears ?? -1); bv = b.isFresher ? 0 : (b.totalExperienceYears ?? -1); break;
+      case 'noticePeriod': av = noticeDays(a.noticePeriod); bv = noticeDays(b.noticePeriod); break;
+      case 'status':      av = a.availabilityStatus ?? ''; bv = b.availabilityStatus ?? ''; break;
+      case 'source':      av = a.source ?? ''; bv = b.source ?? ''; break;
+      case 'recordOwner': av = a.recordOwner ?? ''; bv = b.recordOwner ?? ''; break;
+      case 'lastLoginAt': av = a.lastLoginAt ?? ''; bv = b.lastLoginAt ?? ''; break;
+      case 'createdBy':   av = a.createdBy ?? ''; bv = b.createdBy ?? ''; break;
+      case 'modifiedBy':  av = a.modifiedBy ?? ''; bv = b.modifiedBy ?? ''; break;
+      default:            av = ''; bv = '';
+    }
+    if (av < bv) return sortDir === 'asc' ? -1 : 1;
+    if (av > bv) return sortDir === 'asc' ? 1 : -1;
+    return 0;
+  }) : filteredPool;
 
   // ── Value picker helpers ──
   const pendingColDef  = pendingCol ? COLUMNS.find(c => c.key === pendingCol) : null;
@@ -575,90 +629,170 @@ export default function TalentPoolPage() {
                   )}
                 </div>
               ) : (
-                <table className="w-full text-left border-collapse">
+                <table className="w-full text-left border-collapse min-w-[1600px]">
                   <thead>
                     <tr className="bg-[#F9FAFB] border-b border-[#E5E7EB]">
-                      {['No.', 'Name', 'Contact', 'Organisation', 'Designation', 'Skills', 'Availability', 'Actions'].map(h => (
-                        <th key={h} className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap">{h}</th>
-                      ))}
+                      <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('name')}>
+                        <div className="flex items-center gap-1">Name <SortIcon sKey="name" /></div>
+                      </th>
+                      <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap">Contact</th>
+                      <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap">Current Organization</th>
+                      <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap">Skills</th>
+                      <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('experience')}>
+                        <div className="flex items-center gap-1">Experience <SortIcon sKey="experience" /></div>
+                      </th>
+                      <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('noticePeriod')}>
+                        <div className="flex items-center gap-1">Notice Period <SortIcon sKey="noticePeriod" /></div>
+                      </th>
+                      <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('status')}>
+                        <div className="flex items-center gap-1">Status <SortIcon sKey="status" /></div>
+                      </th>
+                      <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('source')}>
+                        <div className="flex items-center gap-1">Source <SortIcon sKey="source" /></div>
+                      </th>
+                      <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap">Location</th>
+                      <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('recordOwner')}>
+                        <div className="flex items-center gap-1">Record Owner <SortIcon sKey="recordOwner" /></div>
+                      </th>
+                      <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('lastLoginAt')}>
+                        <div className="flex items-center gap-1">Last Login At <SortIcon sKey="lastLoginAt" /></div>
+                      </th>
+                      <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('createdBy')}>
+                        <div className="flex items-center gap-1">Created By <SortIcon sKey="createdBy" /></div>
+                      </th>
+                      <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('modifiedBy')}>
+                        <div className="flex items-center gap-1">Modified By <SortIcon sKey="modifiedBy" /></div>
+                      </th>
+                      <th className="sticky right-0 z-20 px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap bg-[#F9FAFB] border-l border-[#E5E7EB] shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.08)]">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#F3F4F6]">
-                    {filteredPool.map((candidate, idx) => {
-                      return (
-                        <tr key={candidate.id} className="hover:bg-[#F9FAFB] transition-colors group">
-                          <td className="px-4 py-4 text-sm text-[#6B7280]">{idx + 1}</td>
-                          <td className="px-4 py-4">
-                            <p className="text-sm font-semibold text-[#111827]">{candidate.firstName} {candidate.lastName}</p>
-                            <p className="text-xs text-[#6B7280]">
-                              {candidate.allowRecruiterContact ? candidate.email : '••••••@••••••.com'}
-                            </p>
-                            {candidate.isAlumni && (
-                              <div className="flex items-center gap-1.5 mt-0.5">
-                                <span className="text-[9px] font-black text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-full uppercase tracking-widest">Alumni</span>
-                              </div>
+                    {sortedPool.map((candidate) => (
+                      <tr key={candidate.id} className="hover:bg-[#F9FAFB] transition-colors group">
+
+                        {/* Name */}
+                        <td className="px-4 py-4 min-w-[160px]">
+                          <p className="text-sm font-semibold text-[#111827] whitespace-nowrap">{candidate.firstName} {candidate.lastName}</p>
+                          {candidate.isAlumni && (
+                            <span className="inline-block mt-0.5 text-[9px] font-black text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-full uppercase tracking-widest">Alumni</span>
+                          )}
+                        </td>
+
+                        {/* Contact — email above, phone below */}
+                        <td className="px-4 py-4 min-w-[180px]">
+                          {candidate.allowRecruiterContact ? (
+                            <>
+                              <p className="text-sm text-[#374151]">{candidate.email}</p>
+                              <p className="text-xs text-[#6B7280] mt-0.5">{candidate.phone || '—'}</p>
+                            </>
+                          ) : (
+                            <>
+                              <p className="text-sm text-[#9CA3AF]">••••••@••••••.com</p>
+                              <p className="text-xs text-[#9CA3AF] mt-0.5 flex items-center gap-1"><EyeOff className="w-3 h-3" /> hidden</p>
+                            </>
+                          )}
+                        </td>
+
+                        {/* Current Organization — org + designation */}
+                        <td className="px-4 py-4 min-w-[160px]">
+                          {candidate.currentOrg || candidate.currentDesignation ? (
+                            <>
+                              <p className="text-sm text-[#374151] font-medium whitespace-nowrap">{candidate.currentOrg || '—'}</p>
+                              <p className="text-xs text-[#6B7280] mt-0.5 whitespace-nowrap">{candidate.currentDesignation || '—'}</p>
+                            </>
+                          ) : <span className="text-sm text-[#9CA3AF]">—</span>}
+                        </td>
+
+                        {/* Skills */}
+                        <td className="px-4 py-4 min-w-[160px]">
+                          {candidate.skills?.length ? (
+                            <div className="flex flex-wrap gap-1">
+                              {candidate.skills.slice(0, 3).map(s => (
+                                <span key={s} className="px-2 py-0.5 text-[10px] font-bold bg-[#F4F5FA] text-[#3538CD] border border-[#3538CD]/10 rounded-full whitespace-nowrap">{s}</span>
+                              ))}
+                              {candidate.skills.length > 3 && (
+                                <span className="px-2 py-0.5 text-[10px] font-bold text-[#9CA3AF] bg-[#F9FAFB] border border-[#E5E7EB] rounded-full">+{candidate.skills.length - 3}</span>
+                              )}
+                            </div>
+                          ) : <span className="text-sm text-[#9CA3AF]">—</span>}
+                        </td>
+
+                        {/* Experience */}
+                        <td className="px-4 py-4 text-sm text-[#374151] whitespace-nowrap">{formatExp(candidate)}</td>
+
+                        {/* Notice Period */}
+                        <td className="px-4 py-4 text-sm text-[#374151] whitespace-nowrap">{candidate.noticePeriod || '—'}</td>
+
+                        {/* Status */}
+                        <td className="px-4 py-4">
+                          {candidate.candidateStatus ? (
+                            <span
+                              className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full border cursor-default ${candidateStatusStyle[candidate.candidateStatus]}`}
+                              onMouseEnter={(candidate.candidateStatus === 'Discarded' || candidate.candidateStatus === 'Blacklisted') && candidate.statusReason ? (e) => showTooltip(e, candidate.statusReason!) : undefined}
+                              onMouseLeave={() => setTooltip(null)}
+                            >
+                              <span className="w-1.5 h-1.5 rounded-full bg-current shrink-0" />
+                              {candidate.candidateStatus}
+                            </span>
+                          ) : <span className="text-sm text-[#C4C9D4]">—</span>}
+                        </td>
+
+                        {/* Source */}
+                        <td className="px-4 py-4 text-sm text-[#374151] whitespace-nowrap">{candidate.source || '—'}</td>
+
+                        {/* Location — City, State */}
+                        <td className="px-4 py-4 text-sm text-[#374151] whitespace-nowrap">
+                          {[candidate.city, candidate.state].filter(Boolean).join(', ') || candidate.location || '—'}
+                        </td>
+
+                        {/* Record Owner */}
+                        <td className="px-4 py-4 text-sm text-[#374151] whitespace-nowrap">{candidate.recordOwner || '—'}</td>
+
+                        {/* Last Login At */}
+                        <td className="px-4 py-4 text-sm text-[#374151] whitespace-nowrap">
+                          {candidate.lastLoginAt
+                            ? new Date(candidate.lastLoginAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+                            : '—'}
+                        </td>
+
+                        {/* Created By */}
+                        <td className="px-4 py-4 text-sm text-[#374151] whitespace-nowrap">
+                          {candidate.createdBy || (candidate.addedByRecruiter ? (candidate.recordOwner || 'Recruiter') : 'Self')}
+                        </td>
+
+                        {/* Modified By */}
+                        <td className="px-4 py-4 text-sm text-[#374151] whitespace-nowrap">{candidate.modifiedBy || '—'}</td>
+
+                        {/* Actions — frozen right */}
+                        <td className="sticky right-0 z-10 px-4 py-4 bg-white group-hover:bg-[#F9FAFB] border-l border-[#E5E7EB] shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.08)] transition-colors">
+                          <div className="flex items-center gap-1">
+                            {candidate.allowRecruiterContact && (
+                              <button
+                                onClick={() => setInviteTarget(candidate)}
+                                className="p-1.5 text-[#6B7280] hover:text-[#3538CD] hover:bg-[#F4F5FA] rounded-md border border-transparent hover:border-[#E5E7EB] transition-colors"
+                                title="Invite"
+                              >
+                                <Send className="w-4 h-4" />
+                              </button>
                             )}
-                            {!candidate.allowRecruiterContact && (
-                              <p className="flex items-center gap-1 text-[10px] text-[#9CA3AF] mt-0.5">
-                                <EyeOff className="w-3 h-3" /> Prefers to apply first
-                              </p>
-                            )}
-                          </td>
-                          <td className="px-4 py-4 text-sm text-[#374151] whitespace-nowrap">
-                            {candidate.allowRecruiterContact ? (candidate.phone || '—') : '••••• •••••'}
-                          </td>
-                          <td className="px-4 py-4 text-sm text-[#374151]">{candidate.currentOrg || '—'}</td>
-                          <td className="px-4 py-4 text-sm text-[#374151]">{candidate.currentDesignation || '—'}</td>
-                          <td className="px-4 py-4">
-                            {candidate.skills?.length ? (
-                              <div className="flex flex-wrap gap-1">
-                                {candidate.skills.slice(0, 3).map(s => (
-                                  <span key={s} className="px-2 py-0.5 text-[10px] font-bold bg-[#F4F5FA] text-[#3538CD] border border-[#3538CD]/10 rounded-full whitespace-nowrap">{s}</span>
-                                ))}
-                                {candidate.skills.length > 3 && (
-                                  <span className="px-2 py-0.5 text-[10px] font-bold text-[#9CA3AF] bg-[#F9FAFB] border border-[#E5E7EB] rounded-full">+{candidate.skills.length - 3}</span>
-                                )}
-                              </div>
-                            ) : <span className="text-sm text-[#9CA3AF]">—</span>}
-                          </td>
-                          <td className="px-4 py-4">
-                            {candidate.availabilityStatus ? (
-                              <span className={`inline-flex px-2 py-0.5 text-[10px] font-black rounded-full border uppercase tracking-widest whitespace-nowrap ${availabilityStyle[candidate.availabilityStatus]}`}>
-                                {candidate.availabilityStatus}
-                              </span>
-                            ) : (
-                              <span className="text-sm text-[#C4C9D4]">—</span>
-                            )}
-                          </td>
-                          <td className="px-4 py-4">
-                              <div className="flex items-center justify-end gap-2">
-                               {candidate.allowRecruiterContact && (
-                                 <button
-                                   onClick={() => setInviteTarget(candidate)}
-                                   className="px-3 py-1.5 text-[11px] font-black text-[#3538CD] border border-[#3538CD]/20 rounded-lg hover:bg-[#3538CD]/5 transition-colors uppercase tracking-widest whitespace-nowrap"
-                                 >
-                                   Invite
-                                 </button>
-                               )}
-                               <Link
-                                 to={`/crm/talent-pool/${candidate.id}/edit`}
-                                 className="p-1.5 text-[#6B7280] hover:text-[#3538CD] hover:bg-white rounded-md shadow-sm border border-transparent hover:border-[#E5E7EB]"
-                                 title="Edit talent"
-                               >
-                                 <Pencil className="w-4 h-4" />
-                               </Link>
-                               <Link
-                                 to={`/crm/talent-pool/${candidate.id}`}
-                                 className="p-1.5 text-[#6B7280] hover:text-[#3538CD] hover:bg-white rounded-md shadow-sm border border-transparent hover:border-[#E5E7EB]"
-                                 title="View talent"
-                               >
-                                 <Eye className="w-4 h-4" />
-                               </Link>
-                             </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
+                            <Link
+                              to={`/crm/talent-pool/${candidate.id}/edit`}
+                              className="p-1.5 text-[#6B7280] hover:text-[#3538CD] hover:bg-[#F4F5FA] rounded-md border border-transparent hover:border-[#E5E7EB] transition-colors"
+                              title="Edit"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </Link>
+                            <Link
+                              to={`/crm/talent-pool/${candidate.id}`}
+                              className="p-1.5 text-[#6B7280] hover:text-[#3538CD] hover:bg-[#F4F5FA] rounded-md border border-transparent hover:border-[#E5E7EB] transition-colors"
+                              title="View"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Link>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               )}
@@ -693,6 +827,21 @@ export default function TalentPoolPage() {
           <button onClick={() => setInviteSent(null)} className="ml-1 text-white/40 hover:text-white transition-colors">
             <X className="w-4 h-4" />
           </button>
+        </div>
+      )}
+
+      {/* Fixed-position tooltip — renders above overflow-x-auto clipping boundary */}
+      {tooltip && (
+        <div
+          className="fixed z-[9999] pointer-events-none"
+          style={{ left: tooltip.x, top: tooltip.y - 8, transform: 'translate(-50%, -100%)' }}
+        >
+          <div className="bg-[#1D2939] text-white text-xs px-2.5 py-1.5 rounded-lg shadow-xl max-w-[220px] text-center leading-relaxed break-words">
+            {tooltip.text}
+          </div>
+          <div className="flex justify-center mt-0.5">
+            <div className="w-0 h-0 border-l-[5px] border-r-[5px] border-t-[5px] border-l-transparent border-r-transparent border-t-[#1D2939]" />
+          </div>
         </div>
       )}
     </>

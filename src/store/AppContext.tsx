@@ -19,7 +19,7 @@ interface AppContextType extends AppState {
   updateCandidateAvailability: (candidateId: string, status: TalentAvailabilityStatus) => void;
 }
 
-const STORAGE_KEY = 'collab_careers_state_v2';
+const STORAGE_KEY = 'collab_careers_state_v3';
 
 const initialState: AppState = {
   jobs: [
@@ -329,9 +329,18 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
       currentDesignation: 'Frontend Engineer',
       noticePeriod: '30 days',
       skills: ['React', 'TypeScript', 'Tailwind CSS', 'Node.js'],
+      city: 'Pune',
+      state: 'Maharashtra',
       location: 'Pune, India',
+      source: 'LinkedIn',
+      recordOwner: 'Sarah Chen',
+      addedAt: new Date().toISOString(),
+      addedByRecruiter: true,
+      totalExperienceYears: 4,
+      totalExperienceMonths: 2,
       linkedin: 'linkedin.com/in/riyadesai',
       availabilityStatus: 'Open to Good Offers' as const,
+      candidateStatus: 'Active' as const,
     },
     {
       id: 'c3',
@@ -346,9 +355,19 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
       currentDesignation: 'Product Manager',
       noticePeriod: '60 days',
       skills: ['Product Strategy', 'Agile', 'SQL', 'Figma'],
+      city: 'Bangalore',
+      state: 'Karnataka',
       location: 'Bangalore, India',
+      source: 'Referral',
+      recordOwner: 'Michael Park',
+      addedAt: new Date(Date.now() - 86400000 * 40).toISOString(),
+      addedByRecruiter: true,
+      totalExperienceYears: 7,
+      totalExperienceMonths: 0,
       linkedin: 'linkedin.com/in/karanmehta',
       availabilityStatus: 'Not Interested' as const,
+      candidateStatus: 'Discarded' as const,
+      statusReason: 'Salary expectations significantly above budget',
     },
     {
       id: 'c4',
@@ -364,9 +383,18 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
       currentDesignation: 'UX Designer',
       noticePeriod: 'Immediate',
       skills: ['Figma', 'User Research', 'Prototyping', 'Design Systems'],
+      city: 'Mumbai',
+      state: 'Maharashtra',
       location: 'Mumbai, India',
+      source: 'Direct Approach',
+      recordOwner: 'Sarah Chen',
+      addedAt: new Date(Date.now() - 86400000 * 15).toISOString(),
+      addedByRecruiter: true,
+      totalExperienceYears: 5,
+      totalExperienceMonths: 8,
       linkedin: 'linkedin.com/in/ananyasharma',
       availabilityStatus: 'Immediate Joiner' as const,
+      candidateStatus: 'Joined' as const,
     },
     {
       id: 'c5',
@@ -381,9 +409,19 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
       currentDesignation: 'Senior Backend Engineer',
       noticePeriod: '90 days',
       skills: ['Java', 'Spring Boot', 'Microservices', 'AWS'],
+      city: 'Hyderabad',
+      state: 'Telangana',
       location: 'Hyderabad, India',
+      source: 'Naukri',
+      recordOwner: 'James Wilson',
+      addedAt: new Date(Date.now() - 86400000 * 5).toISOString(),
+      addedByRecruiter: true,
+      totalExperienceYears: 9,
+      totalExperienceMonths: 3,
       linkedin: 'linkedin.com/in/vikramnair',
       availabilityStatus: 'Serving Notice Period' as const,
+      candidateStatus: 'Blacklisted' as const,
+      statusReason: 'Misrepresented experience in previous role',
     },
   ],
   applications: [

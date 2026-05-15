@@ -68,6 +68,8 @@ export interface Candidate {
   resumeLink?: string;
   isAlumni: boolean;
   isBlacklisted?: boolean;
+  candidateStatus?: 'Active' | 'Blacklisted' | 'Discarded' | 'Joined';
+  statusReason?: string;
   alumniEmail?: string;
   savedJobIds?: string[];
   profileVisibility?: 'visible' | 'private';
@@ -104,6 +106,9 @@ export interface Candidate {
   targetRole?: string;
   addedByRecruiter?: boolean;
   addedAt?: string;
+  lastLoginAt?: string;
+  createdBy?: string;
+  modifiedBy?: string;
   availabilityStatus?: TalentAvailabilityStatus;
 }
 

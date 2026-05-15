@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CRMLayout from '../components/CRMLayout';
-import { Upload, X, Check, ChevronDown, ChevronUp, Trash2, Plus, CheckCircle } from 'lucide-react';
+import { Upload, X, Check, ChevronDown, ChevronUp, Trash2, Plus, CheckCircle, Loader2, Wand2, Pencil } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 
 const SOURCES = ['LinkedIn', 'Referral', 'Job Fair', 'Direct Approach', 'Naukri', 'Internshala', 'Other'];
@@ -52,8 +52,18 @@ export default function AddTalentPage() {
   });
 
   const [skillInput, setSkillInput] = useState('');
+  const [fillMode, setFillMode] = useState<'manual' | 'autofill'>('manual');
+  const [autoFilling, setAutoFilling] = useState(false);
 
   const set = (field: string, value: any) => setForm(f => ({ ...f, [field]: value }));
+
+  const handleFillMode = (mode: 'manual' | 'autofill') => {
+    setFillMode(mode);
+    if (mode === 'autofill') {
+      setAutoFilling(true);
+      setTimeout(() => setAutoFilling(false), 2200);
+    }
+  };
 
   const addSkill = (raw: string) => {
     const s = raw.replace(/,/g, '').trim();
@@ -156,6 +166,76 @@ export default function AddTalentPage() {
               <div className="flex gap-2">
                 <button type="button" onClick={() => navigate('/crm/talent-pool')} className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">Cancel</button>
                 <button type="submit" className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700">Save</button>
+              </div>
+            </div>
+
+            {/* Resume Submission — at the top so fill-mode can be chosen first */}
+            <div className="flex lg:flex-row flex-col gap-2">
+              <SideLabel title="Resume" hint="Upload resume and choose how to fill the form." />
+              <div className="w-full p-3 pt-2 bg-white border rounded-lg border-gray-200 2xl:w-3/4 2xl-to-xl:w-[80%] w-[80%] 2xl:p-5 2xl:pt-3">
+                <div className="w-full">
+                  <label className="block text-xs font-medium text-gray-400 mb-1">Resume</label>
+                  <label className="block cursor-pointer">
+                    <div className={`py-4 px-3.5 items-center border rounded-lg w-full flex justify-center flex-col transition-all ${form.resumeFile ? 'border-indigo-300 bg-indigo-50' : 'border-gray-300 hover:border-indigo-300'}`}>
+                      {form.resumeFile ? (
+                        <div className="flex items-center justify-center gap-3">
+                          <Check className="w-5 h-5 text-indigo-600" />
+                          <div className="text-left">
+                            <p className="text-sm font-bold text-gray-900">{form.resumeFile}</p>
+                            <button type="button" onClick={(e) => { e.preventDefault(); set('resumeFile', ''); }} className="text-xs text-error-500 hover:underline mt-0.5">Remove</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-center flex flex-col items-center">
+                          <div className="p-[9px] border rounded-lg text-center">
+                            <Upload className="w-5 h-5 text-gray-500" />
+                          </div>
+                          <div className="2xl:mt-4 2xl-to-xl:mt-2 mt-2">
+                            <p className="2xl:text-md 2xl-to-xl:text-xs text-xs">
+                              <span className="text-indigo-700 font-semibold">Click to upload</span>
+                              <span className="text-gray-600"> or drag and drop</span>
+                            </p>
+                            <p className="text-gray-600 2xl:text-sm 2xl-to-xl:text-xs text-xs mt-0.5">DOCX & PDF (max. 5 MB)</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <input type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) set('resumeFile', f.name); }} />
+                  </label>
+                </div>
+                <div className="w-full">
+                  <p className="flex justify-center py-3 text-gray-600 text-sm items-center w-full">OR</p>
+                  <input type="url" value={form.resumeLink} onChange={e => set('resumeLink', e.target.value)} placeholder="Paste resume link here" className={inputClass} />
+                </div>
+
+                {/* Fill mode toggle */}
+                <div className="mt-4 pt-4 border-t border-gray-100">
+                  <p className="text-xs font-medium text-gray-600 mb-2">How would you like to fill candidate details?</p>
+                  <div className="flex rounded-lg border border-gray-200 bg-gray-50 p-0.5 gap-0.5">
+                    <button
+                      type="button"
+                      onClick={() => handleFillMode('manual')}
+                      className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md text-xs font-medium transition-all ${fillMode === 'manual' ? 'bg-white text-gray-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                      Manual Entry
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleFillMode('autofill')}
+                      className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md text-xs font-medium transition-all ${fillMode === 'autofill' ? 'bg-white text-indigo-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                    >
+                      <Wand2 className="w-3.5 h-3.5" />
+                      Autofill from Resume
+                    </button>
+                  </div>
+                  {autoFilling && (
+                    <div className="flex items-center gap-2 mt-3 text-indigo-600">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span className="text-xs font-medium">Extracting candidate details from resume...</span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -284,47 +364,6 @@ export default function AddTalentPage() {
               </div>
             </div>
 
-            {/* Resume Submission */}
-            <div className="flex lg:flex-row flex-col gap-2">
-              <SideLabel title="Resume Submission" hint="Upload the candidate's resume." />
-              <div className="w-full p-3 pt-2 bg-white border rounded-lg border-gray-200 2xl:w-3/4 2xl-to-xl:w-[80%] w-[80%] 2xl:p-5 2xl:pt-3">
-                <div className="w-full">
-                  <label className="block text-xs font-medium text-gray-400 mb-1">Resume</label>
-                  <label className="block cursor-pointer">
-                    <div className={`py-4 px-3.5 items-center border rounded-lg w-full flex justify-center flex-col transition-all ${form.resumeFile ? 'border-indigo-300 bg-indigo-50' : 'border-gray-300 hover:border-indigo-300'}`}>
-                      {form.resumeFile ? (
-                        <div className="flex items-center justify-center gap-3">
-                          <Check className="w-5 h-5 text-indigo-600" />
-                          <div className="text-left">
-                            <p className="text-sm font-bold text-gray-900">{form.resumeFile}</p>
-                            <button type="button" onClick={(e) => { e.preventDefault(); set('resumeFile', ''); }} className="text-xs text-error-500 hover:underline mt-0.5">Remove</button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="text-center flex flex-col items-center">
-                          <div className="p-[9px] border rounded-lg text-center">
-                            <Upload className="w-5 h-5 text-gray-500" />
-                          </div>
-                          <div className="2xl:mt-4 2xl-to-xl:mt-2 mt-2">
-                            <p className="2xl:text-md 2xl-to-xl:text-xs text-xs">
-                              <span className="text-indigo-700 font-semibold">Click to upload</span>
-                              <span className="text-gray-600"> or drag and drop</span>
-                            </p>
-                            <p className="text-gray-600 2xl:text-sm 2xl-to-xl:text-xs text-xs mt-0.5">DOCX & PDF (max. 5 MB)</p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    <input type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) set('resumeFile', f.name); }} />
-                  </label>
-                </div>
-                <div className="w-full">
-                  <p className="flex justify-center py-3 text-gray-600 text-sm items-center w-full">OR</p>
-                  <input type="url" value={form.resumeLink} onChange={e => set('resumeLink', e.target.value)} placeholder="Paste resume link here" className={inputClass} />
-                </div>
-              </div>
-            </div>
-
             {/* Professional Details */}
             <div className="flex lg:flex-row flex-col gap-2">
               <SideLabel title="Professional Details" hint="Add professional background and experience." />
@@ -335,6 +374,13 @@ export default function AddTalentPage() {
                       <input type="checkbox" id="is_fresher" checked={form.isFresher} onChange={e => set('isFresher', e.target.checked)} className="border border-gray-300 rounded focus:border-indigo-300 accent-indigo-600" />
                       <label className="text-gray-900 2xl:text-sm 2xl-to-xl:text-xs font-medium cursor-pointer text-xs" htmlFor="is_fresher">Fresher</label>
                     </div>
+                  </div>
+
+                  <div>
+                    <div className="flex items-end min-h-6">
+                      <label className={labelClass}>Highest Qualification</label>
+                    </div>
+                    <input type="text" value={form.highestQualification} onChange={e => set('highestQualification', e.target.value)} className={inputClass} maxLength={50} />
                   </div>
 
                   {!form.isFresher && (
@@ -352,12 +398,6 @@ export default function AddTalentPage() {
                           <input type="number" min="0" max="11" value={form.expMonths} onChange={e => set('expMonths', e.target.value)} className="w-full rounded-l-lg outline-none py-1.5 px-3 2xl:h-10 2xl-to-xl:h-9 h-9 border 2xl:text-sm 2xl-to-xl:text-xs text-xs border-gray-300 focus:border-indigo-300 bg-white" />
                           <div className="relative -ml-px inline-flex items-center px-3 2xl:text-sm 2xl-to-xl:text-xs text-xs 2xl:h-10 2xl-to-xl:h-9 h-9 text-gray-500 bg-gray-100 border border-gray-300 rounded-r-md">Months</div>
                         </div>
-                      </div>
-                      <div>
-                        <div className="flex items-end min-h-6">
-                          <label className={labelClass}>Highest Qualification</label>
-                        </div>
-                        <input type="text" value={form.highestQualification} onChange={e => set('highestQualification', e.target.value)} className={inputClass} maxLength={50} />
                       </div>
 
                       {/* Experiences block replaces Current Org / Designation */}
