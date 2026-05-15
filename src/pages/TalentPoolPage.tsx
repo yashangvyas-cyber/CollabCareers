@@ -27,7 +27,7 @@ type FilterColumn =
 
 type FilterOperator = 'Is' | 'Contains' | 'Greater Than' | 'Less Than';
 
-type FilterStep = 'closed' | 'type-select' | 'column-select' | 'operator-select' | 'value-select';
+type FilterStep = 'closed' | 'menu' | 'field-select' | 'op-select' | 'value-select';
 
 interface PoolFilter {
   id: string;
@@ -76,12 +76,12 @@ export default function TalentPoolPage() {
   const filterRef    = useRef<HTMLDivElement>(null);
   const [filterStep, setFilterStep]         = useState<FilterStep>('closed');
   const [activeFilters, setActiveFilters]   = useState<PoolFilter[]>([]);
-  const [quickSearch, setQuickSearch]       = useState('');
-  const [showQuickSearch, setShowQuickSearch] = useState(false);
   const [columnSearch, setColumnSearch]     = useState('');
   const [pendingCol, setPendingCol]         = useState<FilterColumn | null>(null);
   const [pendingOp, setPendingOp]           = useState<FilterOperator | null>(null);
   const [pendingVals, setPendingVals]       = useState<string[]>([]);
+  const [quickSearch, setQuickSearch]       = useState('');
+  const [showQuickSearch, setShowQuickSearch] = useState(false);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -114,26 +114,19 @@ export default function TalentPoolPage() {
   ];
 
   // ── Filter helpers ──
-  const openFilter = (col: FilterColumn) => {
+  const pickField = (col: FilterColumn) => {
     const colDef = COLUMNS.find(c => c.key === col)!;
     const existing = activeFilters.find(f => f.column === col);
+    setColumnSearch('');
     setPendingCol(col);
     setPendingVals(existing?.values ?? []);
     if (colDef.operators.length === 1) {
       setPendingOp(colDef.operators[0]);
-      setFilterStep('value-select');
+      setFilterStep(colDef.operators[0] === 'Is' ? 'value-select' : 'closed');
     } else {
       setPendingOp(existing?.operator ?? null);
-      setFilterStep('operator-select');
+      setFilterStep('op-select');
     }
-  };
-
-  const selectOperator = (op: FilterOperator) => {
-    setPendingOp(op);
-    // Reset values when operator changes
-    const existing = activeFilters.find(f => f.column === pendingCol);
-    setPendingVals(existing?.operator === op ? existing.values : []);
-    setFilterStep('value-select');
   };
 
   const applyFilter = () => {
@@ -153,7 +146,7 @@ export default function TalentPoolPage() {
     setActiveFilters(prev =>
       prev.map(f => {
         if (f.id !== filterId) return f;
-        if (f.operator !== 'Is') return null; // single-value operators — remove whole filter
+        if (f.operator !== 'Is') return null;
         const next = f.values.filter(v => v !== val);
         return next.length ? { ...f, values: next } : null;
       }).filter(Boolean) as PoolFilter[]
@@ -162,16 +155,18 @@ export default function TalentPoolPage() {
 
   const clearAll = () => {
     setActiveFilters([]);
+    setFilterStep('closed');
+    setPendingCol(null);
+    setPendingOp(null);
+    setPendingVals([]);
     setQuickSearch('');
     setShowQuickSearch(false);
-    setFilterStep('closed');
   };
 
   const hasAnyFilter = activeFilters.length > 0 || quickSearch.trim().length > 0;
 
   // ── Filtered data ──
   const filteredPool = talentPool.filter(c => {
-    // Quick search
     if (quickSearch.trim()) {
       const q = quickSearch.toLowerCase();
       const hit =
@@ -285,39 +280,43 @@ export default function TalentPoolPage() {
             </div>
 
             {/* ── Filter bar ── */}
-            <div ref={filterRef} className="relative">
-              <div className="flex items-center gap-2 bg-white border border-[#E5E7EB] rounded-xl px-3 py-2 min-h-[48px] flex-wrap gap-y-1.5">
+            <div ref={filterRef} className="relative flex items-stretch gap-2">
 
-                {/* Σ button */}
-                <button
-                  onClick={() => setFilterStep(prev => prev === 'type-select' ? 'closed' : 'type-select')}
-                  className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-sm font-black transition-all shrink-0 ${
-                    filterStep !== 'closed'
-                      ? 'bg-[#3538CD] text-white border-[#3538CD]'
-                      : 'bg-[#F9FAFB] text-[#374151] border-[#E5E7EB] hover:border-[#3538CD]/30'
-                  }`}
-                >
-                  <span className="font-black">Σ</span>
-                  <ChevronDown className={`w-3.5 h-3.5 transition-transform ${filterStep !== 'closed' ? 'rotate-180' : ''}`} />
-                </button>
+              {/* Σ button — opens mode menu */}
+              <button
+                onClick={() => setFilterStep(prev => prev === 'menu' ? 'closed' : 'menu')}
+                className={`flex items-center gap-1 px-2.5 py-2 rounded-xl border text-sm font-black transition-all shrink-0 ${
+                  filterStep !== 'closed'
+                    ? 'bg-[#3538CD] text-white border-[#3538CD]'
+                    : 'bg-[#F9FAFB] text-[#374151] border-[#E5E7EB] hover:border-[#3538CD]/30'
+                }`}
+              >
+                <span className="font-black">Σ</span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${filterStep !== 'closed' ? 'rotate-180' : ''}`} />
+              </button>
 
-                {/* Active filter chips */}
+              {/* Chip area */}
+              <div className="flex-1 flex items-center gap-1.5 flex-wrap bg-white border border-[#E5E7EB] rounded-xl px-3 py-2 min-h-[42px]">
+
+                {/* Applied filter chips */}
                 {activeFilters.map(filter => (
-                  <div key={filter.id} className="flex items-center gap-1 flex-wrap">
-                    {/* Column chip — click to re-edit */}
+                  <div key={filter.id} className="flex items-center">
                     <button
-                      onClick={() => openFilter(filter.column)}
-                      className="px-2.5 py-1 text-[11px] font-black text-white bg-[#3538CD] rounded-lg uppercase tracking-widest hover:bg-[#292bb0] transition-colors"
+                      onClick={() => pickField(filter.column)}
+                      className="px-2.5 py-1 text-[11px] font-black text-white bg-[#3538CD] rounded-l-lg uppercase tracking-widest hover:bg-[#292bb0] transition-colors"
                     >
                       {filter.column}
                     </button>
-                    <span className="px-2 py-1 text-[11px] font-bold text-[#6B7280] bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg">
+                    <span className="px-2 py-1 text-[11px] font-bold text-[#6B7280] bg-[#F9FAFB] border-y border-[#E5E7EB]">
                       {filter.operator}
                     </span>
-                    {filter.values.map(val => (
-                      <div key={val} className="flex items-center gap-1 px-2.5 py-1 bg-[#F4F5FA] border border-[#3538CD]/20 rounded-lg">
+                    {filter.values.map((val, vi) => (
+                      <div
+                        key={val}
+                        className={`flex items-center gap-1 px-2.5 py-1 bg-[#F4F5FA] border border-[#3538CD]/20 ${vi === filter.values.length - 1 ? 'rounded-r-lg' : ''}`}
+                      >
                         <span className="text-[11px] font-bold text-[#3538CD]">{val}</span>
-                        <button onClick={() => removeValue(filter.id, val)}>
+                        <button onClick={() => removeValue(filter.id, val)} className="leading-none">
                           <X className="w-3 h-3 text-[#3538CD] hover:text-red-500 transition-colors" />
                         </button>
                       </div>
@@ -325,7 +324,46 @@ export default function TalentPoolPage() {
                   </div>
                 ))}
 
-                {/* Quick search input */}
+                {/* In-progress chip */}
+                {pendingCol && (
+                  <div className="flex items-center gap-1 flex-wrap">
+                    <span className="px-2.5 py-1 text-[11px] font-black text-white bg-[#3538CD] rounded-lg uppercase tracking-widest">
+                      {pendingCol}
+                    </span>
+                    {pendingOp && (
+                      <>
+                        <button
+                          onClick={() => pendingColDef && pendingColDef.operators.length > 1 && setFilterStep('op-select')}
+                          className={`px-2 py-1 text-[11px] font-bold text-[#6B7280] bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg transition-colors ${pendingColDef && pendingColDef.operators.length > 1 ? 'hover:bg-[#F3F4F6] cursor-pointer' : 'cursor-default'}`}
+                        >
+                          {pendingOp}
+                        </button>
+                        {pendingOp === 'Is' && pendingVals.map(v => (
+                          <div key={v} className="flex items-center gap-1 px-2 py-1 bg-[#F4F5FA] border border-[#3538CD]/20 rounded-lg">
+                            <span className="text-[11px] font-bold text-[#3538CD]">{v}</span>
+                            <button onClick={() => setPendingVals(prev => prev.filter(x => x !== v))} className="leading-none">
+                              <X className="w-2.5 h-2.5 text-[#3538CD] hover:text-red-500 transition-colors" />
+                            </button>
+                          </div>
+                        ))}
+                        {(isTextOp || isNumericOp) && (
+                          <input
+                            autoFocus
+                            type={isNumericOp ? 'number' : 'text'}
+                            min={isNumericOp ? '0' : undefined}
+                            value={pendingVals[0] || ''}
+                            onChange={e => setPendingVals(e.target.value ? [e.target.value] : [])}
+                            placeholder={isNumericOp ? 'Enter years...' : `Type ${pendingCol}...`}
+                            className="w-32 px-2 py-1 text-sm border border-[#E5E7EB] rounded-lg focus:outline-none focus:border-[#3538CD]"
+                            onKeyDown={e => { if (e.key === 'Enter' && canApply) applyFilter(); }}
+                          />
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {/* Quick search inline input */}
                 {showQuickSearch && (
                   <div className="flex items-center gap-2 flex-1 min-w-40">
                     <Search className="w-3.5 h-3.5 text-[#9CA3AF] shrink-0" />
@@ -340,27 +378,42 @@ export default function TalentPoolPage() {
                   </div>
                 )}
 
-                {/* Placeholder when empty */}
-                {!showQuickSearch && activeFilters.length === 0 && (
-                  <span className="text-sm text-[#C4C9D4] select-none">No filters applied — use Σ to filter</span>
+                {/* Placeholder — clicking opens field picker */}
+                {!showQuickSearch && !pendingCol && activeFilters.length === 0 && (
+                  <button
+                    onClick={() => { setColumnSearch(''); setFilterStep('field-select'); }}
+                    className="flex-1 text-left text-sm text-[#C4C9D4] select-none cursor-text"
+                  >
+                    Filter Results...
+                  </button>
                 )}
 
-                {/* Clear all */}
-                {hasAnyFilter && (
+                {/* Clear X */}
+                {(hasAnyFilter || !!pendingCol) && (
                   <button
                     onClick={clearAll}
-                    className="ml-auto flex items-center gap-1 text-[11px] font-black text-[#9CA3AF] hover:text-red-500 transition-colors uppercase tracking-widest shrink-0"
+                    className="ml-auto p-1 text-[#9CA3AF] hover:text-red-500 transition-colors shrink-0"
+                    title="Clear all"
                   >
-                    <X className="w-3.5 h-3.5" /> Clear all
+                    <X className="w-3.5 h-3.5" />
                   </button>
                 )}
               </div>
 
-              {/* ── Type select dropdown ── */}
-              {filterStep === 'type-select' && (
+              {/* Filter apply button */}
+              <button
+                onClick={applyFilter}
+                disabled={!pendingCol || !canApply}
+                className="px-4 py-2 text-sm font-black text-white bg-[#3538CD] rounded-xl hover:bg-[#292bb0] transition-colors disabled:opacity-40 disabled:cursor-not-allowed uppercase tracking-widest shrink-0"
+              >
+                Filter
+              </button>
+
+              {/* ── Mode menu (Look-up Filter / Quick Search) ── */}
+              {filterStep === 'menu' && (
                 <div className="absolute top-full left-0 mt-1.5 bg-white border border-[#E5E7EB] rounded-xl shadow-xl z-50 w-52 py-1.5 overflow-hidden">
                   <button
-                    onClick={() => { setColumnSearch(''); setFilterStep('column-select'); }}
+                    onClick={() => { setColumnSearch(''); setFilterStep('field-select'); }}
                     className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#F9FAFB] transition-colors text-sm font-bold text-[#374151]"
                   >
                     <span className="w-5 text-center font-black text-[#3538CD]">Σ</span>
@@ -377,13 +430,12 @@ export default function TalentPoolPage() {
                 </div>
               )}
 
-              {/* ── Column picker ── */}
-              {filterStep === 'column-select' && (
+              {/* ── Field select dropdown ── */}
+              {filterStep === 'field-select' && (
                 <div className="absolute top-full left-0 mt-1.5 bg-white border border-[#E5E7EB] rounded-xl shadow-xl z-50 w-64 overflow-hidden">
                   <div className="p-3 border-b border-[#F3F4F6]">
                     <div className="flex items-center gap-2 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-3 py-2">
-                      <span className="font-black text-[#9CA3AF] text-sm shrink-0">Σ</span>
-                      <ChevronDown className="w-3.5 h-3.5 text-[#9CA3AF] shrink-0" />
+                      <Search className="w-3.5 h-3.5 text-[#9CA3AF] shrink-0" />
                       <input
                         autoFocus
                         type="text"
@@ -398,7 +450,7 @@ export default function TalentPoolPage() {
                     {visibleColumns.map(col => (
                       <button
                         key={col.key}
-                        onClick={() => openFilter(col.key)}
+                        onClick={() => pickField(col.key)}
                         className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[#F9FAFB] transition-colors text-left"
                       >
                         <col.icon className="w-4 h-4 text-[#9CA3AF] shrink-0" />
@@ -409,27 +461,29 @@ export default function TalentPoolPage() {
                       </button>
                     ))}
                     {visibleColumns.length === 0 && (
-                      <p className="px-4 py-4 text-sm text-[#C4C9D4] text-center">No matching columns</p>
+                      <p className="px-4 py-4 text-sm text-[#C4C9D4] text-center">No matching fields</p>
                     )}
                   </div>
                 </div>
               )}
 
-              {/* ── Operator select ── */}
-              {filterStep === 'operator-select' && pendingCol && (
-                <div className="absolute top-full left-0 mt-1.5 bg-white border border-[#E5E7EB] rounded-xl shadow-xl z-50 w-64 overflow-hidden">
+              {/* ── Operator select dropdown ── */}
+              {filterStep === 'op-select' && pendingCol && (
+                <div className="absolute top-full left-0 mt-1.5 bg-white border border-[#E5E7EB] rounded-xl shadow-xl z-50 w-56 overflow-hidden">
                   <div className="px-4 py-3 border-b border-[#F3F4F6] flex items-center gap-2">
-                    <button onClick={() => setFilterStep('column-select')} className="p-0.5 rounded hover:bg-[#F3F4F6] text-[#9CA3AF] hover:text-[#374151] transition-colors">
+                    <button
+                      onClick={() => setFilterStep('field-select')}
+                      className="p-0.5 rounded hover:bg-[#F3F4F6] text-[#9CA3AF] hover:text-[#374151] transition-colors"
+                    >
                       <ChevronLeft className="w-4 h-4" />
                     </button>
                     <span className="text-xs font-black text-[#374151] uppercase tracking-widest flex-1 truncate">{pendingCol}</span>
                   </div>
                   <div className="py-1">
-                    <p className="px-4 pt-2 pb-1 text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">Select Operator</p>
                     {pendingColDef?.operators.map(op => (
                       <button
                         key={op}
-                        onClick={() => selectOperator(op)}
+                        onClick={() => { setPendingOp(op); setFilterStep(op === 'Is' ? 'value-select' : 'closed'); }}
                         className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-[#F9FAFB] transition-colors text-sm font-bold text-[#374151]"
                       >
                         {op}
@@ -440,93 +494,33 @@ export default function TalentPoolPage() {
                 </div>
               )}
 
-              {/* ── Value picker ── */}
-              {filterStep === 'value-select' && pendingCol && pendingOp && (
+              {/* ── Value picker dropdown (Is operator) ── */}
+              {filterStep === 'value-select' && pendingCol && pendingOp === 'Is' && (
                 <div className="absolute top-full left-0 mt-1.5 bg-white border border-[#E5E7EB] rounded-xl shadow-xl z-50 w-64 overflow-hidden">
-                  {/* Header */}
                   <div className="px-4 py-3 border-b border-[#F3F4F6] flex items-center gap-2">
                     <button
-                      onClick={() => setFilterStep(pendingColDef && pendingColDef.operators.length > 1 ? 'operator-select' : 'column-select')}
+                      onClick={() => setFilterStep(pendingColDef && pendingColDef.operators.length > 1 ? 'op-select' : 'field-select')}
                       className="p-0.5 rounded hover:bg-[#F3F4F6] text-[#9CA3AF] hover:text-[#374151] transition-colors"
                     >
                       <ChevronLeft className="w-4 h-4" />
                     </button>
                     <span className="text-xs font-black text-[#374151] uppercase tracking-widest flex-1 truncate">{pendingCol}</span>
-                    <span className="px-2 py-0.5 text-[10px] font-bold text-[#6B7280] bg-[#F9FAFB] border border-[#E5E7EB] rounded shrink-0">
-                      {pendingOp}
-                    </span>
+                    <span className="px-2 py-0.5 text-[10px] font-bold text-[#6B7280] bg-[#F9FAFB] border border-[#E5E7EB] rounded shrink-0">Is</span>
                   </div>
-
-                  {/* Values — vary by operator type */}
-                  {pendingOp === 'Is' && (
-                    <div className="py-1 max-h-64 overflow-y-auto">
-                      {pickerValues.map(val => (
-                        <label key={val} className="flex items-center gap-3 px-4 py-2.5 hover:bg-[#F9FAFB] cursor-pointer transition-colors">
-                          <input
-                            type="checkbox"
-                            checked={pendingVals.includes(val)}
-                            onChange={() => setPendingVals(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val])}
-                            className="w-4 h-4 accent-[#3538CD] rounded shrink-0"
-                          />
-                          <span className="text-sm text-[#374151] font-bold">{val}</span>
-                        </label>
-                      ))}
-                    </div>
-                  )}
-
-                  {isTextOp && (
-                    <div className="p-3">
-                      <input
-                        autoFocus
-                        type="text"
-                        value={pendingVals[0] || ''}
-                        onChange={e => setPendingVals(e.target.value ? [e.target.value] : [])}
-                        placeholder={`Type to filter ${pendingCol}...`}
-                        className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#3538CD] focus:ring-2 focus:ring-[#3538CD]/10"
-                        onKeyDown={e => { if (e.key === 'Enter' && canApply) applyFilter(); }}
-                      />
-                    </div>
-                  )}
-
-                  {isNumericOp && (
-                    <div className="p-3">
-                      <div className="flex items-center gap-2">
+                  <div className="py-1 max-h-64 overflow-y-auto">
+                    {pickerValues.map(val => (
+                      <label key={val} className="flex items-center gap-3 px-4 py-2.5 hover:bg-[#F9FAFB] cursor-pointer transition-colors">
                         <input
-                          autoFocus
-                          type="number"
-                          min="0"
-                          value={pendingVals[0] || ''}
-                          onChange={e => setPendingVals(e.target.value ? [e.target.value] : [])}
-                          placeholder="Enter years..."
-                          className="flex-1 border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#3538CD] focus:ring-2 focus:ring-[#3538CD]/10"
-                          onKeyDown={e => { if (e.key === 'Enter' && canApply) applyFilter(); }}
+                          type="checkbox"
+                          checked={pendingVals.includes(val)}
+                          onChange={() => setPendingVals(prev =>
+                            prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val]
+                          )}
+                          className="w-4 h-4 accent-[#3538CD] rounded shrink-0"
                         />
-                        <span className="text-xs text-[#9CA3AF] font-bold shrink-0">yrs</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Footer */}
-                  <div className="p-3 border-t border-[#F3F4F6] flex gap-2">
-                    <button
-                      onClick={() => {
-                        setActiveFilters(prev => prev.filter(f => f.column !== pendingCol));
-                        setPendingVals([]);
-                        setPendingOp(null);
-                        setFilterStep('closed');
-                        setPendingCol(null);
-                      }}
-                      className="flex-1 py-2 text-xs font-black text-[#6B7280] border border-[#E5E7EB] rounded-lg hover:bg-[#F9FAFB] transition-colors uppercase tracking-widest"
-                    >
-                      Clear
-                    </button>
-                    <button
-                      onClick={applyFilter}
-                      disabled={!canApply}
-                      className="flex-1 py-2 text-xs font-black text-white bg-[#3538CD] rounded-lg hover:bg-[#292bb0] transition-colors disabled:opacity-40 disabled:cursor-not-allowed uppercase tracking-widest"
-                    >
-                      Apply
-                    </button>
+                        <span className="text-sm text-[#374151] font-bold">{val}</span>
+                      </label>
+                    ))}
                   </div>
                 </div>
               )}
