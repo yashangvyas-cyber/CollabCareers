@@ -20,7 +20,7 @@ interface AppContextType extends AppState {
   blacklistCandidate: (candidateId: string, reason: string) => void;
 }
 
-const STORAGE_KEY = 'collab_careers_state_v3';
+const STORAGE_KEY = 'collab_careers_state_v4';
 
 const initialState: AppState = {
   jobs: [
@@ -423,6 +423,59 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
       availabilityStatus: 'Serving Notice Period' as const,
       candidateStatus: 'Blacklisted' as const,
       statusReason: 'Misrepresented experience in previous role',
+    },
+    {
+      id: 'c6',
+      firstName: 'Neha',
+      lastName: 'Kulkarni',
+      email: 'neha.kulkarni@gmail.com',
+      phone: '+91 94321 56789',
+      isAlumni: false,
+      profileVisibility: 'visible' as const,
+      allowRecruiterContact: true,
+      currentOrg: 'Capgemini',
+      currentDesignation: 'Business Analyst',
+      noticePeriod: '45 days',
+      skills: ['Business Analysis', 'JIRA', 'SQL', 'PowerBI', 'Agile'],
+      city: 'Chennai',
+      state: 'Tamil Nadu',
+      location: 'Chennai, India',
+      source: 'CollabCRM Portal',
+      recordOwner: 'Lisa Ray',
+      addedAt: new Date(Date.now() - 86400000 * 3).toISOString(),
+      addedByRecruiter: false,
+      totalExperienceYears: 3,
+      totalExperienceMonths: 6,
+      linkedin: 'linkedin.com/in/nehakulkarni',
+      availabilityStatus: 'Open to Good Offers' as const,
+      candidateStatus: 'Active' as const,
+    },
+    {
+      id: 'c7',
+      firstName: 'Arjun',
+      lastName: 'Verma',
+      email: 'arjun.verma@outlook.com',
+      phone: '+91 91234 87650',
+      isAlumni: true,
+      alumniEmail: 'arjun@alumni.org',
+      profileVisibility: 'visible' as const,
+      allowRecruiterContact: true,
+      currentOrg: 'Deloitte',
+      currentDesignation: 'Full Stack Developer',
+      noticePeriod: '30 days',
+      skills: ['Vue.js', 'Python', 'Django', 'PostgreSQL', 'Docker'],
+      city: 'Ahmedabad',
+      state: 'Gujarat',
+      location: 'Ahmedabad, India',
+      source: 'CollabCRM Portal',
+      recordOwner: 'David Kim',
+      addedAt: new Date(Date.now() - 86400000 * 8).toISOString(),
+      addedByRecruiter: false,
+      totalExperienceYears: 6,
+      totalExperienceMonths: 1,
+      linkedin: 'linkedin.com/in/arjunverma',
+      availabilityStatus: 'Serving Notice Period' as const,
+      candidateStatus: 'Active' as const,
     },
   ],
   applications: [
