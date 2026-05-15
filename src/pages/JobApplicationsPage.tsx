@@ -76,7 +76,7 @@ const formatInterviewDate = (iso: string) => {
   return `${day}/${mon}/${year}, ${time}`;
 };
 
-type SortKey = 'job' | 'experience' | 'noticePeriod' | 'interviewDate' | 'appStatus' | 'candidateStatus' | 'source' | 'businessUnit' | 'recordOwner';
+type SortKey = 'job' | 'experience' | 'noticePeriod' | 'interviewDate' | 'appStatus' | 'candidateStatus' | 'source' | 'businessUnit' | 'recordOwner' | 'createdBy' | 'modifiedBy';
 type SortDir = 'asc' | 'desc';
 
 export default function JobApplicationsPage() {
@@ -111,6 +111,8 @@ export default function JobApplicationsPage() {
       case 'source':          av = a.source.toLowerCase();          bv = b.source.toLowerCase();          break;
       case 'businessUnit':    av = a.businessUnit.toLowerCase();    bv = b.businessUnit.toLowerCase();    break;
       case 'recordOwner':     av = a.recordOwner.toLowerCase();     bv = b.recordOwner.toLowerCase();     break;
+      case 'createdBy':       av = a.createdBy.toLowerCase();       bv = b.createdBy.toLowerCase();       break;
+      case 'modifiedBy':      av = a.modifiedBy.toLowerCase();      bv = b.modifiedBy.toLowerCase();      break;
       default:                av = ''; bv = '';
     }
     if (av < bv) return sortDir === 'asc' ? -1 : 1;
@@ -176,9 +178,7 @@ export default function JobApplicationsPage() {
             onClick={() => setTerminalOpen(v => !v)}
             className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-[#F3F4F6] transition-colors"
           >
-            <span className="text-[11px] font-bold text-[#6B7280] uppercase tracking-widest">
-              Closed &amp; Terminal
-            </span>
+            <span className="text-sm font-semibold text-[#374151]">Click to View Closed &amp; Terminal Stages</span>
             <ChevronDown className={`w-4 h-4 text-[#6B7280] transition-transform duration-300 ${terminalOpen ? 'rotate-180' : ''}`} />
           </button>
           <div className={`transition-all duration-300 overflow-hidden ${terminalOpen ? 'max-h-[120px] opacity-100' : 'max-h-0 opacity-0'}`}>
@@ -258,39 +258,45 @@ export default function JobApplicationsPage() {
             <table className="w-full text-left border-collapse min-w-[1800px]">
               <thead>
                 <tr className="bg-[#F9FAFB] border-b border-[#E5E7EB]">
-                  <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap">No.</th>
-                  <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap">Candidate</th>
-                  <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap">Contact</th>
-                  <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('job')}>
+                  {/* left-aligned: No, Candidate, Contact, Applied Job */}
+                  <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap text-left">No.</th>
+                  <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap text-left">Candidate</th>
+                  <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap text-left">Contact</th>
+                  <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap text-left cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('job')}>
                     <div className="flex items-center gap-1">Applied Job <SortIcon sKey="job" /></div>
                   </th>
-                  <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('experience')}>
-                    <div className="flex items-center gap-1">Experience <SortIcon sKey="experience" /></div>
+                  {/* centered: all remaining data columns */}
+                  <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap text-center cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('experience')}>
+                    <div className="flex items-center justify-center gap-1">Experience <SortIcon sKey="experience" /></div>
                   </th>
-                  <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('noticePeriod')}>
-                    <div className="flex items-center gap-1">Notice Period (Days) <SortIcon sKey="noticePeriod" /></div>
+                  <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap text-center cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('noticePeriod')}>
+                    <div className="flex items-center justify-center gap-1">Notice Period (Days) <SortIcon sKey="noticePeriod" /></div>
                   </th>
-                  <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('interviewDate')}>
-                    <div className="flex items-center gap-1">Interview Date and Time <SortIcon sKey="interviewDate" /></div>
+                  <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap text-center cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('interviewDate')}>
+                    <div className="flex items-center justify-center gap-1">Interview <SortIcon sKey="interviewDate" /></div>
                   </th>
-                  <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('appStatus')}>
-                    <div className="flex items-center gap-1">Application Status <SortIcon sKey="appStatus" /></div>
+                  <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap text-center cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('appStatus')}>
+                    <div className="flex items-center justify-center gap-1">Application Status <SortIcon sKey="appStatus" /></div>
                   </th>
-                  <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('candidateStatus')}>
-                    <div className="flex items-center gap-1">Candidate Status <SortIcon sKey="candidateStatus" /></div>
+                  <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap text-center cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('candidateStatus')}>
+                    <div className="flex items-center justify-center gap-1">Candidate Status <SortIcon sKey="candidateStatus" /></div>
                   </th>
-                  <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('source')}>
-                    <div className="flex items-center gap-1">Source <SortIcon sKey="source" /></div>
+                  <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap text-center cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('source')}>
+                    <div className="flex items-center justify-center gap-1">Source <SortIcon sKey="source" /></div>
                   </th>
-                  <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('businessUnit')}>
-                    <div className="flex items-center gap-1">Business Unit <SortIcon sKey="businessUnit" /></div>
+                  <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap text-center cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('businessUnit')}>
+                    <div className="flex items-center justify-center gap-1">Business Unit <SortIcon sKey="businessUnit" /></div>
                   </th>
-                  <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('recordOwner')}>
-                    <div className="flex items-center gap-1">Record Owner <SortIcon sKey="recordOwner" /></div>
+                  <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap text-center cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('recordOwner')}>
+                    <div className="flex items-center justify-center gap-1">Record Owner <SortIcon sKey="recordOwner" /></div>
                   </th>
-                  <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap">Created By</th>
-                  <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap">Modified By</th>
-                  <th className="sticky right-0 z-20 px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap bg-[#F9FAFB] border-l border-[#E5E7EB] shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.08)]">Actions</th>
+                  <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap text-center cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('createdBy')}>
+                    <div className="flex items-center justify-center gap-1">Created By <SortIcon sKey="createdBy" /></div>
+                  </th>
+                  <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap text-center cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('modifiedBy')}>
+                    <div className="flex items-center justify-center gap-1">Modified By <SortIcon sKey="modifiedBy" /></div>
+                  </th>
+                  <th className="sticky right-0 z-20 px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap text-center bg-[#F9FAFB] border-l border-[#E5E7EB] shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.08)]">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#F3F4F6]">
@@ -301,7 +307,7 @@ export default function JobApplicationsPage() {
                     <tr key={c.no} className="hover:bg-[#F9FAFB] transition-colors group">
 
                       {/* No. */}
-                      <td className="px-4 py-4 text-sm text-[#6B7280]">{c.no}</td>
+                      <td className="px-4 py-4 text-sm text-[#6B7280] text-left">{c.no}</td>
 
                       {/* Candidate */}
                       <td className="px-4 py-4 min-w-[160px]">
@@ -334,15 +340,15 @@ export default function JobApplicationsPage() {
                       </td>
 
                       {/* Experience */}
-                      <td className="px-4 py-4 text-sm text-[#374151] whitespace-nowrap">{c.experience}</td>
+                      <td className="px-4 py-4 text-sm text-[#374151] whitespace-nowrap text-center">{c.experience}</td>
 
                       {/* Notice Period */}
-                      <td className="px-4 py-4 text-sm text-[#374151] whitespace-nowrap">
+                      <td className="px-4 py-4 text-sm text-[#374151] whitespace-nowrap text-center">
                         {c.noticePeriod === '0' ? 'Immediate' : `${c.noticePeriod} days`}
                       </td>
 
                       {/* Interview Date and Time */}
-                      <td className="px-4 py-4 whitespace-nowrap">
+                      <td className="px-4 py-4 whitespace-nowrap text-center">
                         {c.interviewDate
                           ? <span className="text-sm text-[#374151]">{formatInterviewDate(c.interviewDate)}</span>
                           : <button className="px-3 py-1.5 bg-[#F4F5FA] text-[#3538CD] text-[12px] font-bold rounded-md hover:bg-[#3538CD]/10 transition-colors">Schedule</button>
@@ -350,7 +356,7 @@ export default function JobApplicationsPage() {
                       </td>
 
                       {/* Application Status */}
-                      <td className="px-4 py-4 whitespace-nowrap">
+                      <td className="px-4 py-4 whitespace-nowrap text-center">
                         <span
                           className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border"
                           style={{ borderColor: appS.border, color: appS.text, backgroundColor: appS.bg }}
@@ -361,7 +367,7 @@ export default function JobApplicationsPage() {
                       </td>
 
                       {/* Candidate Status */}
-                      <td className="px-4 py-4 whitespace-nowrap">
+                      <td className="px-4 py-4 whitespace-nowrap text-center">
                         <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full border ${candS}`}>
                           <span className="w-1.5 h-1.5 rounded-full bg-current shrink-0" />
                           {c.candidateStatus}
@@ -369,19 +375,19 @@ export default function JobApplicationsPage() {
                       </td>
 
                       {/* Source */}
-                      <td className="px-4 py-4 text-sm text-[#374151] whitespace-nowrap">{c.source}</td>
+                      <td className="px-4 py-4 text-sm text-[#374151] whitespace-nowrap text-center">{c.source}</td>
 
                       {/* Business Unit */}
-                      <td className="px-4 py-4 text-sm text-[#374151] whitespace-nowrap">{c.businessUnit}</td>
+                      <td className="px-4 py-4 text-sm text-[#374151] whitespace-nowrap text-center">{c.businessUnit}</td>
 
                       {/* Record Owner */}
-                      <td className="px-4 py-4 text-sm text-[#374151] whitespace-nowrap">{c.recordOwner}</td>
+                      <td className="px-4 py-4 text-sm text-[#374151] whitespace-nowrap text-center">{c.recordOwner}</td>
 
                       {/* Created By */}
-                      <td className="px-4 py-4 text-sm text-[#374151] whitespace-nowrap">{c.createdBy}</td>
+                      <td className="px-4 py-4 text-sm text-[#374151] whitespace-nowrap text-center">{c.createdBy}</td>
 
                       {/* Modified By */}
-                      <td className="px-4 py-4 text-sm text-[#374151] whitespace-nowrap">{c.modifiedBy}</td>
+                      <td className="px-4 py-4 text-sm text-[#374151] whitespace-nowrap text-center">{c.modifiedBy}</td>
 
                       {/* Actions */}
                       <td className="sticky right-0 z-10 px-4 py-4 bg-white border-l border-[#E5E7EB] shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.05)] group-hover:bg-[#F9FAFB]">
