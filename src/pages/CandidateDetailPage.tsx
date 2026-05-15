@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import CRMLayout from '../components/CRMLayout';
 import { Mail, Phone, Copy, Eye, MoreVertical, ExternalLink, UserCheck, EyeOff, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { useApp } from '../store/AppContext';
@@ -165,7 +165,7 @@ export default function CandidateDetailPage() {
                     </span>
                     <p className="text-[10px] font-bold text-[#6B7280] text-center leading-relaxed">
                       Previously worked here · Verified via{' '}
-                      <a href="#" className="text-[#3538CD] hover:underline">{alumniEmail}</a>
+                      <Link to={`/crm/employees/${candidateId}`} className="text-[#3538CD] hover:underline">{alumniEmail}</Link>
                     </p>
                   </div>
                 )}

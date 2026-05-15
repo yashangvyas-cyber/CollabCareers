@@ -19,6 +19,7 @@ import CareerPortalPage from './pages/CareerPortalPage';
 import TalentPoolPage from './pages/TalentPoolPage';
 import TalentPoolDetailsPage from './pages/TalentPoolDetailsPage';
 import AddTalentPage from './pages/AddTalentPage';
+import EmployeeDetailPage from './pages/EmployeeDetailPage';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
         {/* Flow 1: Recruiter (CRM) */}
         <Route path="/crm/add-job" element={<AddJobPage />} />
         <Route path="/crm/candidates/:candidateId" element={<CandidateDetailPage />} />
+        <Route path="/crm/employees/:empId" element={<EmployeeDetailPage />} />
         <Route path="/crm/candidates" element={<JobApplicationsPage />} />
         <Route path="/crm/talent-pool/add" element={<AddTalentPage />} />
         <Route path="/crm/talent-pool/:candidateId" element={<TalentPoolDetailsPage />} />
