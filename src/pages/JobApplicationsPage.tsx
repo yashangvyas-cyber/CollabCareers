@@ -10,13 +10,13 @@ import {
 const TERMINAL_CHIPS = [
   { status: 'Selected',       border: 'rgb(171,239,198)', text: 'rgb(6,118,71)',    bg: 'rgb(236,253,243)', dot: 'rgb(23,178,106)'  },
   { status: 'Rejected',       border: 'rgb(254,205,202)', text: 'rgb(180,35,24)',   bg: 'rgb(254,243,242)', dot: 'rgb(240,68,56)'   },
-  { status: 'Withdrawn',      border: 'rgb(209,213,219)', text: 'rgb(107,114,128)', bg: 'rgb(249,250,251)', dot: 'rgb(156,163,175)' },
+  { status: 'Withdrawn',      border: 'rgb(220,215,210)', text: 'rgb(113,104,95)',  bg: 'rgb(250,249,247)', dot: 'rgb(168,160,149)' },
   { status: 'Joined',         border: 'rgb(213,217,235)', text: 'rgb(54,63,114)',   bg: 'rgb(248,249,252)', dot: 'rgb(78,91,166)'   },
   { status: 'Offer Declined', border: 'rgb(246,208,254)', text: 'rgb(159,26,177)',  bg: 'rgb(253,244,255)', dot: 'rgb(212,68,241)'  },
   { status: 'Not Joined',     border: 'rgb(255,193,205)', text: 'rgb(255,0,81)',    bg: 'rgb(255,241,243)', dot: 'rgb(255,0,81)'    },
   { status: 'Archived',       border: 'rgb(203,213,225)', text: 'rgb(71,85,105)',   bg: 'rgb(248,250,252)', dot: 'rgb(100,116,139)' },
   { status: 'Offer Revoked',  border: 'rgb(255,221,211)', text: 'rgb(255,87,34)',   bg: 'rgb(255,247,244)', dot: 'rgb(255,137,100)' },
-  { status: 'No Show',        border: 'rgb(254,215,170)', text: 'rgb(154,52,18)',   bg: 'rgb(255,247,237)', dot: 'rgb(249,115,22)'  },
+  { status: 'No Show',        border: 'rgb(253,186,116)', text: 'rgb(120,53,15)',   bg: 'rgb(255,247,237)', dot: 'rgb(217,119,6)'   },
 ];
 
 const APP_STATUS_STYLE: Record<string, { border: string; text: string; bg: string; dot: string }> = {
@@ -176,10 +176,10 @@ export default function JobApplicationsPage() {
             onClick={() => setTerminalOpen(v => !v)}
             className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-[#F3F4F6] transition-colors"
           >
-            <span className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">
+            <span className="text-[11px] font-bold text-[#6B7280] uppercase tracking-widest">
               Closed &amp; Terminal
             </span>
-            <ChevronDown className={`w-4 h-4 text-[#9CA3AF] transition-transform duration-300 ${terminalOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-4 h-4 text-[#6B7280] transition-transform duration-300 ${terminalOpen ? 'rotate-180' : ''}`} />
           </button>
           <div className={`transition-all duration-300 overflow-hidden ${terminalOpen ? 'max-h-[120px] opacity-100' : 'max-h-0 opacity-0'}`}>
             <div className="px-4 pb-3 flex flex-wrap gap-2">
