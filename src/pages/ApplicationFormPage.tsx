@@ -173,7 +173,7 @@ export default function ApplicationFormPage() {
     }
 
     // Check for existing draft (auto-resumption)
-    const draft = applications.find(a => a.jobId === job?.id && a.candidateId === currentUser.id && a.status === 'Draft');
+    const draft = applications.find(a => a.jobId === job?.id && a.candidateId === currentUser.id && a.status === 'Applied');
     if (draft) {
       setFormData(prev => ({
         ...(draft.answers?._fullFormData || prev),
@@ -186,7 +186,7 @@ export default function ApplicationFormPage() {
 
     // NEW: Auto-prefill from latest SUBMITTED application if not a draft
     const latestSubmission = applications
-      .filter(a => a.candidateId === currentUser.id && a.status === 'Submitted')
+      .filter(a => a.candidateId === currentUser.id && a.status === 'Applied')
       .sort((a, b) => new Date(b.appliedAt).getTime() - new Date(a.appliedAt).getTime())[0];
 
     if (latestSubmission && step === 0 && !resumeName) {
@@ -221,7 +221,7 @@ export default function ApplicationFormPage() {
       id: `DRAFT-${Date.now()}`,
       candidateId: currentUser?.id || 'guest',
       jobId: job.id,
-      status: 'Draft',
+      status: 'Applied',
       appliedAt: new Date().toISOString(),
       answers: { ...formData.customAnswers, _fullFormData: formData },
       resumeUrl: resumeName || 'Manually Filled',
@@ -235,7 +235,7 @@ export default function ApplicationFormPage() {
       id: `APP-${Date.now()}`,
       candidateId: currentUser?.id || 'guest',
       jobId: job.id,
-      status: 'Submitted',
+      status: 'Applied',
       appliedAt: new Date().toISOString(),
       answers: { ...formData.customAnswers, _fullFormData: formData },
       resumeUrl: resumeName || 'Manually Filled',

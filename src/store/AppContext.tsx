@@ -508,7 +508,7 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
       id: 'a3',
       candidateId: 'c1',
       jobId: 'd4',
-      status: 'Decision Made',
+      status: 'Selected',
       appliedAt: new Date(Date.now() - 86400000 * 10).toISOString(),
       answers: { _fullFormData: { personal: { contactNumber: '+91 98765 43210' }, address: { city: 'Ahmedabad', country: 'India' } } },
       resumeUrl: 'Alex_Patel_Resume.pdf'
@@ -517,7 +517,7 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
       id: 'a4',
       candidateId: 'c1',
       jobId: 'd5',
-      status: 'Draft',
+      status: 'Applied',
       appliedAt: new Date(Date.now() - 86400000 * 1).toISOString(),
       answers: { _fullFormData: { personal: { contactNumber: '+91 98765 43210' } } },
       resumeUrl: 'Alex_Patel_Resume.pdf'
@@ -526,7 +526,7 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
       id: 'a5',
       candidateId: 'c1',
       jobId: 'd8', // QA Engineer
-      status: 'Submitted',
+      status: 'Applied',
       appliedAt: new Date(Date.now() - 86400000 * 15).toISOString(),
       answers: { _fullFormData: { personal: { contactNumber: '+91 98765 43210' } } },
       resumeUrl: 'Alex_Patel_Resume.pdf'
@@ -564,7 +564,7 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
       id: 'a9',
       candidateId: 'c3',
       jobId: 'd4', // Project Manager
-      status: 'Decision Made',
+      status: 'Selected',
       appliedAt: new Date(Date.now() - 86400000 * 7).toISOString(),
       answers: { _fullFormData: { personal: { contactNumber: '+91 76543 21098' } } },
       resumeUrl: 'Karan_Mehta_Resume.pdf'
@@ -723,14 +723,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const submitApplication = (app: Application) => {
     setState(prev => ({
       ...prev,
-      applications: [...prev.applications.filter(a => !(a.jobId === app.jobId && a.candidateId === app.candidateId && a.status === 'Draft')), app],
+      applications: [...prev.applications.filter(a => !(a.jobId === app.jobId && a.candidateId === app.candidateId && a.status === 'Applied')), app],
     }));
   };
 
   const saveDraft = (app: Application) => {
     setState(prev => ({
       ...prev,
-      applications: [...prev.applications.filter(a => !(a.jobId === app.jobId && a.candidateId === app.candidateId && a.status === 'Draft')), app],
+      applications: [...prev.applications.filter(a => !(a.jobId === app.jobId && a.candidateId === app.candidateId && a.status === 'Applied')), app],
     }));
   };
 

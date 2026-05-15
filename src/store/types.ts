@@ -116,7 +116,11 @@ export interface Application {
   id: string;
   candidateId: string;
   jobId: string;
-  status: 'Draft' | 'Submitted' | 'Under Review' | 'Interview in Progress' | 'Decision Made' | 'Offer Made' | 'Rejected' | 'Withdrawn';
+  status:
+    | 'Applied' | 'Under Review' | 'Shortlisted' | 'Interview in Progress'
+    | 'On Hold' | 'Offer Made' | 'Offer Accepted'
+    | 'Selected' | 'Rejected' | 'Withdrawn' | 'Joined' | 'Offer Declined'
+    | 'Not Joined' | 'Archived' | 'Offer Revoked' | 'No Show';
   appliedAt: string;
   answers: Record<string, any>;
   resumeUrl: string;
