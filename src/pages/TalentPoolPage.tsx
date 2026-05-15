@@ -766,7 +766,7 @@ export default function TalentPoolPage() {
                         {/* Actions — frozen right */}
                         <td className="sticky right-0 z-10 px-4 py-4 bg-white group-hover:bg-[#F9FAFB] border-l border-[#E5E7EB] shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.08)] transition-colors">
                           <div className="flex items-center gap-1">
-                            {candidate.allowRecruiterContact && (
+                            {candidate.allowRecruiterContact && candidate.candidateStatus !== 'Joined' && candidate.candidateStatus !== 'Blacklisted' && candidate.candidateStatus !== 'Discarded' && (
                               <button
                                 onClick={() => setInviteTarget(candidate)}
                                 className="p-1.5 text-[#6B7280] hover:text-[#3538CD] hover:bg-[#F4F5FA] rounded-md border border-transparent hover:border-[#E5E7EB] transition-colors"

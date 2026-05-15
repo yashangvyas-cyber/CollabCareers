@@ -153,7 +153,6 @@ export default function TalentPoolDetailsPage() {
   const canContact = !!candidate.allowRecruiterContact;
 
   const candidateStatus = candidate.candidateStatus ?? (candidate.isBlacklisted ? 'Blacklisted' : 'Active');
-  const appStatus = candidateApps[0]?.status ?? null;
 
   const currentExp = candidate.experiences?.find((e: any) => e.isCurrent) ?? candidate.experiences?.[0];
   const displayOrg = candidate.currentOrg ?? currentExp?.company;
@@ -223,42 +222,18 @@ export default function TalentPoolDetailsPage() {
                   <p className="text-xs text-[#9CA3AF] mt-0.5 text-center">{displayOrg}</p>
                 )}
 
-                {/* Candidate + Application status */}
-                <div className="flex gap-3 w-full mt-3">
-                  <div className="flex-1 flex flex-col items-center gap-1.5">
-                    <p className="text-[9px] font-bold text-[#9CA3AF] uppercase tracking-widest">Candidate</p>
-                    {(() => {
-                      const cs = CANDIDATE_STATUS_STYLE[candidateStatus] ?? CANDIDATE_STATUS_STYLE['Active'];
-                      return (
-                        <span
-                          className="px-3 py-1 text-[10px] font-black rounded-full uppercase tracking-widest border"
-                          style={{ backgroundColor: cs.bg, color: cs.text, borderColor: cs.border }}
-                        >
-                          {candidateStatus}
-                        </span>
-                      );
-                    })()}
-                  </div>
-                  <div className="flex-1 flex flex-col items-center gap-1.5">
-                    <p className="text-[9px] font-bold text-[#9CA3AF] uppercase tracking-widest">Application</p>
-                    {appStatus ? (() => {
-                      const as = APP_STATUS_STYLE[appStatus] ?? APP_STATUS_STYLE['Applied'];
-                      return (
-                        <span
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold border"
-                          style={{ backgroundColor: as.bg, color: as.text, borderColor: as.border }}
-                        >
-                          <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: as.dot }} />
-                          {appStatus}
-                        </span>
-                      );
-                    })() : (
-                      <span className="px-3 py-1 text-[10px] font-black rounded-full uppercase tracking-widest border border-[#E5E7EB] bg-[#F9FAFB] text-[#9CA3AF]">
-                        None
-                      </span>
-                    )}
-                  </div>
-                </div>
+                {/* Candidate status */}
+                {(() => {
+                  const cs = CANDIDATE_STATUS_STYLE[candidateStatus] ?? CANDIDATE_STATUS_STYLE['Active'];
+                  return (
+                    <span
+                      className="mt-3 px-3 py-1 text-[10px] font-black rounded-full uppercase tracking-widest border"
+                      style={{ backgroundColor: cs.bg, color: cs.text, borderColor: cs.border }}
+                    >
+                      {candidateStatus}
+                    </span>
+                  );
+                })()}
 
                 <div className="w-full border-t border-[#E5E7EB] my-5" />
 
@@ -463,7 +438,7 @@ export default function TalentPoolDetailsPage() {
                 })}
               </div>
               <div className="flex items-center gap-2 pr-1">
-                {canContact && (
+                {canContact && candidateStatus === 'Active' && (
                   <button
                     onClick={() => setShowInvite(true)}
                     className="flex items-center gap-2 px-5 py-2.5 bg-[#3538CD] text-white text-xs font-black rounded-xl hover:bg-[#292bb0] transition-all shadow-md shadow-[#3538CD]/20 uppercase tracking-widest"
@@ -684,12 +659,14 @@ export default function TalentPoolDetailsPage() {
                     <p className="text-xs text-[#C4C9D4] max-w-xs">
                       When you invite this person to apply for a role, a record will appear here.
                     </p>
-                    <button
-                      onClick={() => setShowInvite(true)}
-                      className="mt-2 flex items-center gap-2 px-5 py-2.5 bg-[#3538CD] text-white text-xs font-black rounded-xl hover:bg-[#292bb0] transition-all shadow-md shadow-[#3538CD]/20 uppercase tracking-widest"
-                    >
-                      <Send className="w-3.5 h-3.5" /> Send First Invite
-                    </button>
+                    {candidateStatus === 'Active' && (
+                      <button
+                        onClick={() => setShowInvite(true)}
+                        className="mt-2 flex items-center gap-2 px-5 py-2.5 bg-[#3538CD] text-white text-xs font-black rounded-xl hover:bg-[#292bb0] transition-all shadow-md shadow-[#3538CD]/20 uppercase tracking-widest"
+                      >
+                        <Send className="w-3.5 h-3.5" /> Send First Invite
+                      </button>
+                    )}
                   </div>
                 ) : (
                   <>
@@ -722,7 +699,7 @@ export default function TalentPoolDetailsPage() {
                                 {' · '}{formatRelative(invite.sentAt)}
                               </p>
                             </div>
-                            {!isSent && !isApplied && (
+                            {!isSent && !isApplied && candidateStatus === 'Active' && (
                               <button
                                 onClick={() => setShowInvite(true)}
                                 className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-black text-[#3538CD] bg-[#F4F5FA] border border-[#3538CD]/10 rounded-lg hover:bg-[#3538CD]/10 transition-colors uppercase tracking-widest shrink-0"
