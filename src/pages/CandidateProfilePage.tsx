@@ -375,7 +375,7 @@ export default function CandidateProfilePage() {
                               On {formatDate(app.appliedAt)}
                             </p>
                           </div>
-                        ) : app.status === 'Draft' && !app.jobClosed ? (
+                        ) : app.status === 'Applied' && !app.jobClosed ? (
                           <button
                             onClick={() => navigate(`/portal/yopmails/apply/${app.jobId}`, { state: { continueDraft: true, draftJobTitle: app.title, lastSaved: app.appliedAt } })}
                             className="flex items-center gap-2 bg-[#3538CD] text-white px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-[#292bb0] transition-all shadow-lg shadow-[#3538CD]/20 active:scale-95 whitespace-nowrap"

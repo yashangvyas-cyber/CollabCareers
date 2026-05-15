@@ -37,7 +37,7 @@ export default function ViewApplicationPage() {
     jobType: job?.jobType || 'On-site',
     experience: job?.experience || '4+ Years',
     appliedAt: application?.appliedAt || '2026-03-18T10:00:00Z',
-    status: application?.status || 'Submitted',
+    status: application?.status || 'Applied',
     jobClosed: job?.status === 'Close',
     description: job?.description || 'Expert React developer needed for performance-critical web applications.',
     candidateInfo: {

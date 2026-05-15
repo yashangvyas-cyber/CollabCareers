@@ -101,10 +101,10 @@ export default function JobDetailPage() {
   }
 
   const existingApplication = applications.find(
-    a => a.candidateId === currentUser?.id && a.jobId === job.id && a.status !== 'Draft'
+    a => a.candidateId === currentUser?.id && a.jobId === job.id && a.status !== 'Applied'
   );
   const previousApp = applications
-    .filter(a => a.candidateId === currentUser?.id && a.status === 'Submitted')
+    .filter(a => a.candidateId === currentUser?.id && a.status === 'Applied')
     .sort((a, b) => new Date(b.appliedAt).getTime() - new Date(a.appliedAt).getTime())[0];
 
   useEffect(() => {
