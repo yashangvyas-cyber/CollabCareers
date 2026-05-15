@@ -637,12 +637,11 @@ export default function TalentPoolPage() {
                       </th>
                       <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap">Contact</th>
                       <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap">Current Organization</th>
-                      <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap">Skills</th>
                       <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('experience')}>
                         <div className="flex items-center gap-1">Experience <SortIcon sKey="experience" /></div>
                       </th>
                       <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('noticePeriod')}>
-                        <div className="flex items-center gap-1">Notice Period <SortIcon sKey="noticePeriod" /></div>
+                        <div className="flex items-center gap-1">Notice Period (Days) <SortIcon sKey="noticePeriod" /></div>
                       </th>
                       <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('status')}>
                         <div className="flex items-center gap-1">Status <SortIcon sKey="status" /></div>
@@ -651,6 +650,7 @@ export default function TalentPoolPage() {
                         <div className="flex items-center gap-1">Source <SortIcon sKey="source" /></div>
                       </th>
                       <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap">Location</th>
+                      <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap">Skills</th>
                       <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('recordOwner')}>
                         <div className="flex items-center gap-1">Record Owner <SortIcon sKey="recordOwner" /></div>
                       </th>
@@ -703,20 +703,6 @@ export default function TalentPoolPage() {
                           ) : <span className="text-sm text-[#9CA3AF]">—</span>}
                         </td>
 
-                        {/* Skills */}
-                        <td className="px-4 py-4 min-w-[160px]">
-                          {candidate.skills?.length ? (
-                            <div className="flex flex-wrap gap-1">
-                              {candidate.skills.slice(0, 3).map(s => (
-                                <span key={s} className="px-2 py-0.5 text-[10px] font-bold bg-[#F4F5FA] text-[#3538CD] border border-[#3538CD]/10 rounded-full whitespace-nowrap">{s}</span>
-                              ))}
-                              {candidate.skills.length > 3 && (
-                                <span className="px-2 py-0.5 text-[10px] font-bold text-[#9CA3AF] bg-[#F9FAFB] border border-[#E5E7EB] rounded-full">+{candidate.skills.length - 3}</span>
-                              )}
-                            </div>
-                          ) : <span className="text-sm text-[#9CA3AF]">—</span>}
-                        </td>
-
                         {/* Experience */}
                         <td className="px-4 py-4 text-sm text-[#374151] whitespace-nowrap">{formatExp(candidate)}</td>
 
@@ -743,6 +729,20 @@ export default function TalentPoolPage() {
                         {/* Location — City, State */}
                         <td className="px-4 py-4 text-sm text-[#374151] whitespace-nowrap">
                           {[candidate.city, candidate.state].filter(Boolean).join(', ') || candidate.location || '—'}
+                        </td>
+
+                        {/* Skills */}
+                        <td className="px-4 py-4 min-w-[160px]">
+                          {candidate.skills?.length ? (
+                            <div className="flex flex-wrap gap-1">
+                              {candidate.skills.slice(0, 3).map(s => (
+                                <span key={s} className="px-2 py-0.5 text-[10px] font-bold bg-[#F4F5FA] text-[#3538CD] border border-[#3538CD]/10 rounded-full whitespace-nowrap">{s}</span>
+                              ))}
+                              {candidate.skills.length > 3 && (
+                                <span className="px-2 py-0.5 text-[10px] font-bold text-[#9CA3AF] bg-[#F9FAFB] border border-[#E5E7EB] rounded-full">+{candidate.skills.length - 3}</span>
+                              )}
+                            </div>
+                          ) : <span className="text-sm text-[#9CA3AF]">—</span>}
                         </td>
 
                         {/* Record Owner */}

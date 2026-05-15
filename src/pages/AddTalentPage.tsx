@@ -294,24 +294,30 @@ export default function AddTalentPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                   <div>
                     <div className="mb-1.5 flex items-end min-h-6">
-                      <label className={labelClass}>Record Owner</label>
+                      <label className={labelClass}>Job Title</label>
                     </div>
                     <div className="relative">
-                      <select value={form.recordOwner} onChange={e => set('recordOwner', e.target.value)} className={selectClass}>
-                        <option value="">Select (Optional)</option>
-                        {['Sarah Chen', 'Michael Park', 'James Wilson', 'Lisa Ray', 'David Kim'].map(o => <option key={o}>{o}</option>)}
+                      <select value={form.appliedJob} onChange={e => set('appliedJob', e.target.value)} className={selectClass}>
+                        <option value="">Select</option>
+                        {jobs.filter(j => j.status === 'Open').map(j => <option key={j.id} value={j.id}>{j.title}</option>)}
                       </select>
                       <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                     </div>
                   </div>
                   <div>
                     <div className="mb-1.5 flex items-end min-h-6">
-                      <label className={labelClass}>Job Title</label>
+                      <label className={labelClass}>Record Owner{form.appliedJob ? <>&nbsp;</> : null}</label>
+                      {form.appliedJob && <span className={reqClass}>*</span>}
                     </div>
                     <div className="relative">
-                      <select value={form.appliedJob} onChange={e => set('appliedJob', e.target.value)} className={selectClass}>
-                        <option value="">Select (Optional)</option>
-                        {jobs.filter(j => j.status === 'Open').map(j => <option key={j.id} value={j.id}>{j.title}</option>)}
+                      <select
+                        required={!!form.appliedJob}
+                        value={form.recordOwner}
+                        onChange={e => set('recordOwner', e.target.value)}
+                        className={selectClass}
+                      >
+                        <option value="">Select</option>
+                        {['Sarah Chen', 'Michael Park', 'James Wilson', 'Lisa Ray', 'David Kim'].map(o => <option key={o}>{o}</option>)}
                       </select>
                       <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                     </div>
