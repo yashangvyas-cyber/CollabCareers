@@ -67,6 +67,7 @@ export interface Candidate {
   resumeUrl?: string;
   resumeLink?: string;
   isAlumni: boolean;
+  isBlacklisted?: boolean;
   alumniEmail?: string;
   savedJobIds?: string[];
   profileVisibility?: 'visible' | 'private';

@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import CRMLayout from '../components/CRMLayout';
 import {
-  ChevronDown, X, Eye, Check, Users, UserCheck, Send, Briefcase,
+  ChevronDown, X, Eye, Check, Briefcase, Users, UserCheck,
   GraduationCap, UserPlus, Search, Tag, Activity, ChevronLeft, Pencil, EyeOff,
-  Clock, MapPin, Building2, TrendingUp, User,
+  Clock, MapPin, Building2, TrendingUp, User, Plus,
 } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 import type { Candidate, TalentAvailabilityStatus } from '../store/types';
@@ -57,8 +57,9 @@ const availabilityStyle: Record<TalentAvailabilityStatus, string> = {
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 export default function TalentPoolPage() {
-  const { candidates, jobs, invites } = useApp();
+  const { candidates, jobs } = useApp();
   const location = useLocation();
+  const navigate = useNavigate();
 
   // ── Invite state ──
   const [inviteTarget, setInviteTarget] = useState<Candidate | null>(null);
@@ -219,11 +220,34 @@ export default function TalentPoolPage() {
   });
 
   // ── Stats ──
-  const tpStats = [
-    { label: 'Talent Pool',      value: talentPool.length,                                                                                        icon: Users },
-    { label: 'Available Now',    value: talentPool.filter(c => c.availabilityStatus === 'Immediate Joiner').length,                                       icon: UserCheck },
-    { label: 'Invited',          value: invites.filter(i => talentPool.some(c => c.id === i.candidateId)).length,                                  icon: Send },
-    { label: 'Alumni',           value: talentPool.filter(c => c.isAlumni).length,                                                                icon: GraduationCap },
+  const now = new Date();
+  const activeStatuses: TalentAvailabilityStatus[] = ['Immediate Joiner', 'Serving Notice Period', 'Open to Good Offers', 'Offer in Hand'];
+  const statCards = [
+    {
+      label: 'Total Candidates',
+      value: talentPool.length,
+      action: () => navigate('/crm/talent-pool/add'),
+    },
+    {
+      label: 'Active',
+      value: talentPool.filter(c => c.availabilityStatus && activeStatuses.includes(c.availabilityStatus)).length,
+    },
+    {
+      label: 'New This Month',
+      value: talentPool.filter(c => {
+        if (!c.addedAt) return false;
+        const d = new Date(c.addedAt);
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      }).length,
+    },
+    {
+      label: 'Alumni',
+      value: talentPool.filter(c => c.isAlumni).length,
+    },
+    {
+      label: 'Blacklisted',
+      value: talentPool.filter(c => c.isBlacklisted).length,
+    },
   ];
 
   const handleInviteSent = (name: string) => {
@@ -248,14 +272,22 @@ export default function TalentPoolPage() {
         <div className="space-y-6 pt-2">
 
           {/* Stats */}
-          <div className="grid grid-cols-4 gap-4">
-            {tpStats.map((stat, i) => (
-              <div key={i} className="bg-white p-5 rounded-xl border border-[#E5E7EB] shadow-sm">
-                <div className="flex items-start justify-between mb-3">
-                  <p className="text-[12px] font-medium text-[#6B7280]">{stat.label}</p>
-                  <stat.icon className="w-4 h-4 text-[#9CA3AF]" />
+          <div className="grid grid-cols-5 gap-4">
+            {statCards.map((card, i) => (
+              <div key={i} className="bg-white rounded-xl px-5 py-4 flex flex-col border border-[#E5E7EB] shadow-sm min-h-[100px]">
+                <p className="text-xs font-medium text-[#6B7280]">{card.label}</p>
+                <div className="mt-auto pt-3 flex items-center justify-between">
+                  <span className="text-2xl font-semibold text-[#111827]">{card.value}</span>
+                  {card.action && (
+                    <button
+                      onClick={card.action}
+                      className="p-1.5 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors"
+                      title="Add Talent"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
-                <span className="text-3xl font-bold text-[#111827]">{stat.value}</span>
               </div>
             ))}
           </div>
