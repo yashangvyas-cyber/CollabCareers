@@ -100,6 +100,7 @@ export interface Candidate {
   country?: string;
   zipCode?: string;
   source?: string;
+  sourceRemark?: string;
   recruiterNotes?: string;
   businessUnit?: string;
   recordOwner?: string;

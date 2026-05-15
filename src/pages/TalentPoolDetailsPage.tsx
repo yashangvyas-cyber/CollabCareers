@@ -4,8 +4,9 @@ import CRMLayout from '../components/CRMLayout';
 import {
   Mail, Phone, MapPin, Copy, FileText, ExternalLink,
   Briefcase, Check, X, MessageSquare,
-  CalendarDays, Send, MoreVertical, UserCheck, EyeOff, ChevronDown,
-  Pencil, Ban, Info,
+  CalendarDays, Send, MoreVertical, ChevronDown,
+  Pencil, Ban, Info, Eye, Clock,
+  ArrowUpDown, ArrowUp, ArrowDown,
 } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 import InviteEmailCompose from '../components/InviteEmailCompose';
@@ -33,12 +34,17 @@ function SectionCard({ title, children }: { title: string; children: React.React
   );
 }
 
+function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' | null }) {
+  if (!active || !dir) return <ArrowUpDown className="w-3 h-3 text-[#9CA3AF]" />;
+  return dir === 'asc' ? <ArrowUp className="w-3 h-3 text-[#3538CD]" /> : <ArrowDown className="w-3 h-3 text-[#3538CD]" />;
+}
+
 const AVAILABILITY_OPTIONS: TalentAvailabilityStatus[] = [
   'Immediate Joiner',
   'Serving Notice Period',
   'Open to Good Offers',
   'Offer in Hand',
-  'Not Interested'
+  'Not Interested',
 ];
 
 const availabilityStyle: Record<TalentAvailabilityStatus, string> = {
@@ -50,25 +56,38 @@ const availabilityStyle: Record<TalentAvailabilityStatus, string> = {
 };
 
 const inviteStatusStyle: Record<TalentInviteStatus, { pill: string; label: string }> = {
-  'Sent':          { pill: 'bg-[#F4F5FA] text-[#3538CD] border-[#3538CD]/10',  label: 'Awaiting Response' },
-  'Interested':    { pill: 'bg-green-50 text-green-700 border-green-200',       label: 'Interested' },
-  'Not Interested':{ pill: 'bg-gray-100 text-gray-500 border-gray-200',         label: 'Not Interested' },
-  'Applied':       { pill: 'bg-[#3538CD] text-white border-[#3538CD]',          label: 'Applied' },
-  'Expired':       { pill: 'bg-amber-50 text-amber-600 border-amber-200',       label: 'Expired' },
+  'Sent':           { pill: 'bg-[#F4F5FA] text-[#3538CD] border-[#3538CD]/10', label: 'Awaiting Response' },
+  'Interested':     { pill: 'bg-green-50 text-green-700 border-green-200',      label: 'Interested' },
+  'Not Interested': { pill: 'bg-gray-100 text-gray-500 border-gray-200',        label: 'Not Interested' },
+  'Applied':        { pill: 'bg-[#3538CD] text-white border-[#3538CD]',         label: 'Applied' },
+  'Expired':        { pill: 'bg-amber-50 text-amber-600 border-amber-200',      label: 'Expired' },
 };
 
-const appStatusStyle: Record<string, string> = {
-  'Under Review':          'bg-[#F4F5FA] text-[#3538CD] border-[#3538CD]/10',
-  'Interview in Progress': 'bg-[#F4F5FA] text-[#3538CD] border-[#3538CD]/10',
-  'Decision Made':         'bg-[#F9FAFB] text-[#6B7280] border-[#E5E7EB]',
-  'Offer Made':            'bg-[#3538CD] text-white border-[#3538CD]',
-  'Rejected':              'bg-gray-100 text-gray-400 border-gray-200',
-  'Draft':                 'bg-amber-50 text-amber-600 border-amber-200',
-  'Submitted':             'bg-[#F4F5FA] text-[#3538CD] border-[#3538CD]/10',
-  'Withdrawn':             'bg-gray-50 text-gray-400 border-gray-200',
+const APP_STATUS_STYLE: Record<string, { border: string; text: string; bg: string; dot: string }> = {
+  'Applied':               { border: 'rgb(191,219,254)', text: 'rgb(29,78,216)',   bg: 'rgb(239,246,255)', dot: 'rgb(59,130,246)'  },
+  'Under Review':          { border: 'rgb(191,219,254)', text: 'rgb(29,78,216)',   bg: 'rgb(239,246,255)', dot: 'rgb(59,130,246)'  },
+  'Shortlisted':           { border: 'rgb(167,243,208)', text: 'rgb(6,95,70)',     bg: 'rgb(236,253,245)', dot: 'rgb(16,185,129)'  },
+  'Interview in Progress': { border: 'rgb(253,230,138)', text: 'rgb(146,64,14)',   bg: 'rgb(255,251,235)', dot: 'rgb(245,158,11)'  },
+  'Offer Made':            { border: 'rgb(167,243,208)', text: 'rgb(6,78,59)',     bg: 'rgb(209,250,229)', dot: 'rgb(5,150,105)'   },
+  'Offer Accepted':        { border: 'rgb(167,243,208)', text: 'rgb(6,78,59)',     bg: 'rgb(209,250,229)', dot: 'rgb(5,150,105)'   },
+  'On Hold':               { border: 'rgb(221,214,254)', text: 'rgb(91,33,182)',   bg: 'rgb(245,243,255)', dot: 'rgb(139,92,246)'  },
+  'Selected':              { border: 'rgb(171,239,198)', text: 'rgb(6,118,71)',    bg: 'rgb(236,253,243)', dot: 'rgb(23,178,106)'  },
+  'Rejected':              { border: 'rgb(254,205,202)', text: 'rgb(180,35,24)',   bg: 'rgb(254,243,242)', dot: 'rgb(240,68,56)'   },
+  'Withdrawn':             { border: 'rgb(220,215,210)', text: 'rgb(113,104,95)',  bg: 'rgb(250,249,247)', dot: 'rgb(168,160,149)' },
+  'Joined':                { border: 'rgb(213,217,235)', text: 'rgb(54,63,114)',   bg: 'rgb(248,249,252)', dot: 'rgb(78,91,166)'   },
+  'Offer Declined':        { border: 'rgb(246,208,254)', text: 'rgb(159,26,177)',  bg: 'rgb(253,244,255)', dot: 'rgb(212,68,241)'  },
+  'Not Joined':            { border: 'rgb(255,193,205)', text: 'rgb(255,0,81)',    bg: 'rgb(255,241,243)', dot: 'rgb(255,0,81)'    },
+  'Archived':              { border: 'rgb(203,213,225)', text: 'rgb(71,85,105)',   bg: 'rgb(248,250,252)', dot: 'rgb(100,116,139)' },
+  'Offer Revoked':         { border: 'rgb(255,221,211)', text: 'rgb(255,87,34)',   bg: 'rgb(255,247,244)', dot: 'rgb(255,137,100)' },
+  'No Show':               { border: 'rgb(253,186,116)', text: 'rgb(120,53,15)',   bg: 'rgb(255,247,237)', dot: 'rgb(217,119,6)'   },
 };
 
-
+const CANDIDATE_STATUS_STYLE: Record<string, { bg: string; text: string; border: string }> = {
+  'Active':      { bg: 'rgb(238,242,255)', text: 'rgb(53,56,205)',   border: 'rgb(199,210,254)' },
+  'Blacklisted': { bg: 'rgb(254,242,242)', text: 'rgb(185,28,28)',   border: 'rgb(254,202,202)' },
+  'Discarded':   { bg: 'rgb(249,250,251)', text: 'rgb(107,114,128)', border: 'rgb(209,213,219)' },
+  'Joined':      { bg: 'rgb(240,253,244)', text: 'rgb(21,128,61)',   border: 'rgb(187,247,208)' },
+};
 
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -83,7 +102,7 @@ const formatRelative = (iso: string) => {
 
 // ── Page ─────────────────────────────────────────────────────────────────────
 
-const TABS = ['Profile', 'Applications', 'Invite History', 'Notes'] as const;
+const TABS = ['Profile', 'Applications', 'Invite History', 'History', 'Notes'] as const;
 type Tab = typeof TABS[number];
 
 export default function TalentPoolDetailsPage() {
@@ -99,6 +118,7 @@ export default function TalentPoolDetailsPage() {
   const kebabRef = useRef<HTMLDivElement>(null);
   const [showBlacklist, setShowBlacklist] = useState(false);
   const [blacklistRemarks, setBlacklistRemarks] = useState('');
+  const [appliedSortDir, setAppliedSortDir] = useState<'asc' | 'desc' | null>(null);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -132,6 +152,13 @@ export default function TalentPoolDetailsPage() {
 
   const canContact = !!candidate.allowRecruiterContact;
 
+  const candidateStatus = candidate.candidateStatus ?? (candidate.isBlacklisted ? 'Blacklisted' : 'Active');
+  const appStatus = candidateApps[0]?.status ?? null;
+
+  const currentExp = candidate.experiences?.find((e: any) => e.isCurrent) ?? candidate.experiences?.[0];
+  const displayOrg = candidate.currentOrg ?? currentExp?.company;
+  const displayDesignation = candidate.currentDesignation ?? currentExp?.designation;
+
   const handleInviteSent = (name: string) => {
     setShowInvite(false);
     setInviteSent(name);
@@ -147,6 +174,15 @@ export default function TalentPoolDetailsPage() {
     if (m) parts.push(`${m} mo${m !== 1 ? 's' : ''}`);
     return parts.join(', ');
   })();
+
+  const toggleAppliedSort = () => setAppliedSortDir(d => d === 'asc' ? 'desc' : 'asc');
+
+  const sortedApps = [...candidateApps].sort((a, b) => {
+    if (!appliedSortDir) return 0;
+    const da = new Date(a.appliedAt).getTime();
+    const db = new Date(b.appliedAt).getTime();
+    return appliedSortDir === 'asc' ? da - db : db - da;
+  });
 
   return (
     <>
@@ -165,75 +201,63 @@ export default function TalentPoolDetailsPage() {
               <div className="h-1 bg-gradient-to-r from-[#3538CD] to-[#6366F1]" />
               <div className="p-6 flex flex-col items-center">
 
-                {/* Avatar */}
-                <div className="w-20 h-20 rounded-full bg-[#3538CD]/5 border-4 border-white shadow-sm flex items-center justify-center text-[#3538CD] font-black text-3xl mb-4">
-                  {candidate.firstName[0]}{candidate.lastName[0]}
-                </div>
-
-                <h2 className="text-lg font-black text-[#1A1A2E] text-center leading-tight">
-                  {candidate.firstName} {candidate.lastName}
-                </h2>
-                {candidate.currentDesignation && (
-                  <p className="text-sm font-bold text-[#3538CD] mt-1 text-center">{candidate.currentDesignation}</p>
-                )}
-                {candidate.currentOrg && (
-                  <p className="text-xs text-[#9CA3AF] mt-0.5 text-center">{candidate.currentOrg}</p>
-                )}
-
-                {/* Availability status */}
-                <div className="mt-3 w-full">
-                  {editingAvailability ? (
-                    <select
-                      autoFocus
-                      value={candidate.availabilityStatus ?? ''}
-                      onChange={e => {
-                        updateCandidateAvailability(candidate.id, e.target.value as TalentAvailabilityStatus);
-                        setEditingAvailability(false);
-                      }}
-                      onBlur={() => setEditingAvailability(false)}
-                      className="w-full text-xs font-bold border border-[#3538CD]/30 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#3538CD]/15 bg-white text-[#374151]"
-                    >
-                      <option value="">— Set Availability —</option>
-                      {AVAILABILITY_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
-                    </select>
-                  ) : (
-                    <button
-                      onClick={() => setEditingAvailability(true)}
-                      className={`w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg border text-xs font-black uppercase tracking-widest transition-all hover:opacity-80 ${
-                        candidate.availabilityStatus
-                          ? availabilityStyle[candidate.availabilityStatus]
-                          : 'bg-[#F9FAFB] text-[#9CA3AF] border-[#E5E7EB]'
-                      }`}
-                    >
-                      <span>{candidate.availabilityStatus ?? 'Set Availability'}</span>
-                      <ChevronDown className="w-3.5 h-3.5 shrink-0" />
-                    </button>
-                  )}
-                </div>
-
-                {/* Badges */}
-                <div className="flex flex-wrap items-center justify-center gap-1.5 mt-3">
+                <div className="flex items-center justify-center gap-2 flex-wrap">
+                  <h2 className="text-lg font-black text-[#1A1A2E] text-center leading-tight">
+                    {candidate.firstName} {candidate.lastName}
+                  </h2>
                   {candidate.isAlumni && (
-                    <span className="px-2.5 py-1 text-[10px] font-black bg-amber-50 text-amber-600 border border-amber-200 rounded-full uppercase tracking-widest">
-                      Verified Alumni
+                    <span className="px-2 py-0.5 text-[9px] font-black bg-amber-50 text-amber-600 border border-amber-200 rounded-full uppercase tracking-widest shrink-0">
+                      Alumni
                     </span>
                   )}
-                  {candidate.addedByRecruiter && (
-                    <span className="px-2.5 py-1 text-[10px] font-black bg-[#F4F5FA] text-[#3538CD] border border-[#3538CD]/10 rounded-full uppercase tracking-widest">
-                      Recruiter Added
-                    </span>
-                  )}
-
-                  <span className={`flex items-center gap-1 px-2.5 py-1 text-[10px] font-black rounded-full border uppercase tracking-widest ${
-                    canContact
-                      ? 'bg-green-50 text-green-600 border-green-200'
-                      : 'bg-gray-50 text-gray-500 border-gray-200'
-                  }`}>
-                    {canContact
-                      ? <><UserCheck className="w-3 h-3" /> Open to contact</>
-                      : <><EyeOff className="w-3 h-3" /> Invite first</>
-                    }
+                </div>
+                {candidate.addedByRecruiter && (
+                  <span className="mt-1.5 px-2 py-0.5 text-[9px] font-black bg-[#F4F5FA] text-[#3538CD] border border-[#3538CD]/10 rounded-full uppercase tracking-widest">
+                    Recruiter Added
                   </span>
+                )}
+                {displayDesignation && (
+                  <p className="text-sm font-bold text-[#3538CD] mt-1 text-center">{displayDesignation}</p>
+                )}
+                {displayOrg && (
+                  <p className="text-xs text-[#9CA3AF] mt-0.5 text-center">{displayOrg}</p>
+                )}
+
+                {/* Candidate + Application status */}
+                <div className="flex gap-3 w-full mt-3">
+                  <div className="flex-1 flex flex-col items-center gap-1.5">
+                    <p className="text-[9px] font-bold text-[#9CA3AF] uppercase tracking-widest">Candidate</p>
+                    {(() => {
+                      const cs = CANDIDATE_STATUS_STYLE[candidateStatus] ?? CANDIDATE_STATUS_STYLE['Active'];
+                      return (
+                        <span
+                          className="px-3 py-1 text-[10px] font-black rounded-full uppercase tracking-widest border"
+                          style={{ backgroundColor: cs.bg, color: cs.text, borderColor: cs.border }}
+                        >
+                          {candidateStatus}
+                        </span>
+                      );
+                    })()}
+                  </div>
+                  <div className="flex-1 flex flex-col items-center gap-1.5">
+                    <p className="text-[9px] font-bold text-[#9CA3AF] uppercase tracking-widest">Application</p>
+                    {appStatus ? (() => {
+                      const as = APP_STATUS_STYLE[appStatus] ?? APP_STATUS_STYLE['Applied'];
+                      return (
+                        <span
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold border"
+                          style={{ backgroundColor: as.bg, color: as.text, borderColor: as.border }}
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: as.dot }} />
+                          {appStatus}
+                        </span>
+                      );
+                    })() : (
+                      <span className="px-3 py-1 text-[10px] font-black rounded-full uppercase tracking-widest border border-[#E5E7EB] bg-[#F9FAFB] text-[#9CA3AF]">
+                        None
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="w-full border-t border-[#E5E7EB] my-5" />
@@ -245,7 +269,10 @@ export default function TalentPoolDetailsPage() {
                       <Mail className="w-4 h-4 text-[#6B7280]" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Email</p>
+                      <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest flex items-center gap-1.5">
+                        Email
+                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${canContact ? 'bg-green-500' : 'bg-gray-300'}`} title={canContact ? 'Open to contact' : 'Invite first'} />
+                      </p>
                       <div className="flex items-center gap-1">
                         {canContact ? (
                           <>
@@ -367,6 +394,36 @@ export default function TalentPoolDetailsPage() {
                       <p className="text-xs font-bold text-[#374151] mt-0.5">{formatDate(candidate.addedAt)}</p>
                     </div>
                   )}
+                  <div>
+                    <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest mb-1.5">Availability</p>
+                    {editingAvailability ? (
+                      <select
+                        autoFocus
+                        value={candidate.availabilityStatus ?? ''}
+                        onChange={e => {
+                          updateCandidateAvailability(candidate.id, e.target.value as TalentAvailabilityStatus);
+                          setEditingAvailability(false);
+                        }}
+                        onBlur={() => setEditingAvailability(false)}
+                        className="w-full text-xs font-bold border border-[#3538CD]/30 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#3538CD]/15 bg-white text-[#374151]"
+                      >
+                        <option value="">— Set Availability —</option>
+                        {AVAILABILITY_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+                      </select>
+                    ) : (
+                      <button
+                        onClick={() => setEditingAvailability(true)}
+                        className={`w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg border text-xs font-black uppercase tracking-widest transition-all hover:opacity-80 ${
+                          candidate.availabilityStatus
+                            ? availabilityStyle[candidate.availabilityStatus]
+                            : 'bg-[#F9FAFB] text-[#9CA3AF] border-[#E5E7EB]'
+                        }`}
+                      >
+                        <span>{candidate.availabilityStatus ?? 'Set Availability'}</span>
+                        <ChevronDown className="w-3.5 h-3.5 shrink-0" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -446,51 +503,97 @@ export default function TalentPoolDetailsPage() {
             {activeTab === 'Profile' && (
               <div className="space-y-5">
 
-
-
-                <SectionCard title="Professional Details">
+                <SectionCard title="Personal Information">
                   <div className="grid grid-cols-3 gap-8">
-                    <DetailField label="Current Organisation" value={candidate.currentOrg} />
-                    <DetailField label="Designation" value={candidate.currentDesignation} />
-                    <DetailField label="Notice Period" value={candidate.noticePeriod} />
-                    <DetailField label="Total Experience" value={candidate.isFresher ? 'Fresher' : totalExp} />
-                    <DetailField label="Highest Qualification" value={candidate.highestQualification} />
+                    <DetailField label="Date of Birth" value={candidate.dateOfBirth} />
+                    <DetailField label="Gender" value={candidate.gender} />
+                    <DetailField label="Marital Status" value={candidate.maritalStatus} />
                   </div>
-
-                  {candidate.skills?.length ? (
-                    <div className="border-t border-[#F3F4F6] mt-6 pt-5">
-                      <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest mb-3">Skills</p>
-                      <div className="flex flex-wrap gap-2">
-                        {candidate.skills.map(s => (
-                          <span key={s} className="px-3 py-1.5 bg-[#F4F5FA] border border-[#3538CD]/10 text-[#3538CD] text-[11px] font-bold rounded-full">
-                            {s}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  ) : null}
                 </SectionCard>
 
-                {(candidate.currentCtc || candidate.expectedCtc) && (
-                  <SectionCard title="Salary Information">
-                    <div className="grid grid-cols-4 gap-8">
-                      <DetailField label="CTC Type" value={candidate.ctcType} />
-                      <DetailField label="Currency" value={candidate.ctcCurrency} />
-                      {!candidate.isFresher && <DetailField label="Current CTC" value={candidate.currentCtc} />}
-                      <DetailField label="Expected CTC" value={candidate.expectedCtc} />
-                    </div>
-                  </SectionCard>
-                )}
-
-                {(candidate.city || candidate.state || candidate.country) && (
-                  <SectionCard title="Location">
+                <SectionCard title="Professional Details">
+                  <div className="space-y-8">
                     <div className="grid grid-cols-3 gap-8">
-                      <DetailField label="City" value={candidate.city} />
-                      <DetailField label="State" value={candidate.state} />
-                      <DetailField label="Country" value={candidate.country} />
+                      <DetailField label="Current Organisation" value={displayOrg} />
+                      <DetailField label="Designation" value={displayDesignation} />
+                      <DetailField label="Notice Period" value={candidate.noticePeriod} />
+                      <DetailField label="Total Experience" value={candidate.isFresher ? 'Fresher' : totalExp} />
+                      <DetailField label="Highest Qualification" value={candidate.highestQualification} />
                     </div>
-                  </SectionCard>
-                )}
+
+                    {candidate.skills?.length ? (
+                      <div>
+                        <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest mb-3">Skills</p>
+                        <div className="flex flex-wrap gap-2">
+                          {candidate.skills.map(s => (
+                            <span key={s} className="px-3 py-1.5 bg-[#F4F5FA] border border-[#3538CD]/10 text-[#3538CD] text-[11px] font-bold rounded-full">
+                              {s}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {candidate.experiences?.length ? (
+                      <div className="space-y-3">
+                        <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Career Journey</p>
+                        {candidate.experiences.map((exp: any, i: number) => (
+                          <div key={i} className="bg-[#F9FAFB] p-4 rounded-xl border border-[#E5E7EB]">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <h4 className="text-sm font-black text-[#111827]">{exp.designation}</h4>
+                                <p className="text-xs font-bold text-[#3538CD]">{exp.company}</p>
+                              </div>
+                              <span className="text-[10px] font-black uppercase tracking-widest text-[#6B7280] bg-white border border-[#E5E7EB] px-2.5 py-1 rounded-md">
+                                {exp.from} – {exp.to}
+                              </span>
+                            </div>
+                            {exp.description && (
+                              <p className="text-xs font-medium text-[#4B5563] mt-3 leading-relaxed">{exp.description}</p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                </SectionCard>
+
+                <SectionCard title="Salary Information">
+                  <div className="grid grid-cols-4 gap-8">
+                    <DetailField label="CTC Type" value={candidate.ctcType} />
+                    <DetailField label="Currency" value={candidate.ctcCurrency} />
+                    <DetailField label="Current CTC" value={candidate.isFresher ? 'Fresher' : candidate.currentCtc} />
+                    <DetailField label="Expected CTC" value={candidate.expectedCtc} />
+                  </div>
+                </SectionCard>
+
+                <SectionCard title="Address">
+                  <div className="space-y-6">
+                    <DetailField label="Address" value={candidate.address} />
+                    <div className="grid grid-cols-4 gap-8">
+                      <DetailField label="Country" value={candidate.country} />
+                      <DetailField label="State" value={candidate.state} />
+                      <DetailField label="Town / City" value={candidate.city} />
+                      <DetailField label="Zip / Postal Code" value={candidate.zipCode} />
+                    </div>
+                  </div>
+                </SectionCard>
+
+                <SectionCard title="Source Information">
+                  <div className="grid grid-cols-4 gap-8">
+                    {candidate.source ? (
+                      <div className="space-y-1">
+                        <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Source</p>
+                        <span className="inline-flex px-3 py-1.5 bg-[#3538CD] text-white text-[11px] font-black rounded-lg uppercase tracking-wider">
+                          {candidate.source}
+                        </span>
+                      </div>
+                    ) : <DetailField label="Source" value={undefined} />}
+                    <DetailField label="Source Remark" value={candidate.sourceRemark} />
+                    <DetailField label="Business Unit" value={candidate.businessUnit} />
+                    <DetailField label="Record Owner" value={candidate.recordOwner} />
+                  </div>
+                </SectionCard>
 
                 <SectionCard title="Recruiter Notes">
                   {candidate.recruiterNotes ? (
@@ -510,36 +613,55 @@ export default function TalentPoolDetailsPage() {
                   <table className="w-full text-left border-collapse text-sm whitespace-nowrap">
                     <thead>
                       <tr className="border-b border-[#E5E7EB] bg-[#F9FAFB]">
-                        {['#', 'Applied Date', 'Job Title', 'Business Unit', 'Status', 'Actions'].map(h => (
-                          <th key={h} className="px-6 py-4 font-black text-[#6B7280] text-[10px] uppercase tracking-widest">{h}</th>
-                        ))}
+                        <th className="px-6 py-4 font-black text-[#6B7280] text-[10px] uppercase tracking-widest">No</th>
+                        <th className="px-6 py-4 font-black text-[#6B7280] text-[10px] uppercase tracking-widest">
+                          <button
+                            onClick={toggleAppliedSort}
+                            className="flex items-center gap-1.5 hover:text-[#3538CD] transition-colors uppercase tracking-widest"
+                          >
+                            Applied On
+                            <SortIcon active={appliedSortDir !== null} dir={appliedSortDir} />
+                          </button>
+                        </th>
+                        <th className="px-6 py-4 font-black text-[#6B7280] text-[10px] uppercase tracking-widest">Job Title</th>
+                        <th className="px-6 py-4 font-black text-[#6B7280] text-[10px] uppercase tracking-widest">Application Status</th>
+                        <th className="px-6 py-4 font-black text-[#6B7280] text-[10px] uppercase tracking-widest text-center">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#E5E7EB]">
-                      {candidateApps.length === 0 ? (
+                      {sortedApps.length === 0 ? (
                         <tr>
-                          <td colSpan={6} className="px-6 py-16 text-center">
+                          <td colSpan={5} className="px-6 py-16 text-center">
                             <CalendarDays className="w-8 h-8 text-[#E5E7EB] mx-auto mb-3" />
                             <p className="text-sm font-bold text-[#9CA3AF]">No applications yet</p>
                             <p className="text-xs text-[#C4C9D4] mt-1">This talent hasn't applied to any role.</p>
                           </td>
                         </tr>
-                      ) : candidateApps.map((app, i) => {
+                      ) : sortedApps.map((app, i) => {
                         const job = jobs.find(j => j.id === app.jobId);
-                        const st = appStatusStyle[app.status] ?? 'bg-[#F9FAFB] text-[#6B7280] border-[#E5E7EB]';
+                        const style = APP_STATUS_STYLE[app.status] ?? APP_STATUS_STYLE['Applied'];
+                        const jobCode = `MI-${String(i + 1).padStart(3, '0')}`;
                         return (
                           <tr key={app.id} className="hover:bg-[#F9FAFB] transition-colors">
-                            <td className="px-6 py-4 font-bold text-[#9CA3AF]">{i + 1}</td>
-                            <td className="px-6 py-4 text-[#374151] font-medium">{formatDate(app.appliedAt)}</td>
-                            <td className="px-6 py-4 font-bold text-[#3538CD]">{job?.title || '—'}</td>
-                            <td className="px-6 py-4 text-[#374151] font-medium">{job?.businessUnit || '—'}</td>
+                            <td className="px-6 py-4 font-bold text-[#111827] text-xs">{i + 1}</td>
+                            <td className="px-6 py-4 text-xs font-medium text-[#374151]">{formatDate(app.appliedAt)}</td>
                             <td className="px-6 py-4">
-                              <span className={`inline-flex items-center px-2.5 py-1 text-[10px] font-black uppercase tracking-widest rounded-md border ${st}`}>
+                              <span className="text-xs font-bold text-[#3538CD]">{jobCode}</span>
+                              <span className="text-xs font-medium text-[#374151]"> | {job?.title || '—'}</span>
+                            </td>
+                            <td className="px-6 py-4">
+                              <span
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border"
+                                style={{ borderColor: style.border, color: style.text, backgroundColor: style.bg }}
+                              >
+                                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: style.dot }} />
                                 {app.status}
                               </span>
                             </td>
-                            <td className="px-6 py-4">
-                              <button className="text-[#3538CD] font-black text-[11px] hover:underline uppercase tracking-widest">View</button>
+                            <td className="px-6 py-4 text-center">
+                              <button className="p-1.5 text-[#6B7280] hover:text-[#3538CD] rounded-md hover:bg-[#F3F4F6] transition-colors">
+                                <Eye className="w-4 h-4" />
+                              </button>
                             </td>
                           </tr>
                         );
@@ -580,7 +702,6 @@ export default function TalentPoolDetailsPage() {
                       const isSent = invite.status === 'Sent';
                       return (
                         <div key={invite.id} className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden">
-                          {/* Top row — invite info */}
                           <div className="px-5 pt-5 pb-4 flex items-start justify-between gap-4">
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
@@ -601,7 +722,6 @@ export default function TalentPoolDetailsPage() {
                                 {' · '}{formatRelative(invite.sentAt)}
                               </p>
                             </div>
-                            {/* Resend — only when already resolved */}
                             {!isSent && !isApplied && (
                               <button
                                 onClick={() => setShowInvite(true)}
@@ -611,8 +731,6 @@ export default function TalentPoolDetailsPage() {
                               </button>
                             )}
                           </div>
-
-                          {/* Update Response row — always shown unless Applied */}
                           {!isApplied && (
                             <div className="px-5 pb-4 flex items-center gap-2">
                               <p className="text-[10px] font-black text-[#C4C9D4] uppercase tracking-widest mr-1 shrink-0">
@@ -644,8 +762,6 @@ export default function TalentPoolDetailsPage() {
                               </button>
                             </div>
                           )}
-
-                          {/* Applied — terminal, no override */}
                           {isApplied && (
                             <div className="px-5 pb-4">
                               <p className="text-[11px] text-[#9CA3AF] italic">
@@ -658,6 +774,19 @@ export default function TalentPoolDetailsPage() {
                     })}
                   </>
                 )}
+              </div>
+            )}
+
+            {/* ── History tab ── */}
+            {activeTab === 'History' && (
+              <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm py-20 flex flex-col items-center gap-3 text-center px-8">
+                <div className="w-12 h-12 bg-[#F4F5FA] rounded-2xl flex items-center justify-center">
+                  <Clock className="w-5 h-5 text-[#D1D5DB]" />
+                </div>
+                <p className="text-sm font-black text-[#9CA3AF]">No history yet</p>
+                <p className="text-xs text-[#C4C9D4] max-w-xs">
+                  Activity and changes for this candidate will appear here.
+                </p>
               </div>
             )}
 
@@ -704,7 +833,6 @@ export default function TalentPoolDetailsPage() {
       {showBlacklist && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/40 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
-            {/* Header */}
             <div className="flex items-center justify-between pl-4 pr-4 py-4">
               <p className="text-gray-900 font-semibold text-xl">
                 Confirm — <span className="text-indigo-600">Blacklist candidate</span>
@@ -719,7 +847,6 @@ export default function TalentPoolDetailsPage() {
             <hr className="border-t border-gray-200" />
 
             <div className="p-4 space-y-4">
-              {/* Info banner */}
               <div className="flex rounded-xl border border-indigo-300 bg-indigo-50 text-indigo-700 text-sm">
                 <div className="p-3 flex items-center">
                   <div className="border-2 border-indigo-300 rounded-full p-1.5 flex items-center justify-center">
@@ -733,7 +860,6 @@ export default function TalentPoolDetailsPage() {
                 </div>
               </div>
 
-              {/* Remarks */}
               <div>
                 <div className="flex items-center gap-1 mb-1.5">
                   <label className="text-xs font-medium text-gray-700">Remarks</label>
@@ -749,7 +875,6 @@ export default function TalentPoolDetailsPage() {
               </div>
             </div>
 
-            {/* Actions */}
             <div className="flex gap-3 px-4 pb-4">
               <button
                 type="button"
