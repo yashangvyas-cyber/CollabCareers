@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import CRMLayout from '../components/CRMLayout';
-import { Mail, Phone, Copy, Eye, MoreVertical, ExternalLink, UserCheck, EyeOff, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Mail, Phone, Copy, Eye, MoreVertical, ExternalLink, UserCheck, EyeOff, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 
 function DetailField({ label, value, isLink }: { label: string; value?: string; isLink?: boolean }) {
@@ -85,6 +85,47 @@ const mockAppliedJobsMap: Record<string, MockAppRow[]> = {
   ],
 };
 
+type MockRound = {
+  no: number; name: string; mode: 'Offline' | 'Online'; datetime: string;
+  status: 'Completed' | 'Scheduled' | 'Cancelled'; panelSuggestion: 'Should Hire' | 'On Hold' | 'Reject';
+  panel: string[]; scheduledBy: string; scheduledAt: string; duration: string;
+  additionalInfo: string; feedbackScore: number; feedbackBy: string;
+};
+type MockInterviewDetails = { offerStatus: string; department: string; joiningOn: string; remarks: string; rounds: MockRound[]; };
+
+const mockInterviewMap: Record<string, MockInterviewDetails> = {
+  '1': {
+    offerStatus: 'Offer Accepted', department: 'Engineering', joiningOn: '01/Jan/2027', remarks: '-',
+    rounds: [
+      { no: 1, name: 'Aptitude Test', mode: 'Offline', datetime: '28/Nov/2025, 08:06 PM', status: 'Completed', panelSuggestion: 'Should Hire', panel: ['Super User'], scheduledBy: 'Super User', scheduledAt: '28/Nov/2025, 11:36 PM', duration: '60 Minutes', additionalInfo: '-', feedbackScore: 9, feedbackBy: 'Super User' },
+      { no: 2, name: 'Technical Round', mode: 'Online', datetime: '01/Dec/2025, 11:00 AM', status: 'Completed', panelSuggestion: 'Should Hire', panel: ['Super User', 'Rajan Mehta'], scheduledBy: 'Super User', scheduledAt: '30/Nov/2025, 09:00 AM', duration: '90 Minutes', additionalInfo: 'React and TypeScript deep dive.', feedbackScore: 8, feedbackBy: 'Rajan Mehta' },
+    ],
+  },
+  '2': {
+    offerStatus: 'Interview in Progress', department: 'Design', joiningOn: '-', remarks: '-',
+    rounds: [
+      { no: 1, name: 'Portfolio Review', mode: 'Online', datetime: '22/Apr/2026, 03:00 PM', status: 'Completed', panelSuggestion: 'Should Hire', panel: ['Super User'], scheduledBy: 'Super User', scheduledAt: '21/Apr/2026, 05:00 PM', duration: '45 Minutes', additionalInfo: '-', feedbackScore: 8, feedbackBy: 'Super User' },
+    ],
+  },
+  '3': {
+    offerStatus: 'Shortlisted', department: 'Mobile', joiningOn: '-', remarks: '-',
+    rounds: [
+      { no: 1, name: 'HR Screening', mode: 'Online', datetime: '25/Apr/2026, 10:00 AM', status: 'Scheduled', panelSuggestion: 'Should Hire', panel: ['Super User'], scheduledBy: 'Super User', scheduledAt: '24/Apr/2026, 06:00 PM', duration: '30 Minutes', additionalInfo: '-', feedbackScore: 0, feedbackBy: 'Super User' },
+    ],
+  },
+};
+
+const ROUND_STATUS_STYLE: Record<string, { bg: string; border: string; text: string }> = {
+  'Completed': { bg: 'rgb(240,253,244)', border: 'rgb(187,247,208)', text: 'rgb(21,128,61)' },
+  'Scheduled': { bg: 'rgb(239,246,255)', border: 'rgb(191,219,254)', text: 'rgb(29,78,216)' },
+  'Cancelled': { bg: 'rgb(254,242,242)', border: 'rgb(254,202,202)', text: 'rgb(185,28,28)' },
+};
+const SUGGESTION_STYLE: Record<string, { bg: string; border: string; text: string }> = {
+  'Should Hire': { bg: 'rgb(240,253,244)', border: 'rgb(187,247,208)', text: 'rgb(22,101,52)'  },
+  'On Hold':     { bg: 'rgb(255,251,235)', border: 'rgb(253,230,138)', text: 'rgb(146,64,14)'  },
+  'Reject':      { bg: 'rgb(254,242,242)', border: 'rgb(254,202,202)', text: 'rgb(185,28,28)'  },
+};
+
 function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' | null }) {
   if (!active || !dir) return <ArrowUpDown className="w-3 h-3 text-[#9CA3AF]" />;
   return dir === 'asc' ? <ArrowUp className="w-3 h-3 text-[#3538CD]" /> : <ArrowDown className="w-3 h-3 text-[#3538CD]" />;
@@ -119,6 +160,13 @@ export default function CandidateDetailPage() {
   const tabs = ['Applicant Details', 'Interview Details', 'Applied Jobs', 'Notes', 'History'];
   const [activeTab, setActiveTab] = useState('Applicant Details');
   const [appliedSortDir, setAppliedSortDir] = useState<'asc' | 'desc' | null>(null);
+  const [feedbackOpen, setFeedbackOpen] = useState<boolean[]>([]);
+
+  const interviewData: MockInterviewDetails | null = isMockCandidate && candidateId ? (mockInterviewMap[candidateId] ?? null) : null;
+  const avgScore = interviewData?.rounds.length
+    ? Math.round(interviewData.rounds.reduce((s, r) => s + r.feedbackScore, 0) / interviewData.rounds.length)
+    : 0;
+  const offerStyle = interviewData ? (APP_STATUS_STYLE[interviewData.offerStatus] ?? APP_STATUS_STYLE['Applied']) : null;
 
   const toggleAppliedSort = () => setAppliedSortDir(d => d === 'asc' ? 'desc' : 'asc');
 
@@ -509,6 +557,187 @@ export default function CandidateDetailPage() {
                     </tbody>
                   </table>
                 </div>
+              </div>
+            )}
+
+            {activeTab === 'Interview Details' && (
+              <div className="space-y-4">
+                {!interviewData ? (
+                  <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm flex flex-col items-center justify-center py-20">
+                    <p className="text-sm font-medium text-[#9CA3AF]">No interview details found for this candidate.</p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Offer / Status card */}
+                    <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm overflow-hidden">
+                      <div className="p-4 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-2xl flex items-center justify-center border"
+                            style={{ backgroundColor: offerStyle?.bg, borderColor: offerStyle?.border }}>
+                            <UserCheck className="w-5 h-5" style={{ color: offerStyle?.text }} />
+                          </div>
+                          <div>
+                            <p className="text-xs text-[#6B7280] font-medium">Offer Details</p>
+                            <p className="text-base font-semibold" style={{ color: offerStyle?.text }}>{interviewData.offerStatus}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          {isAlumni && (
+                            <Link to={`/crm/employees/${candidateId}`}
+                              className="text-xs font-semibold text-white bg-[#3538CD] hover:bg-[#292bb0] px-3.5 py-2 rounded-lg transition-colors">
+                              View Employee
+                            </Link>
+                          )}
+                          <button className="w-9 h-9 border border-[#E5E7EB] rounded-lg flex items-center justify-center hover:bg-[#F9FAFB] transition-colors">
+                            <MoreVertical className="w-4 h-4 text-[#6B7280]" />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="px-5 py-2.5 bg-[#F9FAFB] border-t border-b border-[#E5E7EB] flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs text-[#6B7280] font-medium">Department:</span>
+                          <span className="text-xs font-semibold text-[#374151]">{interviewData.department}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs text-[#6B7280] font-medium">Joining On:</span>
+                          <span className="text-xs font-semibold text-[#374151]">{interviewData.joiningOn}</span>
+                        </div>
+                      </div>
+                      <div className="p-4">
+                        <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Remarks</p>
+                        <p className="text-xs text-[#6B7280] mt-1">{interviewData.remarks}</p>
+                      </div>
+                    </div>
+
+                    {/* Interview Rounds */}
+                    <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm overflow-hidden">
+                      <div className="px-5 py-4 flex items-center justify-between border-b border-[#E5E7EB]">
+                        <div className="flex items-center gap-2">
+                          <span className="text-base font-semibold text-[#111827]">Interview Rounds</span>
+                          <span className="border border-[#3538CD] rounded-xl py-0.5 px-2 bg-[#EEF4FF] text-[#3538CD] text-xs font-medium">
+                            {String(interviewData.rounds.length).padStart(2, '0')}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-[#6B7280] font-medium">Feedback Score:</span>
+                          <span className="text-lg font-semibold text-[#111827]">{avgScore}</span>
+                          <div className="flex leading-none">
+                            {Array.from({ length: 10 }, (_, i) => (
+                              <span key={i} className="text-xl" style={{ color: i < avgScore ? '#F4B400' : '#E5E7EB' }}>★</span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="p-5 space-y-5">
+                        {interviewData.rounds.map((round, idx) => {
+                          const isFbOpen = feedbackOpen[idx] ?? false;
+                          const statusStyle = ROUND_STATUS_STYLE[round.status] ?? ROUND_STATUS_STYLE['Completed'];
+                          const suggStyle = SUGGESTION_STYLE[round.panelSuggestion] ?? SUGGESTION_STYLE['Should Hire'];
+                          return (
+                            <div key={round.no} className="border border-[#D1D5DB] rounded-xl p-4 space-y-4">
+                              {/* Round header row */}
+                              <div className="flex items-start gap-4">
+                                <div className="w-10 h-10 rounded-xl border border-green-300 bg-green-50 flex items-center justify-center text-sm font-semibold text-green-700 shrink-0">
+                                  {round.no}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <span className="text-base font-semibold text-[#111827]">{round.name}</span>
+                                    <span className="inline-flex items-center border border-[#E5E7EB] bg-[#F9FAFB] text-[#374151] rounded-full text-xs font-medium py-0.5 px-2 capitalize">
+                                      {round.mode.toLowerCase()}
+                                    </span>
+                                  </div>
+                                  <p className="text-xs font-medium text-[#6B7280] mt-1">{round.datetime}</p>
+                                </div>
+                                <div className="flex gap-6 shrink-0">
+                                  <div>
+                                    <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest mb-1.5">Interview Status</p>
+                                    <span className="inline-flex items-center rounded-full border font-medium text-xs py-0.5 px-2.5"
+                                      style={{ backgroundColor: statusStyle.bg, borderColor: statusStyle.border, color: statusStyle.text }}>
+                                      {round.status}
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest mb-1.5">Panel Suggestion</p>
+                                    <span className="inline-flex items-center rounded-full border font-medium text-xs py-0.5 px-2.5"
+                                      style={{ backgroundColor: suggStyle.bg, borderColor: suggStyle.border, color: suggStyle.text }}>
+                                      {round.panelSuggestion}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Metadata grid */}
+                              <div className="border border-[#E5E7EB] rounded-lg bg-[#F9FAFB] p-3 flex flex-wrap">
+                                <div className="w-1/2 px-2 mb-4">
+                                  <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Interview Panel</p>
+                                  <div className="flex flex-wrap gap-1.5 mt-2">
+                                    {round.panel.map(name => (
+                                      <span key={name} className="inline-flex items-center border border-[#E5E7EB] rounded-lg bg-white py-1 px-2 text-xs font-medium text-[#374151] gap-1.5">
+                                        <span className="w-5 h-5 rounded-full bg-[#3538CD]/10 text-[#3538CD] text-[9px] font-black flex items-center justify-center shrink-0">
+                                          {name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                                        </span>
+                                        {name}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                                <div className="w-1/4 px-2 mb-4">
+                                  <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Scheduled By</p>
+                                  <p className="text-xs font-semibold text-[#374151] mt-2">{round.scheduledBy}</p>
+                                  <p className="text-[10px] text-[#9CA3AF] mt-0.5">{round.scheduledAt}</p>
+                                </div>
+                                <div className="w-1/4 px-2 mb-4">
+                                  <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Interview Duration</p>
+                                  <p className="text-xs font-semibold text-[#374151] mt-2">{round.duration}</p>
+                                </div>
+                                <div className="w-full px-2">
+                                  <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Additional Information</p>
+                                  <p className="text-xs text-[#6B7280] mt-2">{round.additionalInfo}</p>
+                                </div>
+                              </div>
+
+                              {/* Collapsible feedback */}
+                              <div>
+                                <button
+                                  onClick={() => setFeedbackOpen(prev => {
+                                    const next = [...prev];
+                                    next[idx] = !isFbOpen;
+                                    return next;
+                                  })}
+                                  className={`w-full flex items-center justify-between border border-[#E5E7EB] bg-green-50 p-3 text-sm font-medium text-[#374151] transition-colors hover:bg-green-100 ${isFbOpen ? 'rounded-t-lg' : 'rounded-lg'}`}
+                                >
+                                  <div className="flex items-center gap-1 flex-wrap text-xs">
+                                    <span>Interview Panel Feedback</span>
+                                    <span className="text-[#9CA3AF]">(Provided by</span>
+                                    <span className="text-[#3538CD] font-semibold">{round.feedbackBy}</span>
+                                    <span className="text-[#9CA3AF]">)</span>
+                                  </div>
+                                  <ChevronDown className={`w-4 h-4 text-[#9CA3AF] transition-transform duration-200 shrink-0 ${isFbOpen ? 'rotate-180' : ''}`} />
+                                </button>
+                                {isFbOpen && (
+                                  <div className="border border-t-0 border-[#E5E7EB] rounded-b-lg p-4 space-y-2">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-xs text-[#6B7280] font-medium">Score:</span>
+                                      <span className="text-sm font-bold text-[#111827]">{round.feedbackScore}</span>
+                                      <div className="flex leading-none">
+                                        {Array.from({ length: 10 }, (_, i) => (
+                                          <span key={i} style={{ color: i < round.feedbackScore ? '#F4B400' : '#E5E7EB' }}>★</span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                    <p className="text-xs text-[#9CA3AF] italic">No written feedback provided.</p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>
