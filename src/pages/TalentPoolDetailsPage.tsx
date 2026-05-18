@@ -87,6 +87,26 @@ const formatRelative = (iso: string) => {
 
 // ── Page ─────────────────────────────────────────────────────────────────────
 
+type Note = { id: string; author: string; text: string; createdAt: string };
+
+const mockNotesMap: Record<string, Note[]> = {
+  full1: [
+    { id: 'n1', author: 'System', text: 'Candidate profile created from LinkedIn outreach by Sarah Chen.', createdAt: new Date(Date.now() - 86400000 * 1).toISOString() },
+    { id: 'n2', author: 'Sarah Chen', text: 'Initial phone screen done. Very articulate, strong ML background. Communication is excellent. Moving her to the technical round next week.', createdAt: new Date(Date.now() - 86400000 * 1 + 3600000 * 3).toISOString() },
+    { id: 'n3', author: 'Sarah Chen', text: 'Technical assessment sent. Deadline is in 2 days — follow up if no submission by then.', createdAt: new Date(Date.now() - 3600000 * 5).toISOString() },
+  ],
+  full2: [
+    { id: 'n4', author: 'System', text: 'Candidate added via referral from Vikram Nair. Alumni status verified — previously worked as Senior DevOps Engineer at MindInventory (Jul 2017 – Feb 2020).', createdAt: new Date(Date.now() - 86400000 * 2).toISOString() },
+    { id: 'n5', author: 'Michael Park', text: 'Intro call completed. Very hands-on. Kubernetes and Terraform expertise is exactly what the platform team needs. Open to relocation if required.', createdAt: new Date(Date.now() - 86400000 * 1 - 3600000 * 2).toISOString() },
+    { id: 'n6', author: 'Michael Park', text: 'Competing offer from Razorpay on the table. Rohan expects a decision by 30 May. Escalating to the hiring manager — need to fast-track the process.', createdAt: new Date(Date.now() - 3600000 * 8).toISOString() },
+  ],
+  full3: [
+    { id: 'n7', author: 'System', text: 'Candidate identified via Dribbble portfolio. Directly approached by Lisa Ray on 15 May 2026.', createdAt: new Date(Date.now() - 86400000 * 3).toISOString() },
+    { id: 'n8', author: 'Lisa Ray', text: 'Portfolio walkthrough done — exceptional Figma work, very clear design thinking. Particularly impressed by the Swiggy Instamart checkout redesign. Shortlisting for a design challenge round.', createdAt: new Date(Date.now() - 86400000 * 2).toISOString() },
+    { id: 'n9', author: 'Lisa Ray', text: 'She is available for interviews any day this week and prefers morning slots. Sending calendar invite today.', createdAt: new Date(Date.now() - 3600000 * 6).toISOString() },
+  ],
+};
+
 const TABS = ['Profile', 'Applications', 'Invite History', 'History', 'Notes'] as const;
 type Tab = typeof TABS[number];
 
@@ -107,8 +127,7 @@ export default function TalentPoolDetailsPage() {
   const [copiedLink, setCopiedLink] = useState(false);
   const [appliedSortDir, setAppliedSortDir] = useState<'asc' | 'desc' | null>(null);
   const [noteInput, setNoteInput] = useState('');
-  type Note = { id: string; author: string; text: string; createdAt: string };
-  const [notes, setNotes] = useState<Note[]>([]);
+  const [notes, setNotes] = useState<Note[]>(() => mockNotesMap[candidateId ?? ''] ?? []);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -202,10 +221,7 @@ export default function TalentPoolDetailsPage() {
                 </div>
 
                 {displayDesignation && (
-                  <p className="text-sm font-bold text-[#3538CD] mt-1 text-center">{displayDesignation}</p>
-                )}
-                {displayOrg && (
-                  <p className="text-xs text-[#9CA3AF] mt-0.5 text-center">{displayOrg}</p>
+                  <p title="Current Designation" className="text-sm font-bold text-[#3538CD] mt-1 text-center cursor-default">{displayDesignation}</p>
                 )}
 
                 {/* Candidate status */}
@@ -346,6 +362,7 @@ export default function TalentPoolDetailsPage() {
                   const badge =
                     tab === 'Applications' && candidateApps.length > 0 ? candidateApps.length :
                     tab === 'Invite History' && pendingInviteCount > 0 ? pendingInviteCount :
+                    tab === 'Notes' && notes.length > 0 ? notes.length :
                     null;
                   const isActive = tab === activeTab;
                   return (
@@ -674,13 +691,6 @@ export default function TalentPoolDetailsPage() {
                                 Not Interested
                                 {invite.status === 'Not Interested' && <span className="ml-0.5 text-[9px]">✓</span>}
                               </button>
-                            </div>
-                          )}
-                          {isApplied && (
-                            <div className="px-5 pb-4">
-                              <p className="text-[11px] text-[#9CA3AF] italic">
-                                Candidate applied — no further action needed on this invite.
-                              </p>
                             </div>
                           )}
                         </div>

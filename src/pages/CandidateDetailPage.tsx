@@ -173,8 +173,8 @@ export default function CandidateDetailPage() {
           <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden">
             <div className="p-6 flex flex-col items-center">
               <h2 className="text-xl font-black text-[#1A1A2E] text-center tracking-tight">{firstName} {lastName}</h2>
-              {displayDesignation && (
-                <p className="text-sm font-bold text-[#3538CD] mt-1 text-center">{displayDesignation}</p>
+              {appliedJob && (
+                <p title="Applied For" className="text-sm font-bold text-[#3538CD] mt-1 text-center cursor-default">{appliedJob.title}</p>
               )}
 
               <div className="flex flex-col items-center gap-2 mt-4">
