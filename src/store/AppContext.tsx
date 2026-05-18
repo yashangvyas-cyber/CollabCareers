@@ -889,13 +889,13 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
     },
     // Ananya Sharma (c4) — no applications (empty state demo)
     // Applications for JobApplicationsPage rows 1–6
-    { id: 'm1', candidateId: '1', jobId: 'd1', status: 'Under Review',          appliedAt: '2026-04-21T00:00:00.000Z', answers: {}, resumeUrl: 'Mahesh_Patel_Resume.pdf' },
+    { id: 'm1', candidateId: '1', jobId: 'd1', status: 'Under Review',          appliedAt: '2026-04-21T00:00:00.000Z', answers: { d1_q1: 'https://github.com/maheshpatel-dev', d1_q2: '3', d1_q3: 'No', d1_q4: 'On-site' }, resumeUrl: 'Mahesh_Patel_Resume.pdf' },
     { id: 'm2', candidateId: '1', jobId: 'd6', status: 'Interview in Progress', appliedAt: '2026-04-10T00:00:00.000Z', answers: {}, resumeUrl: 'Mahesh_Patel_Resume.pdf' },
     { id: 'm3', candidateId: '2', jobId: 'd2', status: 'Interview in Progress', appliedAt: '2026-04-18T00:00:00.000Z', answers: {}, resumeUrl: 'Priya_Shah_Resume.pdf' },
     { id: 'm4', candidateId: '3', jobId: 'd3', status: 'Applied',               appliedAt: '2026-04-23T00:00:00.000Z', answers: {}, resumeUrl: 'Arjun_Mehta_Resume.pdf' },
     { id: 'm5', candidateId: '3', jobId: 'd7', status: 'Rejected',              appliedAt: '2026-04-15T00:00:00.000Z', answers: {}, resumeUrl: 'Arjun_Mehta_Resume.pdf' },
     { id: 'm6', candidateId: '4', jobId: 'd5', status: 'Applied',               appliedAt: '2026-04-22T00:00:00.000Z', answers: {}, resumeUrl: 'Sneha_Patel_Resume.pdf' },
-    { id: 'm7', candidateId: '5', jobId: 'd4', status: 'Selected',              appliedAt: '2026-04-18T00:00:00.000Z', answers: {}, resumeUrl: 'Rahul_Joshi_Resume.pdf' },
+    { id: 'm7', candidateId: '5', jobId: 'd4', status: 'Selected',              appliedAt: '2026-04-18T00:00:00.000Z', answers: { d4_q1: 'Yes', d4_q2: 'PMP (2020), Certified Scrum Master (2018)', d4_q3: '15', d4_q4: 'Kanban', d4_q5: 'Yes' }, resumeUrl: 'Rahul_Joshi_Resume.pdf' },
     { id: 'm8', candidateId: '5', jobId: 'd5', status: 'Rejected',              appliedAt: '2026-04-05T00:00:00.000Z', answers: {}, resumeUrl: 'Rahul_Joshi_Resume.pdf' },
     { id: 'm9', candidateId: '6', jobId: 'd13', status: 'Under Review',         appliedAt: '2026-04-20T00:00:00.000Z', answers: {}, resumeUrl: 'Kavya_Rao_Resume.pdf' },
     // Demo candidates — fully answered application form responses
