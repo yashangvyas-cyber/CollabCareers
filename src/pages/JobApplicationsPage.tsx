@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import CRMLayout from '../components/CRMLayout';
 import {
   ChevronDown, Plus, X, MoreHorizontal,
-  Eye, LayoutGrid, ArrowUpDown, ArrowUp, ArrowDown
+  Eye, LayoutGrid, ArrowUpDown, ArrowUp, ArrowDown, UserPlus, Search, ChevronUp,
 } from 'lucide-react';
+import { useApp } from '../store/AppContext';
 
 // ── Terminal chip colour definitions ──────────────────────────────────────────
 const TERMINAL_CHIPS = [
@@ -79,11 +80,79 @@ const formatInterviewDate = (iso: string) => {
 type SortKey = 'job' | 'experience' | 'noticePeriod' | 'interviewDate' | 'appStatus' | 'candidateStatus' | 'source' | 'businessUnit' | 'recordOwner' | 'createdBy' | 'modifiedBy';
 type SortDir = 'asc' | 'desc';
 
+const RECORD_OWNERS = ['Sarah Chen', 'Michael Park', 'James Wilson', 'Lisa Ray', 'David Kim'];
+
 export default function JobApplicationsPage() {
+  const { jobs, candidates, applications, submitApplication } = useApp();
+
   const [filterStatuses, setFilterStatuses] = useState<string[]>([]);
   const [terminalOpen, setTerminalOpen] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>('asc');
+
+  // ── Add Application RSP ──
+  const [showAddApp, setShowAddApp] = useState(false);
+  const [addForm, setAddForm] = useState({ bu: '', jobId: '', candidateId: '', recordOwner: '' });
+  const [candSearch, setCandSearch] = useState('');
+  const [candOpen, setCandOpen] = useState(false);
+  const [dupError, setDupError] = useState(false);
+  const candRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (candRef.current && !candRef.current.contains(e.target as Node)) setCandOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const buList = Array.from(new Set(jobs.map(j => j.businessUnit).filter(Boolean))).sort() as string[];
+  const filteredJobs = addForm.bu ? jobs.filter(j => j.businessUnit === addForm.bu && j.status === 'Open') : [];
+  const talentPool = candidates.filter(c => c.profileVisibility === 'visible');
+  const filteredCands = talentPool.filter(c => {
+    const q = candSearch.toLowerCase();
+    return `${c.firstName} ${c.lastName}`.toLowerCase().includes(q) || c.email.toLowerCase().includes(q);
+  });
+  const selectedCand = talentPool.find(c => c.id === addForm.candidateId);
+
+  const buAbbr = (bu: string): string => {
+    const MAP: Record<string, string> = { 'MindInventory': 'MI', '300Mind': '3M', 'CollabCRM': 'CC' };
+    if (MAP[bu]) return MAP[bu];
+    const parts = bu.split(/(?=[A-Z])|(?<=\d)(?=[A-Za-z])|\s+/).filter(Boolean);
+    return parts.map(p => p[0].toUpperCase()).join('').slice(0, 3);
+  };
+
+  const jobLabel = (jobId: string) => {
+    const job = jobs.find(j => j.id === jobId);
+    if (!job) return '';
+    const abbr = buAbbr(job.businessUnit ?? '');
+    const num = parseInt(job.id.replace(/\D/g, '')) || 0;
+    return `${abbr}-${String(num).padStart(3, '0')} | ${job.title}`;
+  };
+
+  const closeRSP = () => {
+    setShowAddApp(false);
+    setAddForm({ bu: '', jobId: '', candidateId: '', recordOwner: '' });
+    setCandSearch('');
+    setCandOpen(false);
+    setDupError(false);
+  };
+
+  const handleAddApp = () => {
+    if (!addForm.bu || !addForm.jobId || !addForm.candidateId || !addForm.recordOwner) return;
+    const dup = applications.find(a => a.candidateId === addForm.candidateId && a.jobId === addForm.jobId);
+    if (dup) { setDupError(true); return; }
+    submitApplication({
+      id: `app_${Date.now()}`,
+      candidateId: addForm.candidateId,
+      jobId: addForm.jobId,
+      status: 'Under Review',
+      appliedAt: new Date().toISOString(),
+      answers: { _addedByRecruiter: true, recordOwner: addForm.recordOwner },
+      resumeUrl: selectedCand?.resumeUrl || '',
+    });
+    closeRSP();
+  };
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
@@ -217,6 +286,13 @@ export default function JobApplicationsPage() {
             <div className="flex items-center gap-2">
               <button className="p-2 border border-[#E5E7EB] rounded-lg text-[#6B7280] hover:bg-[#F9FAFB]"><LayoutGrid className="w-4 h-4" /></button>
               <button className="p-2 border border-[#E5E7EB] rounded-lg text-[#6B7280] hover:bg-[#F9FAFB]"><MoreHorizontal className="w-4 h-4" /></button>
+              <button
+                onClick={() => setShowAddApp(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-[#3538CD] text-white text-sm font-semibold rounded-lg hover:bg-[#2D30B0] transition-colors"
+              >
+                <UserPlus className="w-4 h-4" />
+                Add Application
+              </button>
             </div>
           </div>
 
@@ -422,6 +498,164 @@ export default function JobApplicationsPage() {
           </div>
         </div>
       </div>
+
+      {/* ── Add Application RSP ── */}
+      {showAddApp && (
+        <>
+          <div className="fixed inset-0 bg-black/30 z-[200]" onClick={closeRSP} />
+          <div className="fixed right-0 top-0 h-full w-[480px] bg-white z-[201] shadow-2xl flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-5 border-b border-[#E5E7EB]">
+              <div>
+                <h2 className="text-base font-black text-[#1A1A2E]">Add Application</h2>
+                <p className="text-xs text-[#6B7280] mt-0.5">Manually add a candidate to a job opening</p>
+              </div>
+              <button onClick={closeRSP} className="p-1.5 rounded-lg text-[#9CA3AF] hover:text-[#374151] hover:bg-[#F3F4F6]">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
+
+              {/* BU */}
+              <div>
+                <label className="block text-xs font-bold text-[#374151] uppercase tracking-wider mb-1.5">
+                  Business Unit <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    value={addForm.bu}
+                    onChange={e => setAddForm(f => ({ ...f, bu: e.target.value, jobId: '' }))}
+                    className="w-full appearance-none border border-[#D1D5DB] rounded-lg px-3 py-2.5 text-sm text-[#111827] bg-white focus:outline-none focus:border-[#3538CD] focus:ring-1 focus:ring-[#3538CD]/20"
+                  >
+                    <option value="">Select Business Unit</option>
+                    {buList.map(bu => <option key={bu} value={bu}>{bu}</option>)}
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-[#9CA3AF] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Job Title */}
+              <div>
+                <label className="block text-xs font-bold text-[#374151] uppercase tracking-wider mb-1.5">
+                  Job Title <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    value={addForm.jobId}
+                    onChange={e => setAddForm(f => ({ ...f, jobId: e.target.value }))}
+                    disabled={!addForm.bu}
+                    className="w-full appearance-none border border-[#D1D5DB] rounded-lg px-3 py-2.5 text-sm text-[#111827] bg-white focus:outline-none focus:border-[#3538CD] focus:ring-1 focus:ring-[#3538CD]/20 disabled:bg-[#F9FAFB] disabled:text-[#9CA3AF] disabled:cursor-not-allowed"
+                  >
+                    <option value="">{addForm.bu ? 'Select Job' : 'Select BU first'}</option>
+                    {filteredJobs.map(j => (
+                      <option key={j.id} value={j.id}>{jobLabel(j.id)}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-[#9CA3AF] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Candidate */}
+              <div>
+                <label className="block text-xs font-bold text-[#374151] uppercase tracking-wider mb-1.5">
+                  Candidate <span className="text-red-500">*</span>
+                </label>
+                <div className="relative" ref={candRef}>
+                  <button
+                    type="button"
+                    onClick={() => { setCandOpen(o => !o); setCandSearch(''); }}
+                    className="w-full flex items-center justify-between border border-[#D1D5DB] rounded-lg px-3 py-2.5 bg-white hover:border-[#3538CD] transition-colors text-left"
+                  >
+                    {selectedCand ? (
+                      <div>
+                        <p className="text-sm font-semibold text-[#111827]">{selectedCand.firstName} {selectedCand.lastName}</p>
+                        <p className="text-xs text-[#6B7280]">({selectedCand.email})</p>
+                      </div>
+                    ) : (
+                      <span className="text-sm text-[#9CA3AF]">Select Candidate from Talent Pool</span>
+                    )}
+                    {candOpen ? <ChevronUp className="w-4 h-4 text-[#9CA3AF] flex-shrink-0" /> : <ChevronDown className="w-4 h-4 text-[#9CA3AF] flex-shrink-0" />}
+                  </button>
+
+                  {candOpen && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-[#E5E7EB] rounded-xl shadow-xl overflow-hidden">
+                      <div className="p-2 border-b border-[#F3F4F6]">
+                        <div className="flex items-center gap-2 px-2 py-1.5 bg-[#F9FAFB] rounded-lg">
+                          <Search className="w-3.5 h-3.5 text-[#9CA3AF]" />
+                          <input
+                            autoFocus
+                            type="text"
+                            placeholder="Search by name or email..."
+                            value={candSearch}
+                            onChange={e => setCandSearch(e.target.value)}
+                            className="flex-1 text-xs bg-transparent outline-none text-[#374151] placeholder-[#9CA3AF]"
+                          />
+                        </div>
+                      </div>
+                      <div className="max-h-52 overflow-y-auto">
+                        {filteredCands.length === 0 ? (
+                          <p className="text-xs text-[#9CA3AF] text-center py-6">No candidates found</p>
+                        ) : filteredCands.map(c => (
+                          <button
+                            key={c.id}
+                            type="button"
+                            onClick={() => { setAddForm(f => ({ ...f, candidateId: c.id })); setCandOpen(false); setDupError(false); }}
+                            className={`w-full text-left px-4 py-3 hover:bg-[#F4F5FA] transition-colors border-b border-[#F9FAFB] last:border-0 ${addForm.candidateId === c.id ? 'bg-[#EEF4FF]' : ''}`}
+                          >
+                            <p className="text-sm font-semibold text-[#111827]">{c.firstName} {c.lastName}</p>
+                            <p className="text-xs text-[#6B7280]">({c.email})</p>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Record Owner */}
+              <div>
+                <label className="block text-xs font-bold text-[#374151] uppercase tracking-wider mb-1.5">
+                  Record Owner <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    value={addForm.recordOwner}
+                    onChange={e => setAddForm(f => ({ ...f, recordOwner: e.target.value }))}
+                    className="w-full appearance-none border border-[#D1D5DB] rounded-lg px-3 py-2.5 text-sm text-[#111827] bg-white focus:outline-none focus:border-[#3538CD] focus:ring-1 focus:ring-[#3538CD]/20"
+                  >
+                    <option value="">Select Record Owner</option>
+                    {RECORD_OWNERS.map(o => <option key={o} value={o}>{o}</option>)}
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-[#9CA3AF] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Duplicate error */}
+              {dupError && (
+                <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+                  <p className="text-xs font-semibold text-red-700">This candidate already has an application for the selected job.</p>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-[#E5E7EB] flex items-center justify-end gap-3 bg-[#F9FAFB]">
+              <button onClick={closeRSP} className="px-4 py-2 text-sm font-semibold text-[#374151] border border-[#D1D5DB] rounded-lg hover:bg-white transition-colors">
+                Cancel
+              </button>
+              <button
+                onClick={handleAddApp}
+                disabled={!addForm.bu || !addForm.jobId || !addForm.candidateId || !addForm.recordOwner}
+                className="px-5 py-2 text-sm font-semibold text-white bg-[#3538CD] rounded-lg hover:bg-[#2D30B0] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                Add Application
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </CRMLayout>
   );
 }

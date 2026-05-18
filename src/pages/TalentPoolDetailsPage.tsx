@@ -343,26 +343,6 @@ export default function TalentPoolDetailsPage() {
 
                 {/* Meta */}
                 <div className="w-full space-y-2.5">
-                  {candidate.source && (
-                    <div>
-                      <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Source</p>
-                      <span className="inline-flex mt-1 px-2.5 py-1 bg-[#3538CD] text-white text-[10px] font-black rounded-lg uppercase tracking-wider">
-                        {candidate.source}
-                      </span>
-                    </div>
-                  )}
-                  {candidate.businessUnit && (
-                    <div>
-                      <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Business Unit</p>
-                      <p className="text-xs font-bold text-[#374151] mt-0.5">{candidate.businessUnit}</p>
-                    </div>
-                  )}
-                  {candidate.recordOwner && (
-                    <div>
-                      <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Record Owner</p>
-                      <p className="text-xs font-bold text-[#374151] mt-0.5">{candidate.recordOwner}</p>
-                    </div>
-                  )}
                   {candidate.addedAt && (
                     <div>
                       <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Added On</p>
@@ -496,9 +476,9 @@ export default function TalentPoolDetailsPage() {
                       <DetailField label="Highest Qualification" value={candidate.highestQualification} />
                     </div>
 
-                    {candidate.skills?.length ? (
-                      <div>
-                        <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest mb-3">Skills</p>
+                    <div>
+                      <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest mb-3">Skills</p>
+                      {candidate.skills?.length ? (
                         <div className="flex flex-wrap gap-2">
                           {candidate.skills.map(s => (
                             <span key={s} className="px-3 py-1.5 bg-[#F4F5FA] border border-[#3538CD]/10 text-[#3538CD] text-[11px] font-bold rounded-full">
@@ -506,30 +486,32 @@ export default function TalentPoolDetailsPage() {
                             </span>
                           ))}
                         </div>
-                      </div>
-                    ) : null}
+                      ) : <p className="text-sm font-bold text-[#1A1A2E]">–</p>}
+                    </div>
 
-                    {candidate.experiences?.length ? (
-                      <div className="space-y-3">
-                        <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Career Journey</p>
-                        {candidate.experiences.map((exp: any, i: number) => (
-                          <div key={i} className="bg-[#F9FAFB] p-4 rounded-xl border border-[#E5E7EB]">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <h4 className="text-sm font-black text-[#111827]">{exp.designation}</h4>
-                                <p className="text-xs font-bold text-[#3538CD]">{exp.company}</p>
-                              </div>
-                              <span className="text-[10px] font-black uppercase tracking-widest text-[#6B7280] bg-white border border-[#E5E7EB] px-2.5 py-1 rounded-md">
-                                {exp.from} – {exp.to}
-                              </span>
+                    <DetailField label="General Remarks" value={candidate.recruiterNotes} />
+
+                    <div className="space-y-3">
+                      <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Career Journey</p>
+                      {candidate.experiences?.length ? candidate.experiences.map((exp: any, i: number) => (
+                        <div key={i} className="bg-[#F9FAFB] p-4 rounded-xl border border-[#E5E7EB]">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h4 className="text-sm font-black text-[#111827]">{exp.designation}</h4>
+                              <p className="text-xs font-bold text-[#3538CD]">{exp.company}</p>
                             </div>
-                            {exp.description && (
-                              <p className="text-xs font-medium text-[#4B5563] mt-3 leading-relaxed">{exp.description}</p>
-                            )}
+                            <span className="text-[10px] font-black uppercase tracking-widest text-[#6B7280] bg-white border border-[#E5E7EB] px-2.5 py-1 rounded-md">
+                              {exp.from} – {exp.to}
+                            </span>
                           </div>
-                        ))}
-                      </div>
-                    ) : null}
+                          {exp.description && (
+                            <p className="text-xs font-medium text-[#4B5563] mt-3 leading-relaxed">{exp.description}</p>
+                          )}
+                        </div>
+                      )) : (
+                        <p className="text-sm text-[#C4C9D4] italic">No experience added.</p>
+                      )}
+                    </div>
                   </div>
                 </SectionCard>
 
@@ -555,7 +537,7 @@ export default function TalentPoolDetailsPage() {
                 </SectionCard>
 
                 <SectionCard title="Source Information">
-                  <div className="grid grid-cols-4 gap-8">
+                  <div className="flex gap-16">
                     {candidate.source ? (
                       <div className="space-y-1">
                         <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Source</p>
@@ -565,17 +547,7 @@ export default function TalentPoolDetailsPage() {
                       </div>
                     ) : <DetailField label="Source" value={undefined} />}
                     <DetailField label="Source Remark" value={candidate.sourceRemark} />
-                    <DetailField label="Business Unit" value={candidate.businessUnit} />
-                    <DetailField label="Record Owner" value={candidate.recordOwner} />
                   </div>
-                </SectionCard>
-
-                <SectionCard title="Recruiter Notes">
-                  {candidate.recruiterNotes ? (
-                    <p className="text-sm text-[#374151] leading-relaxed">{candidate.recruiterNotes}</p>
-                  ) : (
-                    <p className="text-sm text-[#C4C9D4] italic">No notes added yet.</p>
-                  )}
                 </SectionCard>
 
               </div>

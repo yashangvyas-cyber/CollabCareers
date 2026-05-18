@@ -14,12 +14,10 @@ const MARITAL_STATUSES = ['Single', 'Married', 'Divorced', 'Widowed'];
 
 export default function AddTalentPage() {
   const navigate = useNavigate();
-  const { jobs, addCandidate, submitApplication } = useApp();
+  const { addCandidate } = useApp();
 
   const [form, setForm] = useState({
     businessUnit: '',
-    recordOwner: '',
-    appliedJob: '',
     source: '',
     remark: '',
     firstName: '',
@@ -136,7 +134,6 @@ export default function AddTalentPage() {
       skills: form.skills,
       noticePeriod: form.noticePeriod || undefined,
       experiences: form.experiences.length > 0 && (form.experiences[0].company || form.experiences[0].designation) ? form.experiences : undefined,
-      appliedJob: form.appliedJob || undefined,
       location: form.city && form.country ? `${form.city}, ${form.country}` : form.city || form.country || undefined,
       address: form.address.trim() || undefined,
       city: form.city.trim() || undefined,
@@ -160,29 +157,11 @@ export default function AddTalentPage() {
       currentDesignation: form.experiences.find((e: any) => e.isCurrent)?.designation || form.experiences[0]?.designation || undefined,
       recruiterNotes: form.recruiterNotes.trim() || undefined,
       businessUnit: form.businessUnit || undefined,
-      recordOwner: form.recordOwner.trim() || undefined,
       addedByRecruiter: true,
       addedAt: new Date().toISOString(),
     };
 
     addCandidate(candidateData);
-
-    if (form.appliedJob) {
-      submitApplication({
-        id: `app_${Date.now()}`,
-        candidateId: candidateData.id,
-        jobId: form.appliedJob,
-        status: 'Under Review',
-        appliedAt: new Date().toISOString(),
-        answers: {
-          _fullFormData: {
-            personal: { contactNumber: form.phone },
-            professional: { experiences: candidateData.experiences }
-          }
-        },
-        resumeUrl: form.resumeFile || ''
-      });
-    }
 
     navigate('/crm/talent-pool', { state: { addedName: `${form.firstName} ${form.lastName}` } });
   };
@@ -292,39 +271,9 @@ export default function AddTalentPage() {
 
             {/* Record Details */}
             <div className="flex lg:flex-row flex-col gap-2">
-              <SideLabel title="Record Details" hint="Assign ownership and link to a job if applicable." />
+              <SideLabel title="Source Information" hint="Tag the source of this candidate record." />
               <div className="w-full p-3 pt-2 bg-white border rounded-lg border-gray-200 2xl:w-3/4 2xl-to-xl:w-[80%] w-[80%] 2xl:p-5 2xl:pt-3">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                  <div>
-                    <div className="mb-1.5 flex items-end min-h-6">
-                      <label className={labelClass}>Job Title</label>
-                    </div>
-                    <div className="relative">
-                      <select value={form.appliedJob} onChange={e => set('appliedJob', e.target.value)} className={selectClass}>
-                        <option value="">Select</option>
-                        {jobs.filter(j => j.status === 'Open').map(j => <option key={j.id} value={j.id}>{j.title}</option>)}
-                      </select>
-                      <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    </div>
-                  </div>
-                  <div>
-                    <div className="mb-1.5 flex items-end min-h-6">
-                      <label className={labelClass}>Record Owner{form.appliedJob ? <>&nbsp;</> : null}</label>
-                      {form.appliedJob && <span className={reqClass}>*</span>}
-                    </div>
-                    <div className="relative">
-                      <select
-                        required={!!form.appliedJob}
-                        value={form.recordOwner}
-                        onChange={e => set('recordOwner', e.target.value)}
-                        className={selectClass}
-                      >
-                        <option value="">Select</option>
-                        {['Sarah Chen', 'Michael Park', 'James Wilson', 'Lisa Ray', 'David Kim'].map(o => <option key={o}>{o}</option>)}
-                      </select>
-                      <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    </div>
-                  </div>
                   <div>
                     <div className="mb-1.5 flex items-end min-h-6">
                       <label className={labelClass}>Source&nbsp;</label>
@@ -350,7 +299,7 @@ export default function AddTalentPage() {
 
             {/* Candidate Information */}
             <div className="flex lg:flex-row flex-col gap-2">
-              <SideLabel title="Candidate Information" hint="Provide basic candidate details." />
+              <SideLabel title="Personal Information" hint="Provide basic candidate details." />
               <div className="w-full p-3 pt-2 bg-white border rounded-lg border-gray-200 2xl:w-3/4 2xl-to-xl:w-[80%] w-[80%] 2xl:p-5 2xl:pt-3">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
                   <div>

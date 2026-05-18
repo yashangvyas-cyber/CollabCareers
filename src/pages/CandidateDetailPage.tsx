@@ -426,6 +426,45 @@ export default function CandidateDetailPage() {
                     <p className="text-sm font-bold text-[#1A1A2E] whitespace-pre-wrap">{candidate?.recruiterNotes || '–'}</p>
                   </div>
                 </div>
+
+                {/* Application Form Responses */}
+                {appliedJob && appliedJob.customFields?.length > 0 && (
+                  <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden">
+                    <SectionHeader title="Application Form Responses" />
+                    <div className="p-6 space-y-6">
+                      {appliedJob.customFields.map((field, i) => {
+                        const raw = latestApp?.answers?.[field.id];
+                        let display: string | undefined;
+                        if (raw === undefined || raw === null || raw === '') {
+                          display = undefined;
+                        } else if (typeof raw === 'boolean') {
+                          display = raw ? 'Yes' : 'No';
+                        } else if (field.type === 'Yes/No') {
+                          display = raw === true || raw === 'true' || raw === 'Yes' ? 'Yes' : 'No';
+                        } else if (field.type === 'File Upload') {
+                          display = raw ? 'File uploaded' : undefined;
+                        } else {
+                          display = String(raw);
+                        }
+                        return (
+                          <div key={field.id} className="flex gap-4">
+                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[#F4F5FA] border border-[#3538CD]/10 text-[#3538CD] text-[10px] font-black flex items-center justify-center mt-0.5">
+                              {i + 1}
+                            </span>
+                            <div className="flex-1 space-y-1.5">
+                              <p className="text-xs font-bold text-[#6B7280] uppercase tracking-widest flex items-center gap-2">
+                                {field.label}
+                                <span className="px-2 py-0.5 bg-[#F3F4F6] text-[#9CA3AF] text-[9px] font-bold rounded-full normal-case tracking-normal">{field.type}</span>
+                                {field.required && <span className="text-red-400 text-[9px] font-bold tracking-normal normal-case">Required</span>}
+                              </p>
+                              <p className="text-sm font-bold text-[#1A1A2E]">{display || '–'}</p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </>
             )}
 

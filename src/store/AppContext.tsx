@@ -20,7 +20,7 @@ interface AppContextType extends AppState {
   blacklistCandidate: (candidateId: string, reason: string) => void;
 }
 
-const STORAGE_KEY = 'collab_careers_state_v5';
+const STORAGE_KEY = 'collab_careers_state_v7';
 
 const initialState: AppState = {
   jobs: [
@@ -37,7 +37,12 @@ const initialState: AppState = {
       salaryRange: { min: '8', max: '14', currency: '₹', type: 'Annual' },
       status: 'Open',
       publishOnCollabCareers: true,
-      customFields: [{ id: '1', label: 'Portfolio URL', type: 'Text', required: true }],
+      customFields: [
+        { id: 'd1_q1', label: 'Portfolio / GitHub URL', type: 'Text', required: true },
+        { id: 'd1_q2', label: 'Years of React Experience', type: 'Number', required: true },
+        { id: 'd1_q3', label: 'Are you open to relocate?', type: 'Yes/No', required: false },
+        { id: 'd1_q4', label: 'Preferred Work Mode', type: 'Dropdown', required: true, options: [{ id: 'wm1', value: 'Remote' }, { id: 'wm2', value: 'On-site' }, { id: 'wm3', value: 'Hybrid' }] },
+      ],
       evaluationCriteria: ['React expert', 'UI skills'],
       createdAt: new Date().toISOString(),
       description: `We are looking for an experienced React Developer to join our frontend team and help build high-performance, scalable web applications. You will work closely with product managers, designers, and backend engineers to deliver polished, accessible user experiences.
@@ -140,7 +145,13 @@ Ship fast, learn faster. Our mobile team is small and the codebase is well-maint
       salaryRange: { min: '18', max: '25', currency: '₹', type: 'Annual' },
       status: 'Open',
       publishOnCollabCareers: true,
-      customFields: [],
+      customFields: [
+        { id: 'd4_q1', label: 'Do you hold a PMP or Scrum certification?', type: 'Yes/No', required: true },
+        { id: 'd4_q2', label: 'Certifications held (list all)', type: 'Text', required: false },
+        { id: 'd4_q3', label: 'Largest team size managed', type: 'Number', required: true },
+        { id: 'd4_q4', label: 'Preferred project methodology', type: 'Dropdown', required: true, options: [{ id: 'pm1', value: 'Agile / Scrum' }, { id: 'pm2', value: 'Kanban' }, { id: 'pm3', value: 'Waterfall' }, { id: 'pm4', value: 'Hybrid' }] },
+        { id: 'd4_q5', label: 'Notice period confirmed?', type: 'Yes/No', required: true },
+      ],
       evaluationCriteria: ['Agile certification'],
       createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
       description: `We are looking for a seasoned Project Manager to lead cross-functional initiatives from ideation to delivery. You will be the connective tissue between business stakeholders, engineering, and design — ensuring we build the right things, the right way, on time.
@@ -670,6 +681,120 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
       modifiedBy: 'Michael Park',
       availabilityStatus: 'Immediate Joiner' as const,
     },
+    // ── Demo candidates — fully populated for profile page showcase ──
+    {
+      id: 'demo1',
+      firstName: 'Vikram',
+      lastName: 'Nair',
+      email: 'vikram.nair@gmail.com',
+      phone: '+91 98001 23456',
+      isAlumni: false,
+      profileVisibility: 'visible' as const,
+      allowRecruiterContact: true,
+      candidateStatus: 'Active' as const,
+      // Personal
+      gender: 'Male',
+      dateOfBirth: '04/Mar/1993',
+      maritalStatus: 'Married',
+      // Professional
+      currentOrg: 'Infosys',
+      currentDesignation: 'Senior Full-Stack Engineer',
+      noticePeriod: '60 days',
+      isFresher: false,
+      totalExperienceYears: 8,
+      totalExperienceMonths: 3,
+      highestQualification: 'B.Tech — Computer Science, IIT Bombay',
+      skills: ['React', 'Node.js', 'TypeScript', 'PostgreSQL', 'AWS', 'Docker', 'GraphQL', 'Redis'],
+      experiences: [
+        { id: 1, company: 'Infosys', designation: 'Senior Full-Stack Engineer', from: 'Jan 2021', to: 'Present', isCurrent: true, description: 'Leading a team of 6 engineers building a B2B SaaS platform. Architected micro-services migration reducing latency by 40%.' },
+        { id: 2, company: 'Wipro', designation: 'Full-Stack Developer', from: 'Jun 2018', to: 'Dec 2020', isCurrent: false, description: 'Built RESTful APIs and React dashboards for an e-commerce analytics product serving 2M+ users.' },
+        { id: 3, company: 'TechSpark (Startup)', designation: 'Junior Developer', from: 'Jul 2016', to: 'May 2018', isCurrent: false, description: 'Developed internal tooling and automation scripts. First engineering hire.' },
+      ],
+      // Salary
+      ctcType: 'Annual',
+      ctcCurrency: 'INR (₹)',
+      currentCtc: '24,00,000',
+      expectedCtc: '32,00,000',
+      // Address
+      address: '14B Whitefield Main Road, Varthur',
+      city: 'Bangalore',
+      state: 'Karnataka',
+      country: 'India',
+      zipCode: '560066',
+      location: 'Bangalore, India',
+      linkedin: 'linkedin.com/in/vikramnair',
+      // Source
+      source: 'LinkedIn',
+      sourceRemark: 'Reached out directly — strong open source contributions on GitHub.',
+      businessUnit: 'MindInventory',
+      recordOwner: 'Sarah Chen',
+      recruiterNotes: 'Excellent system design skills. Cleared L1 telephonic round with flying colours. Prefers remote or hybrid. Has a competing offer from Razorpay — move fast.',
+      // Resume
+      resumeUrl: 'Vikram_Nair_Resume.pdf',
+      resumeLink: 'https://www.w3.org/WAI/WCAG21/Techniques/pdf/PDF2.pdf',
+      addedByRecruiter: true,
+      addedAt: '2026-05-10T09:30:00.000Z',
+      createdBy: 'Sarah Chen',
+      modifiedBy: 'Sarah Chen',
+      availabilityStatus: 'Serving Notice Period' as const,
+    },
+    {
+      id: 'demo2',
+      firstName: 'Aishwarya',
+      lastName: 'Menon',
+      email: 'aishwarya.menon@gmail.com',
+      phone: '+91 91234 56789',
+      isAlumni: true,
+      alumniEmail: 'aishwarya@mindinventory.com',
+      profileVisibility: 'visible' as const,
+      allowRecruiterContact: true,
+      candidateStatus: 'Active' as const,
+      // Personal
+      gender: 'Female',
+      dateOfBirth: '19/Sep/1995',
+      maritalStatus: 'Single',
+      // Professional
+      currentOrg: 'Accenture',
+      currentDesignation: 'Product Manager',
+      noticePeriod: '90 days',
+      isFresher: false,
+      totalExperienceYears: 6,
+      totalExperienceMonths: 9,
+      highestQualification: 'MBA — Product Management, IIM Ahmedabad',
+      skills: ['Product Strategy', 'Roadmapping', 'SQL', 'Figma', 'A/B Testing', 'Agile', 'Stakeholder Management'],
+      experiences: [
+        { id: 1, company: 'Accenture', designation: 'Product Manager', from: 'Mar 2022', to: 'Present', isCurrent: true, description: 'Owns the end-to-end product roadmap for a FinTech compliance platform. Shipped 3 major features reducing client onboarding time by 55%.' },
+        { id: 2, company: 'MindInventory', designation: 'Associate Product Manager', from: 'Jul 2019', to: 'Feb 2022', isCurrent: false, description: 'Defined product specs and coordinated with engineering and design for a fleet-management mobile app. Grew DAU from 12K to 85K in 18 months.' },
+        { id: 3, company: 'Deloitte', designation: 'Business Analyst', from: 'Aug 2017', to: 'Jun 2019', isCurrent: false, description: 'Conducted requirements gathering and process mapping for BFSI clients across US and UK markets.' },
+      ],
+      // Salary
+      ctcType: 'Annual',
+      ctcCurrency: 'INR (₹)',
+      currentCtc: '28,00,000',
+      expectedCtc: '38,00,000',
+      // Address
+      address: '302 Skyline Apartments, Prahlad Nagar',
+      city: 'Ahmedabad',
+      state: 'Gujarat',
+      country: 'India',
+      zipCode: '380015',
+      location: 'Ahmedabad, India',
+      linkedin: 'linkedin.com/in/aishwaryamenon',
+      // Source
+      source: 'Referral',
+      sourceRemark: 'Referred by Rahul Joshi — worked together at MindInventory. Strong cultural fit.',
+      businessUnit: '300Mind',
+      recordOwner: 'Lisa Ray',
+      recruiterNotes: 'Very articulate in stakeholder communication. Previous MindInventory alumna — knows the culture well. Interview slots sent for 22 May 2026.',
+      // Resume
+      resumeUrl: 'Aishwarya_Menon_Resume.pdf',
+      resumeLink: 'https://www.w3.org/WAI/WCAG21/Techniques/pdf/PDF2.pdf',
+      addedByRecruiter: true,
+      addedAt: '2026-05-14T11:45:00.000Z',
+      createdBy: 'Lisa Ray',
+      modifiedBy: 'Lisa Ray',
+      availabilityStatus: 'Open to Good Offers' as const,
+    },
   ],
   applications: [
     {
@@ -773,6 +898,36 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
     { id: 'm7', candidateId: '5', jobId: 'd4', status: 'Selected',              appliedAt: '2026-04-18T00:00:00.000Z', answers: {}, resumeUrl: 'Rahul_Joshi_Resume.pdf' },
     { id: 'm8', candidateId: '5', jobId: 'd5', status: 'Rejected',              appliedAt: '2026-04-05T00:00:00.000Z', answers: {}, resumeUrl: 'Rahul_Joshi_Resume.pdf' },
     { id: 'm9', candidateId: '6', jobId: 'd13', status: 'Under Review',         appliedAt: '2026-04-20T00:00:00.000Z', answers: {}, resumeUrl: 'Kavya_Rao_Resume.pdf' },
+    // Demo candidates — fully answered application form responses
+    {
+      id: 'demo-app-1',
+      candidateId: 'demo1',
+      jobId: 'd1',
+      status: 'Shortlisted',
+      appliedAt: '2026-05-12T10:30:00.000Z',
+      answers: {
+        d1_q1: 'https://github.com/vikramnair',
+        d1_q2: '7',
+        d1_q3: 'Yes',
+        d1_q4: 'Hybrid',
+      },
+      resumeUrl: 'Vikram_Nair_Resume.pdf',
+    },
+    {
+      id: 'demo-app-2',
+      candidateId: 'demo2',
+      jobId: 'd4',
+      status: 'Interview in Progress',
+      appliedAt: '2026-05-15T14:00:00.000Z',
+      answers: {
+        d4_q1: 'Yes',
+        d4_q2: 'PMP (2021), Certified Scrum Master (2019), Google Project Management Certificate',
+        d4_q3: '22',
+        d4_q4: 'Agile / Scrum',
+        d4_q5: 'Yes',
+      },
+      resumeUrl: 'Aishwarya_Menon_Resume.pdf',
+    },
   ],
   invites: [
     // Riya Desai (c2) — invited for Node.js role, she said Interested

@@ -4,7 +4,7 @@ import CRMLayout from '../components/CRMLayout';
 import {
   ChevronDown, X, Eye, Check, Briefcase, Users, UserCheck,
   GraduationCap, UserPlus, Search, Tag, Activity, ChevronLeft, Pencil, EyeOff,
-  Clock, MapPin, Building2, TrendingUp, User, Plus, ArrowUpDown, ArrowUp, ArrowDown, Send,
+  Clock, MapPin, Building2, TrendingUp, Plus, ArrowUpDown, ArrowUp, ArrowDown, Send,
 } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 import type { Candidate, TalentAvailabilityStatus } from '../store/types';
@@ -14,7 +14,7 @@ import InviteEmailCompose from '../components/InviteEmailCompose';
 
 // ── Sort types ────────────────────────────────────────────────────────────────
 
-type SortKey = 'name' | 'experience' | 'noticePeriod' | 'status' | 'source' | 'recordOwner' | 'lastLoginAt' | 'createdBy' | 'modifiedBy';
+type SortKey = 'name' | 'experience' | 'noticePeriod' | 'status' | 'source' | 'lastLoginAt' | 'createdBy' | 'modifiedBy';
 type SortDir = 'asc' | 'desc';
 
 // ── Filter types ─────────────────────────────────────────────────────────────
@@ -28,7 +28,6 @@ type FilterColumn =
   | 'Location'
   | 'Organisation'
   | 'Designation'
-  | 'Record Owner'
   | 'Alumni'
   | 'Added By';
 
@@ -112,8 +111,6 @@ export default function TalentPoolPage() {
 
   // ── Data ──
   const talentPool    = candidates.filter(c => c.profileVisibility === 'visible');
-  const recordOwners  = Array.from(new Set(talentPool.map(c => c.recordOwner).filter(Boolean) as string[])).sort();
-
   // Column config
   const COLUMNS: ColumnDef[] = [
     { key: 'Availability Status', label: 'Availability Status', icon: Activity,      operators: ['Is'],                           values: ['Immediate Joiner', 'Serving Notice Period', 'Open to Good Offers', 'Offer in Hand', 'Not Interested'] },
@@ -124,7 +121,6 @@ export default function TalentPoolPage() {
     { key: 'Location',            label: 'Location',            icon: MapPin,        operators: ['Contains'] },
     { key: 'Organisation',        label: 'Organisation',        icon: Building2,     operators: ['Contains'] },
     { key: 'Designation',         label: 'Designation',         icon: Briefcase,     operators: ['Contains'] },
-    { key: 'Record Owner',        label: 'Record Owner',        icon: User,          operators: ['Is'],                           values: recordOwners.length ? recordOwners : ['Sarah Chen', 'Michael Park', 'James Wilson', 'Lisa Ray', 'David Kim'] },
     { key: 'Alumni',              label: 'Alumni',              icon: GraduationCap, operators: ['Is'],                           values: ['Yes', 'No'] },
     { key: 'Added By',            label: 'Added By',            icon: UserCheck,     operators: ['Is'],                           values: ['Recruiter Added', 'Self Registered'] },
   ];
@@ -222,8 +218,6 @@ export default function TalentPoolPage() {
           match = (c.currentOrg || '').toLowerCase().includes(v0); break;
         case 'Designation':
           match = (c.currentDesignation || '').toLowerCase().includes(v0); break;
-        case 'Record Owner':
-          match = !!c.recordOwner && f.values.includes(c.recordOwner); break;
         case 'Alumni':
           match = f.values.includes(c.isAlumni ? 'Yes' : 'No'); break;
         case 'Added By':
@@ -299,7 +293,6 @@ export default function TalentPoolPage() {
       case 'noticePeriod': av = noticeDays(a.noticePeriod); bv = noticeDays(b.noticePeriod); break;
       case 'status':      av = a.availabilityStatus ?? ''; bv = b.availabilityStatus ?? ''; break;
       case 'source':      av = a.source ?? ''; bv = b.source ?? ''; break;
-      case 'recordOwner': av = a.recordOwner ?? ''; bv = b.recordOwner ?? ''; break;
       case 'lastLoginAt': av = a.lastLoginAt ?? ''; bv = b.lastLoginAt ?? ''; break;
       case 'createdBy':   av = a.createdBy ?? ''; bv = b.createdBy ?? ''; break;
       case 'modifiedBy':  av = a.modifiedBy ?? ''; bv = b.modifiedBy ?? ''; break;
@@ -651,9 +644,6 @@ export default function TalentPoolPage() {
                       </th>
                       <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap">Location</th>
                       <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap">Skills</th>
-                      <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('recordOwner')}>
-                        <div className="flex items-center gap-1">Record Owner <SortIcon sKey="recordOwner" /></div>
-                      </th>
                       <th className="px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-[#F3F4F6]" onClick={() => toggleSort('lastLoginAt')}>
                         <div className="flex items-center gap-1">Last Login At <SortIcon sKey="lastLoginAt" /></div>
                       </th>
@@ -744,9 +734,6 @@ export default function TalentPoolPage() {
                             </div>
                           ) : <span className="text-sm text-[#9CA3AF]">—</span>}
                         </td>
-
-                        {/* Record Owner */}
-                        <td className="px-4 py-4 text-sm text-[#374151] whitespace-nowrap">{candidate.recordOwner || '—'}</td>
 
                         {/* Last Login At */}
                         <td className="px-4 py-4 text-sm text-[#374151] whitespace-nowrap">
