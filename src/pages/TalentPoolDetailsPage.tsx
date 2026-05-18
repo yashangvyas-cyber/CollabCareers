@@ -3,14 +3,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 import CRMLayout from '../components/CRMLayout';
 import {
   Mail, Phone, MapPin, Copy, FileText, ExternalLink,
-  Briefcase, Check, X, MessageSquare,
-  CalendarDays, Send, MoreVertical, ChevronDown,
+  Check, X, Link2, Archive,
+  CalendarDays, Send, MoreVertical,
   Pencil, Ban, Info, Eye, Clock,
   ArrowUpDown, ArrowUp, ArrowDown,
 } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 import InviteEmailCompose from '../components/InviteEmailCompose';
-import type { TalentAvailabilityStatus, TalentInviteStatus } from '../store/types';
+import type { TalentInviteStatus } from '../store/types';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -39,21 +39,6 @@ function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' | null
   return dir === 'asc' ? <ArrowUp className="w-3 h-3 text-[#3538CD]" /> : <ArrowDown className="w-3 h-3 text-[#3538CD]" />;
 }
 
-const AVAILABILITY_OPTIONS: TalentAvailabilityStatus[] = [
-  'Immediate Joiner',
-  'Serving Notice Period',
-  'Open to Good Offers',
-  'Offer in Hand',
-  'Not Interested',
-];
-
-const availabilityStyle: Record<TalentAvailabilityStatus, string> = {
-  'Immediate Joiner':      'bg-green-50 text-green-700 border-green-200',
-  'Serving Notice Period': 'bg-yellow-50 text-yellow-700 border-yellow-200',
-  'Open to Good Offers':   'bg-blue-50 text-blue-700 border-blue-200',
-  'Offer in Hand':         'bg-purple-50 text-purple-700 border-purple-200',
-  'Not Interested':        'bg-gray-100 text-gray-500 border-gray-200',
-};
 
 const inviteStatusStyle: Record<TalentInviteStatus, { pill: string; label: string }> = {
   'Sent':           { pill: 'bg-[#F4F5FA] text-[#3538CD] border-[#3538CD]/10', label: 'Awaiting Response' },
@@ -108,17 +93,22 @@ type Tab = typeof TABS[number];
 export default function TalentPoolDetailsPage() {
   const { candidateId } = useParams();
   const navigate = useNavigate();
-  const { candidates, jobs, applications, invites, updateInviteStatus, updateCandidateAvailability, blacklistCandidate } = useApp();
+  const { candidates, jobs, applications, invites, updateInviteStatus, blacklistCandidate, discardCandidate } = useApp();
 
   const [activeTab, setActiveTab] = useState<Tab>('Profile');
   const [showInvite, setShowInvite] = useState(false);
   const [inviteSent, setInviteSent] = useState<string | null>(null);
-  const [editingAvailability, setEditingAvailability] = useState(false);
   const [showKebab, setShowKebab] = useState(false);
   const kebabRef = useRef<HTMLDivElement>(null);
   const [showBlacklist, setShowBlacklist] = useState(false);
   const [blacklistRemarks, setBlacklistRemarks] = useState('');
+  const [showDiscard, setShowDiscard] = useState(false);
+  const [discardRemarks, setDiscardRemarks] = useState('');
+  const [copiedLink, setCopiedLink] = useState(false);
   const [appliedSortDir, setAppliedSortDir] = useState<'asc' | 'desc' | null>(null);
+  const [noteInput, setNoteInput] = useState('');
+  type Note = { id: string; author: string; text: string; createdAt: string };
+  const [notes, setNotes] = useState<Note[]>([]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -210,11 +200,7 @@ export default function TalentPoolDetailsPage() {
                     </span>
                   )}
                 </div>
-                {candidate.addedByRecruiter && (
-                  <span className="mt-1.5 px-2 py-0.5 text-[9px] font-black bg-[#F4F5FA] text-[#3538CD] border border-[#3538CD]/10 rounded-full uppercase tracking-widest">
-                    Recruiter Added
-                  </span>
-                )}
+
                 {displayDesignation && (
                   <p className="text-sm font-bold text-[#3538CD] mt-1 text-center">{displayDesignation}</p>
                 )}
@@ -310,17 +296,6 @@ export default function TalentPoolDetailsPage() {
                     </div>
                   )}
 
-                  <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setActiveTab('Applications')}>
-                    <div className="w-8 h-8 rounded-lg bg-[#F9FAFB] flex items-center justify-center">
-                      <Briefcase className="w-4 h-4 text-[#6B7280] group-hover:text-[#3538CD] transition-colors" />
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Applications</p>
-                      <span className="text-sm font-bold text-[#3538CD] underline decoration-[#3538CD]/30 underline-offset-4 hover:decoration-[#3538CD]">
-                        {candidateApps.length}
-                      </span>
-                    </div>
-                  </div>
                 </div>
 
                 <div className="w-full border-t border-[#E5E7EB] my-5" />
@@ -343,41 +318,17 @@ export default function TalentPoolDetailsPage() {
 
                 {/* Meta */}
                 <div className="w-full space-y-2.5">
-                  {candidate.addedAt && (
-                    <div>
-                      <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Added On</p>
-                      <p className="text-xs font-bold text-[#374151] mt-0.5">{formatDate(candidate.addedAt)}</p>
-                    </div>
-                  )}
                   <div>
-                    <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest mb-1.5">Availability</p>
-                    {editingAvailability ? (
-                      <select
-                        autoFocus
-                        value={candidate.availabilityStatus ?? ''}
-                        onChange={e => {
-                          updateCandidateAvailability(candidate.id, e.target.value as TalentAvailabilityStatus);
-                          setEditingAvailability(false);
-                        }}
-                        onBlur={() => setEditingAvailability(false)}
-                        className="w-full text-xs font-bold border border-[#3538CD]/30 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#3538CD]/15 bg-white text-[#374151]"
-                      >
-                        <option value="">— Set Availability —</option>
-                        {AVAILABILITY_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
-                      </select>
-                    ) : (
-                      <button
-                        onClick={() => setEditingAvailability(true)}
-                        className={`w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg border text-xs font-black uppercase tracking-widest transition-all hover:opacity-80 ${
-                          candidate.availabilityStatus
-                            ? availabilityStyle[candidate.availabilityStatus]
-                            : 'bg-[#F9FAFB] text-[#9CA3AF] border-[#E5E7EB]'
-                        }`}
-                      >
-                        <span>{candidate.availabilityStatus ?? 'Set Availability'}</span>
-                        <ChevronDown className="w-3.5 h-3.5 shrink-0" />
-                      </button>
-                    )}
+                    <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Created by</p>
+                    <p className="text-[10px] font-bold text-[#6B7280] mt-0.5">
+                      {candidate.createdBy ?? 'Super User'} · {candidate.addedAt ? new Date(candidate.addedAt).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Modified by</p>
+                    <p className="text-[10px] font-bold text-[#6B7280] mt-0.5">
+                      {candidate.modifiedBy ?? 'Super User'} · {candidate.addedAt ? new Date(candidate.addedAt).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -434,12 +385,26 @@ export default function TalentPoolDetailsPage() {
                     <MoreVertical className="w-4 h-4 text-[#6B7280]" />
                   </button>
                   {showKebab && (
-                    <div className="absolute right-0 mt-1.5 w-44 bg-white rounded-xl border border-[#E5E7EB] shadow-xl z-50 overflow-hidden">
+                    <div className="absolute right-0 mt-1.5 w-52 bg-white rounded-xl border border-[#E5E7EB] shadow-xl z-50 overflow-hidden">
+                      <button
+                        onClick={() => { navigator.clipboard.writeText(window.location.href); setShowKebab(false); setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2500); }}
+                        className="w-full flex items-center gap-2.5 px-4 py-3 text-xs font-black text-[#374151] hover:bg-[#F9FAFB] transition-colors uppercase tracking-widest"
+                      >
+                        <Link2 className="w-3.5 h-3.5 text-[#6B7280]" /> Copy Profile Link
+                      </button>
+                      <div className="h-px bg-[#F3F4F6]" />
                       <button
                         onClick={() => { setShowKebab(false); navigate(`/crm/talent-pool/${candidateId}/edit`); }}
                         className="w-full flex items-center gap-2.5 px-4 py-3 text-xs font-black text-[#374151] hover:bg-[#F9FAFB] transition-colors uppercase tracking-widest"
                       >
                         <Pencil className="w-3.5 h-3.5 text-[#6B7280]" /> Edit
+                      </button>
+                      <div className="h-px bg-[#F3F4F6]" />
+                      <button
+                        onClick={() => { setShowKebab(false); setShowDiscard(true); }}
+                        className="w-full flex items-center gap-2.5 px-4 py-3 text-xs font-black text-amber-600 hover:bg-amber-50 transition-colors uppercase tracking-widest"
+                      >
+                        <Archive className="w-3.5 h-3.5" /> Discard
                       </button>
                       <div className="h-px bg-[#F3F4F6]" />
                       <button
@@ -741,19 +706,74 @@ export default function TalentPoolDetailsPage() {
 
             {/* ── Notes tab ── */}
             {activeTab === 'Notes' && (
-              <SectionCard title="Recruiter Notes">
-                {candidate.recruiterNotes ? (
-                  <p className="text-sm text-[#374151] leading-relaxed whitespace-pre-wrap">{candidate.recruiterNotes}</p>
+              <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden">
+                {/* Header */}
+                <div className="flex items-center gap-2.5 px-5 py-4 border-b border-[#E5E7EB]">
+                  <p className="text-base font-semibold text-[#111827]">Notes</p>
+                  {notes.length > 0 && (
+                    <span className="px-2 py-0.5 rounded-2xl border border-indigo-200 bg-indigo-50 text-indigo-700 text-[11px] font-medium">
+                      {notes.length} {notes.length === 1 ? 'Note' : 'Notes'}
+                    </span>
+                  )}
+                </div>
+
+                {/* Input row */}
+                <div className="px-5 py-3 border-b border-[#E5E7EB] bg-[#F9FAFB] flex items-center gap-3">
+                  <input
+                    type="text"
+                    value={noteInput}
+                    onChange={e => setNoteInput(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' && noteInput.trim()) {
+                        setNotes(prev => [...prev, { id: Date.now().toString(), author: 'Super User', text: noteInput.trim(), createdAt: new Date().toISOString() }]);
+                        setNoteInput('');
+                      }
+                    }}
+                    placeholder="Write a note here..."
+                    className="flex-1 text-sm text-[#374151] bg-white border border-[#E5E7EB] rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 placeholder:text-[#9CA3AF]"
+                  />
+                  <button
+                    disabled={!noteInput.trim()}
+                    onClick={() => {
+                      if (!noteInput.trim()) return;
+                      setNotes(prev => [...prev, { id: Date.now().toString(), author: 'Super User', text: noteInput.trim(), createdAt: new Date().toISOString() }]);
+                      setNoteInput('');
+                    }}
+                    className="px-4 py-2 rounded-lg text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    Submit
+                  </button>
+                </div>
+
+                {/* Notes list */}
+                {notes.length === 0 ? (
+                  <div className="py-16 flex flex-col items-center gap-2 text-center">
+                    <p className="text-sm font-semibold text-[#9CA3AF]">No notes yet</p>
+                    <p className="text-xs text-[#C4C9D4]">Add the first note above.</p>
+                  </div>
                 ) : (
-                  <div className="py-12 flex flex-col items-center gap-2 text-center">
-                    <div className="w-10 h-10 bg-[#F4F5FA] rounded-xl flex items-center justify-center">
-                      <MessageSquare className="w-5 h-5 text-[#D1D5DB]" />
-                    </div>
-                    <p className="text-sm font-bold text-[#9CA3AF]">No notes yet</p>
-                    <p className="text-xs text-[#C4C9D4]">Notes about this talent will appear here.</p>
+                  <div className="divide-y divide-[#F3F4F6]">
+                    {notes.map(note => {
+                      const initials = note.author.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+                      const ts = new Date(note.createdAt).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                      return (
+                        <div key={note.id} className="flex items-start gap-3 px-5 py-4">
+                          <div className="w-8 h-8 rounded-full bg-indigo-600 text-white text-[11px] font-black flex items-center justify-center shrink-0 mt-0.5">
+                            {initials}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-baseline gap-2 mb-1">
+                              <span className="text-sm font-semibold text-[#111827]">{note.author}</span>
+                              <span className="text-[11px] text-[#9CA3AF]">({ts})</span>
+                            </div>
+                            <p className="text-sm text-indigo-600">{note.text}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
-              </SectionCard>
+              </div>
             )}
 
           </div>
@@ -846,6 +866,83 @@ export default function TalentPoolDetailsPage() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {showDiscard && (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+            <div className="flex items-center justify-between pl-4 pr-4 py-4">
+              <p className="text-gray-900 font-semibold text-xl">
+                Confirm — <span className="text-amber-600">Discard candidate</span>
+              </p>
+              <button
+                onClick={() => { setShowDiscard(false); setDiscardRemarks(''); }}
+                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <hr className="border-t border-gray-200" />
+
+            <div className="p-4 space-y-4">
+              <div className="flex rounded-xl border border-amber-300 bg-amber-50 text-amber-700 text-sm">
+                <div className="p-3 flex items-center">
+                  <div className="border-2 border-amber-300 rounded-full p-1.5 flex items-center justify-center">
+                    <div className="border-2 border-amber-400 rounded-full p-1 flex items-center justify-center">
+                      <Info className="w-4 h-4 text-amber-700" />
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 pl-0 flex items-center">
+                  <h3 className="font-semibold">Are you sure you want to discard this candidate?</h3>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center gap-1 mb-1.5">
+                  <label className="text-xs font-medium text-gray-700">Remarks</label>
+                  <span className="text-red-500 text-xs">*</span>
+                </div>
+                <textarea
+                  rows={4}
+                  value={discardRemarks}
+                  onChange={e => setDiscardRemarks(e.target.value)}
+                  placeholder="Reason for discarding..."
+                  className="w-full rounded-lg py-2 px-3 border border-gray-300 focus:border-amber-300 focus:outline-none bg-white text-sm resize-none h-[90px]"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 px-4 pb-4">
+              <button
+                type="button"
+                onClick={() => { setShowDiscard(false); setDiscardRemarks(''); }}
+                className="flex-1 h-9 rounded-lg border border-gray-300 text-gray-700 text-sm font-semibold hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={!discardRemarks.trim()}
+                onClick={() => {
+                  discardCandidate(candidate.id, discardRemarks.trim());
+                  setShowDiscard(false);
+                  setDiscardRemarks('');
+                }}
+                className="flex-1 h-9 rounded-lg bg-amber-500 text-white text-sm font-semibold hover:bg-amber-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Yes, Discard
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {copiedLink && (
+        <div className="fixed bottom-6 right-6 z-[200] bg-[#111827] text-white px-5 py-3.5 rounded-xl shadow-2xl flex items-center gap-3">
+          <Check className="w-4 h-4 text-green-400 shrink-0" />
+          <span className="text-sm font-bold">Profile link copied to clipboard</span>
         </div>
       )}
     </>

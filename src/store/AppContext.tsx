@@ -18,9 +18,10 @@ interface AppContextType extends AppState {
   updateInviteStatus: (inviteId: string, status: TalentInviteStatus) => void;
   updateCandidateAvailability: (candidateId: string, status: TalentAvailabilityStatus) => void;
   blacklistCandidate: (candidateId: string, reason: string) => void;
+  discardCandidate: (candidateId: string, reason: string) => void;
 }
 
-const STORAGE_KEY = 'collab_careers_state_v7';
+const STORAGE_KEY = 'collab_careers_state_v8';
 
 const initialState: AppState = {
   jobs: [
@@ -337,6 +338,156 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
     },
   ],
   candidates: [
+    // ── Fully populated showcase candidates ──────────────────────────────────
+    {
+      id: 'full1',
+      firstName: 'Priya',
+      lastName: 'Mehta',
+      email: 'priya.mehta@gmail.com',
+      phone: '+91 99812 34567',
+      isAlumni: false,
+      profileVisibility: 'visible' as const,
+      allowRecruiterContact: true,
+      candidateStatus: 'Active' as const,
+      gender: 'Female',
+      dateOfBirth: '22/Jun/1996',
+      maritalStatus: 'Single',
+      currentOrg: 'Amazon',
+      currentDesignation: 'Senior Data Scientist',
+      noticePeriod: '60 days',
+      isFresher: false,
+      totalExperienceYears: 5,
+      totalExperienceMonths: 4,
+      highestQualification: 'M.Tech — Data Science, IIT Delhi',
+      skills: ['Python', 'Machine Learning', 'TensorFlow', 'SQL', 'Spark', 'AWS SageMaker', 'Tableau'],
+      experiences: [
+        { id: 1, company: 'Amazon', designation: 'Senior Data Scientist', from: 'Feb 2022', to: 'Present', isCurrent: true, description: 'Building ML models for supply chain demand forecasting serving 50M+ SKUs across India. Reduced overstock cost by 18%.' },
+        { id: 2, company: 'Mu Sigma', designation: 'Data Analyst', from: 'Aug 2019', to: 'Jan 2022', isCurrent: false, description: 'Developed predictive analytics dashboards for FMCG clients. Automated 14 manual reporting pipelines saving 120 hrs/month.' },
+      ],
+      ctcType: 'Annual',
+      ctcCurrency: 'INR (₹)',
+      currentCtc: '32,00,000',
+      expectedCtc: '42,00,000',
+      address: '7A Indiranagar 100 Feet Road',
+      city: 'Bangalore',
+      state: 'Karnataka',
+      country: 'India',
+      zipCode: '560038',
+      location: 'Bangalore, India',
+      linkedin: 'linkedin.com/in/priyamehta-ds',
+      source: 'LinkedIn',
+      sourceRemark: 'Applied via LinkedIn Easy Apply. Strong publication record — 3 papers on NLP.',
+      businessUnit: 'MindInventory',
+      recordOwner: 'Sarah Chen',
+      recruiterNotes: 'Exceptional analytical thinking. Cleared screening round in 20 min. Interested in AI-first product roles. Follow up by 25 May.',
+      resumeUrl: 'Priya_Mehta_Resume.pdf',
+      resumeLink: 'https://www.w3.org/WAI/WCAG21/Techniques/pdf/PDF2.pdf',
+      addedByRecruiter: true,
+      addedAt: new Date(Date.now() - 86400000 * 1).toISOString(),
+      createdBy: 'Sarah Chen',
+      modifiedBy: 'Sarah Chen',
+      availabilityStatus: 'Serving Notice Period' as const,
+    },
+    {
+      id: 'full2',
+      firstName: 'Rohan',
+      lastName: 'Kapoor',
+      email: 'rohan.kapoor@gmail.com',
+      phone: '+91 91100 22334',
+      isAlumni: true,
+      alumniEmail: 'rohan@mindinventory.com',
+      profileVisibility: 'visible' as const,
+      allowRecruiterContact: true,
+      candidateStatus: 'Active' as const,
+      gender: 'Male',
+      dateOfBirth: '08/Nov/1991',
+      maritalStatus: 'Married',
+      currentOrg: 'Flipkart',
+      currentDesignation: 'DevOps Lead',
+      noticePeriod: '90 days',
+      isFresher: false,
+      totalExperienceYears: 9,
+      totalExperienceMonths: 1,
+      highestQualification: 'B.E. — Computer Engineering, BITS Pilani',
+      skills: ['Kubernetes', 'Terraform', 'AWS', 'CI/CD', 'Docker', 'Prometheus', 'Linux', 'Go'],
+      experiences: [
+        { id: 1, company: 'Flipkart', designation: 'DevOps Lead', from: 'Mar 2020', to: 'Present', isCurrent: true, description: 'Leading a team of 8 SREs maintaining 99.99% uptime for Flipkart\'s payments infrastructure. Migrated 200+ services to Kubernetes.' },
+        { id: 2, company: 'MindInventory', designation: 'Senior DevOps Engineer', from: 'Jul 2017', to: 'Feb 2020', isCurrent: false, description: 'Built CI/CD pipelines from scratch reducing deployment time from 4 hrs to 12 min. Introduced infrastructure-as-code using Terraform.' },
+        { id: 3, company: 'HCL Technologies', designation: 'Systems Engineer', from: 'Jun 2015', to: 'Jun 2017', isCurrent: false, description: 'Managed on-premise Linux servers and automation scripts for a US banking client.' },
+      ],
+      ctcType: 'Annual',
+      ctcCurrency: 'INR (₹)',
+      currentCtc: '38,00,000',
+      expectedCtc: '50,00,000',
+      address: '22 Kondapur Main Road, Gachibowli',
+      city: 'Hyderabad',
+      state: 'Telangana',
+      country: 'India',
+      zipCode: '500084',
+      location: 'Hyderabad, India',
+      linkedin: 'linkedin.com/in/rohankapoor-devops',
+      source: 'Referral',
+      sourceRemark: 'Referred by Vikram Nair. Previously at MindInventory — strong cultural fit confirmed.',
+      businessUnit: '300Mind',
+      recordOwner: 'Michael Park',
+      recruiterNotes: 'Very hands-on. Infrastructure design experience is exactly what the platform team needs. Prefers remote. Has offer from Razorpay — decision expected by 30 May.',
+      resumeUrl: 'Rohan_Kapoor_Resume.pdf',
+      resumeLink: 'https://www.w3.org/WAI/WCAG21/Techniques/pdf/PDF2.pdf',
+      addedByRecruiter: true,
+      addedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+      createdBy: 'Michael Park',
+      modifiedBy: 'Michael Park',
+      availabilityStatus: 'Serving Notice Period' as const,
+    },
+    {
+      id: 'full3',
+      firstName: 'Sneha',
+      lastName: 'Joshi',
+      email: 'sneha.joshi@gmail.com',
+      phone: '+91 96770 11223',
+      isAlumni: false,
+      profileVisibility: 'visible' as const,
+      allowRecruiterContact: true,
+      candidateStatus: 'Active' as const,
+      gender: 'Female',
+      dateOfBirth: '14/Apr/1998',
+      maritalStatus: 'Single',
+      currentOrg: 'Swiggy',
+      currentDesignation: 'Product Designer',
+      noticePeriod: '30 days',
+      isFresher: false,
+      totalExperienceYears: 4,
+      totalExperienceMonths: 7,
+      highestQualification: 'B.Des — Interaction Design, NID Ahmedabad',
+      skills: ['Figma', 'Design Systems', 'User Research', 'Prototyping', 'Motion Design', 'Accessibility'],
+      experiences: [
+        { id: 1, company: 'Swiggy', designation: 'Product Designer', from: 'Oct 2021', to: 'Present', isCurrent: true, description: 'Owns end-to-end design for the Swiggy Instamart checkout experience used by 8M+ weekly users. Reduced cart abandonment by 23%.' },
+        { id: 2, company: 'Juspay', designation: 'UI/UX Designer', from: 'Sep 2019', to: 'Sep 2021', isCurrent: false, description: 'Designed payment SDK UI components used in PhonePe, Amazon Pay, and Ola. Built comprehensive design token system.' },
+      ],
+      ctcType: 'Annual',
+      ctcCurrency: 'INR (₹)',
+      currentCtc: '18,00,000',
+      expectedCtc: '25,00,000',
+      address: '501 Raheja Residency, Koramangala 5th Block',
+      city: 'Bangalore',
+      state: 'Karnataka',
+      country: 'India',
+      zipCode: '560095',
+      location: 'Bangalore, India',
+      linkedin: 'linkedin.com/in/snehajoshi-design',
+      source: 'Direct Approach',
+      sourceRemark: 'Spotted via Dribbble portfolio. Top 1% designer on the platform.',
+      businessUnit: 'MindInventory',
+      recordOwner: 'Lisa Ray',
+      recruiterNotes: 'Portfolio is stunning — especially the payment UX work. Excited about design system opportunities. Available for interview any day this week.',
+      resumeUrl: 'Sneha_Joshi_Resume.pdf',
+      resumeLink: 'https://www.w3.org/WAI/WCAG21/Techniques/pdf/PDF2.pdf',
+      addedByRecruiter: true,
+      addedAt: new Date(Date.now() - 86400000 * 3).toISOString(),
+      createdBy: 'Lisa Ray',
+      modifiedBy: 'Lisa Ray',
+      availabilityStatus: 'Open to Good Offers' as const,
+    },
     {
       id: 'c1',
       firstName: 'Alex',
@@ -1176,6 +1327,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  const discardCandidate = (candidateId: string, reason: string) => {
+    setState(prev => ({
+      ...prev,
+      candidates: prev.candidates.map(c =>
+        c.id === candidateId
+          ? { ...c, candidateStatus: 'Discarded' as const, statusReason: reason }
+          : c
+      ),
+    }));
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -1196,6 +1358,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         updateInviteStatus,
         updateCandidateAvailability,
         blacklistCandidate,
+        discardCandidate,
       }}
     >
       {children}
