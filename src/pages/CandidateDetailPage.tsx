@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import CRMLayout from '../components/CRMLayout';
 import { Mail, Phone, Copy, Eye, MoreVertical, ExternalLink, UserCheck, EyeOff, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown } from 'lucide-react';
@@ -45,6 +45,9 @@ const APP_STATUS_STYLE: Record<string, { border: string; text: string; bg: strin
   'Archived':              { border: 'rgb(203,213,225)', text: 'rgb(71,85,105)',   bg: 'rgb(248,250,252)', dot: 'rgb(100,116,139)' },
   'Offer Revoked':         { border: 'rgb(255,221,211)', text: 'rgb(255,87,34)',   bg: 'rgb(255,247,244)', dot: 'rgb(255,137,100)' },
   'No Show':               { border: 'rgb(253,186,116)', text: 'rgb(120,53,15)',   bg: 'rgb(255,247,237)', dot: 'rgb(217,119,6)'   },
+  'Active':                { border: 'rgb(191,219,254)', text: 'rgb(29,78,216)',   bg: 'rgb(239,246,255)', dot: 'rgb(59,130,246)'  },
+  'Cancelled':             { border: 'rgb(209,213,219)', text: 'rgb(75,85,99)',    bg: 'rgb(249,250,251)', dot: 'rgb(107,114,128)' },
+  'Future':                { border: 'rgb(199,210,254)', text: 'rgb(67,56,202)',   bg: 'rgb(238,242,255)', dot: 'rgb(99,102,241)'  },
 };
 
 const CANDIDATE_STATUS_STYLE: Record<string, { bg: string; text: string; border: string }> = {
@@ -100,6 +103,36 @@ function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' | null
   return dir === 'asc' ? <ArrowUp className="w-3 h-3 text-[#3538CD]" /> : <ArrowDown className="w-3 h-3 text-[#3538CD]" />;
 }
 
+const PIPELINE_STAGES = ['Active', 'Interview', 'Selected', 'Offered', 'Joined'] as const;
+
+type PipelineStateInfo = {
+  stageIndex: number;
+  type: 'active' | 'hold' | 'exit' | 'complete';
+  label: string;
+};
+
+const STATUS_PIPELINE_MAP: Record<string, PipelineStateInfo> = {
+  'Applied':               { stageIndex: 0, type: 'active',   label: 'Applied' },
+  'Under Review':          { stageIndex: 0, type: 'active',   label: 'Under Review' },
+  'Active':                { stageIndex: 0, type: 'active',   label: 'Active' },
+  'Shortlisted':           { stageIndex: 0, type: 'active',   label: 'Shortlisted' },
+  'Interview in Progress': { stageIndex: 1, type: 'active',   label: 'Interview in Progress' },
+  'Selected':              { stageIndex: 2, type: 'active',   label: 'Selected' },
+  'Offer Made':            { stageIndex: 3, type: 'active',   label: 'Offer Made' },
+  'Offer Accepted':        { stageIndex: 4, type: 'complete', label: 'Offer Accepted' },
+  'Joined':                { stageIndex: 4, type: 'complete', label: 'Joined' },
+  'On Hold':               { stageIndex: 1, type: 'hold',     label: 'On Hold' },
+  'Future':                { stageIndex: 0, type: 'hold',     label: 'Future Consideration' },
+  'Rejected':              { stageIndex: 1, type: 'exit',     label: 'Rejected' },
+  'No Show':               { stageIndex: 1, type: 'exit',     label: 'No Show' },
+  'Cancelled':             { stageIndex: 0, type: 'exit',     label: 'Cancelled' },
+  'Withdrawn':             { stageIndex: 0, type: 'exit',     label: 'Withdrawn' },
+  'Offer Declined':        { stageIndex: 3, type: 'exit',     label: 'Offer Declined' },
+  'Offer Revoked':         { stageIndex: 3, type: 'exit',     label: 'Offer Revoked' },
+  'Not Joined':            { stageIndex: 4, type: 'exit',     label: 'Not Joined' },
+  'Archived':              { stageIndex: 0, type: 'exit',     label: 'Archived' },
+};
+
 export default function CandidateDetailPage() {
   const { candidateId } = useParams();
   const { candidates, applications, jobs } = useApp();
@@ -153,6 +186,38 @@ export default function CandidateDetailPage() {
 
   const toggleAppliedSort = () => setAppliedSortDir(d => d === 'asc' ? 'desc' : 'asc');
 
+  // Pipeline state
+  const pipelineState: PipelineStateInfo = (() => {
+    if (candidateStatus === 'Blacklisted') return { stageIndex: 0, type: 'exit', label: 'Blacklisted' };
+    if (candidateStatus === 'Discarded')   return { stageIndex: 0, type: 'exit', label: 'Discarded' };
+    if (latestApp) return STATUS_PIPELINE_MAP[latestApp.status] ?? { stageIndex: 0, type: 'active', label: latestApp.status };
+    return { stageIndex: 0, type: 'active', label: 'Applied' };
+  })();
+
+  const pipelineDotColor = (idx: number) => {
+    if (idx > pipelineState.stageIndex) return 'bg-white border-[#D1D5DB] text-transparent';
+    if (idx === pipelineState.stageIndex) {
+      if (pipelineState.type === 'exit') return 'bg-red-500 border-red-500 text-white';
+      if (pipelineState.type === 'hold') return 'bg-amber-400 border-amber-400 text-white';
+      return 'bg-[#3538CD] border-[#3538CD] text-white';
+    }
+    return 'bg-[#3538CD] border-[#3538CD] text-white';
+  };
+
+  const pipelineSegColor = (idx: number) => {
+    if (idx >= pipelineState.stageIndex) return 'bg-[#E5E7EB]';
+    if (pipelineState.type === 'exit') return 'bg-red-300';
+    if (pipelineState.type === 'hold') return 'bg-amber-300';
+    return 'bg-[#3538CD]';
+  };
+
+  const pipelineBannerStyle = {
+    active:   { bg: 'bg-[#EEF4FF]', text: 'text-[#3538CD]',  border: 'border-[#C7D2FE]', icon: '●' },
+    hold:     { bg: 'bg-amber-50',  text: 'text-amber-700',  border: 'border-amber-200', icon: '⏸' },
+    exit:     { bg: 'bg-red-50',    text: 'text-red-700',    border: 'border-red-200',   icon: '✕' },
+    complete: { bg: 'bg-green-50',  text: 'text-green-700',  border: 'border-green-200', icon: '✓' },
+  }[pipelineState.type];
+
   const sortedApps = [...candidateApplications].sort((a, b) => {
     if (!appliedSortDir) return 0;
     const da = a.appliedAt ? new Date(a.appliedAt).getTime() : 0;
@@ -170,11 +235,11 @@ export default function CandidateDetailPage() {
       <div className="flex gap-8 items-start">
         {/* LEFT SIDEBAR */}
         <div className="w-[300px] shrink-0 sticky top-[80px]">
-          <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden">
-            <div className="h-1 bg-gradient-to-r from-[#0D9488] to-[#059669]" />
+          <div className="bg-[#FBF8F5] rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-[#3538CD] to-[#6366F1]" />
             <div className="p-6 flex flex-col items-center">
               <div className="mb-3">
-                <span className="px-2.5 py-0.5 text-[9px] font-black uppercase tracking-widest rounded-full bg-[#F0FDF4] text-[#059669] border border-[#BBF7D0]">
+                <span className="px-2.5 py-0.5 text-[9px] font-black uppercase tracking-widest rounded-full bg-[#EEF4FF] text-[#3538CD] border border-[#C7D2FE]">
                   Job Applicant
                 </span>
               </div>
@@ -273,6 +338,7 @@ export default function CandidateDetailPage() {
 
         {/* MAIN CONTENT */}
         <div className="flex-1 min-w-0">
+
           <div className="flex items-center justify-between mb-6 bg-white p-2 rounded-2xl border border-[#E5E7EB] shadow-sm">
             <div className="flex items-center">
               {tabs.map((tab) => {
@@ -283,7 +349,7 @@ export default function CandidateDetailPage() {
                     onClick={() => setActiveTab(tab)}
                     className={`px-6 py-2.5 text-xs font-black uppercase tracking-widest transition-all rounded-xl flex items-center gap-1.5 ${
                       isActive
-                        ? 'bg-[#0D9488] text-white shadow-md shadow-[#0D9488]/20'
+                        ? 'bg-[#3538CD] text-white shadow-md shadow-[#3538CD]/20'
                         : 'text-[#6B7280] hover:text-[#111827] hover:bg-[#F9FAFB]'
                     }`}
                   >
@@ -298,7 +364,7 @@ export default function CandidateDetailPage() {
               })}
             </div>
             <div className="flex items-center gap-3 pr-2">
-              <button className="bg-[#0D9488] text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-[#0B7C72] transition-all shadow-lg shadow-[#0D9488]/20">
+              <button className="bg-[#3538CD] text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-[#2D3AB5] transition-all shadow-lg shadow-[#3538CD]/20">
                 Schedule Interview
               </button>
               <button className="p-3 rounded-xl border-2 border-[#E5E7EB] hover:bg-[#F9FAFB] transition-all">
@@ -310,6 +376,33 @@ export default function CandidateDetailPage() {
           <div className="space-y-6">
             {activeTab === 'Applicant Details' && (
               <>
+                {/* Pipeline Bar */}
+                <div className="bg-[#F0F5FF] rounded-2xl border border-[#C7D2FE] shadow-sm p-5">
+                  <div className="flex items-start">
+                    {PIPELINE_STAGES.map((stage, idx) => {
+                      const isCurrent = idx === pipelineState.stageIndex;
+                      const dotEls: React.ReactNode[] = [];
+                      dotEls.push(
+                        <div key={stage} className="flex flex-col items-center shrink-0 w-20">
+                          <span className={`text-[9px] font-bold uppercase tracking-widest mb-2 ${isCurrent ? 'text-[#111827]' : 'text-[#9CA3AF]'}`}>{stage}</span>
+                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center text-[9px] font-black ${pipelineDotColor(idx)}`}>
+                            {idx === pipelineState.stageIndex && pipelineState.type === 'exit' ? '✕' : idx <= pipelineState.stageIndex ? '✓' : ''}
+                          </div>
+                          {isCurrent && (
+                            <span className={`mt-2 px-2 py-0.5 text-[8px] font-black uppercase tracking-wider rounded-full border whitespace-nowrap ${pipelineBannerStyle.bg} ${pipelineBannerStyle.text} ${pipelineBannerStyle.border}`}>
+                              {pipelineState.label}
+                            </span>
+                          )}
+                        </div>
+                      );
+                      if (idx < PIPELINE_STAGES.length - 1) {
+                        dotEls.push(<div key={`seg-${idx}`} className={`flex-1 h-0.5 mt-[18px] ${pipelineSegColor(idx)}`} />);
+                      }
+                      return dotEls;
+                    })}
+                  </div>
+                </div>
+
                 {/* Applied Job card */}
                 {appliedJob && (
                   <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden">

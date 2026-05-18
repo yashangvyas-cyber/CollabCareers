@@ -65,6 +65,9 @@ const APP_STATUS_STYLE: Record<string, { border: string; text: string; bg: strin
   'Archived':              { border: 'rgb(203,213,225)', text: 'rgb(71,85,105)',   bg: 'rgb(248,250,252)', dot: 'rgb(100,116,139)' },
   'Offer Revoked':         { border: 'rgb(255,221,211)', text: 'rgb(255,87,34)',   bg: 'rgb(255,247,244)', dot: 'rgb(255,137,100)' },
   'No Show':               { border: 'rgb(253,186,116)', text: 'rgb(120,53,15)',   bg: 'rgb(255,247,237)', dot: 'rgb(217,119,6)'   },
+  'Active':                { border: 'rgb(191,219,254)', text: 'rgb(29,78,216)',   bg: 'rgb(239,246,255)', dot: 'rgb(59,130,246)'  },
+  'Cancelled':             { border: 'rgb(209,213,219)', text: 'rgb(75,85,99)',    bg: 'rgb(249,250,251)', dot: 'rgb(107,114,128)' },
+  'Future':                { border: 'rgb(199,210,254)', text: 'rgb(67,56,202)',   bg: 'rgb(238,242,255)', dot: 'rgb(99,102,241)'  },
 };
 
 const CANDIDATE_STATUS_STYLE: Record<string, { bg: string; text: string; border: string }> = {
@@ -205,7 +208,7 @@ export default function TalentPoolDetailsPage() {
           {/* ── LEFT SIDEBAR ── */}
           <div className="w-[280px] shrink-0 sticky top-[80px] space-y-4">
 
-            <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden">
+            <div className="bg-[#EEF4FF] rounded-3xl border border-[#C7D2FE] shadow-sm overflow-hidden">
               <div className="h-1 bg-gradient-to-r from-[#3538CD] to-[#6366F1]" />
               <div className="p-6 flex flex-col items-center">
 
