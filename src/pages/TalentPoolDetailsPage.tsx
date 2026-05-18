@@ -209,6 +209,12 @@ export default function TalentPoolDetailsPage() {
               <div className="h-1 bg-gradient-to-r from-[#3538CD] to-[#6366F1]" />
               <div className="p-6 flex flex-col items-center">
 
+                <div className="mb-3">
+                  <span className="px-2.5 py-0.5 text-[9px] font-black uppercase tracking-widest rounded-full bg-[#EEF2FF] text-[#3538CD] border border-[#C7D2FE]">
+                    Talent Pool
+                  </span>
+                </div>
+
                 <div className="flex items-center justify-center gap-2 flex-wrap">
                   <h2 className="text-lg font-black text-[#1A1A2E] text-center leading-tight">
                     {candidate.firstName} {candidate.lastName}

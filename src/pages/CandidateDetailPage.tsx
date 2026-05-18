@@ -171,7 +171,13 @@ export default function CandidateDetailPage() {
         {/* LEFT SIDEBAR */}
         <div className="w-[300px] shrink-0 sticky top-[80px]">
           <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-[#0D9488] to-[#059669]" />
             <div className="p-6 flex flex-col items-center">
+              <div className="mb-3">
+                <span className="px-2.5 py-0.5 text-[9px] font-black uppercase tracking-widest rounded-full bg-[#F0FDF4] text-[#059669] border border-[#BBF7D0]">
+                  Job Applicant
+                </span>
+              </div>
               <h2 className="text-xl font-black text-[#1A1A2E] text-center tracking-tight">{firstName} {lastName}</h2>
               {appliedJob && (
                 <p title="Applied For" className="text-sm font-bold text-[#3538CD] mt-1 text-center cursor-default">{appliedJob.title}</p>
@@ -277,7 +283,7 @@ export default function CandidateDetailPage() {
                     onClick={() => setActiveTab(tab)}
                     className={`px-6 py-2.5 text-xs font-black uppercase tracking-widest transition-all rounded-xl flex items-center gap-1.5 ${
                       isActive
-                        ? 'bg-[#3538CD] text-white shadow-md shadow-[#3538CD]/20'
+                        ? 'bg-[#0D9488] text-white shadow-md shadow-[#0D9488]/20'
                         : 'text-[#6B7280] hover:text-[#111827] hover:bg-[#F9FAFB]'
                     }`}
                   >
@@ -292,7 +298,7 @@ export default function CandidateDetailPage() {
               })}
             </div>
             <div className="flex items-center gap-3 pr-2">
-              <button className="bg-[#3538CD] text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-[#292bb0] transition-all shadow-lg shadow-[#3538CD]/20">
+              <button className="bg-[#0D9488] text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-[#0B7C72] transition-all shadow-lg shadow-[#0D9488]/20">
                 Schedule Interview
               </button>
               <button className="p-3 rounded-xl border-2 border-[#E5E7EB] hover:bg-[#F9FAFB] transition-all">
@@ -416,14 +422,6 @@ export default function CandidateDetailPage() {
                     <DetailField label="Source Remark" value={candidate?.sourceRemark} />
                     <DetailField label="Business Unit" value={candidate?.businessUnit} />
                     <DetailField label="Record Owner" value={candidate?.recordOwner} />
-                  </div>
-                </div>
-
-                {/* Recruiter Notes */}
-                <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden">
-                  <SectionHeader title="Recruiter Notes" />
-                  <div className="p-6">
-                    <p className="text-sm font-bold text-[#1A1A2E] whitespace-pre-wrap">{candidate?.recruiterNotes || '–'}</p>
                   </div>
                 </div>
 

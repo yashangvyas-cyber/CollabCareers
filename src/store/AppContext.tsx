@@ -21,7 +21,7 @@ interface AppContextType extends AppState {
   discardCandidate: (candidateId: string, reason: string) => void;
 }
 
-const STORAGE_KEY = 'collab_careers_state_v10';
+const STORAGE_KEY = 'collab_careers_state_v11';
 
 const initialState: AppState = {
   jobs: [
@@ -1045,10 +1045,10 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
     { id: 'm3', candidateId: '2', jobId: 'd2', status: 'Interview in Progress', appliedAt: '2026-04-18T00:00:00.000Z', answers: {}, resumeUrl: 'Priya_Shah_Resume.pdf' },
     { id: 'm4', candidateId: '3', jobId: 'd3', status: 'Applied',               appliedAt: '2026-04-23T00:00:00.000Z', answers: {}, resumeUrl: 'Arjun_Mehta_Resume.pdf' },
     { id: 'm5', candidateId: '3', jobId: 'd7', status: 'Rejected',              appliedAt: '2026-04-15T00:00:00.000Z', answers: {}, resumeUrl: 'Arjun_Mehta_Resume.pdf' },
-    { id: 'm6', candidateId: '4', jobId: 'd5', status: 'Applied',               appliedAt: '2026-04-22T00:00:00.000Z', answers: {}, resumeUrl: 'Sneha_Patel_Resume.pdf' },
+    { id: 'm6', candidateId: '4', jobId: 'd5', status: 'Offer Made',             appliedAt: '2026-04-22T00:00:00.000Z', answers: {}, resumeUrl: 'Sneha_Patel_Resume.pdf' },
     { id: 'm7', candidateId: '5', jobId: 'd4', status: 'Selected',              appliedAt: '2026-04-18T00:00:00.000Z', answers: { d4_q1: 'Yes', d4_q2: 'PMP (2020), Certified Scrum Master (2018)', d4_q3: '15', d4_q4: 'Kanban', d4_q5: 'Yes' }, resumeUrl: 'Rahul_Joshi_Resume.pdf' },
     { id: 'm8', candidateId: '5', jobId: 'd5', status: 'Rejected',              appliedAt: '2026-04-05T00:00:00.000Z', answers: {}, resumeUrl: 'Rahul_Joshi_Resume.pdf' },
-    { id: 'm9', candidateId: '6', jobId: 'd13', status: 'Under Review',         appliedAt: '2026-04-20T00:00:00.000Z', answers: {}, resumeUrl: 'Kavya_Rao_Resume.pdf' },
+    { id: 'm9', candidateId: '6', jobId: 'd13', status: 'Offer Accepted',        appliedAt: '2026-04-20T00:00:00.000Z', answers: {}, resumeUrl: 'Kavya_Rao_Resume.pdf' },
     // Demo candidates — fully answered application form responses
     {
       id: 'demo-app-1',
@@ -1136,6 +1136,20 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
       answers: {},
       resumeUrl: 'Sneha_Joshi_Resume.pdf',
     },
+    // ── c-series candidates — pipeline scenario apps ──
+    { id: 'cx-c3', candidateId: 'c3', jobId: 'd1', status: 'Under Review',         appliedAt: new Date(Date.now() - 86400000 * 30).toISOString(), answers: {}, resumeUrl: 'Karan_Mehta_Resume.pdf' },
+    { id: 'cx-c4', candidateId: 'c4', jobId: 'd2', status: 'Joined',               appliedAt: new Date(Date.now() - 86400000 * 60).toISOString(), answers: {}, resumeUrl: 'Ananya_Sharma_Resume.pdf' },
+    { id: 'cx-c5', candidateId: 'c5', jobId: 'd3', status: 'Interview in Progress', appliedAt: new Date(Date.now() - 86400000 * 14).toISOString(), answers: {}, resumeUrl: 'Vikram_Nair_Resume.pdf' },
+    { id: 'cx-c6', candidateId: 'c6', jobId: 'd4', status: 'On Hold',              appliedAt: new Date(Date.now() - 86400000 * 10).toISOString(), answers: {}, resumeUrl: 'Neha_Kulkarni_Resume.pdf' },
+    { id: 'cx-c7', candidateId: 'c7', jobId: 'd5', status: 'Future',               appliedAt: new Date(Date.now() - 86400000 * 7).toISOString(), answers: {}, resumeUrl: 'Arjun_Verma_Resume.pdf' },
+    // ── pipeline scenario candidates ps1–ps7 ──
+    { id: 'ps1-app', candidateId: 'ps1', jobId: 'd6',  status: 'Rejected',      appliedAt: new Date(Date.now() - 86400000 * 22).toISOString(), answers: {}, resumeUrl: 'Sanjay_Kumar_Resume.pdf' },
+    { id: 'ps2-app', candidateId: 'ps2', jobId: 'd7',  status: 'Withdrawn',     appliedAt: new Date(Date.now() - 86400000 * 18).toISOString(), answers: {}, resumeUrl: 'Divya_Patel_Resume.pdf' },
+    { id: 'ps3-app', candidateId: 'ps3', jobId: 'd8',  status: 'Offer Declined', appliedAt: new Date(Date.now() - 86400000 * 15).toISOString(), answers: {}, resumeUrl: 'Kiran_Shah_Resume.pdf' },
+    { id: 'ps4-app', candidateId: 'ps4', jobId: 'd9',  status: 'Offer Revoked', appliedAt: new Date(Date.now() - 86400000 * 12).toISOString(), answers: {}, resumeUrl: 'Pooja_Nair_Resume.pdf' },
+    { id: 'ps5-app', candidateId: 'ps5', jobId: 'd10', status: 'Not Joined',    appliedAt: new Date(Date.now() - 86400000 * 10).toISOString(), answers: {}, resumeUrl: 'Arun_Verma_Resume.pdf' },
+    { id: 'ps6-app', candidateId: 'ps6', jobId: 'd11', status: 'No Show',       appliedAt: new Date(Date.now() - 86400000 * 8).toISOString(), answers: {}, resumeUrl: 'Priyanka_Rao_Resume.pdf' },
+    { id: 'ps7-app', candidateId: 'ps7', jobId: 'd12', status: 'Cancelled',     appliedAt: new Date(Date.now() - 86400000 * 5).toISOString(), answers: {}, resumeUrl: 'Deepak_Singh_Resume.pdf' },
   ],
   invites: [
     // Riya Desai (c2) — invited for Node.js role, she said Interested
