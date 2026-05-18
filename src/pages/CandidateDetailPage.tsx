@@ -46,14 +46,16 @@ const APP_STATUS_STYLE: Record<string, { border: string; text: string; bg: strin
   'Offer Revoked':         { border: 'rgb(255,221,211)', text: 'rgb(255,87,34)',   bg: 'rgb(255,247,244)', dot: 'rgb(255,137,100)' },
   'No Show':               { border: 'rgb(253,186,116)', text: 'rgb(120,53,15)',   bg: 'rgb(255,247,237)', dot: 'rgb(217,119,6)'   },
   'Active':                { border: 'rgb(191,219,254)', text: 'rgb(29,78,216)',   bg: 'rgb(239,246,255)', dot: 'rgb(59,130,246)'  },
-  'Cancelled':             { border: 'rgb(209,213,219)', text: 'rgb(75,85,99)',    bg: 'rgb(249,250,251)', dot: 'rgb(107,114,128)' },
+  'Cancelled':             { border: 'rgb(247,166,222)', text: 'rgb(238,70,188)',  bg: 'rgb(253,242,250)', dot: 'rgb(238,70,188)'  },
   'Future':                { border: 'rgb(199,210,254)', text: 'rgb(67,56,202)',   bg: 'rgb(238,242,255)', dot: 'rgb(99,102,241)'  },
+  'Blacklisted':           { border: 'rgb(196,201,224)', text: 'rgb(78,91,166)',   bg: 'rgb(249,250,251)', dot: 'rgb(78,91,166)'   },
+  'Discarded':             { border: 'rgb(207,214,224)', text: 'rgb(102,112,133)', bg: 'rgb(249,250,251)', dot: 'rgb(102,112,133)' },
 };
 
 const CANDIDATE_STATUS_STYLE: Record<string, { bg: string; text: string; border: string }> = {
   'Active':      { bg: 'rgb(238,242,255)', text: 'rgb(53,56,205)',   border: 'rgb(199,210,254)' },
-  'Blacklisted': { bg: 'rgb(254,242,242)', text: 'rgb(185,28,28)',   border: 'rgb(254,202,202)' },
-  'Discarded':   { bg: 'rgb(249,250,251)', text: 'rgb(107,114,128)', border: 'rgb(209,213,219)' },
+  'Blacklisted': { bg: 'rgb(249,250,251)', text: 'rgb(78,91,166)',   border: 'rgb(196,201,224)' },
+  'Discarded':   { bg: 'rgb(249,250,251)', text: 'rgb(102,112,133)', border: 'rgb(207,214,224)' },
   'Joined':      { bg: 'rgb(240,253,244)', text: 'rgb(21,128,61)',   border: 'rgb(187,247,208)' },
 };
 
@@ -103,7 +105,7 @@ function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' | null
   return dir === 'asc' ? <ArrowUp className="w-3 h-3 text-[#3538CD]" /> : <ArrowDown className="w-3 h-3 text-[#3538CD]" />;
 }
 
-const PIPELINE_STAGES = ['Active', 'Interview', 'Selected', 'Offered', 'Joined'] as const;
+const PIPELINE_STAGES = ['Applied', 'Interview', 'Selected', 'Offered', 'Joined'] as const;
 
 type PipelineStateInfo = {
   stageIndex: number;
@@ -119,14 +121,14 @@ const STATUS_PIPELINE_MAP: Record<string, PipelineStateInfo> = {
   'Interview in Progress': { stageIndex: 1, type: 'active',   label: 'Interview in Progress' },
   'Selected':              { stageIndex: 2, type: 'active',   label: 'Selected' },
   'Offer Made':            { stageIndex: 3, type: 'active',   label: 'Offer Made' },
-  'Offer Accepted':        { stageIndex: 4, type: 'complete', label: 'Offer Accepted' },
+  'Offer Accepted':        { stageIndex: 4, type: 'active',   label: 'Offer Accepted' },
   'Joined':                { stageIndex: 4, type: 'complete', label: 'Joined' },
   'On Hold':               { stageIndex: 1, type: 'hold',     label: 'On Hold' },
-  'Future':                { stageIndex: 0, type: 'hold',     label: 'Future Consideration' },
-  'Rejected':              { stageIndex: 1, type: 'exit',     label: 'Rejected' },
+  'Future':                { stageIndex: 2, type: 'hold',     label: 'Future Consideration' },
   'No Show':               { stageIndex: 1, type: 'exit',     label: 'No Show' },
-  'Cancelled':             { stageIndex: 0, type: 'exit',     label: 'Cancelled' },
-  'Withdrawn':             { stageIndex: 0, type: 'exit',     label: 'Withdrawn' },
+  'Cancelled':             { stageIndex: 1, type: 'exit',     label: 'Cancelled' },
+  'Rejected':              { stageIndex: 1, type: 'exit',     label: 'Rejected' },
+  'Withdrawn':             { stageIndex: 1, type: 'exit',     label: 'Withdrawn' },
   'Offer Declined':        { stageIndex: 3, type: 'exit',     label: 'Offer Declined' },
   'Offer Revoked':         { stageIndex: 3, type: 'exit',     label: 'Offer Revoked' },
   'Not Joined':            { stageIndex: 4, type: 'exit',     label: 'Not Joined' },
@@ -186,13 +188,17 @@ export default function CandidateDetailPage() {
 
   const toggleAppliedSort = () => setAppliedSortDir(d => d === 'asc' ? 'desc' : 'asc');
 
-  // Pipeline state
+  // Blacklisted/Discarded: show as badge on connector line, not as exit dot
+  const isOverride = candidateStatus === 'Blacklisted' || candidateStatus === 'Discarded';
+
+  // Pipeline state always reflects actual app status (override doesn't affect dots)
   const pipelineState: PipelineStateInfo = (() => {
-    if (candidateStatus === 'Blacklisted') return { stageIndex: 0, type: 'exit', label: 'Blacklisted' };
-    if (candidateStatus === 'Discarded')   return { stageIndex: 0, type: 'exit', label: 'Discarded' };
     if (latestApp) return STATUS_PIPELINE_MAP[latestApp.status] ?? { stageIndex: 0, type: 'active', label: latestApp.status };
     return { stageIndex: 0, type: 'active', label: 'Applied' };
   })();
+
+  // Segment index after which the override badge appears
+  const overrideAfterStage = isOverride ? pipelineState.stageIndex : -1;
 
   const pipelineDotColor = (idx: number) => {
     if (idx > pipelineState.stageIndex) return 'bg-white border-[#D1D5DB] text-transparent';
@@ -211,12 +217,6 @@ export default function CandidateDetailPage() {
     return 'bg-[#3538CD]';
   };
 
-  const pipelineBannerStyle = {
-    active:   { bg: 'bg-[#EEF4FF]', text: 'text-[#3538CD]',  border: 'border-[#C7D2FE]', icon: '●' },
-    hold:     { bg: 'bg-amber-50',  text: 'text-amber-700',  border: 'border-amber-200', icon: '⏸' },
-    exit:     { bg: 'bg-red-50',    text: 'text-red-700',    border: 'border-red-200',   icon: '✕' },
-    complete: { bg: 'bg-green-50',  text: 'text-green-700',  border: 'border-green-200', icon: '✓' },
-  }[pipelineState.type];
 
   const sortedApps = [...candidateApplications].sort((a, b) => {
     if (!appliedSortDir) return 0;
@@ -235,7 +235,7 @@ export default function CandidateDetailPage() {
       <div className="flex gap-8 items-start">
         {/* LEFT SIDEBAR */}
         <div className="w-[300px] shrink-0 sticky top-[80px]">
-          <div className="bg-[#FBF8F5] rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden">
+          <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-[#3538CD] to-[#6366F1]" />
             <div className="p-6 flex flex-col items-center">
               <div className="mb-3">
@@ -388,15 +388,36 @@ export default function CandidateDetailPage() {
                           <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center text-[9px] font-black ${pipelineDotColor(idx)}`}>
                             {idx === pipelineState.stageIndex && pipelineState.type === 'exit' ? '✕' : idx <= pipelineState.stageIndex ? '✓' : ''}
                           </div>
-                          {isCurrent && (
-                            <span className={`mt-2 px-2 py-0.5 text-[8px] font-black uppercase tracking-wider rounded-full border whitespace-nowrap ${pipelineBannerStyle.bg} ${pipelineBannerStyle.text} ${pipelineBannerStyle.border}`}>
-                              {pipelineState.label}
-                            </span>
-                          )}
+                          {isCurrent && pipelineState.type !== 'complete' && (() => {
+                            const s = APP_STATUS_STYLE[pipelineState.label] ?? { bg: 'rgb(249,250,251)', text: 'rgb(107,114,128)', border: 'rgb(209,213,219)' };
+                            return (
+                              <span
+                                className="mt-2 px-2 py-0.5 text-[8px] font-black uppercase tracking-wider rounded-full border whitespace-nowrap"
+                                style={{ backgroundColor: s.bg, color: s.text, borderColor: s.border }}
+                              >
+                                {pipelineState.label}
+                              </span>
+                            );
+                          })()}
                         </div>
                       );
                       if (idx < PIPELINE_STAGES.length - 1) {
-                        dotEls.push(<div key={`seg-${idx}`} className={`flex-1 h-0.5 mt-[18px] ${pipelineSegColor(idx)}`} />);
+                        const showOverrideBadge = isOverride && idx === overrideAfterStage;
+                        const ovStyle = showOverrideBadge ? (APP_STATUS_STYLE[candidateStatus] ?? { bg: 'rgb(249,250,251)', text: 'rgb(107,114,128)', border: 'rgb(209,213,219)' }) : null;
+                        dotEls.push(
+                          <div key={`seg-${idx}`} className={`flex-1 h-0.5 mt-[18px] relative ${pipelineSegColor(idx)}`}>
+                            {showOverrideBadge && ovStyle && (
+                              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+                                <span
+                                  className="px-2 py-0.5 text-[8px] font-black uppercase tracking-wider rounded-full border whitespace-nowrap"
+                                  style={{ backgroundColor: ovStyle.bg, color: ovStyle.text, borderColor: ovStyle.border }}
+                                >
+                                  {candidateStatus}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        );
                       }
                       return dotEls;
                     })}
