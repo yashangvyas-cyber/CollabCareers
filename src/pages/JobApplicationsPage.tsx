@@ -9,7 +9,7 @@ import { useApp } from '../store/AppContext';
 
 // ── Terminal chip colour definitions ──────────────────────────────────────────
 const TERMINAL_CHIPS = [
-  { status: 'Selected',       border: 'rgb(171,239,198)', text: 'rgb(6,118,71)',    bg: 'rgb(236,253,243)', dot: 'rgb(23,178,106)'  },
+  { status: 'Selected',       border: 'rgb(171,239,198)', text: 'rgb(23,178,106)', bg: 'rgb(236,253,243)', dot: 'rgb(23,178,106)'  },
   { status: 'Rejected',       border: 'rgb(254,205,202)', text: 'rgb(180,35,24)',   bg: 'rgb(254,243,242)', dot: 'rgb(240,68,56)'   },
   { status: 'Withdrawn',      border: 'rgb(220,215,210)', text: 'rgb(113,104,95)',  bg: 'rgb(250,249,247)', dot: 'rgb(168,160,149)' },
   { status: 'Joined',         border: 'rgb(213,217,235)', text: 'rgb(54,63,114)',   bg: 'rgb(248,249,252)', dot: 'rgb(78,91,166)'   },
@@ -28,7 +28,7 @@ const displayAppStatus = (s: string) => APP_STATUS_DISPLAY[s] ?? s;
 const APP_STATUS_STYLE: Record<string, { border: string; text: string; bg: string; dot: string }> = {
   'Applied':               { border: 'rgb(191,219,254)', text: 'rgb(29,78,216)',  bg: 'rgb(239,246,255)', dot: 'rgb(59,130,246)'  },
   'Under Review':          { border: 'rgb(184,194,240)', text: 'rgb(59,79,160)',  bg: 'rgb(238,240,255)', dot: 'rgb(99,115,210)'  },
-  'Shortlisted':           { border: 'rgb(167,243,208)', text: 'rgb(6,95,70)',    bg: 'rgb(236,253,245)', dot: 'rgb(16,185,129)'  },
+  'Shortlisted':           { border: 'rgb(221,214,254)', text: 'rgb(109,40,217)', bg: 'rgb(245,243,255)', dot: 'rgb(109,40,217)'  },
   'Interview in Progress': { border: 'rgb(253,230,138)', text: 'rgb(146,64,14)',  bg: 'rgb(255,251,235)', dot: 'rgb(245,158,11)'  },
   'Offered':               { border: 'rgb(125,211,252)', text: 'rgb(11,165,236)', bg: 'rgb(240,249,255)', dot: 'rgb(11,165,236)'  },
   'Offer Made':            { border: 'rgb(125,211,252)', text: 'rgb(11,165,236)', bg: 'rgb(240,249,255)', dot: 'rgb(11,165,236)'  },

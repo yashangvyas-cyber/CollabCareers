@@ -31,12 +31,12 @@ function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }
 const APP_STATUS_STYLE: Record<string, { border: string; text: string; bg: string; dot: string }> = {
   'Applied':               { border: 'rgb(191,219,254)', text: 'rgb(29,78,216)',   bg: 'rgb(239,246,255)', dot: 'rgb(59,130,246)'  },
   'Under Review':          { border: 'rgb(184,194,240)', text: 'rgb(59,79,160)',   bg: 'rgb(238,240,255)', dot: 'rgb(99,115,210)'  },
-  'Shortlisted':           { border: 'rgb(167,243,208)', text: 'rgb(6,95,70)',     bg: 'rgb(236,253,245)', dot: 'rgb(16,185,129)'  },
+  'Shortlisted':           { border: 'rgb(221,214,254)', text: 'rgb(109,40,217)',  bg: 'rgb(245,243,255)', dot: 'rgb(109,40,217)'  },
   'Interview in Progress': { border: 'rgb(253,230,138)', text: 'rgb(146,64,14)',   bg: 'rgb(255,251,235)', dot: 'rgb(245,158,11)'  },
   'Offered':               { border: 'rgb(125,211,252)', text: 'rgb(11,165,236)',  bg: 'rgb(240,249,255)', dot: 'rgb(11,165,236)'  },
   'Offer Accepted':        { border: 'rgb(166,243,207)', text: 'rgb(102,198,28)',  bg: 'rgb(237,252,242)', dot: 'rgb(102,198,28)'  },
   'On Hold':               { border: 'rgb(254,215,170)', text: 'rgb(181,71,8)',    bg: 'rgb(255,250,235)', dot: 'rgb(181,71,8)'    },
-  'Selected':              { border: 'rgb(171,239,198)', text: 'rgb(6,118,71)',    bg: 'rgb(236,253,243)', dot: 'rgb(23,178,106)'  },
+  'Selected':              { border: 'rgb(171,239,198)', text: 'rgb(23,178,106)',  bg: 'rgb(236,253,243)', dot: 'rgb(23,178,106)'  },
   'Rejected':              { border: 'rgb(254,205,202)', text: 'rgb(180,35,24)',   bg: 'rgb(254,243,242)', dot: 'rgb(240,68,56)'   },
   'Withdrawn':             { border: 'rgb(220,215,210)', text: 'rgb(113,104,95)',  bg: 'rgb(250,249,247)', dot: 'rgb(168,160,149)' },
   'Joined':                { border: 'rgb(213,217,235)', text: 'rgb(54,63,114)',   bg: 'rgb(248,249,252)', dot: 'rgb(78,91,166)'   },
@@ -179,6 +179,9 @@ export default function CandidateDetailPage() {
   const [activeTab, setActiveTab] = useState('Applicant Details');
   const [appliedSortDir, setAppliedSortDir] = useState<'asc' | 'desc' | null>(null);
   const [feedbackOpen, setFeedbackOpen] = useState<boolean[]>([]);
+  const [kebabOpen, setKebabOpen] = useState(false);
+  const [archiveModalOpen, setArchiveModalOpen] = useState(false);
+  const [archiveRemark, setArchiveRemark] = useState('');
 
   // Interview Details uses mock data keyed by candidateId
   const interviewData: MockInterviewDetails | null = candidateId ? (mockInterviewMap[candidateId] ?? null) : null;
@@ -370,9 +373,62 @@ export default function CandidateDetailPage() {
               <button className="bg-[#3538CD] text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-[#3538CD] transition-all shadow-lg shadow-[#3538CD]/20">
                 Schedule Interview
               </button>
-              <button className="p-3 rounded-xl border-2 border-[#E5E7EB] hover:bg-[#F9FAFB] transition-all">
-                <MoreVertical className="w-5 h-5 text-[#6B7280]" />
-              </button>
+              <div className="relative">
+                <button
+                  className="p-3 rounded-xl border-2 border-[#E5E7EB] hover:bg-[#F9FAFB] transition-all"
+                  onClick={() => setKebabOpen(o => !o)}
+                >
+                  <MoreVertical className="w-5 h-5 text-[#6B7280]" />
+                </button>
+                {kebabOpen && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setKebabOpen(false)} />
+                    <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-xl border border-[#E5E7EB] shadow-lg z-20 overflow-hidden">
+                      <button
+                        className="w-full text-left px-4 py-3 text-sm font-semibold text-[#111827] hover:bg-[#F9FAFB] transition-colors"
+                        onClick={() => setKebabOpen(false)}
+                      >
+                        Shortlist Application
+                      </button>
+                      <button
+                        className="w-full text-left px-4 py-3 text-sm font-semibold text-[#111827] hover:bg-[#F9FAFB] transition-colors border-t border-[#F3F4F6]"
+                        onClick={() => { setKebabOpen(false); setArchiveModalOpen(true); setArchiveRemark(''); }}
+                      >
+                        Archive Application
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+              {archiveModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+                  <div className="bg-white rounded-2xl shadow-xl w-[420px] p-6">
+                    <h3 className="text-sm font-black text-[#111827] uppercase tracking-wider mb-1">Archive Application</h3>
+                    <p className="text-xs text-[#6B7280] mb-4">Add an optional remark before archiving.</p>
+                    <textarea
+                      className="w-full border border-[#E5E7EB] rounded-xl px-3 py-2.5 text-sm text-[#111827] placeholder:text-[#9CA3AF] resize-none focus:outline-none focus:ring-2 focus:ring-[#3538CD]/30 focus:border-[#3538CD]"
+                      rows={3}
+                      placeholder="Remark (optional)"
+                      value={archiveRemark}
+                      onChange={e => setArchiveRemark(e.target.value)}
+                    />
+                    <div className="flex justify-end gap-3 mt-4">
+                      <button
+                        className="px-4 py-2 text-xs font-bold text-[#6B7280] hover:text-[#111827] transition-colors"
+                        onClick={() => setArchiveModalOpen(false)}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        className="px-5 py-2 bg-[#3538CD] text-white text-xs font-black uppercase tracking-wider rounded-xl hover:bg-[#2d30b0] transition-colors"
+                        onClick={() => setArchiveModalOpen(false)}
+                      >
+                        Archive
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -435,10 +491,23 @@ export default function CandidateDetailPage() {
                 {appliedJob && (
                   <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden">
                     <SectionHeader title="Applied Job" />
-                    <div className="p-6 grid grid-cols-3 gap-8">
+                    <div className="p-6 grid grid-cols-4 gap-8">
                       <DetailField label="Job Title" value={appliedJob.title} />
                       <DetailField label="Business Unit" value={appliedJob.businessUnit} />
-                      <DetailField label="Application Status" value={latestApp?.status} />
+                      <div className="space-y-1">
+                        <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Application Status</p>
+                        {latestApp?.status ? (() => {
+                          const s = APP_STATUS_STYLE[latestApp.status] ?? { border: 'rgb(229,231,235)', text: 'rgb(107,114,128)', bg: 'rgb(249,250,251)', dot: 'rgb(156,163,175)' };
+                          return (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border"
+                              style={{ background: s.bg, color: s.text, borderColor: s.border }}>
+                              <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: s.dot }} />
+                              {latestApp.status}
+                            </span>
+                          );
+                        })() : <p className="text-sm font-bold text-[#1A1A2E]">–</p>}
+                      </div>
+                      <DetailField label="Record Owner" value={candidate?.recordOwner} />
                     </div>
                   </div>
                 )}
@@ -529,7 +598,7 @@ export default function CandidateDetailPage() {
                 {/* Source Information */}
                 <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden">
                   <SectionHeader title="Source Information" />
-                  <div className="p-6 grid grid-cols-4 gap-8">
+                  <div className="p-6 grid grid-cols-2 gap-8">
                     <div className="space-y-1">
                       <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Source</p>
                       {candidate?.source ? (
@@ -541,8 +610,6 @@ export default function CandidateDetailPage() {
                       )}
                     </div>
                     <DetailField label="Source Remark" value={candidate?.sourceRemark} />
-                    <DetailField label="Business Unit" value={candidate?.businessUnit} />
-                    <DetailField label="Record Owner" value={candidate?.recordOwner} />
                   </div>
                 </div>
 
