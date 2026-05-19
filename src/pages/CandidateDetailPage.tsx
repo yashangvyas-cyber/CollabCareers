@@ -131,7 +131,7 @@ const STATUS_PIPELINE_MAP: Record<string, PipelineStateInfo> = {
   'Withdrawn':             { stageIndex: 1, type: 'exit',     label: 'Withdrawn' },
   'Offer Declined':        { stageIndex: 3, type: 'exit',     label: 'Offer Declined' },
   'Offer Revoked':         { stageIndex: 3, type: 'exit',     label: 'Offer Revoked' },
-  'Not Joined':            { stageIndex: 4, type: 'exit',     label: 'Not Joined' },
+  'Not Joined':            { stageIndex: 3, type: 'active',   label: 'Not Joined' },
   'Archived':              { stageIndex: 0, type: 'exit',     label: 'Archived' },
 };
 
@@ -188,8 +188,10 @@ export default function CandidateDetailPage() {
 
   const toggleAppliedSort = () => setAppliedSortDir(d => d === 'asc' ? 'desc' : 'asc');
 
-  // Blacklisted/Discarded: show as badge on connector line, not as exit dot
-  const isOverride = candidateStatus === 'Blacklisted' || candidateStatus === 'Discarded';
+  // Blacklisted/Discarded/Not Joined: show as badge on connector line, not as exit dot
+  const isNotJoined = latestApp?.status === 'Not Joined';
+  const isOverride = candidateStatus === 'Blacklisted' || candidateStatus === 'Discarded' || isNotJoined;
+  const overrideBadgeLabel = isNotJoined ? 'Not Joined' : candidateStatus;
 
   // Pipeline state always reflects actual app status (override doesn't affect dots)
   const pipelineState: PipelineStateInfo = (() => {
@@ -236,7 +238,7 @@ export default function CandidateDetailPage() {
         {/* LEFT SIDEBAR */}
         <div className="w-[300px] shrink-0 sticky top-[80px]">
           <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden">
-            <div className="h-1 bg-gradient-to-r from-[#3538CD] to-[#6366F1]" />
+            <div className="h-1 bg-gradient-to-r from-[#3538CD] to-[#565EE9]" />
             <div className="p-6 flex flex-col items-center">
               <h2 className="text-xl font-black text-[#1A1A2E] text-center tracking-tight">{firstName} {lastName}</h2>
               {appliedJob && (
@@ -359,7 +361,7 @@ export default function CandidateDetailPage() {
               })}
             </div>
             <div className="flex items-center gap-3 pr-2">
-              <button className="bg-[#3538CD] text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-[#2D3AB5] transition-all shadow-lg shadow-[#3538CD]/20">
+              <button className="bg-[#3538CD] text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-[#3538CD] transition-all shadow-lg shadow-[#3538CD]/20">
                 Schedule Interview
               </button>
               <button className="p-3 rounded-xl border-2 border-[#E5E7EB] hover:bg-[#F9FAFB] transition-all">
@@ -383,7 +385,7 @@ export default function CandidateDetailPage() {
                           <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center text-[9px] font-black ${pipelineDotColor(idx)}`}>
                             {idx === pipelineState.stageIndex && pipelineState.type === 'exit' ? '✕' : idx <= pipelineState.stageIndex ? '✓' : ''}
                           </div>
-                          {isCurrent && pipelineState.type !== 'complete' && (() => {
+                          {isCurrent && pipelineState.type !== 'complete' && pipelineState.label !== stage && (() => {
                             const s = APP_STATUS_STYLE[pipelineState.label] ?? { bg: 'rgb(249,250,251)', text: 'rgb(107,114,128)', border: 'rgb(209,213,219)' };
                             return (
                               <span
@@ -398,7 +400,7 @@ export default function CandidateDetailPage() {
                       );
                       if (idx < PIPELINE_STAGES.length - 1) {
                         const showOverrideBadge = isOverride && idx === overrideAfterStage;
-                        const ovStyle = showOverrideBadge ? (APP_STATUS_STYLE[candidateStatus] ?? { bg: 'rgb(249,250,251)', text: 'rgb(107,114,128)', border: 'rgb(209,213,219)' }) : null;
+                        const ovStyle = showOverrideBadge ? (APP_STATUS_STYLE[overrideBadgeLabel] ?? { bg: 'rgb(249,250,251)', text: 'rgb(107,114,128)', border: 'rgb(209,213,219)' }) : null;
                         dotEls.push(
                           <div key={`seg-${idx}`} className={`flex-1 h-0.5 mt-[18px] relative ${pipelineSegColor(idx)}`}>
                             {showOverrideBadge && ovStyle && (
@@ -407,7 +409,7 @@ export default function CandidateDetailPage() {
                                   className="px-2 py-0.5 text-[8px] font-black uppercase tracking-wider rounded-full border whitespace-nowrap"
                                   style={{ backgroundColor: ovStyle.bg, color: ovStyle.text, borderColor: ovStyle.border }}
                                 >
-                                  {candidateStatus}
+                                  {overrideBadgeLabel}
                                 </span>
                               </div>
                             )}

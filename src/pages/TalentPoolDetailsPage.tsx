@@ -209,7 +209,7 @@ export default function TalentPoolDetailsPage() {
           <div className="w-[280px] shrink-0 sticky top-[80px] space-y-4">
 
             <div className="bg-[#F0F5FF] rounded-3xl border border-[#C7D2FE] shadow-sm overflow-hidden">
-              <div className="h-1 bg-gradient-to-r from-[#3538CD] to-[#6366F1]" />
+              <div className="h-1 bg-gradient-to-r from-[#3538CD] to-[#565EE9]" />
               <div className="p-6 flex flex-col items-center">
 
 
@@ -393,7 +393,7 @@ export default function TalentPoolDetailsPage() {
                 {canContact && candidateStatus === 'Active' && (
                   <button
                     onClick={() => setShowInvite(true)}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-[#3538CD] text-white text-xs font-black rounded-xl hover:bg-[#2D3AB5] transition-all shadow-md shadow-[#3538CD]/20 uppercase tracking-widest"
+                    className="flex items-center gap-2 px-5 py-2.5 bg-[#3538CD] text-white text-xs font-black rounded-xl hover:bg-[#3538CD] transition-all shadow-md shadow-[#3538CD]/20 uppercase tracking-widest"
                   >
                     <Send className="w-3.5 h-3.5" /> Invite to Apply
                   </button>
@@ -620,7 +620,7 @@ export default function TalentPoolDetailsPage() {
                     {candidateStatus === 'Active' && (
                       <button
                         onClick={() => setShowInvite(true)}
-                        className="mt-2 flex items-center gap-2 px-5 py-2.5 bg-[#3538CD] text-white text-xs font-black rounded-xl hover:bg-[#2D3AB5] transition-all shadow-md shadow-[#3538CD]/20 uppercase tracking-widest"
+                        className="mt-2 flex items-center gap-2 px-5 py-2.5 bg-[#3538CD] text-white text-xs font-black rounded-xl hover:bg-[#3538CD] transition-all shadow-md shadow-[#3538CD]/20 uppercase tracking-widest"
                       >
                         <Send className="w-3.5 h-3.5" /> Send First Invite
                       </button>
