@@ -123,6 +123,7 @@ export interface Application {
     | 'Offered' | 'Offer Accepted'
     | 'Selected' | 'Rejected' | 'Cancelled' | 'Withdrawn' | 'Joined' | 'Offer Declined'
     | 'Not Joined' | 'Archived' | 'Offer Revoked' | 'No Show';
+  exitedAfterStage?: number;
   appliedAt: string;
   answers: Record<string, any>;
   resumeUrl: string;

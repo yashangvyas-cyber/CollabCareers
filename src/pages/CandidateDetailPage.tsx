@@ -30,11 +30,11 @@ function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }
 
 const APP_STATUS_STYLE: Record<string, { border: string; text: string; bg: string; dot: string }> = {
   'Applied':               { border: 'rgb(191,219,254)', text: 'rgb(29,78,216)',   bg: 'rgb(239,246,255)', dot: 'rgb(59,130,246)'  },
-  'Under Review':          { border: 'rgb(191,219,254)', text: 'rgb(29,78,216)',   bg: 'rgb(239,246,255)', dot: 'rgb(59,130,246)'  },
+  'Under Review':          { border: 'rgb(103,232,249)', text: 'rgb(14,116,144)',  bg: 'rgb(236,254,255)', dot: 'rgb(6,182,212)'   },
   'Shortlisted':           { border: 'rgb(167,243,208)', text: 'rgb(6,95,70)',     bg: 'rgb(236,253,245)', dot: 'rgb(16,185,129)'  },
   'Interview in Progress': { border: 'rgb(253,230,138)', text: 'rgb(146,64,14)',   bg: 'rgb(255,251,235)', dot: 'rgb(245,158,11)'  },
-  'Offered':               { border: 'rgb(167,243,208)', text: 'rgb(6,78,59)',     bg: 'rgb(209,250,229)', dot: 'rgb(5,150,105)'   },
-  'Offer Accepted':        { border: 'rgb(167,243,208)', text: 'rgb(6,78,59)',     bg: 'rgb(209,250,229)', dot: 'rgb(5,150,105)'   },
+  'Offered':               { border: 'rgb(125,211,252)', text: 'rgb(11,165,236)',  bg: 'rgb(240,249,255)', dot: 'rgb(11,165,236)'  },
+  'Offer Accepted':        { border: 'rgb(166,243,207)', text: 'rgb(102,198,28)',  bg: 'rgb(237,252,242)', dot: 'rgb(102,198,28)'  },
   'On Hold':               { border: 'rgb(221,214,254)', text: 'rgb(91,33,182)',   bg: 'rgb(245,243,255)', dot: 'rgb(139,92,246)'  },
   'Selected':              { border: 'rgb(171,239,198)', text: 'rgb(6,118,71)',    bg: 'rgb(236,253,243)', dot: 'rgb(23,178,106)'  },
   'Rejected':              { border: 'rgb(254,205,202)', text: 'rgb(180,35,24)',   bg: 'rgb(254,243,242)', dot: 'rgb(240,68,56)'   },
@@ -118,9 +118,10 @@ const STATUS_PIPELINE_MAP: Record<string, PipelineStateInfo> = {
   'Under Review':          { stageIndex: 0, type: 'active',   label: 'Under Review' },
   'Active':                { stageIndex: 0, type: 'active',   label: 'Active' },
   'Shortlisted':           { stageIndex: 0, type: 'active',   label: 'Shortlisted' },
-  'Interview in Progress': { stageIndex: 1, type: 'active',   label: 'Interview in Progress' },
+  'Interview in Progress': { stageIndex: 1, type: 'active',   label: 'Interview' },
   'Selected':              { stageIndex: 2, type: 'active',   label: 'Selected' },
   'Offered':               { stageIndex: 3, type: 'active',   label: 'Offered' },
+  'Offer Made':            { stageIndex: 3, type: 'active',   label: 'Offered' },
   'Offer Accepted':        { stageIndex: 3, type: 'active',   label: 'Offer Accepted' },
   'Joined':                { stageIndex: 4, type: 'complete', label: 'Joined' },
   'On Hold':               { stageIndex: 1, type: 'hold',     label: 'On Hold' },
@@ -128,11 +129,11 @@ const STATUS_PIPELINE_MAP: Record<string, PipelineStateInfo> = {
   'No Show':               { stageIndex: 1, type: 'exit',     label: 'No Show' },
   'Cancelled':             { stageIndex: 1, type: 'exit',     label: 'Cancelled' },
   'Rejected':              { stageIndex: 1, type: 'exit',     label: 'Rejected' },
-  'Withdrawn':             { stageIndex: 1, type: 'exit',     label: 'Withdrawn' },
+  'Withdrawn':             { stageIndex: 1, type: 'active',   label: 'Withdrawn' },
   'Offer Declined':        { stageIndex: 3, type: 'exit',     label: 'Offer Declined' },
   'Offer Revoked':         { stageIndex: 3, type: 'exit',     label: 'Offer Revoked' },
   'Not Joined':            { stageIndex: 3, type: 'active',   label: 'Not Joined' },
-  'Archived':              { stageIndex: 0, type: 'exit',     label: 'Archived' },
+  'Archived':              { stageIndex: 0, type: 'active',   label: 'Archived' },
 };
 
 export default function CandidateDetailPage() {
@@ -188,19 +189,26 @@ export default function CandidateDetailPage() {
 
   const toggleAppliedSort = () => setAppliedSortDir(d => d === 'asc' ? 'desc' : 'asc');
 
-  // Blacklisted/Discarded/Not Joined: show as badge on connector line, not as exit dot
-  const isNotJoined = latestApp?.status === 'Not Joined';
-  const isOverride = candidateStatus === 'Blacklisted' || candidateStatus === 'Discarded' || isNotJoined;
-  const overrideBadgeLabel = isNotJoined ? 'Not Joined' : candidateStatus;
+  // Not Joined / Withdrawn / Archived: connector badge on the line, dots fill to last reached stage
+  const appStatus = latestApp?.status;
+  const isConnectorBadge = appStatus === 'Not Joined' || appStatus === 'Withdrawn' || appStatus === 'Archived';
+  const isCandidatureOverride = candidateStatus === 'Blacklisted' || candidateStatus === 'Discarded';
+  const overrideBadgeLabel = isConnectorBadge ? (appStatus as string) : candidateStatus;
 
-  // Pipeline state always reflects actual app status (override doesn't affect dots)
+  // Pipeline state — for connector badge statuses, exitedAfterStage overrides the default stageIndex
   const pipelineState: PipelineStateInfo = (() => {
-    if (latestApp) return STATUS_PIPELINE_MAP[latestApp.status] ?? { stageIndex: 0, type: 'active', label: latestApp.status };
-    return { stageIndex: 0, type: 'active', label: 'Applied' };
+    if (latestApp) {
+      const mapped = STATUS_PIPELINE_MAP[latestApp.status] ?? { stageIndex: 0, type: 'active' as const, label: latestApp.status };
+      if (isConnectorBadge && latestApp.exitedAfterStage != null) {
+        return { ...mapped, stageIndex: latestApp.exitedAfterStage };
+      }
+      return mapped;
+    }
+    return { stageIndex: 0, type: 'active' as const, label: 'Applied' };
   })();
 
-  // Segment index after which the override badge appears
-  const overrideAfterStage = isOverride ? pipelineState.stageIndex : -1;
+  const showConnectorBadge = isConnectorBadge || isCandidatureOverride;
+  const overrideAfterStage = showConnectorBadge ? pipelineState.stageIndex : -1;
 
   const pipelineDotColor = (idx: number) => {
     if (idx > pipelineState.stageIndex) return 'bg-white border-[#D1D5DB] text-transparent';
@@ -384,8 +392,10 @@ export default function CandidateDetailPage() {
                             {idx === pipelineState.stageIndex && pipelineState.type === 'exit' ? '✕' : idx <= pipelineState.stageIndex ? '✓' : ''}
                           </div>
                           {isCurrent && pipelineState.type !== 'complete' && (() => {
-                            const chipLabel = isNotJoined ? 'Offer Accepted' : pipelineState.label;
-                            if (chipLabel === stage) return null;
+                            let chipLabel: string | null = null;
+                            if (appStatus === 'Not Joined') chipLabel = 'Offer Accepted';
+                            else if (!isConnectorBadge && pipelineState.label !== stage) chipLabel = pipelineState.label;
+                            if (!chipLabel) return null;
                             const s = APP_STATUS_STYLE[chipLabel] ?? { bg: 'rgb(249,250,251)', text: 'rgb(107,114,128)', border: 'rgb(209,213,219)' };
                             return (
                               <span
@@ -399,7 +409,7 @@ export default function CandidateDetailPage() {
                         </div>
                       );
                       if (idx < PIPELINE_STAGES.length - 1) {
-                        const showOverrideBadge = isOverride && idx === overrideAfterStage;
+                        const showOverrideBadge = showConnectorBadge && idx === overrideAfterStage;
                         const ovStyle = showOverrideBadge ? (APP_STATUS_STYLE[overrideBadgeLabel] ?? { bg: 'rgb(249,250,251)', text: 'rgb(107,114,128)', border: 'rgb(209,213,219)' }) : null;
                         dotEls.push(
                           <div key={`seg-${idx}`} className={`flex-1 h-0.5 mt-[18px] relative ${pipelineSegColor(idx)}`}>

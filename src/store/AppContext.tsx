@@ -21,7 +21,7 @@ interface AppContextType extends AppState {
   discardCandidate: (candidateId: string, reason: string) => void;
 }
 
-const STORAGE_KEY = 'collab_careers_state_v13';
+const STORAGE_KEY = 'collab_careers_state_v15';
 
 const initialState: AppState = {
   jobs: [
@@ -968,6 +968,7 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
     { id: 'ps5', firstName: 'Arun',     lastName: 'Verma',  email: 'arun.verma@example.com',     phone: '+91 99100 55555', isAlumni: false, candidateStatus: 'Active' as const, currentDesignation: 'DevOps Engineer',      currentOrg: 'TCS',              noticePeriod: 'Immediate', source: 'Referral', addedByRecruiter: true, addedAt: new Date(Date.now() - 86400000 * 12).toISOString() },
     { id: 'ps6', firstName: 'Priyanka', lastName: 'Rao',    email: 'priyanka.rao@example.com',   phone: '+91 99100 66666', isAlumni: false, candidateStatus: 'Active' as const, currentDesignation: 'QA Engineer',          currentOrg: 'Accenture',        noticePeriod: '30 days', source: 'Naukri',    addedByRecruiter: true, addedAt: new Date(Date.now() - 86400000 * 10).toISOString() },
     { id: 'ps7', firstName: 'Deepak',   lastName: 'Singh',  email: 'deepak.singh@example.com',   phone: '+91 99100 77777', isAlumni: false, candidateStatus: 'Active' as const, currentDesignation: 'Data Analyst',         currentOrg: 'Capgemini',        noticePeriod: '45 days', source: 'LinkedIn',  addedByRecruiter: true, addedAt: new Date(Date.now() - 86400000 * 8).toISOString() },
+    { id: 'ps8', firstName: 'Rekha',    lastName: 'Sharma', email: 'rekha.sharma@example.com',   phone: '+91 98765 00001', isAlumni: false, candidateStatus: 'Active' as const, currentDesignation: 'HR Executive',         currentOrg: 'Mindtree',         noticePeriod: '30 days', source: 'Naukri',    addedByRecruiter: true, addedAt: new Date(Date.now() - 86400000 * 50).toISOString(), skills: ['Recruitment', 'HRMS', 'Excel'], totalExperienceYears: 2 },
   ],
   applications: [
     {
@@ -1180,12 +1181,13 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
     { id: 'cx-c7', candidateId: 'c7', jobId: 'd5', status: 'Future',               appliedAt: new Date(Date.now() - 86400000 * 7).toISOString(), answers: {}, resumeUrl: 'Arjun_Verma_Resume.pdf' },
     // ── pipeline scenario candidates ps1–ps7 ──
     { id: 'ps1-app', candidateId: 'ps1', jobId: 'd6',  status: 'Rejected',      appliedAt: new Date(Date.now() - 86400000 * 22).toISOString(), answers: {}, resumeUrl: 'Sanjay_Kumar_Resume.pdf' },
-    { id: 'ps2-app', candidateId: 'ps2', jobId: 'd7',  status: 'Withdrawn',     appliedAt: new Date(Date.now() - 86400000 * 18).toISOString(), answers: {}, resumeUrl: 'Divya_Patel_Resume.pdf' },
+    { id: 'ps2-app', candidateId: 'ps2', jobId: 'd7',  status: 'Withdrawn',     exitedAfterStage: 1, appliedAt: new Date(Date.now() - 86400000 * 18).toISOString(), answers: {}, resumeUrl: 'Divya_Patel_Resume.pdf' },
     { id: 'ps3-app', candidateId: 'ps3', jobId: 'd8',  status: 'Offer Declined', appliedAt: new Date(Date.now() - 86400000 * 15).toISOString(), answers: {}, resumeUrl: 'Kiran_Shah_Resume.pdf' },
     { id: 'ps4-app', candidateId: 'ps4', jobId: 'd9',  status: 'Offer Revoked', appliedAt: new Date(Date.now() - 86400000 * 12).toISOString(), answers: {}, resumeUrl: 'Pooja_Nair_Resume.pdf' },
     { id: 'ps5-app', candidateId: 'ps5', jobId: 'd10', status: 'Not Joined',    appliedAt: new Date(Date.now() - 86400000 * 10).toISOString(), answers: {}, resumeUrl: 'Arun_Verma_Resume.pdf' },
     { id: 'ps6-app', candidateId: 'ps6', jobId: 'd11', status: 'No Show',       appliedAt: new Date(Date.now() - 86400000 * 8).toISOString(), answers: {}, resumeUrl: 'Priyanka_Rao_Resume.pdf' },
     { id: 'ps7-app', candidateId: 'ps7', jobId: 'd12', status: 'Cancelled',     appliedAt: new Date(Date.now() - 86400000 * 5).toISOString(), answers: {}, resumeUrl: 'Deepak_Singh_Resume.pdf' },
+    { id: 'ps8-app', candidateId: 'ps8', jobId: 'd1',  status: 'Archived',      exitedAfterStage: 0, appliedAt: '2026-03-10T00:00:00.000Z', answers: {}, resumeUrl: 'Rekha_Sharma_Resume.pdf' },
   ],
   invites: [
     // Riya Desai (c2) — invited for Node.js role, she said Interested
