@@ -383,14 +383,16 @@ export default function CandidateDetailPage() {
                           <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center text-[9px] font-black ${pipelineDotColor(idx)}`}>
                             {idx === pipelineState.stageIndex && pipelineState.type === 'exit' ? '✕' : idx <= pipelineState.stageIndex ? '✓' : ''}
                           </div>
-                          {isCurrent && pipelineState.type !== 'complete' && pipelineState.label !== stage && (() => {
-                            const s = APP_STATUS_STYLE[pipelineState.label] ?? { bg: 'rgb(249,250,251)', text: 'rgb(107,114,128)', border: 'rgb(209,213,219)' };
+                          {isCurrent && pipelineState.type !== 'complete' && (() => {
+                            const chipLabel = isNotJoined ? 'Offer Accepted' : pipelineState.label;
+                            if (chipLabel === stage) return null;
+                            const s = APP_STATUS_STYLE[chipLabel] ?? { bg: 'rgb(249,250,251)', text: 'rgb(107,114,128)', border: 'rgb(209,213,219)' };
                             return (
                               <span
                                 className="mt-2 px-2 py-0.5 text-[8px] font-black uppercase tracking-wider rounded-full border whitespace-nowrap"
                                 style={{ backgroundColor: s.bg, color: s.text, borderColor: s.border }}
                               >
-                                {pipelineState.label}
+                                {chipLabel}
                               </span>
                             );
                           })()}
