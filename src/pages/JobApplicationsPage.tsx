@@ -27,13 +27,13 @@ const displayAppStatus = (s: string) => APP_STATUS_DISPLAY[s] ?? s;
 
 const APP_STATUS_STYLE: Record<string, { border: string; text: string; bg: string; dot: string }> = {
   'Applied':               { border: 'rgb(191,219,254)', text: 'rgb(29,78,216)',  bg: 'rgb(239,246,255)', dot: 'rgb(59,130,246)'  },
-  'Under Review':          { border: 'rgb(103,232,249)', text: 'rgb(14,116,144)', bg: 'rgb(236,254,255)', dot: 'rgb(6,182,212)'   },
+  'Under Review':          { border: 'rgb(184,194,240)', text: 'rgb(59,79,160)',  bg: 'rgb(238,240,255)', dot: 'rgb(99,115,210)'  },
   'Shortlisted':           { border: 'rgb(167,243,208)', text: 'rgb(6,95,70)',    bg: 'rgb(236,253,245)', dot: 'rgb(16,185,129)'  },
   'Interview in Progress': { border: 'rgb(253,230,138)', text: 'rgb(146,64,14)',  bg: 'rgb(255,251,235)', dot: 'rgb(245,158,11)'  },
   'Offered':               { border: 'rgb(125,211,252)', text: 'rgb(11,165,236)', bg: 'rgb(240,249,255)', dot: 'rgb(11,165,236)'  },
   'Offer Made':            { border: 'rgb(125,211,252)', text: 'rgb(11,165,236)', bg: 'rgb(240,249,255)', dot: 'rgb(11,165,236)'  },
   'Offer Accepted':        { border: 'rgb(166,243,207)', text: 'rgb(102,198,28)', bg: 'rgb(237,252,242)', dot: 'rgb(102,198,28)'  },
-  'On Hold':               { border: 'rgb(221,214,254)', text: 'rgb(91,33,182)',  bg: 'rgb(245,243,255)', dot: 'rgb(139,92,246)'  },
+  'On Hold':               { border: 'rgb(254,215,170)', text: 'rgb(181,71,8)',   bg: 'rgb(255,250,235)', dot: 'rgb(181,71,8)'    },
   ...Object.fromEntries(TERMINAL_CHIPS.map(c => [c.status, c])),
 };
 
