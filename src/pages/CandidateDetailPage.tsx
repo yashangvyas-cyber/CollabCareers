@@ -235,14 +235,9 @@ export default function CandidateDetailPage() {
       <div className="flex gap-8 items-start">
         {/* LEFT SIDEBAR */}
         <div className="w-[300px] shrink-0 sticky top-[80px]">
-          <div className="bg-[#F0F9FF] rounded-3xl border border-[#BAE6FD] shadow-sm overflow-hidden">
+          <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-[#3538CD] to-[#6366F1]" />
             <div className="p-6 flex flex-col items-center">
-              <div className="mb-3">
-                <span className="px-2.5 py-0.5 text-[9px] font-black uppercase tracking-widest rounded-full bg-[#EEF4FF] text-[#3538CD] border border-[#C7D2FE]">
-                  Job Applicant
-                </span>
-              </div>
               <h2 className="text-xl font-black text-[#1A1A2E] text-center tracking-tight">{firstName} {lastName}</h2>
               {appliedJob && (
                 <p title="Applied For" className="text-sm font-bold text-[#3538CD] mt-1 text-center cursor-default">{appliedJob.title}</p>
@@ -347,15 +342,15 @@ export default function CandidateDetailPage() {
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`px-6 py-2.5 text-xs font-black uppercase tracking-widest transition-all rounded-xl flex items-center gap-1.5 ${
+                    className={`px-2.5 py-1.5 text-xs font-semibold transition-all rounded-md flex items-center gap-1.5 whitespace-nowrap ${
                       isActive
-                        ? 'bg-[#3538CD] text-white shadow-md shadow-[#3538CD]/20'
+                        ? 'bg-indigo-50 text-indigo-700'
                         : 'text-[#6B7280] hover:text-[#111827] hover:bg-[#F9FAFB]'
                     }`}
                   >
                     {tab}
                     {tab === 'Applied Jobs' && (
-                      <span className={`text-[9px] font-black px-1.5 py-0.5 rounded ${isActive ? 'bg-white/20 text-white' : 'bg-[#E5E7EB] text-[#6B7280]'}`}>
+                      <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded ${isActive ? 'bg-indigo-100 text-indigo-700' : 'bg-[#E5E7EB] text-[#6B7280]'}`}>
                         {totalApplicationCount}
                       </span>
                     )}
