@@ -21,7 +21,7 @@ interface AppContextType extends AppState {
   discardCandidate: (candidateId: string, reason: string) => void;
 }
 
-const STORAGE_KEY = 'collab_careers_state_v15';
+const STORAGE_KEY = 'collab_careers_state_v16';
 
 const initialState: AppState = {
   jobs: [
@@ -1187,7 +1187,7 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
     { id: 'ps5-app', candidateId: 'ps5', jobId: 'd10', status: 'Not Joined',    appliedAt: new Date(Date.now() - 86400000 * 10).toISOString(), answers: {}, resumeUrl: 'Arun_Verma_Resume.pdf' },
     { id: 'ps6-app', candidateId: 'ps6', jobId: 'd11', status: 'No Show',       appliedAt: new Date(Date.now() - 86400000 * 8).toISOString(), answers: {}, resumeUrl: 'Priyanka_Rao_Resume.pdf' },
     { id: 'ps7-app', candidateId: 'ps7', jobId: 'd12', status: 'Cancelled',     appliedAt: new Date(Date.now() - 86400000 * 5).toISOString(), answers: {}, resumeUrl: 'Deepak_Singh_Resume.pdf' },
-    { id: 'ps8-app', candidateId: 'ps8', jobId: 'd1',  status: 'Archived',      exitedAfterStage: 0, appliedAt: '2026-03-10T00:00:00.000Z', answers: {}, resumeUrl: 'Rekha_Sharma_Resume.pdf' },
+    { id: 'ps8-app', candidateId: 'ps8', jobId: 'd1',  status: 'Archived',      exitedAfterStage: 0, archiveRemark: 'Candidate went silent after 2 follow-ups. Archiving for now.', appliedAt: '2026-03-10T00:00:00.000Z', answers: {}, resumeUrl: 'Rekha_Sharma_Resume.pdf' },
   ],
   invites: [
     // Riya Desai (c2) — invited for Node.js role, she said Interested

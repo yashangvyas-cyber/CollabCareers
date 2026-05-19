@@ -124,6 +124,7 @@ export interface Application {
     | 'Selected' | 'Rejected' | 'Cancelled' | 'Withdrawn' | 'Joined' | 'Offer Declined'
     | 'Not Joined' | 'Archived' | 'Offer Revoked' | 'No Show';
   exitedAfterStage?: number;
+  archiveRemark?: string;
   appliedAt: string;
   answers: Record<string, any>;
   resumeUrl: string;

@@ -28,6 +28,23 @@ function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }
   );
 }
 
+type Note = { id: string; author: string; text: string; createdAt: string; tag?: string };
+
+const mockNotesMap: Record<string, Note[]> = {
+  '1': [
+    { id: 'cn1', author: 'System',     text: 'Application received via Naukri. Resume screened by ATS — 78% match score.', createdAt: new Date(Date.now() - 86400000 * 2).toISOString() },
+    { id: 'cn2', author: 'Sarah Chen', text: 'Reviewed resume — solid full-stack background. Scheduling a quick phone screen for tomorrow.', createdAt: new Date(Date.now() - 86400000 * 1).toISOString() },
+  ],
+  '2': [
+    { id: 'cn3', author: 'System',     text: 'Application received via LinkedIn. Candidate profile verified.', createdAt: new Date(Date.now() - 86400000 * 3).toISOString() },
+    { id: 'cn4', author: 'Sarah Chen', text: 'First interview done. Strong communication, good React knowledge. Moving to technical round.', createdAt: new Date(Date.now() - 86400000 * 1 - 3600000 * 2).toISOString() },
+    { id: 'cn5', author: 'Sarah Chen', text: 'Technical round scheduled for Friday. Panel: Rahul + Ananya.', createdAt: new Date(Date.now() - 3600000 * 4).toISOString() },
+  ],
+  '3': [
+    { id: 'cn6', author: 'System', text: 'Application received via CollabCareers portal.', createdAt: new Date(Date.now() - 86400000 * 1).toISOString() },
+  ],
+};
+
 const APP_STATUS_STYLE: Record<string, { border: string; text: string; bg: string; dot: string }> = {
   'Applied':               { border: 'rgb(191,219,254)', text: 'rgb(29,78,216)',   bg: 'rgb(239,246,255)', dot: 'rgb(59,130,246)'  },
   'Under Review':          { border: 'rgb(184,194,240)', text: 'rgb(59,79,160)',   bg: 'rgb(238,240,255)', dot: 'rgb(99,115,210)'  },
@@ -182,6 +199,9 @@ export default function CandidateDetailPage() {
   const [kebabOpen, setKebabOpen] = useState(false);
   const [archiveModalOpen, setArchiveModalOpen] = useState(false);
   const [archiveRemark, setArchiveRemark] = useState('');
+  const [savedArchiveRemark, setSavedArchiveRemark] = useState(() => latestApp?.archiveRemark ?? '');
+  const [notes, setNotes] = useState<Note[]>(() => mockNotesMap[candidateId ?? ''] ?? []);
+  const [noteInput, setNoteInput] = useState('');
 
   // Interview Details uses mock data keyed by candidateId
   const interviewData: MockInterviewDetails | null = candidateId ? (mockInterviewMap[candidateId] ?? null) : null;
@@ -365,6 +385,11 @@ export default function CandidateDetailPage() {
                         {totalApplicationCount}
                       </span>
                     )}
+                    {tab === 'Notes' && notes.length > 0 && (
+                      <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded ${isActive ? 'bg-indigo-100 text-indigo-700' : 'bg-[#E5E7EB] text-[#6B7280]'}`}>
+                        {notes.length}
+                      </span>
+                    )}
                   </button>
                 );
               })}
@@ -421,7 +446,10 @@ export default function CandidateDetailPage() {
                       </button>
                       <button
                         className="px-5 py-2 bg-[#3538CD] text-white text-xs font-black uppercase tracking-wider rounded-xl hover:bg-[#2d30b0] transition-colors"
-                        onClick={() => setArchiveModalOpen(false)}
+                        onClick={() => {
+                          setSavedArchiveRemark(archiveRemark.trim());
+                          setArchiveModalOpen(false);
+                        }}
                       >
                         Archive
                       </button>
@@ -499,11 +527,20 @@ export default function CandidateDetailPage() {
                         {latestApp?.status ? (() => {
                           const s = APP_STATUS_STYLE[latestApp.status] ?? { border: 'rgb(229,231,235)', text: 'rgb(107,114,128)', bg: 'rgb(249,250,251)', dot: 'rgb(156,163,175)' };
                           return (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border"
-                              style={{ background: s.bg, color: s.text, borderColor: s.border }}>
-                              <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: s.dot }} />
-                              {latestApp.status}
-                            </span>
+                            <div className="relative inline-flex group">
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border cursor-default"
+                                style={{ background: s.bg, color: s.text, borderColor: s.border }}>
+                                <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: s.dot }} />
+                                {latestApp.status}
+                              </span>
+                              {savedArchiveRemark && (
+                                <div className="absolute bottom-full left-0 mb-2 w-56 bg-[#1F2937] text-white text-[11px] rounded-lg px-3 py-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
+                                  <p className="font-semibold mb-0.5 text-[#9CA3AF] uppercase tracking-wider text-[9px]">Archive Remark</p>
+                                  <p>"{savedArchiveRemark}"</p>
+                                  <div className="absolute top-full left-4 border-4 border-transparent border-t-[#1F2937]" />
+                                </div>
+                              )}
+                            </div>
                           );
                         })() : <p className="text-sm font-bold text-[#1A1A2E]">–</p>}
                       </div>
@@ -714,6 +751,84 @@ export default function CandidateDetailPage() {
                     </tbody>
                   </table>
                 </div>
+              </div>
+            )}
+
+            {activeTab === 'Notes' && (
+              <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden">
+                {/* Header */}
+                <div className="flex items-center gap-2.5 px-5 py-4 border-b border-[#E5E7EB]">
+                  <p className="text-base font-semibold text-[#111827]">Notes</p>
+                  {notes.length > 0 && (
+                    <span className="px-2 py-0.5 rounded-2xl border border-indigo-200 bg-indigo-50 text-indigo-700 text-[11px] font-medium">
+                      {notes.length} {notes.length === 1 ? 'Note' : 'Notes'}
+                    </span>
+                  )}
+                </div>
+
+                {/* Input row */}
+                <div className="px-5 py-3 border-b border-[#E5E7EB] bg-[#F9FAFB] flex items-center gap-3">
+                  <input
+                    type="text"
+                    value={noteInput}
+                    onChange={e => setNoteInput(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' && noteInput.trim()) {
+                        setNotes(prev => [...prev, { id: Date.now().toString(), author: 'Super User', text: noteInput.trim(), createdAt: new Date().toISOString() }]);
+                        setNoteInput('');
+                      }
+                    }}
+                    placeholder="Write a note here..."
+                    className="flex-1 text-sm text-[#374151] bg-white border border-[#E5E7EB] rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 placeholder:text-[#9CA3AF]"
+                  />
+                  <button
+                    disabled={!noteInput.trim()}
+                    onClick={() => {
+                      if (!noteInput.trim()) return;
+                      setNotes(prev => [...prev, { id: Date.now().toString(), author: 'Super User', text: noteInput.trim(), createdAt: new Date().toISOString() }]);
+                      setNoteInput('');
+                    }}
+                    className="px-4 py-2 rounded-lg text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    Submit
+                  </button>
+                </div>
+
+                {/* Notes list */}
+                {notes.length === 0 ? (
+                  <div className="py-16 flex flex-col items-center gap-2 text-center">
+                    <p className="text-sm font-semibold text-[#9CA3AF]">No notes yet</p>
+                    <p className="text-xs text-[#C4C9D4]">Add the first note above.</p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-[#F3F4F6]">
+                    {notes.map(note => {
+                      const isSystem = note.author === 'System';
+                      const initials = note.author.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+                      const ts = new Date(note.createdAt).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                      return (
+                        <div key={note.id} className="flex items-start gap-3 px-5 py-4">
+                          <div className="w-8 h-8 rounded-full text-white text-[11px] font-black flex items-center justify-center shrink-0 mt-0.5"
+                            style={{ backgroundColor: isSystem ? '#9CA3AF' : '#4F46E5' }}>
+                            {initials}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <span className="text-sm font-semibold text-[#111827]">{note.author}</span>
+                              <span className="text-[11px] text-[#9CA3AF]">({ts})</span>
+                              {note.tag && (
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#F5F3FF] text-[#6D28D9] border border-[#DDD6FE]">
+                                  {note.tag}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm" style={{ color: isSystem ? '#6B7280' : '#111827' }}>{note.text}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
 

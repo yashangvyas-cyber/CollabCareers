@@ -768,11 +768,13 @@ export default function TalentPoolDetailsPage() {
                 ) : (
                   <div className="divide-y divide-[#F3F4F6]">
                     {notes.map(note => {
+                      const isSystem = note.author === 'System';
                       const initials = note.author.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
                       const ts = new Date(note.createdAt).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
                       return (
                         <div key={note.id} className="flex items-start gap-3 px-5 py-4">
-                          <div className="w-8 h-8 rounded-full bg-indigo-600 text-white text-[11px] font-black flex items-center justify-center shrink-0 mt-0.5">
+                          <div className="w-8 h-8 rounded-full text-white text-[11px] font-black flex items-center justify-center shrink-0 mt-0.5"
+                            style={{ backgroundColor: isSystem ? '#9CA3AF' : '#4F46E5' }}>
                             {initials}
                           </div>
                           <div className="flex-1 min-w-0">
@@ -780,7 +782,7 @@ export default function TalentPoolDetailsPage() {
                               <span className="text-sm font-semibold text-[#111827]">{note.author}</span>
                               <span className="text-[11px] text-[#9CA3AF]">({ts})</span>
                             </div>
-                            <p className="text-sm text-indigo-600">{note.text}</p>
+                            <p className="text-sm" style={{ color: isSystem ? '#6B7280' : '#111827' }}>{note.text}</p>
                           </div>
                         </div>
                       );
