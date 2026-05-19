@@ -235,7 +235,7 @@ export default function CandidateDetailPage() {
       <div className="flex gap-8 items-start">
         {/* LEFT SIDEBAR */}
         <div className="w-[300px] shrink-0 sticky top-[80px]">
-          <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden">
+          <div className="bg-[#F0F9FF] rounded-3xl border border-[#BAE6FD] shadow-sm overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-[#3538CD] to-[#6366F1]" />
             <div className="p-6 flex flex-col items-center">
               <div className="mb-3">

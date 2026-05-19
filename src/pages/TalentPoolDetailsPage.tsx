@@ -208,7 +208,7 @@ export default function TalentPoolDetailsPage() {
           {/* ── LEFT SIDEBAR ── */}
           <div className="w-[280px] shrink-0 sticky top-[80px] space-y-4">
 
-            <div className="bg-white rounded-3xl border border-[#E9D5FF] shadow-sm overflow-hidden">
+            <div className="bg-[#FFFBEB] rounded-3xl border border-[#FDE68A] shadow-sm overflow-hidden">
               <div className="h-1 bg-gradient-to-r from-[#7C3AED] to-[#A78BFA]" />
               <div className="p-6 flex flex-col items-center">
 
