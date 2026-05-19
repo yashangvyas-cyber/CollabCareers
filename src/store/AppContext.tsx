@@ -21,7 +21,7 @@ interface AppContextType extends AppState {
   discardCandidate: (candidateId: string, reason: string) => void;
 }
 
-const STORAGE_KEY = 'collab_careers_state_v12';
+const STORAGE_KEY = 'collab_careers_state_v13';
 
 const initialState: AppState = {
   jobs: [
@@ -1067,7 +1067,7 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
     { id: 'm3', candidateId: '2', jobId: 'd2', status: 'Interview in Progress', appliedAt: '2026-04-18T00:00:00.000Z', answers: {}, resumeUrl: 'Priya_Shah_Resume.pdf' },
     { id: 'm4', candidateId: '3', jobId: 'd3', status: 'Applied',               appliedAt: '2026-04-23T00:00:00.000Z', answers: {}, resumeUrl: 'Arjun_Mehta_Resume.pdf' },
     { id: 'm5', candidateId: '3', jobId: 'd7', status: 'Rejected',              appliedAt: '2026-04-15T00:00:00.000Z', answers: {}, resumeUrl: 'Arjun_Mehta_Resume.pdf' },
-    { id: 'm6', candidateId: '4', jobId: 'd5', status: 'Offer Made',             appliedAt: '2026-04-22T00:00:00.000Z', answers: {}, resumeUrl: 'Sneha_Patel_Resume.pdf' },
+    { id: 'm6', candidateId: '4', jobId: 'd5', status: 'Offered',             appliedAt: '2026-04-22T00:00:00.000Z', answers: {}, resumeUrl: 'Sneha_Patel_Resume.pdf' },
     { id: 'm7', candidateId: '5', jobId: 'd4', status: 'Selected',              appliedAt: '2026-04-18T00:00:00.000Z', answers: { d4_q1: 'Yes', d4_q2: 'PMP (2020), Certified Scrum Master (2018)', d4_q3: '15', d4_q4: 'Kanban', d4_q5: 'Yes' }, resumeUrl: 'Rahul_Joshi_Resume.pdf' },
     { id: 'm8', candidateId: '5', jobId: 'd5', status: 'Rejected',              appliedAt: '2026-04-05T00:00:00.000Z', answers: {}, resumeUrl: 'Rahul_Joshi_Resume.pdf' },
     { id: 'm9',  candidateId: '6',  jobId: 'd13', status: 'Offer Accepted',        appliedAt: '2026-04-20T00:00:00.000Z', answers: {}, resumeUrl: 'Kavya_Rao_Resume.pdf' },
@@ -1081,8 +1081,8 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
     { id: 'r13', candidateId: '13', jobId: 'd4',  status: 'Interview in Progress', appliedAt: '2026-04-16T00:00:00.000Z', answers: {}, resumeUrl: 'Vishal_Singh_Resume.pdf' },
     { id: 'r14', candidateId: '14', jobId: 'd6',  status: 'Interview in Progress', appliedAt: '2026-04-17T00:00:00.000Z', answers: {}, resumeUrl: 'Meera_Pillai_Resume.pdf' },
     { id: 'r15', candidateId: '15', jobId: 'd8',  status: 'Interview in Progress', appliedAt: '2026-04-18T00:00:00.000Z', answers: {}, resumeUrl: 'Karan_Desai_Resume.pdf' },
-    { id: 'r16', candidateId: '16', jobId: 'd1',  status: 'Offer Made',            appliedAt: '2026-04-19T00:00:00.000Z', answers: {}, resumeUrl: 'Ananya_Tiwari_Resume.pdf' },
-    { id: 'r17', candidateId: '17', jobId: 'd2',  status: 'Offer Made',            appliedAt: '2026-04-20T00:00:00.000Z', answers: {}, resumeUrl: 'Suresh_Reddy_Resume.pdf' },
+    { id: 'r16', candidateId: '16', jobId: 'd1',  status: 'Offered',            appliedAt: '2026-04-19T00:00:00.000Z', answers: {}, resumeUrl: 'Ananya_Tiwari_Resume.pdf' },
+    { id: 'r17', candidateId: '17', jobId: 'd2',  status: 'Offered',            appliedAt: '2026-04-20T00:00:00.000Z', answers: {}, resumeUrl: 'Suresh_Reddy_Resume.pdf' },
     { id: 'r18', candidateId: '18', jobId: 'd3',  status: 'Offer Accepted',        appliedAt: '2026-04-21T00:00:00.000Z', answers: {}, resumeUrl: 'Ritu_Malhotra_Resume.pdf' },
     { id: 'r19', candidateId: '19', jobId: 'd4',  status: 'Offer Accepted',        appliedAt: '2026-04-22T00:00:00.000Z', answers: {}, resumeUrl: 'Ajay_Pandey_Resume.pdf' },
     // Demo candidates — fully answered application form responses
@@ -1129,7 +1129,7 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
       id: 'full1-app-2',
       candidateId: 'full1',
       jobId: 'd5',
-      status: 'Offer Made',
+      status: 'Offered',
       appliedAt: new Date(Date.now() - 86400000 * 12).toISOString(),
       answers: {},
       resumeUrl: 'Priya_Mehta_Resume.pdf',

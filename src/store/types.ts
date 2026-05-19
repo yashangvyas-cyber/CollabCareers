@@ -120,7 +120,7 @@ export interface Application {
   status:
     | 'Applied' | 'Under Review' | 'Shortlisted' | 'Interview in Progress' | 'Active'
     | 'On Hold' | 'Future'
-    | 'Offer Made' | 'Offer Accepted'
+    | 'Offered' | 'Offer Accepted'
     | 'Selected' | 'Rejected' | 'Cancelled' | 'Withdrawn' | 'Joined' | 'Offer Declined'
     | 'Not Joined' | 'Archived' | 'Offer Revoked' | 'No Show';
   appliedAt: string;

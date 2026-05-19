@@ -53,7 +53,7 @@ const APP_STATUS_STYLE: Record<string, { border: string; text: string; bg: strin
   'Under Review':          { border: 'rgb(191,219,254)', text: 'rgb(29,78,216)',   bg: 'rgb(239,246,255)', dot: 'rgb(59,130,246)'  },
   'Shortlisted':           { border: 'rgb(167,243,208)', text: 'rgb(6,95,70)',     bg: 'rgb(236,253,245)', dot: 'rgb(16,185,129)'  },
   'Interview in Progress': { border: 'rgb(253,230,138)', text: 'rgb(146,64,14)',   bg: 'rgb(255,251,235)', dot: 'rgb(245,158,11)'  },
-  'Offer Made':            { border: 'rgb(167,243,208)', text: 'rgb(6,78,59)',     bg: 'rgb(209,250,229)', dot: 'rgb(5,150,105)'   },
+  'Offered':               { border: 'rgb(167,243,208)', text: 'rgb(6,78,59)',     bg: 'rgb(209,250,229)', dot: 'rgb(5,150,105)'   },
   'Offer Accepted':        { border: 'rgb(167,243,208)', text: 'rgb(6,78,59)',     bg: 'rgb(209,250,229)', dot: 'rgb(5,150,105)'   },
   'On Hold':               { border: 'rgb(221,214,254)', text: 'rgb(91,33,182)',   bg: 'rgb(245,243,255)', dot: 'rgb(139,92,246)'  },
   'Selected':              { border: 'rgb(171,239,198)', text: 'rgb(6,118,71)',    bg: 'rgb(236,253,243)', dot: 'rgb(23,178,106)'  },
