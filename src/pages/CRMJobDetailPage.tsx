@@ -22,20 +22,37 @@ interface MockCandidate {
   feedbackScore: number | null;
   completedRounds: number | null;
   appStatus: string;
+  candidateStatus: string;
+  recordOwner: string;
+  createdBy: { name: string; date: string };
+  modifiedBy: { name: string; date: string } | null;
 }
 
+const OWNER = 'Gurpreetsingh Dhillon';
+
 const MOCK_CANDIDATES: MockCandidate[] = [
-  { id: 'mc1', name: 'Arjun Mehta',   email: 'arjun.mehta@gmail.com',   phone: '+91 9824501234', experience: '3Y 2M',  interviewDate: '01-Jun-2026, 12:00 PM', panelSuggestion: 'Pending',           feedbackScore: null, completedRounds: null, appStatus: 'Applied' },
-  { id: 'mc2', name: 'Kavya Iyer',    email: 'kavya.iyer@gmail.com',    phone: '+91 8987654321', experience: 'Fresher', interviewDate: '17-May-2026, 02:00 PM', panelSuggestion: 'Should Hire',       feedbackScore: 9,    completedRounds: 1,    appStatus: 'Shortlisted' },
-  { id: 'mc3', name: 'Arjun Reddy',   email: 'arjun.reddy@gmail.com',   phone: '+91 7098765432', experience: '1Y 7M',  interviewDate: '24-May-2026, 01:40 PM', panelSuggestion: 'Should Hire',       feedbackScore: 8,    completedRounds: 2,    appStatus: 'Interview in Progress' },
-  { id: 'mc4', name: 'Deepa Nair',    email: 'deepa.nair@gmail.com',    phone: '+91 9109876543', experience: '2Y 11M', interviewDate: '18-May-2026, 04:00 PM', panelSuggestion: 'No Show/Cancelled', feedbackScore: null, completedRounds: 1,    appStatus: 'No Show' },
-  { id: 'mc5', name: 'Vikram Singh',  email: 'vikram.singh@gmail.com',  phone: '+91 8210987654', experience: '6Y 3M',  interviewDate: '19-May-2026, 01:10 PM', panelSuggestion: 'Not Sure',          feedbackScore: 7,    completedRounds: 1,    appStatus: 'Under Review' },
-  { id: 'mc6', name: 'Anjali Joshi',  email: 'anjali.joshi@gmail.com',  phone: '+91 9321098765', experience: '3Y 0M',  interviewDate: '19-May-2026, 04:10 PM', panelSuggestion: 'Pending',           feedbackScore: null, completedRounds: null, appStatus: 'Interview in Progress' },
-  { id: 'mc7', name: 'Rohan Desai',   email: 'rohan.desai@gmail.com',   phone: '+91 8432109876', experience: '4Y 2M',  interviewDate: '25-May-2026, 02:20 PM', panelSuggestion: null,                feedbackScore: null, completedRounds: null, appStatus: 'Offer Made' },
-  { id: 'mc8', name: 'Sneha Mehta',   email: 'sneha.mehta@gmail.com',   phone: '+91 9543210987', experience: '2Y 8M',  interviewDate: '18-May-2026, 03:25 PM', panelSuggestion: null,                feedbackScore: null, completedRounds: null, appStatus: 'On Hold' },
-  { id: 'mc9', name: 'Amit Kumar',    email: 'amit.kumar@outlook.com',  phone: '+91 7654321098', experience: '5Y 0M',  interviewDate: null,                    panelSuggestion: null,                feedbackScore: null, completedRounds: null, appStatus: 'Applied' },
-  { id: 'mc10',name: 'Priya Patel',   email: 'priya.patel@gmail.com',   phone: '+91 8765432109', experience: '2Y 4M',  interviewDate: null,                    panelSuggestion: null,                feedbackScore: null, completedRounds: null, appStatus: 'Rejected' },
+  { id: 'mc1', name: 'Arjun Mehta',   email: 'arjun.mehta@gmail.com',   phone: '+91 9824501234', experience: '3Y 2M',  interviewDate: '01-Jun-2026, 12:00 PM', panelSuggestion: 'Pending',           feedbackScore: null, completedRounds: null, appStatus: 'Applied',              candidateStatus: 'Active',      recordOwner: OWNER, createdBy: { name: OWNER, date: '22-May-2026, 07:00 PM' }, modifiedBy: null },
+  { id: 'mc2', name: 'Kavya Iyer',    email: 'kavya.iyer@gmail.com',    phone: '+91 8987654321', experience: 'Fresher', interviewDate: '17-May-2026, 02:00 PM', panelSuggestion: 'Should Hire',       feedbackScore: 9,    completedRounds: 1,    appStatus: 'Shortlisted',          candidateStatus: 'Offered',     recordOwner: OWNER, createdBy: { name: OWNER, date: '05-Mar-2024, 03:30 PM' }, modifiedBy: { name: OWNER, date: '27-May-2026, 12:15 PM' } },
+  { id: 'mc3', name: 'Arjun Reddy',   email: 'arjun.reddy@gmail.com',   phone: '+91 7098765432', experience: '1Y 7M',  interviewDate: '24-May-2026, 01:40 PM', panelSuggestion: 'Should Hire',       feedbackScore: 8,    completedRounds: 2,    appStatus: 'Interview in Progress', candidateStatus: 'Rejected',    recordOwner: OWNER, createdBy: { name: OWNER, date: '01-Mar-2024, 04:30 PM' }, modifiedBy: { name: OWNER, date: '27-May-2026, 11:50 AM' } },
+  { id: 'mc4', name: 'Deepa Nair',    email: 'deepa.nair@gmail.com',    phone: '+91 9109876543', experience: '2Y 11M', interviewDate: '18-May-2026, 04:00 PM', panelSuggestion: 'No Show/Cancelled', feedbackScore: null, completedRounds: 1,    appStatus: 'No Show',              candidateStatus: 'Cancelled',   recordOwner: OWNER, createdBy: { name: OWNER, date: '20-Feb-2024, 03:00 PM' }, modifiedBy: { name: OWNER, date: '27-May-2026, 11:58 AM' } },
+  { id: 'mc5', name: 'Vikram Singh',  email: 'vikram.singh@gmail.com',  phone: '+91 8210987654', experience: '6Y 3M',  interviewDate: '19-May-2026, 01:10 PM', panelSuggestion: 'Not Sure',          feedbackScore: 7,    completedRounds: 1,    appStatus: 'Under Review',         candidateStatus: 'On Hold',     recordOwner: OWNER, createdBy: { name: OWNER, date: '12-Feb-2024, 05:30 PM' }, modifiedBy: { name: OWNER, date: '27-May-2026, 12:12 PM' } },
+  { id: 'mc6', name: 'Anjali Joshi',  email: 'anjali.joshi@gmail.com',  phone: '+91 9321098765', experience: '3Y 0M',  interviewDate: '19-May-2026, 04:10 PM', panelSuggestion: 'Pending',           feedbackScore: null, completedRounds: null, appStatus: 'Interview in Progress', candidateStatus: 'Active',      recordOwner: OWNER, createdBy: { name: OWNER, date: '10-Feb-2024, 04:15 PM' }, modifiedBy: null },
+  { id: 'mc7', name: 'Rohan Desai',   email: 'rohan.desai@gmail.com',   phone: '+91 8432109876', experience: '4Y 2M',  interviewDate: '25-May-2026, 02:20 PM', panelSuggestion: null,                feedbackScore: null, completedRounds: null, appStatus: 'Offer Made',           candidateStatus: 'Blacklisted', recordOwner: OWNER, createdBy: { name: OWNER, date: '05-Feb-2024, 08:00 PM' }, modifiedBy: { name: OWNER, date: '27-May-2026, 12:21 PM' } },
+  { id: 'mc8', name: 'Sneha Mehta',   email: 'sneha.mehta@gmail.com',   phone: '+91 9543210987', experience: '2Y 8M',  interviewDate: '18-May-2026, 03:25 PM', panelSuggestion: null,                feedbackScore: null, completedRounds: null, appStatus: 'On Hold',              candidateStatus: 'Future',      recordOwner: OWNER, createdBy: { name: OWNER, date: '01-Feb-2024, 02:30 PM' }, modifiedBy: { name: OWNER, date: '27-May-2026, 12:26 PM' } },
+  { id: 'mc9', name: 'Amit Kumar',    email: 'amit.kumar@outlook.com',  phone: '+91 7654321098', experience: '5Y 0M',  interviewDate: null,                    panelSuggestion: null,                feedbackScore: null, completedRounds: null, appStatus: 'Applied',              candidateStatus: 'Active',      recordOwner: OWNER, createdBy: { name: OWNER, date: '18-Jan-2024, 04:45 PM' }, modifiedBy: null },
+  { id: 'mc10',name: 'Priya Patel',   email: 'priya.patel@gmail.com',   phone: '+91 8765432109', experience: '2Y 4M',  interviewDate: null,                    panelSuggestion: null,                feedbackScore: null, completedRounds: null, appStatus: 'Rejected',             candidateStatus: 'Active',      recordOwner: OWNER, createdBy: { name: OWNER, date: '15-Jan-2024, 03:30 PM' }, modifiedBy: null },
 ];
+
+// Candidate-status pill colours (matches the recruiter CRM palette)
+const CAND_STATUS_STYLE: Record<string, { bg: string; text: string; border: string; dot: string }> = {
+  'Active':      { bg: '#EFF6FF', text: '#1D4ED8', border: '#BFDBFE', dot: '#3B82F6' },
+  'Offered':     { bg: '#F0F9FF', text: '#0BA5EC', border: '#7DD3FC', dot: '#0BA5EC' },
+  'Rejected':    { bg: '#FEF3F2', text: '#B42318', border: '#FECDCA', dot: '#F04438' },
+  'Cancelled':   { bg: '#FDF2FA', text: '#EE46BC', border: '#F7A6DE', dot: '#EE46BC' },
+  'On Hold':     { bg: '#FFFAEB', text: '#B54708', border: '#FEDF89', dot: '#F79009' },
+  'Blacklisted': { bg: '#F9FAFB', text: '#4E5BA6', border: '#C4C9E0', dot: '#4E5BA6' },
+  'Future':      { bg: '#EEF2FF', text: '#4338CA', border: '#C7D2FE', dot: '#6366F1' },
+};
 
 // Pipeline funnel cards (active stages) — scoped to this job's applications
 const STAT_CARDS = [
@@ -422,25 +439,26 @@ function CandidatesAppliedTab({ count }: { count: number }) {
 
         {/* Table */}
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[900px]">
+          <table className="w-full min-w-[1500px]">
             <thead>
               <tr className="bg-[#F9FAFB] border-b border-[#E5E7EB]">
-                {['No.', 'Name', 'Contact Number', 'Experience', 'Interview Date and Time', 'Panel Suggestion', 'Feedback Score', 'Completed Rounds', 'Actions'].map((h) => (
+                {['No.', 'Name', 'Contact Number', 'Experience', 'Interview Date and Time', 'Panel Suggestion', 'Feedback Score', 'Completed Rounds', 'Candidate Status', 'Record Owner', 'Created by', 'Modified by'].map((h) => (
                   <th key={h} className="text-left text-xs font-medium text-[#6B7280] px-4 py-2.5 whitespace-nowrap">
                     <div className="flex items-center gap-1">
                       {h}
-                      {['Name','Experience','Interview Date and Time','Panel Suggestion','Feedback Score','Completed Rounds'].includes(h) && (
+                      {['Name','Experience','Interview Date and Time','Panel Suggestion','Feedback Score','Completed Rounds','Candidate Status','Created by','Modified by'].includes(h) && (
                         <ArrowUpDown className="w-3 h-3 text-[#D1D5DB]" />
                       )}
                     </div>
                   </th>
                 ))}
+                <th className="text-center text-xs font-medium text-[#6B7280] px-4 py-2.5 whitespace-nowrap sticky right-0 bg-[#F9FAFB]">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#EAEAEA]">
               {filteredCandidates.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="px-4 py-10 text-center text-xs text-[#9CA3AF]">
+                  <td colSpan={13} className="px-4 py-10 text-center text-xs text-[#9CA3AF]">
                     No candidates in this stage.
                   </td>
                 </tr>
@@ -485,8 +503,56 @@ function CandidatesAppliedTab({ count }: { count: number }) {
                   <td className="px-4 py-2 text-xs text-[#374151] whitespace-nowrap">
                     {c.completedRounds ?? <span className="text-[#9CA3AF]">-</span>}
                   </td>
+
+                  {/* Candidate Status */}
                   <td className="px-4 py-2 whitespace-nowrap">
-                    <div className="flex items-center gap-2.5">
+                    {(() => {
+                      const s = CAND_STATUS_STYLE[c.candidateStatus] ?? CAND_STATUS_STYLE['Active'];
+                      return (
+                        <span
+                          className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border"
+                          style={{ background: s.bg, color: s.text, borderColor: s.border }}
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: s.dot }} />
+                          {c.candidateStatus}
+                        </span>
+                      );
+                    })()}
+                  </td>
+
+                  {/* Record Owner */}
+                  <td className="px-4 py-2 whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0">
+                        {c.recordOwner.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                      </span>
+                      <span className="text-xs text-[#374151] truncate max-w-[80px]" title={c.recordOwner}>
+                        {c.recordOwner.split(' ')[0]}
+                      </span>
+                    </div>
+                  </td>
+
+                  {/* Created by */}
+                  <td className="px-4 py-2 whitespace-nowrap">
+                    <p className="text-xs text-[#374151]">{c.createdBy.name}</p>
+                    <p className="text-xs text-[#6B7280]">{c.createdBy.date}</p>
+                  </td>
+
+                  {/* Modified by */}
+                  <td className="px-4 py-2 whitespace-nowrap">
+                    {c.modifiedBy ? (
+                      <>
+                        <p className="text-xs text-[#374151]">{c.modifiedBy.name}</p>
+                        <p className="text-xs text-[#6B7280]">{c.modifiedBy.date}</p>
+                      </>
+                    ) : (
+                      <span className="text-xs text-[#9CA3AF]">-</span>
+                    )}
+                  </td>
+
+                  {/* Actions */}
+                  <td className="px-4 py-2 whitespace-nowrap sticky right-0 bg-white group-hover:bg-[#F9FAFB] border-l border-[#E5E7EB]">
+                    <div className="flex items-center justify-center gap-2.5">
                       <button className="text-[#6B7280] hover:text-[#4F46E5] transition-colors"><Eye className="w-4 h-4" /></button>
                       <button className="text-[#6B7280] hover:text-[#4F46E5] transition-colors"><Pencil className="w-4 h-4" /></button>
                     </div>
