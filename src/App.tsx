@@ -1,5 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import AddJobPage from './pages/AddJobPage';
+import JobsListingPage from './pages/JobsListingPage';
+import CRMJobDetailPage from './pages/CRMJobDetailPage';
 import CandidateDetailPage from './pages/CandidateDetailPage';
 import CareerPage from './pages/CareerPage';
 import JobDetailPage from './pages/JobDetailPage';
@@ -27,6 +29,8 @@ function App() {
       <Routes>
         <Route path="/" element={<PrototypeHome />} />
         {/* Flow 1: Recruiter (CRM) */}
+        <Route path="/crm/jobs" element={<JobsListingPage />} />
+        <Route path="/crm/jobs/:jobId" element={<CRMJobDetailPage />} />
         <Route path="/crm/add-job" element={<AddJobPage />} />
         <Route path="/crm/candidates/:candidateId" element={<CandidateDetailPage />} />
         <Route path="/crm/employees/:empId" element={<EmployeeDetailPage />} />

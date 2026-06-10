@@ -249,20 +249,20 @@ export default function AddJobPage() {
 
     addJob(newJob);
     alert("Job posted successfully! It will now appear on the Career Portal.");
-    navigate('/');
+    navigate('/crm/jobs');
   };
 
   return (
     <CRMLayout
       breadcrumbs={[
-        { label: 'Jobs', path: '#' },
+        { label: 'Jobs', path: '/crm/jobs' },
         { label: 'Add Job' },
       ]}
       title="Add Job"
       actions={
         <div className="flex items-center gap-3">
-          <button 
-            onClick={() => navigate('/')}
+          <button
+            onClick={() => navigate('/crm/jobs')}
             className="px-5 py-2 border border-[#E5E7EB] rounded-lg text-sm font-medium text-[#374151] hover:bg-[#F9FAFB] transition-colors"
           >
             Cancel

@@ -8,7 +8,7 @@ import {
 
 const navItems = [
   { name: 'Dashboard', icon: LayoutDashboard, path: '/' },
-  { name: 'Jobs', icon: Briefcase, path: '/crm/add-job', hasAdd: true },
+  { name: 'Jobs', icon: Briefcase, path: '/crm/jobs', hasAdd: true },
   { name: 'Job Applications', icon: Users, path: '/crm/candidates' },
   { name: 'Talent Pool', icon: UserSearch, path: '/crm/talent-pool' },
   { name: 'Interviews', icon: MessageSquare, path: '#' },
@@ -49,7 +49,7 @@ export default function CRMLayout({ children, breadcrumbs, title, actions }: CRM
         {/* Navigation */}
         <nav className="flex-1 px-2 py-2 space-y-0.5">
           {navItems.map((item) => {
-            const isActive = location.pathname.startsWith(item.path) && item.path !== '/';
+            const isActive = (location.pathname.startsWith(item.path) || (item.path === '/crm/jobs' && location.pathname === '/crm/add-job')) && item.path !== '/';
             return (
               <Link
                 key={item.name}
