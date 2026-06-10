@@ -128,13 +128,6 @@ export default function JobDetailPage() {
     }
   };
 
-  const handleSignInClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setAuthTab('signin');
-    setAuthRedirectTo(undefined);
-    setShowAuthModal(true);
-  };
-
   const handleSaveClick = (e: React.MouseEvent) => {
     e.preventDefault();
     if (!currentUser) {
@@ -229,12 +222,6 @@ export default function JobDetailPage() {
                     >
                       Apply Now <ArrowRight className="w-4 h-4" />
                     </button>
-                    {!currentUser && (
-                      <p className="text-center text-[13px] text-[#6B7280] mb-4">
-                        Have an account?{' '}
-                        <button onClick={handleSignInClick} className="font-black text-[#3538CD] hover:underline">Sign In</button>
-                      </p>
-                    )}
                   </>
                 )}
 

@@ -19,9 +19,73 @@ const formatDateForBanner = (dateString: string) => {
   }
 };
 
+// Canonical default shape for the application form. Used as initial state AND as the
+// merge base when prefilling — so every nested section always exists even if a saved
+// draft / previous application only stored a partial subset of fields.
+const getDefaultFormData = (currentUser: any) => ({
+  personal: {
+    firstName: currentUser?.firstName || 'Alex',
+    lastName: currentUser?.lastName || 'Patel',
+    gender: 'Male',
+    contactNumber: currentUser?.phone || '98765 43210',
+    email: currentUser?.email || 'alex.patel@example.com',
+    dob: '12/05/1998',
+    linkedin: 'linkedin.com/in/alexpatel',
+    maritalStatus: 'Single',
+  },
+  professional: {
+    experiences: [
+      { id: Date.now(), from: '2022-Jan', to: '2026-May', description: 'Developing core features using React and TailwindCSS. Leading a team of 3 developers.', company: 'MindInventory', designation: 'UI Developer', isCurrent: false }
+    ],
+    expYears: '3',
+    expMonths: '2',
+    highestQualification: 'B.Tech Computer Science',
+    noticePeriod: '30',
+    skills: ['React', 'JavaScript', 'TypeScript', 'Redux'],
+    remarks: '',
+  },
+  salary: {
+    ctcType: 'Annual',
+    currency: 'INR',
+    currentCtc: '6',
+    expectedCtc: '9',
+  },
+  address: {
+    street: '123, Business Park, S.G. Highway',
+    country: 'India',
+    state: 'Gujarat',
+    city: 'Ahmedabad',
+    zip: '380015',
+  },
+  customAnswers: {} as Record<string, any>,
+});
+
+// Overlay a (possibly partial) saved form onto the full default shape so no nested
+// section is ever undefined. Arrays/primitives in the source replace the defaults.
+const mergeFormData = (currentUser: any, source: any) => {
+  const base = getDefaultFormData(currentUser);
+  if (!source || typeof source !== 'object') return base;
+  return {
+    personal: { ...base.personal, ...(source.personal || {}) },
+    professional: {
+      ...base.professional,
+      ...(source.professional || {}),
+      experiences: source.professional?.experiences?.length
+        ? source.professional.experiences
+        : base.professional.experiences,
+      skills: source.professional?.skills?.length
+        ? source.professional.skills
+        : base.professional.skills,
+    },
+    salary: { ...base.salary, ...(source.salary || {}) },
+    address: { ...base.address, ...(source.address || {}) },
+    customAnswers: {} as Record<string, any>,
+  };
+};
+
 export default function ApplicationFormPage() {
   const { jobId } = useParams();
-  const { jobs, currentUser, applications, submitApplication, saveDraft, alumniVerified } = useApp();
+  const { jobs, currentUser, applications, submitApplication, saveDraft, alumniVerified, updateCurrentUser } = useApp();
   const navigate = useNavigate();
   const location = useLocation();
   const prefillFromId = location.state?.prefillFrom;
@@ -41,44 +105,9 @@ export default function ApplicationFormPage() {
   const [isFresher, setIsFresher] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [jobClosed, setJobClosed] = useState(false);
+  const [syncProfile, setSyncProfile] = useState(true); // "also update my profile with this data"
 
-  const [formData, setFormData] = useState({
-    personal: {
-      firstName: currentUser?.firstName || 'Alex',
-      lastName: currentUser?.lastName || 'Patel',
-      gender: 'Male',
-      contactNumber: currentUser?.phone || '98765 43210',
-      email: currentUser?.email || 'alex.patel@example.com',
-      dob: '12/05/1998',
-      linkedin: 'linkedin.com/in/alexpatel',
-      maritalStatus: 'Single',
-    },
-    professional: {
-      experiences: [
-        { id: Date.now(), from: '2022-Jan', to: '2026-May', description: 'Developing core features using React and TailwindCSS. Leading a team of 3 developers.', company: 'MindInventory', designation: 'UI Developer', isCurrent: false }
-      ],
-      expYears: '3',
-      expMonths: '2',
-      highestQualification: 'B.Tech Computer Science',
-      noticePeriod: '30',
-      skills: ['React', 'JavaScript', 'TypeScript', 'Redux'],
-      remarks: '',
-    },
-    salary: {
-      ctcType: 'Annual',
-      currency: 'INR',
-      currentCtc: '6',
-      expectedCtc: '9',
-    },
-    address: {
-      street: '123, Business Park, S.G. Highway',
-      country: 'India',
-      state: 'Gujarat',
-      city: 'Ahmedabad',
-      zip: '380015',
-    },
-    customAnswers: {} as Record<string, any>,
-  });
+  const [formData, setFormData] = useState(() => getDefaultFormData(currentUser));
 
   const [collapsedSections, setCollapsedSections] = useState<Record<number, boolean>>({
     1: false, 2: false, 3: false, 4: false, 5: false
@@ -104,11 +133,11 @@ export default function ApplicationFormPage() {
       const prevApp = applications.find(a => a.id === prefillFromId);
       if (prevApp && prevApp.answers?._fullFormData) {
         const sourceData = prevApp.answers._fullFormData;
-        setFormData(() => ({
-          ...sourceData,
-          personal: { ...sourceData.personal, email: currentUser.email }, // Keep current email
-          customAnswers: {}, // Never prefill custom answers
-        }));
+        const merged = mergeFormData(currentUser, sourceData);
+        setFormData({
+          ...merged,
+          personal: { ...merged.personal, email: currentUser.email }, // Keep current email
+        });
         setResumeName(prevApp.resumeUrl);
         setPrefillSource({
           title: jobs.find(j => j.id === prevApp.jobId)?.title || 'Previous Job',
@@ -175,12 +204,13 @@ export default function ApplicationFormPage() {
     // Check for existing draft (auto-resumption)
     const draft = applications.find(a => a.jobId === job?.id && a.candidateId === currentUser.id && a.status === 'Applied');
     if (draft) {
-      setFormData(prev => ({
-        ...(draft.answers?._fullFormData || prev),
-        customAnswers: draft.answers || {}
-      }));
+      const merged = mergeFormData(currentUser, draft.answers?._fullFormData);
+      setFormData({
+        ...merged,
+        customAnswers: draft.answers || {},
+      });
       setResumeName(draft.resumeUrl);
-      setStep(1); 
+      setStep(1);
       return;
     }
 
@@ -192,12 +222,11 @@ export default function ApplicationFormPage() {
     if (latestSubmission && step === 0 && !resumeName) {
       const sourceData = latestSubmission.answers?._fullFormData;
       if (sourceData) {
-        setFormData(prev => ({
-          ...prev,
-          ...sourceData,
-          personal: { ...sourceData.personal, email: currentUser.email }, // Privacy: keep current session email
-          customAnswers: {}, // Always fresh for new job
-        }));
+        const merged = mergeFormData(currentUser, sourceData);
+        setFormData({
+          ...merged,
+          personal: { ...merged.personal, email: currentUser.email }, // Privacy: keep current session email
+        });
         setResumeName(latestSubmission.resumeUrl);
         setPrefillSource({
           title: jobs.find(j => j.id === latestSubmission.jobId)?.title || 'Previous Job',
@@ -230,6 +259,11 @@ export default function ApplicationFormPage() {
     setTimeout(() => setShowToast(false), 3000);
   };
 
+  // A "fresh" application = applying for the first time or starting from scratch,
+  // i.e. nothing was prefilled from a previous application or a resumed draft.
+  const isFreshApplication =
+    !prefillSource && !location.state?.continueDraft && !location.state?.prefillFrom;
+
   const handleSubmit = () => {
     submitApplication({
       id: `APP-${Date.now()}`,
@@ -240,6 +274,32 @@ export default function ApplicationFormPage() {
       answers: { ...formData.customAnswers, _fullFormData: formData },
       resumeUrl: resumeName || 'Manually Filled',
     });
+
+    // Optionally sync this application's data back to the candidate's profile.
+    if (isFreshApplication && syncProfile) {
+      updateCurrentUser({
+        firstName: formData.personal.firstName,
+        lastName: formData.personal.lastName,
+        phone: formData.personal.contactNumber,
+        gender: formData.personal.gender,
+        dateOfBirth: formData.personal.dob,
+        linkedin: formData.personal.linkedin,
+        maritalStatus: formData.personal.maritalStatus,
+        highestQualification: formData.professional.highestQualification,
+        noticePeriod: formData.professional.noticePeriod,
+        skills: formData.professional.skills,
+        currentCtc: formData.salary.currentCtc,
+        expectedCtc: formData.salary.expectedCtc,
+        ctcType: formData.salary.ctcType,
+        ctcCurrency: formData.salary.currency,
+        address: formData.address.street,
+        city: formData.address.city,
+        state: formData.address.state,
+        country: formData.address.country,
+        zipCode: formData.address.zip,
+      });
+    }
+
     navigate(`/portal/yopmails/confirmation/${job.id}`);
   };
 
@@ -794,7 +854,25 @@ export default function ApplicationFormPage() {
                 </FormCollapsibleCard>
               )}
             </div>
-            
+
+            {/* Sync-to-profile opt-in (first-time / from-scratch applications only) */}
+            {isFreshApplication && (
+              <label className="flex items-start gap-3 p-5 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm cursor-pointer hover:border-[#3538CD]/40 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={syncProfile}
+                  onChange={(e) => setSyncProfile(e.target.checked)}
+                  className="mt-0.5 w-5 h-5 rounded-md border-2 border-[#D1D5DB] text-[#3538CD] accent-[#3538CD] cursor-pointer shrink-0"
+                />
+                <div>
+                  <p className="text-sm font-black text-[#111827]">Also update my profile with this information</p>
+                  <p className="text-xs font-bold text-[#6B7280] mt-0.5 leading-relaxed">
+                    We'll save these details to your profile so your next application is even faster. You can edit them anytime.
+                  </p>
+                </div>
+              </label>
+            )}
+
             {/* Action Bar spacer */}
             <div className="h-24" />
           </div>
