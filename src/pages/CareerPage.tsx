@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import PortalLayout from '../components/PortalLayout';
 import { Search, MapPin, Briefcase, Clock, ChevronDown, X, Building2, Bookmark, LayoutGrid, List, ArrowRight, UserCircle2 } from 'lucide-react';
 import AuthModal from '../components/AuthModal';
@@ -50,6 +50,41 @@ const PROFILE_FIELDS = [
 
 export default function CareerPage({ openAlumni = false, openRegister = false }: { openAlumni?: boolean, openRegister?: boolean }) {
   const { jobs, currentUser, applications } = useApp();
+  const navigate = useNavigate();
+
+  // Resolve the current user's relationship to a job:
+  //  - 'draft'   → an in-progress application (status 'Applied') on an open job → "Continue Application"
+  //  - 'applied' → a submitted application being processed → "Applied"
+  //  - null      → not applied yet → "View & Apply"
+  const getJobAppState = (job: any): { kind: 'draft' | 'applied' | null; app: any } => {
+    if (!currentUser) return { kind: null, app: null };
+    const app = applications.find(a => a.candidateId === currentUser.id && a.jobId === job.id);
+    if (!app) return { kind: null, app: null };
+    const isDraft = app.status === 'Applied' && job.status !== 'Close';
+    return { kind: isDraft ? 'draft' : 'applied', app };
+  };
+
+  const continueDraft = (job: any, app: any) =>
+    navigate(`/portal/yopmails/apply/${job.id}`, {
+      state: { continueDraft: true, draftJobTitle: job.title, lastSaved: app.appliedAt },
+    });
+
+  // A returning user has prior activity (at least one application); a brand-new signup has none yet.
+  const isReturningUser = !!currentUser && applications.some(a => a.candidateId === currentUser.id);
+
+  // Sticky search/filter — lift a soft shadow only once the card sticks under the header
+  const filterRef = useRef<HTMLDivElement>(null);
+  const [filterStuck, setFilterStuck] = useState(false);
+  useEffect(() => {
+    const onScroll = () => {
+      const el = filterRef.current;
+      if (!el) return;
+      setFilterStuck(el.getBoundingClientRect().top <= 50);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
   const [showAuthModal, setShowAuthModal] = useState(openAlumni || openRegister);
   const [authTab, setAuthTab] = useState<'register' | 'signin'>(openRegister ? 'register' : 'signin');
   const [nudgeDismissed, setNudgeDismissed] = useState(false);
@@ -105,56 +140,44 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
 
   return (
     <PortalLayout>
-      {/* Compact Hero Strip */}
-      <div className="bg-gradient-to-r from-[#3538CD] to-[#2828a8]">
-        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-          <p className="text-sm text-white/80 font-medium">
-            Explore opportunities at <span className="font-bold text-white">MindInventory</span>
-          </p>
-          <span className="px-3 py-1 bg-white/10 text-white text-[11px] font-bold tracking-wide rounded-full border border-white/20 shadow-sm">
-            {filteredJobs.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, filteredJobs.length)} of {filteredJobs.length} Jobs
-          </span>
+      {/* Sub-header — white section, connected under the portal header */}
+      <div className="bg-white">
+        <div className="max-w-7xl mx-auto px-6 py-3">
+          {!currentUser ? (
+            <>
+              <h1 className="text-sm font-bold text-[#111827] tracking-tight">
+                Welcome to <span className="text-[#3538CD]">MindInventory</span> Careers <span className="align-middle">👋</span>
+              </h1>
+              <p className="text-xs text-[#6B7280] font-medium mt-0.5">
+                Explore open roles and apply in minutes.
+              </p>
+            </>
+          ) : isReturningUser ? (
+            <>
+              <h1 className="text-sm font-bold text-[#111827] tracking-tight">
+                Welcome back, {currentUser.firstName} {currentUser.lastName} <span className="align-middle">👋</span>
+              </h1>
+              <p className="text-xs text-[#6B7280] font-medium mt-0.5">
+                Explore opportunities at <span className="font-semibold text-[#3538CD]">MindInventory</span>
+              </p>
+            </>
+          ) : (
+            <>
+              <h1 className="text-sm font-bold text-[#111827] tracking-tight">
+                Welcome, {currentUser.firstName} <span className="align-middle">🎉</span>
+              </h1>
+              <p className="text-xs text-[#6B7280] font-medium mt-0.5">
+                Great to have you — let's find your first role at <span className="font-semibold text-[#3538CD]">MindInventory</span>.
+              </p>
+            </>
+          )}
         </div>
       </div>
 
-      {/* Profile completion nudge */}
-      {(() => {
-        if (!currentUser || nudgeDismissed) return null;
-        const missing = PROFILE_FIELDS.filter(f => !f.check(currentUser));
-        if (missing.length === 0) return null;
-        const completed = PROFILE_FIELDS.length - missing.length;
-        const pct = Math.round((completed / PROFILE_FIELDS.length) * 100);
-        return (
-          <div className="bg-gradient-to-r from-[#3538CD] to-[#4F46E5] px-6 py-3">
-            <div className="max-w-7xl mx-auto flex items-center gap-4">
-              <UserCircle2 className="w-5 h-5 text-white/70 shrink-0" />
-              <div className="flex-1 min-w-0 flex items-center gap-3">
-                <p className="text-sm font-black text-white shrink-0">Your profile is {pct}% complete</p>
-                <div className="flex-1 max-w-[240px] h-1.5 bg-white/20 rounded-full overflow-hidden">
-                  <div className="h-full bg-white rounded-full transition-all" style={{ width: `${pct}%` }} />
-                </div>
-              </div>
-              <Link
-                to="/portal/yopmails/profile"
-                className="shrink-0 flex items-center gap-1.5 px-4 py-2 bg-white text-[#3538CD] text-[11px] font-black rounded-lg uppercase tracking-widest hover:bg-white/90 transition-colors shadow-sm"
-              >
-                Complete Profile <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-              <button
-                onClick={() => setNudgeDismissed(true)}
-                className="shrink-0 p-1.5 text-white/50 hover:text-white transition-colors rounded-md hover:bg-white/10"
-                title="Dismiss"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* Search + Filter Bar */}
-      <div className="bg-white border-b border-[#E5E7EB] sticky top-[49px] z-40 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-4 space-y-4">
+      {/* Search + Filter — contained white card, sticky; the grey top padding is the separator, soft shadow lifts once it sticks */}
+      <div ref={filterRef} className="sticky top-[49px] z-40 bg-[#F9FAFB] pt-4 pb-3">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className={`bg-white border border-[#E5E7EB] rounded-2xl px-5 py-4 space-y-4 transition-shadow duration-200 ${filterStuck ? 'shadow-lg shadow-black/10' : 'shadow-sm'}`}>
           {/* Search Row */}
           <div className="relative max-w-4xl">
             <Search className="w-5 h-5 text-[#9CA3AF] absolute left-4 top-1/2 -translate-y-1/2" />
@@ -182,7 +205,11 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
             )}
 
             {/* View Toggle */}
-            <div className="ml-auto flex items-center gap-1 bg-[#F3F4F6] rounded-lg p-1">
+            {/* Job count — kept visible here so it stays on screen while the bar is stuck */}
+            <span className="ml-auto shrink-0 inline-flex items-center px-3 py-1 bg-[#F3F4F6] text-[#6B7280] text-[11px] font-bold tracking-wide rounded-full border border-[#E5E7EB] whitespace-nowrap">
+              {filteredJobs.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, filteredJobs.length)} of {filteredJobs.length} Jobs
+            </span>
+            <div className="flex items-center gap-1 bg-[#F3F4F6] rounded-lg p-1">
               <button
                 onClick={() => setViewMode('grid')}
                 title="Grid view"
@@ -203,17 +230,49 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
               </button>
             </div>
           </div>
+          </div>
         </div>
       </div>
 
       {/* Job Listings */}
       <div className="max-w-7xl mx-auto px-6 pt-6 pb-8">
 
+        {/* Profile completion nudge — a card on the jobs background */}
+        {(() => {
+          if (!currentUser || nudgeDismissed) return null;
+          const missing = PROFILE_FIELDS.filter(f => !f.check(currentUser));
+          if (missing.length === 0) return null;
+          const completed = PROFILE_FIELDS.length - missing.length;
+          const pct = Math.round((completed / PROFILE_FIELDS.length) * 100);
+          return (
+            <div className="flex items-center gap-3 rounded-xl border border-[#E0E7FF] bg-[#F5F7FF] px-4 py-2.5 shadow-sm mb-5">
+              <UserCircle2 className="w-5 h-5 text-[#4F46E5] shrink-0" />
+              <p className="text-sm font-bold text-[#3730A3] shrink-0">Your profile is {pct}% complete</p>
+              <div className="flex-1 max-w-[260px] h-1.5 bg-[#E0E7FF] rounded-full overflow-hidden">
+                <div className="h-full bg-[#4F46E5] rounded-full transition-all" style={{ width: `${pct}%` }} />
+              </div>
+              <Link
+                to="/portal/yopmails/profile"
+                className="shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 bg-[#4F46E5] text-white text-[11px] font-black rounded-lg uppercase tracking-widest hover:bg-[#4338CA] transition-colors shadow-sm"
+              >
+                Complete Profile <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+              <button
+                onClick={() => setNudgeDismissed(true)}
+                className="shrink-0 p-1.5 text-[#818CF8] hover:text-[#3730A3] hover:bg-white rounded-md transition-colors"
+                title="Dismiss"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          );
+        })()}
+
         {/* ── Grid View ── */}
         {viewMode === 'grid' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {currentJobs.length > 0 ? currentJobs.map((job) => {
-              const hasApplied = currentUser && applications.some(app => app.candidateId === currentUser.id && app.jobId === job.id);
+              const { kind: appKind, app: userApp } = getJobAppState(job);
               return (
               <div key={job.id} className="bg-white rounded-xl border border-[#E5E7EB] p-6 hover:shadow-lg hover:border-primary/30 transition-all duration-200 group">
                 <div className="flex items-start justify-between mb-3">
@@ -252,9 +311,18 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
                 )}
                 <div className="flex items-center justify-between pt-4 border-t border-[#F3F4F6]">
                   <span className="text-[11px] font-black text-[#9CA3AF] uppercase tracking-widest">{formatPostedDate(job.createdAt)}</span>
-                  <Link to={`/portal/yopmails/job/${job.id}`} className={`px-6 py-2.5 text-[12px] font-black rounded-xl transition-all uppercase tracking-widest shadow-md ${hasApplied ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 shadow-emerald-500/5' : 'bg-[#3538CD] text-white hover:bg-[#292bb0] shadow-[#3538CD]/10'}`}>
-                    {hasApplied ? 'Applied' : 'View & Apply'}
-                  </Link>
+                  {appKind === 'draft' ? (
+                    <button
+                      onClick={() => continueDraft(job, userApp)}
+                      className="flex items-center gap-1.5 px-6 py-2.5 text-[12px] font-black rounded-xl transition-all uppercase tracking-widest shadow-md bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 shadow-amber-500/5"
+                    >
+                      Continue Application <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  ) : (
+                    <Link to={`/portal/yopmails/job/${job.id}`} className={`px-6 py-2.5 text-[12px] font-black rounded-xl transition-all uppercase tracking-widest shadow-md ${appKind === 'applied' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 shadow-emerald-500/5' : 'bg-[#3538CD] text-white hover:bg-[#292bb0] shadow-[#3538CD]/10'}`}>
+                      {appKind === 'applied' ? 'Applied' : 'View & Apply'}
+                    </Link>
+                  )}
                 </div>
               </div>
               );
@@ -270,7 +338,7 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
         {viewMode === 'list' && (
           <div className="flex flex-col gap-2">
             {currentJobs.length > 0 ? currentJobs.map((job) => {
-              const hasApplied = currentUser && applications.some(app => app.candidateId === currentUser.id && app.jobId === job.id);
+              const { kind: appKind, app: userApp } = getJobAppState(job);
               return (
               <div key={job.id} className="bg-white rounded-xl border border-[#E5E7EB] px-5 py-4 hover:shadow-md hover:border-primary/30 transition-all duration-200 group">
                 <div className="flex items-center gap-4">
@@ -303,14 +371,23 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
                     <span className="text-[11px] font-black text-[#9CA3AF] uppercase tracking-widest whitespace-nowrap hidden sm:block">
                       {formatPostedDate(job.createdAt)}
                     </span>
-                    {!hasApplied && (
+                    {!appKind && (
                       <button onClick={() => { if (!currentUser) { setSelectedJob(job); setAuthTab('signin'); setShowAuthModal(true); } }} className="p-2 text-[#9CA3AF] hover:text-[#3538CD] hover:bg-[#3538CD]/5 rounded-lg transition-all" title="Save Job">
                         <Bookmark className="w-4 h-4" />
                       </button>
                     )}
-                    <Link to={`/portal/yopmails/job/${job.id}`} className={`px-5 py-2 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all ${hasApplied ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100' : 'bg-[#F4F5FA] text-[#3538CD] hover:bg-[#3538CD] hover:text-white'}`}>
-                      {hasApplied ? 'Applied' : 'View'}
-                    </Link>
+                    {appKind === 'draft' ? (
+                      <button
+                        onClick={() => continueDraft(job, userApp)}
+                        className="flex items-center gap-1.5 px-5 py-2 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100"
+                      >
+                        Continue <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    ) : (
+                      <Link to={`/portal/yopmails/job/${job.id}`} className={`px-5 py-2 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all ${appKind === 'applied' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100' : 'bg-[#F4F5FA] text-[#3538CD] hover:bg-[#3538CD] hover:text-white'}`}>
+                        {appKind === 'applied' ? 'Applied' : 'View'}
+                      </Link>
+                    )}
                   </div>
                 </div>
               </div>

@@ -1023,6 +1023,34 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
       answers: { _fullFormData: { personal: { contactNumber: '+91 98765 43210' } } },
       resumeUrl: 'Alex_Patel_Resume.pdf'
     },
+    // Alex (c1) — in-progress drafts (status 'Applied') so the listing shows "Continue Application"
+    {
+      id: 'ad1',
+      candidateId: 'c1',
+      jobId: 'd3', // Flutter Developer
+      status: 'Applied',
+      appliedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+      answers: { _fullFormData: { personal: { contactNumber: '+91 98765 43210' } } },
+      resumeUrl: 'Alex_Patel_Resume.pdf'
+    },
+    {
+      id: 'ad2',
+      candidateId: 'c1',
+      jobId: 'd6', // Node.js Backend Engineer
+      status: 'Applied',
+      appliedAt: new Date(Date.now() - 86400000 * 3).toISOString(),
+      answers: { _fullFormData: { personal: { contactNumber: '+91 98765 43210' } } },
+      resumeUrl: 'Alex_Patel_Resume.pdf'
+    },
+    {
+      id: 'ad3',
+      candidateId: 'c1',
+      jobId: 'd9', // Product Designer
+      status: 'Applied',
+      appliedAt: new Date(Date.now() - 86400000 * 4).toISOString(),
+      answers: { _fullFormData: { personal: { contactNumber: '+91 98765 43210' } } },
+      resumeUrl: 'Alex_Patel_Resume.pdf'
+    },
     // Riya Desai (c2) — 3 applications, different statuses
     {
       id: 'a6',

@@ -377,16 +377,16 @@ function ReapplyModal({ isOpen, onClose, candidateName, onContinue, onStartFresh
           </button>
           <div className="mb-10 text-center">
             <h2 className="text-3xl font-black text-[#111827] mb-2 tracking-tight">Welcome back, {candidateName}!</h2>
-            <p className="text-[#6B7280] font-bold">We noticed you've applied with us before. Want to use your saved details?</p>
+            <p className="text-[#6B7280] font-bold">You've applied to a role with us before. Want to reuse those details to apply faster?</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <button onClick={onContinue} className="p-8 bg-white border-2 border-[#E5E7EB] rounded-3xl text-left hover:border-[#3538CD] group transition-all">
               <div className="w-12 h-12 bg-[#3538CD]/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Copy className="w-6 h-6 text-[#3538CD]" />
               </div>
-              <h3 className="text-lg font-black text-[#111827] mb-2">Pick up where you left off</h3>
-              <p className="text-sm font-bold text-[#6B7280] leading-relaxed mb-6">We'll carry over your resume, details, and answers. Just review and update anything that's changed.</p>
-              <span className="inline-flex items-center gap-2 text-sm font-black text-[#3538CD] tracking-tight">Continue with saved details <ArrowRight className="w-4 h-4" /></span>
+              <h3 className="text-lg font-black text-[#111827] mb-2">Reuse my previous details</h3>
+              <p className="text-sm font-bold text-[#6B7280] leading-relaxed mb-6">We'll prefill this form with the resume and details from a job you applied to earlier. Just review and update anything that's changed — this job's questions stay fresh.</p>
+              <span className="inline-flex items-center gap-2 text-sm font-black text-[#3538CD] tracking-tight">Use my previous details <ArrowRight className="w-4 h-4" /></span>
             </button>
             <button onClick={onStartFresh} className="p-8 bg-white border-2 border-[#E5E7EB] rounded-3xl text-left hover:border-gray-900 group transition-all">
               <div className="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
