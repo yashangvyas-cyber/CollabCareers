@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Monitor, Globe, ChevronRight } from 'lucide-react';
+import { ArrowRight, Monitor, Globe, ChevronRight, Smartphone } from 'lucide-react';
 
 const flows = [
   {
@@ -52,6 +52,10 @@ export default function PrototypeHome() {
         <p className="text-[#6B7280] text-lg max-w-2xl mx-auto font-medium leading-relaxed">
           A high-fidelity interactive companion for the CollabCareers ecosystem. Explore end-to-end recruitment flows with premium UI/UX.
         </p>
+        <div className="mt-6 inline-flex items-center gap-3 px-5 py-2.5 bg-[#111827] text-white rounded-2xl text-xs font-bold shadow-lg shadow-[#111827]/20">
+          <Smartphone className="w-4 h-4 text-[#3538CD]" />
+          <span>Career Portal pages include a <span className="text-[#3538CD] font-black">Device Simulator</span> — switch between Desktop, Mobile &amp; Tablet views</span>
+        </div>
       </div>
 
       {/* Recommended Flow */}

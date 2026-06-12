@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PortalLayout from '../components/PortalLayout';
-import { Search, MapPin, Briefcase, Clock, ChevronDown, X, Building2, Bookmark, LayoutGrid, List, ArrowRight, UserCircle2, Tags } from 'lucide-react';
+import { Search, MapPin, Briefcase, Clock, ChevronDown, X, Building2, Bookmark, LayoutGrid, List, ArrowRight, UserCircle2, Tags, SlidersHorizontal } from 'lucide-react';
 import AuthModal from '../components/AuthModal';
 import { useApp } from '../store/AppContext';
 
@@ -98,6 +98,7 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
   const [buFilter, setBuFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
   const itemsPerPage = 6;
 
   // Combine store jobs with defaults if store is sparse
@@ -147,7 +148,7 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
     <PortalLayout>
       {/* Sub-header — white section, connected under the portal header */}
       <div className="bg-white">
-        <div className="max-w-7xl mx-auto px-6 py-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
           {!currentUser ? (
             <>
               <h1 className="text-sm font-bold text-[#111827] tracking-tight">
@@ -179,24 +180,39 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
         </div>
       </div>
 
-      {/* Search + Filter — contained white card, sticky; the grey top padding is the separator, soft shadow lifts once it sticks */}
-      <div ref={filterRef} className="sticky top-[49px] z-40 bg-[#F9FAFB] pt-4 pb-3">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className={`bg-white border border-[#E5E7EB] rounded-2xl px-5 py-4 space-y-4 transition-shadow duration-200 ${filterStuck ? 'shadow-lg shadow-black/10' : 'shadow-sm'}`}>
-          {/* Search Row */}
-          <div className="relative max-w-4xl">
-            <Search className="w-5 h-5 text-[#9CA3AF] absolute left-4 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search job title, skills, or keywords..."
-              className="w-full bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl pl-12 pr-6 py-3 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-sm placeholder:text-[#9CA3AF] hover:border-[#D1D5DB]"
-            />
+      {/* Search + Filter — contained white card, sticky */}
+      <div ref={filterRef} className="sticky top-[49px] z-40 bg-[#F9FAFB] pt-3 sm:pt-4 pb-2 sm:pb-3">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6">
+          <div className={`bg-white border border-[#E5E7EB] rounded-xl sm:rounded-2xl px-3 sm:px-5 py-3 sm:py-4 space-y-3 sm:space-y-4 transition-shadow duration-200 ${filterStuck ? 'shadow-lg shadow-black/10' : 'shadow-sm'}`}>
+
+          {/* Search Row — with filter button on mobile */}
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="w-4 sm:w-5 h-4 sm:h-5 text-[#9CA3AF] absolute left-3 sm:left-4 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search jobs..."
+                className="w-full bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl sm:rounded-2xl pl-9 sm:pl-12 pr-4 sm:pr-6 py-2.5 sm:py-3 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-sm placeholder:text-[#9CA3AF] hover:border-[#D1D5DB]"
+              />
+            </div>
+            {/* Mobile filter toggle */}
+            <button
+              onClick={() => setShowMobileFilters(true)}
+              className="sm:hidden flex items-center gap-1.5 px-3 py-2.5 border border-[#E5E7EB] rounded-xl text-[#374151] hover:border-[#3538CD] hover:text-[#3538CD] transition-all bg-white shrink-0 relative"
+            >
+              <SlidersHorizontal className="w-4 h-4" />
+              <span className="text-[11px] font-black uppercase tracking-wider">Filters</span>
+              {(() => {
+                const c = [locationFilter, experienceFilter, employmentFilter, jobTypeFilter, categoryFilter, buFilter].filter(Boolean).length;
+                return c > 0 ? <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#3538CD] text-white text-[10px] font-black rounded-full flex items-center justify-center">{c}</span> : null;
+              })()}
+            </button>
           </div>
 
-          {/* Filters Row + View Toggle */}
-          <div className="flex flex-wrap items-center gap-3">
+          {/* Desktop Filters Row — hidden on mobile */}
+          <div className="hidden sm:flex items-center gap-3 overflow-x-auto pb-1 scrollbar-hide">
             <FilterPill label="Location" icon={<MapPin className="w-3.5 h-3.5" />} value={locationFilter} options={locations} onChange={setLocationFilter} />
             <FilterPill label="Experience" icon={<Clock className="w-3.5 h-3.5" />} value={experienceFilter} options={experienceLevels} onChange={setExperienceFilter} />
             <FilterPill label="Employment" icon={<Briefcase className="w-3.5 h-3.5" />} value={employmentFilter} options={Array.from(new Set(displayJobs.map(j => j.employmentType)))} onChange={setEmploymentFilter} />
@@ -212,38 +228,122 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
               </button>
             )}
 
-            {/* View Toggle */}
-            {/* Job count — kept visible here so it stays on screen while the bar is stuck */}
             <span className="ml-auto shrink-0 inline-flex items-center px-3 py-1 bg-[#F3F4F6] text-[#6B7280] text-[11px] font-bold tracking-wide rounded-full border border-[#E5E7EB] whitespace-nowrap">
               {filteredJobs.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, filteredJobs.length)} of {filteredJobs.length} Jobs
             </span>
             <div className="flex items-center gap-1 bg-[#F3F4F6] rounded-lg p-1">
-              <button
-                onClick={() => setViewMode('grid')}
-                title="Grid view"
-                className={`p-1.5 rounded-md transition-all ${
-                  viewMode === 'grid' ? 'bg-white text-[#3538CD] shadow-sm' : 'text-[#9CA3AF] hover:text-[#6B7280]'
-                }`}
-              >
+              <button onClick={() => setViewMode('grid')} title="Grid view" className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white text-[#3538CD] shadow-sm' : 'text-[#9CA3AF] hover:text-[#6B7280]'}`}>
                 <LayoutGrid className="w-4 h-4" />
               </button>
-              <button
-                onClick={() => setViewMode('list')}
-                title="List view"
-                className={`p-1.5 rounded-md transition-all ${
-                  viewMode === 'list' ? 'bg-white text-[#3538CD] shadow-sm' : 'text-[#9CA3AF] hover:text-[#6B7280]'
-                }`}
-              >
+              <button onClick={() => setViewMode('list')} title="List view" className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-white text-[#3538CD] shadow-sm' : 'text-[#9CA3AF] hover:text-[#6B7280]'}`}>
                 <List className="w-4 h-4" />
               </button>
             </div>
           </div>
+
+          {/* Mobile active filters summary */}
+          {(() => {
+            const active = [
+              locationFilter && `📍 ${locationFilter}`,
+              experienceFilter && `⏱ ${experienceFilter}`,
+              employmentFilter && employmentFilter,
+              jobTypeFilter && jobTypeFilter,
+              categoryFilter && categoryFilter,
+              buFilter && buFilter,
+            ].filter(Boolean) as string[];
+            if (active.length === 0) return null;
+            return (
+              <div className="flex sm:hidden items-center gap-2 flex-wrap">
+                {active.map(a => (
+                  <span key={a} className="px-2 py-1 text-[10px] font-bold bg-[#3538CD]/5 text-[#3538CD] border border-[#3538CD]/10 rounded-lg">{a}</span>
+                ))}
+                <button onClick={clearFilters} className="text-[10px] font-black text-red-500 uppercase tracking-wider ml-1">Clear</button>
+              </div>
+            );
+          })()}
+
+          {/* Mobile job count */}
+          <div className="flex sm:hidden items-center justify-between">
+            <span className="text-[11px] font-bold text-[#9CA3AF]">
+              {filteredJobs.length} job{filteredJobs.length !== 1 ? 's' : ''} found
+            </span>
+            <div className="flex items-center gap-1 bg-[#F3F4F6] rounded-lg p-0.5">
+              <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white text-[#3538CD] shadow-sm' : 'text-[#9CA3AF]'}`}>
+                <LayoutGrid className="w-3.5 h-3.5" />
+              </button>
+              <button onClick={() => setViewMode('list')} className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-white text-[#3538CD] shadow-sm' : 'text-[#9CA3AF]'}`}>
+                <List className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
           </div>
         </div>
       </div>
 
+      {/* ── Mobile Filter Bottom Sheet ── */}
+      {showMobileFilters && (
+        <div className="fixed inset-0 z-[100] sm:hidden">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowMobileFilters(false)} />
+          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl max-h-[80vh] overflow-y-auto animate-in slide-in-from-bottom duration-300">
+            <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-[#F3F4F6] sticky top-0 bg-white z-10 rounded-t-3xl">
+              <h3 className="text-base font-black text-[#111827]">Filter Jobs</h3>
+              <button onClick={() => setShowMobileFilters(false)} className="p-2 hover:bg-[#F3F4F6] rounded-xl transition-colors">
+                <X className="w-5 h-5 text-[#6B7280]" />
+              </button>
+            </div>
+            <div className="p-5 space-y-5">
+              {[
+                { label: 'Location', icon: <MapPin className="w-4 h-4 text-[#3538CD]" />, value: locationFilter, options: locations, onChange: setLocationFilter },
+                { label: 'Experience', icon: <Clock className="w-4 h-4 text-[#3538CD]" />, value: experienceFilter, options: experienceLevels, onChange: setExperienceFilter },
+                { label: 'Employment Type', icon: <Briefcase className="w-4 h-4 text-[#3538CD]" />, value: employmentFilter, options: Array.from(new Set(displayJobs.map(j => j.employmentType))), onChange: setEmploymentFilter },
+                { label: 'Job Type', icon: <Building2 className="w-4 h-4 text-[#3538CD]" />, value: jobTypeFilter, options: Array.from(new Set(displayJobs.map(j => j.jobType))), onChange: setJobTypeFilter },
+                ...(categories.length > 0 ? [{ label: 'Category', icon: <Tags className="w-4 h-4 text-[#3538CD]" />, value: categoryFilter, options: categories, onChange: setCategoryFilter }] : []),
+                { label: 'Business Unit', icon: <Building2 className="w-4 h-4 text-[#3538CD]" />, value: buFilter, options: businessUnits, onChange: setBuFilter },
+              ].map((f) => (
+                <div key={f.label} className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    {f.icon}
+                    <span className="text-xs font-black text-[#374151] uppercase tracking-widest">{f.label}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {f.options.map(opt => (
+                      <button
+                        key={opt}
+                        onClick={() => f.onChange(f.value === opt ? '' : opt)}
+                        className={`px-3 py-2 text-xs font-bold rounded-xl border transition-all ${
+                          f.value === opt
+                            ? 'bg-[#3538CD] text-white border-[#3538CD]'
+                            : 'bg-white text-[#374151] border-[#E5E7EB] hover:border-[#3538CD]/30'
+                        }`}
+                      >
+                        {opt}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="sticky bottom-0 bg-white border-t border-[#F3F4F6] px-5 py-4 flex gap-3">
+              <button
+                onClick={() => { clearFilters(); setShowMobileFilters(false); }}
+                className="flex-1 py-3 text-[11px] font-black text-[#6B7280] border border-[#E5E7EB] rounded-xl uppercase tracking-widest hover:bg-[#F9FAFB] transition-colors"
+              >
+                Clear All
+              </button>
+              <button
+                onClick={() => setShowMobileFilters(false)}
+                className="flex-1 py-3 text-[11px] font-black text-white bg-[#3538CD] rounded-xl uppercase tracking-widest hover:bg-[#292bb0] transition-colors shadow-lg shadow-[#3538CD]/20"
+              >
+                Show {filteredJobs.length} Jobs
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Job Listings */}
-      <div className="max-w-7xl mx-auto px-6 pt-6 pb-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 pt-4 sm:pt-6 pb-8">
 
         {/* Profile completion nudge — a card on the jobs background */}
         {(() => {
@@ -253,10 +353,10 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
           const completed = PROFILE_FIELDS.length - missing.length;
           const pct = Math.round((completed / PROFILE_FIELDS.length) * 100);
           return (
-            <div className="flex items-center gap-3 rounded-xl border border-[#E0E7FF] bg-[#F5F7FF] px-4 py-2.5 shadow-sm mb-5">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 rounded-xl border border-[#E0E7FF] bg-[#F5F7FF] px-4 py-2.5 shadow-sm mb-5">
               <UserCircle2 className="w-5 h-5 text-[#4F46E5] shrink-0" />
               <p className="text-sm font-bold text-[#3730A3] shrink-0">Your profile is {pct}% complete</p>
-              <div className="flex-1 max-w-[260px] h-1.5 bg-[#E0E7FF] rounded-full overflow-hidden">
+              <div className="flex-1 max-w-full sm:max-w-[260px] h-1.5 bg-[#E0E7FF] rounded-full overflow-hidden">
                 <div className="h-full bg-[#4F46E5] rounded-full transition-all" style={{ width: `${pct}%` }} />
               </div>
               <Link
@@ -282,9 +382,9 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
             {currentJobs.length > 0 ? currentJobs.map((job) => {
               const { kind: appKind, app: userApp } = getJobAppState(job);
               return (
-              <div key={job.id} className="bg-white rounded-xl border border-[#E5E7EB] p-6 hover:shadow-lg hover:border-primary/30 transition-all duration-200 group">
+              <div key={job.id} className="bg-white rounded-xl border border-[#E5E7EB] p-4 sm:p-6 hover:shadow-lg hover:border-primary/30 transition-all duration-200 group">
                 <div className="flex items-start justify-between mb-3">
-                  <Link to={`/portal/yopmails/job/${job.id}`} className="text-lg font-semibold text-primary group-hover:text-[#292bb0] transition-colors">
+                  <Link to={`/portal/yopmails/job/${job.id}`} className="text-base sm:text-lg font-semibold text-primary group-hover:text-[#292bb0] transition-colors">
                     {job.title}
                   </Link>
                   <button onClick={() => { if (!currentUser) { setSelectedJob(job); setAuthTab('signin'); setShowAuthModal(true); } }} className="p-2 text-[#9CA3AF] hover:text-[#3538CD] hover:bg-[#3538CD]/5 rounded-lg transition-all" title="Save Job">
@@ -317,17 +417,17 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
                     </div>
                   </>
                 )}
-                <div className="flex items-center justify-between pt-4 border-t border-[#F3F4F6]">
-                  <span className="text-[11px] font-black text-[#9CA3AF] uppercase tracking-widest">{formatPostedDate(job.createdAt)}</span>
+                <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-[#F3F4F6]">
+                  <span className="text-[10px] sm:text-[11px] font-black text-[#9CA3AF] uppercase tracking-widest">{formatPostedDate(job.createdAt)}</span>
                   {appKind === 'draft' ? (
                     <button
                       onClick={() => continueDraft(job, userApp)}
-                      className="flex items-center gap-1.5 px-6 py-2.5 text-[12px] font-black rounded-xl transition-all uppercase tracking-widest shadow-md bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 shadow-amber-500/5"
+                      className="flex items-center gap-1.5 px-3 sm:px-6 py-2 sm:py-2.5 text-[11px] sm:text-[12px] font-black rounded-xl transition-all uppercase tracking-widest shadow-md bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 shadow-amber-500/5"
                     >
-                      Continue Application <ArrowRight className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Continue Application</span><span className="sm:hidden">Continue</span> <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                   ) : (
-                    <Link to={`/portal/yopmails/job/${job.id}`} className={`px-6 py-2.5 text-[12px] font-black rounded-xl transition-all uppercase tracking-widest shadow-md ${appKind === 'applied' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 shadow-emerald-500/5' : 'bg-[#3538CD] text-white hover:bg-[#292bb0] shadow-[#3538CD]/10'}`}>
+                    <Link to={`/portal/yopmails/job/${job.id}`} className={`px-3 sm:px-6 py-2 sm:py-2.5 text-[11px] sm:text-[12px] font-black rounded-xl transition-all uppercase tracking-widest shadow-md ${appKind === 'applied' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 shadow-emerald-500/5' : 'bg-[#3538CD] text-white hover:bg-[#292bb0] shadow-[#3538CD]/10'}`}>
                       {appKind === 'applied' ? 'Applied' : 'View & Apply'}
                     </Link>
                   )}

@@ -33,7 +33,7 @@ export default function PortalLayout({
     <div className="min-h-screen bg-[#F9FAFB] flex flex-col">
       {/* Top Bar */}
       <header className="bg-white border-b border-[#E5E7EB] sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
           {/* Left: Logo + Navigation */}
           <div className="flex items-center gap-5">
             {/* Company Logo */}
@@ -54,7 +54,7 @@ export default function PortalLayout({
                 className="flex items-center gap-2.5 group hover:opacity-80 transition-opacity"
                 title="My Profile"
               >
-                <div className="text-right">
+                <div className="text-right hidden sm:block">
                   <p className="text-sm font-semibold text-[#111827] leading-tight group-hover:text-[#3538CD] transition-colors">
                     {currentUser.firstName} {currentUser.lastName}
                   </p>
@@ -70,13 +70,13 @@ export default function PortalLayout({
               <>
                 <button
                   onClick={handleSignInClick}
-                  className="px-4 py-2 text-sm font-bold text-[#3538CD] border-2 border-[#3538CD] rounded-lg hover:bg-[#3538CD]/5 transition-colors uppercase tracking-widest text-[11px]"
+                  className="px-3 sm:px-4 py-2 text-sm font-bold text-[#3538CD] border-2 border-[#3538CD] rounded-lg hover:bg-[#3538CD]/5 transition-colors uppercase tracking-widest text-[10px] sm:text-[11px]"
                 >
                   Sign In
                 </button>
                 <button
                   onClick={handleRegisterClick}
-                  className="px-4 py-2 text-sm font-bold text-white bg-[#3538CD] border-2 border-[#3538CD] rounded-lg hover:bg-[#292bb0] transition-colors uppercase tracking-widest text-[11px] shadow-sm"
+                  className="px-3 sm:px-4 py-2 text-sm font-bold text-white bg-[#3538CD] border-2 border-[#3538CD] rounded-lg hover:bg-[#292bb0] transition-colors uppercase tracking-widest text-[10px] sm:text-[11px] shadow-sm"
                 >
                   Register
                 </button>
@@ -105,7 +105,7 @@ export default function PortalLayout({
 
       {/* Footer */}
       <footer className="bg-white border-t border-[#E5E7EB] py-6 mt-auto">
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 text-[#9CA3AF] text-xs">
             <CollabCRMIcon size={14} />
             <span>

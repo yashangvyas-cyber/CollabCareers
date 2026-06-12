@@ -129,7 +129,7 @@ export default function AuthModal({
       {/* Modal */}
       <div className="relative w-full max-w-[680px] bg-white rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[92vh]">
         {/* Header — Org + CollabCRM logos together */}
-        <div className="px-8 pt-8 pb-4 flex items-center justify-between">
+        <div className="px-5 sm:px-8 pt-6 sm:pt-8 pb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {/* Org logo */}
             <div className="w-10 h-10 rounded-xl bg-[#3538CD] flex items-center justify-center text-white text-base font-black shadow-sm shrink-0">Y</div>
@@ -147,7 +147,7 @@ export default function AuthModal({
         </div>
 
         {/* Job Context */}
-        <div className="px-8 pb-6">
+        <div className="px-5 sm:px-8 pb-6">
           <div className="flex items-center gap-2 bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl px-4 py-2.5">
              <span className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">
                {jobTitle === 'Portal' ? 'Welcome to' : 'Applying for:'}
@@ -160,7 +160,7 @@ export default function AuthModal({
 
         {/* Tabs - Hidden in Alumni States */}
         {modalState === 'auth' && (
-          <div className="px-8 pb-4">
+          <div className="px-5 sm:px-8 pb-4">
             <div className="flex bg-[#F4F5FA] p-1 rounded-2xl gap-1">
               <button
                 onClick={() => setActiveTab('register')}
@@ -186,7 +186,7 @@ export default function AuthModal({
           </div>
         )}
 
-        <div className="p-8 overflow-y-auto flex-1">
+        <div className="p-5 sm:p-8 overflow-y-auto flex-1">
           {modalState === 'auth' ? (
             <>
               {activeTab === 'register' ? (
@@ -212,7 +212,7 @@ export default function AuthModal({
                   </div>
 
                   {/* Name row — 2-col */}
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="space-y-1.5">
                       <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">First Name *</label>
                       <input type="text" required value={formData.firstName}
@@ -310,7 +310,7 @@ export default function AuthModal({
                   {/* Profile Visibility */}
                   <div className="pt-1">
                     <p className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest mb-3">Profile Visibility</p>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <button type="button" onClick={() => setProfileVisibility('visible')}
                         className={`relative text-left p-4 rounded-2xl border-2 transition-all ${profileVisibility === 'visible' ? 'border-[#3538CD] bg-[#3538CD]/5' : 'border-[#E5E7EB] bg-white hover:border-[#C7C9F0]'}`}>
                         <div className={`absolute top-3 right-3 w-4 h-4 rounded-full border-2 flex items-center justify-center ${profileVisibility === 'visible' ? 'border-[#3538CD]' : 'border-[#D1D5DB]'}`}>
@@ -588,7 +588,7 @@ export default function AuthModal({
                     <p className="text-[10px] font-bold text-[#9CA3AF] ml-1 mt-1">This will be used to sign in to your CollabCRM account</p>
                  </div>
 
-                 <div className="grid grid-cols-2 gap-4">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5 text-left">
                        <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">First Name *</label>
                        <input

@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import AddJobPage from './pages/AddJobPage';
 import JobsListingPage from './pages/JobsListingPage';
 import CRMJobDetailPage from './pages/CRMJobDetailPage';
@@ -22,13 +22,23 @@ import TalentPoolPage from './pages/TalentPoolPage';
 import TalentPoolDetailsPage from './pages/TalentPoolDetailsPage';
 import AddTalentPage from './pages/AddTalentPage';
 import EmployeeDetailPage from './pages/EmployeeDetailPage';
+import DeviceSimulator from './components/DeviceSimulator';
+
+/** Wraps all Career Portal routes with the device simulator */
+function PortalShell() {
+  return (
+    <DeviceSimulator>
+      <Outlet />
+    </DeviceSimulator>
+  );
+}
 
 function App() {
   return (
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route path="/" element={<PrototypeHome />} />
-        {/* Flow 1: Recruiter (CRM) */}
+        {/* Flow 1: Recruiter (CRM) — no simulator */}
         <Route path="/crm/jobs" element={<JobsListingPage />} />
         <Route path="/crm/jobs/:jobId" element={<CRMJobDetailPage />} />
         <Route path="/crm/add-job" element={<AddJobPage />} />
@@ -40,17 +50,19 @@ function App() {
         <Route path="/crm/talent-pool" element={<TalentPoolPage />} />
         <Route path="/crm/config" element={<OperationalConfigPage />} />
         <Route path="/crm/career-portal" element={<CareerPortalPage />} />
-        {/* Unified Career Portal (Flows 2+3+4) */}
-        <Route path="/portal/:slug" element={<CareerPage />} />
-        <Route path="/portal/:slug/job/:jobId" element={<JobDetailPage />} />
-        <Route path="/portal/:slug/register" element={<CareerPage openRegister={true} />} />
-        <Route path="/portal/:slug/apply/:jobId" element={<ApplicationFormPage />} />
-        <Route path="/portal/:slug/confirmation/:jobId" element={<ConfirmationPage />} />
-        <Route path="/portal/:slug/profile" element={<CandidateProfilePage />} />
-        <Route path="/portal/:slug/application/:applicationId" element={<ViewApplicationPage />} />
-        <Route path="/portal/:slug/alumni-verify" element={<CareerPage openAlumni={true} />} />
-        <Route path="/portal/:slug/alumni/apply/:jobId" element={<AlumniApplicationPage />} />
-        <Route path="/portal/:slug/reset-password/:token" element={<ResetPasswordPage />} />
+        {/* Unified Career Portal (Flows 2+3+4) — with device simulator */}
+        <Route element={<PortalShell />}>
+          <Route path="/portal/:slug" element={<CareerPage />} />
+          <Route path="/portal/:slug/job/:jobId" element={<JobDetailPage />} />
+          <Route path="/portal/:slug/register" element={<CareerPage openRegister={true} />} />
+          <Route path="/portal/:slug/apply/:jobId" element={<ApplicationFormPage />} />
+          <Route path="/portal/:slug/confirmation/:jobId" element={<ConfirmationPage />} />
+          <Route path="/portal/:slug/profile" element={<CandidateProfilePage />} />
+          <Route path="/portal/:slug/application/:applicationId" element={<ViewApplicationPage />} />
+          <Route path="/portal/:slug/alumni-verify" element={<CareerPage openAlumni={true} />} />
+          <Route path="/portal/:slug/alumni/apply/:jobId" element={<AlumniApplicationPage />} />
+          <Route path="/portal/:slug/reset-password/:token" element={<ResetPasswordPage />} />
+        </Route>
         {/* Flow 5: Stitching */}
         <Route path="/flow-map" element={<FlowMapPage />} />
         <Route path="/handoff" element={<HandoffPage />} />
@@ -61,3 +73,4 @@ function App() {
 }
 
 export default App;
+

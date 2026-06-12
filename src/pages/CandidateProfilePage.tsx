@@ -163,12 +163,12 @@ export default function CandidateProfilePage() {
   return (
     <>
       <PortalLayout>
-        <div className="max-w-7xl mx-auto px-6 py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
           <div className="flex flex-col lg:flex-row gap-8 items-start">
 
             {/* LEFT: Profile Sidebar */}
             <div className="w-full lg:w-[320px] shrink-0">
-              <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-8 sticky top-[80px]">
+              <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-5 sm:p-8 lg:sticky top-[80px]">
                 {/* Name + buttons */}
                 <div className="text-center mb-6">
                   <h2 className="text-xl font-black text-[#111827]">{currentUser?.firstName} {currentUser?.lastName}</h2>
@@ -280,7 +280,7 @@ export default function CandidateProfilePage() {
             {/* RIGHT: Main Content */}
             <div className="flex-1 min-w-0">
               {/* Tabs */}
-              <div className="flex items-center gap-1 bg-[#F4F5FA] p-1 rounded-2xl mb-8 w-fit">
+              <div className="flex items-center gap-1 bg-[#F4F5FA] p-1 rounded-2xl mb-8 w-full sm:w-fit overflow-x-auto scrollbar-hide">
                 <button
                   onClick={() => setActiveTab('applications')}
                   className={`px-6 py-2.5 text-[11px] font-black uppercase tracking-widest transition-all rounded-xl flex items-center gap-2 ${activeTab === 'applications' ? 'bg-white text-[#3538CD] shadow-sm' : 'text-[#6B7280] hover:text-[#111827]'
@@ -498,7 +498,7 @@ export default function CandidateProfilePage() {
                 setShowEditProfile(false);
               }}
             >
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">First Name <span className="text-red-500">*</span></label>
                   <input
@@ -521,7 +521,7 @@ export default function CandidateProfilePage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Email Address <span className="text-red-500">*</span></label>
                   <div className="relative">
@@ -567,7 +567,7 @@ export default function CandidateProfilePage() {
               <div className="border-t border-[#F3F4F6] pt-3 space-y-3">
                 <p className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest">Professional Details</p>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Organisation</label>
                     <input
@@ -607,7 +607,7 @@ export default function CandidateProfilePage() {
                   </select>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Location</label>
                     <div className="relative">
@@ -705,7 +705,7 @@ export default function CandidateProfilePage() {
               {/* Profile Visibility */}
               <div className="border-t border-[#F3F4F6] pt-3">
                 <p className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest mb-2">Profile Visibility</p>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <button type="button" onClick={() => setEditVisibility('visible')}
                     className={`relative text-left p-2.5 rounded-xl border-2 transition-all ${editVisibility === 'visible' ? 'border-[#3538CD] bg-[#3538CD]/5' : 'border-[#E5E7EB] hover:border-[#C7C9F0]'}`}>
                     <div className={`absolute top-2 right-2 w-3 h-3 rounded-full border-2 flex items-center justify-center ${editVisibility === 'visible' ? 'border-[#3538CD]' : 'border-[#D1D5DB]'}`}>

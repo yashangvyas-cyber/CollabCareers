@@ -70,7 +70,7 @@ export default function ViewApplicationPage() {
     <PortalLayout>
       {/* Top nav bar */}
       <div className="sticky top-[64px] z-30 bg-white/90 backdrop-blur-md border-b border-[#E5E7EB]">
-        <div className="max-w-4xl mx-auto px-6 py-3.5 flex items-center justify-between">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
           <Link 
             to={`/portal/${slug}/profile`} 
             className="flex items-center gap-1.5 text-xs font-black text-[#6B7280] hover:text-[#3538CD] transition-all uppercase tracking-widest"
@@ -90,12 +90,12 @@ export default function ViewApplicationPage() {
         </div>
       )}
 
-      <div className="max-w-4xl mx-auto px-6 py-10">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
 
         {/* Header */}
-        <div className="mb-8 flex items-start justify-between gap-6">
+        <div className="mb-8 flex flex-col sm:flex-row items-start justify-between gap-4 sm:gap-6">
           <div>
-            <h1 className="text-3xl font-black text-[#111827] tracking-tight mb-3">{appData.jobTitle}</h1>
+            <h1 className="text-2xl sm:text-3xl font-black text-[#111827] tracking-tight mb-3">{appData.jobTitle}</h1>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-[#6B7280] font-medium">
               <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-[#9CA3AF]" />{appData.location}</span>
               <span className="text-[#E5E7EB]">|</span>
@@ -145,12 +145,12 @@ export default function ViewApplicationPage() {
           </AccordionCard>
 
           <AccordionCard title="Personal Profile">
-            <div className="grid grid-cols-2 gap-x-10 gap-y-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-5">
               <InfoItem label="Full Name" value={appData.candidateInfo.fullName} />
               <InfoItem label="Email Address" value={appData.candidateInfo.email} />
               <InfoItem label="Mobile Number" value={appData.candidateInfo.phone} />
               <InfoItem label="Date of Birth" value={appData.candidateInfo.dob} />
-              <div className="col-span-2 flex items-center gap-2 text-sm font-medium text-[#3538CD] pt-1">
+              <div className="sm:col-span-2 flex items-center gap-2 text-sm font-medium text-[#3538CD] pt-1">
                 <Linkedin className="w-4 h-4 text-[#0A66C2]" />
                 {appData.candidateInfo.linkedin}
               </div>
@@ -158,8 +158,8 @@ export default function ViewApplicationPage() {
           </AccordionCard>
 
           <AccordionCard title="Professional Details">
-            <div className="grid grid-cols-2 gap-x-10 gap-y-5">
-              <div className="col-span-2 space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-5">
+              <div className="sm:col-span-2 space-y-4">
                 {appData.professionalDetails.experiences.map((exp: any) => (
                   <div key={exp.id} className="bg-[#F9FAFB] p-4 rounded-xl border border-[#E5E7EB]">
                     <div className="flex justify-between items-start">
@@ -178,7 +178,7 @@ export default function ViewApplicationPage() {
               <InfoItem label="Total Experience" value={appData.professionalDetails.totalExperience} />
               <InfoItem label="Highest Qualification" value={appData.professionalDetails.highestQualification} />
               <InfoItem label="Notice Period" value={appData.professionalDetails.noticePeriod} />
-              <div className="col-span-2 pt-1">
+              <div className="sm:col-span-2 pt-1">
                 <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-2">Core Skills</p>
                 <div className="flex flex-wrap gap-1.5">
                   {appData.professionalDetails.skills.map(s => (
@@ -186,15 +186,15 @@ export default function ViewApplicationPage() {
                   ))}
                 </div>
               </div>
-              <div className="col-span-2">
+              <div className="sm:col-span-2">
                 <InfoItem label="Additional Notes" value={appData.professionalDetails.generalRemarks} />
               </div>
             </div>
           </AccordionCard>
 
           <AccordionCard title="Address Information">
-            <div className="grid grid-cols-2 gap-x-10 gap-y-5">
-              <div className="col-span-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-5">
+              <div className="sm:col-span-2">
                 <InfoItem label="Residential Address" value={appData.address.address} />
               </div>
               <InfoItem label="Country" value={appData.address.country} />
@@ -205,7 +205,7 @@ export default function ViewApplicationPage() {
           </AccordionCard>
 
           <AccordionCard title="Salary Information">
-            <div className="grid grid-cols-2 gap-x-10 gap-y-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-5">
               <InfoItem label="CTC Type" value={appData.salaryInfo.ctcType} />
               <InfoItem label="Currency" value={appData.salaryInfo.currency} />
               <InfoItem label="Current CTC" value={`₹ ${appData.salaryInfo.currentCtc}`} />
@@ -214,8 +214,8 @@ export default function ViewApplicationPage() {
           </AccordionCard>
 
           <AccordionCard title="Additional Information">
-            <div className="grid grid-cols-2 gap-x-10 gap-y-5">
-              <div className="col-span-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-5">
+              <div className="sm:col-span-2">
                 <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-1.5">Portfolio URL</p>
                 <a href={appData.additionalInfo.portfolioUrl} target="_blank" rel="noreferrer"
                   className="text-sm font-semibold text-[#3538CD] hover:underline flex items-center gap-1.5">
@@ -292,7 +292,7 @@ function AccordionCard({ title, children, defaultExpanded = true }: { title: str
       <button
         type="button"
         onClick={() => setExpanded(v => !v)}
-        className="w-full flex items-center justify-between px-6 py-4 hover:bg-[#F9FAFB] transition-colors text-left"
+        className="w-full flex items-center justify-between px-4 sm:px-6 py-4 hover:bg-[#F9FAFB] transition-colors text-left"
       >
         <div className="flex items-center gap-3">
           <div className="w-0.5 h-4 bg-[#3538CD] rounded-full" />
@@ -301,7 +301,7 @@ function AccordionCard({ title, children, defaultExpanded = true }: { title: str
         <ChevronDown className={`w-4 h-4 text-[#9CA3AF] transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} />
       </button>
       {expanded && (
-        <div className="px-6 pb-6 pt-4 border-t border-[#F3F4F6]">
+        <div className="px-4 sm:px-6 pb-6 pt-4 border-t border-[#F3F4F6]">
           {children}
         </div>
       )}

@@ -164,13 +164,13 @@ export default function JobDetailPage() {
     <PortalLayout>
       {/* Breadcrumb */}
       <div className="bg-white border-b border-[#E5E7EB]">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center gap-6 py-3">
             <Link to="/portal/yopmails" className="flex items-center gap-2 text-xs font-black text-[#3538CD] uppercase tracking-widest hover:underline">
               <ArrowLeft className="w-4 h-4" /> Back to all jobs
             </Link>
-            <div className="w-[1px] h-4 bg-[#E5E7EB]" />
-            <nav className="flex items-center gap-1.5 text-sm">
+            <div className="w-[1px] h-4 bg-[#E5E7EB] hidden sm:block" />
+            <nav className="items-center gap-1.5 text-sm hidden sm:flex">
               <Link to="/portal/yopmails" className="text-[#6B7280] hover:text-[#3538CD] transition-colors">{job.businessUnit} Jobs</Link>
               <ChevronRight className="w-3.5 h-3.5 text-[#D1D5DB]" />
               <span className="text-[#111827] font-medium">{job.title}</span>
@@ -179,7 +179,7 @@ export default function JobDetailPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
         <div className="flex flex-col lg:flex-row gap-10 items-start">
 
           {/* ── LEFT: Job title + full description ── */}
@@ -187,7 +187,7 @@ export default function JobDetailPage() {
             {/* Title block */}
             <div className="mb-8">
               <p className="text-xs font-black text-[#9CA3AF] uppercase tracking-widest mb-2">{job.businessUnit}</p>
-              <h1 className="text-4xl font-black text-[#111827] leading-tight mb-3">{job.title}</h1>
+              <h1 className="text-2xl sm:text-4xl font-black text-[#111827] leading-tight mb-3">{job.title}</h1>
               <p className="text-sm text-[#9CA3AF] font-medium">{formatPostedDate(job.createdAt)}</p>
             </div>
 
@@ -199,7 +199,7 @@ export default function JobDetailPage() {
 
           {/* ── RIGHT: Sticky apply card ── */}
           <div className="w-full lg:w-[360px] shrink-0">
-            <div className="sticky top-24 space-y-4">
+            <div className="lg:sticky top-24 space-y-4">
 
               {/* CTA card */}
               <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-6">
@@ -372,16 +372,16 @@ function ReapplyModal({ isOpen, onClose, candidateName, onContinue, onStartFresh
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
       <div className="absolute inset-0 bg-[#111827]/60 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        <div className="p-10">
+        <div className="p-6 sm:p-10">
           <button onClick={onClose} className="absolute top-6 right-6 p-2 hover:bg-gray-100 rounded-full transition-colors">
             <X className="w-5 h-5 text-gray-400" />
           </button>
           <div className="mb-10 text-center">
-            <h2 className="text-3xl font-black text-[#111827] mb-2 tracking-tight">Welcome back, {candidateName}!</h2>
+            <h2 className="text-2xl sm:text-3xl font-black text-[#111827] mb-2 tracking-tight">Welcome back, {candidateName}!</h2>
             <p className="text-[#6B7280] font-bold">You've applied to a role with us before. Want to reuse those details to apply faster?</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <button onClick={onContinue} className="p-8 bg-white border-2 border-[#E5E7EB] rounded-3xl text-left hover:border-[#3538CD] group transition-all">
+            <button onClick={onContinue} className="p-5 sm:p-8 bg-white border-2 border-[#E5E7EB] rounded-3xl text-left hover:border-[#3538CD] group transition-all">
               <div className="w-12 h-12 bg-[#3538CD]/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Copy className="w-6 h-6 text-[#3538CD]" />
               </div>
@@ -389,7 +389,7 @@ function ReapplyModal({ isOpen, onClose, candidateName, onContinue, onStartFresh
               <p className="text-sm font-bold text-[#6B7280] leading-relaxed mb-6">We'll prefill this form with the resume and details from a job you applied to earlier. Just review and update anything that's changed — this job's questions stay fresh.</p>
               <span className="inline-flex items-center gap-2 text-sm font-black text-[#3538CD] tracking-tight">Use my previous details <ArrowRight className="w-4 h-4" /></span>
             </button>
-            <button onClick={onStartFresh} className="p-8 bg-white border-2 border-[#E5E7EB] rounded-3xl text-left hover:border-gray-900 group transition-all">
+            <button onClick={onStartFresh} className="p-5 sm:p-8 bg-white border-2 border-[#E5E7EB] rounded-3xl text-left hover:border-gray-900 group transition-all">
               <div className="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <ArrowRight className="w-6 h-6 text-gray-900" />
               </div>

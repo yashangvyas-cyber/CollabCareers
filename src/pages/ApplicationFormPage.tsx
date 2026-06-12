@@ -307,16 +307,16 @@ export default function ApplicationFormPage() {
 
   return (
     <PortalLayout>
-      <div className="max-w-4xl mx-auto px-6 py-10 min-h-[80vh] flex flex-col">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 min-h-[80vh] flex flex-col">
         
         {/* Progress Stepper */}
-        <div className="flex items-center justify-between mb-16 max-w-3xl mx-auto relative px-10">
+        <div className="flex items-center justify-between mb-10 sm:mb-16 max-w-3xl mx-auto relative px-2 sm:px-10">
           {[
             { label: 'CV UPLOAD', s: 0 },
             { label: 'FILL DETAILS', s: 1 },
             { label: 'REVIEW & SUBMIT', s: 2 }
           ].map((item, i) => (
-            <div key={item.label} className="flex flex-col items-center z-10 transition-all duration-500 min-w-[120px]">
+            <div key={item.label} className="flex flex-col items-center z-10 transition-all duration-500 min-w-[80px] sm:min-w-[120px]">
               <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-black transition-all duration-300 border-2 ${
                 step > item.s
                   ? 'bg-[#3538CD] border-[#3538CD] text-white'
@@ -326,7 +326,7 @@ export default function ApplicationFormPage() {
               }`}>
                 {step > item.s ? <CheckCircle className="w-5 h-5" /> : i + 1}
               </div>
-              <span className={`mt-3 text-[10px] font-black tracking-[0.1em] uppercase text-center ${step === item.s ? 'text-[#3538CD]' : 'text-[#9CA3AF]'}`}>
+              <span className={`mt-3 text-[8px] sm:text-[10px] font-black tracking-[0.1em] uppercase text-center ${step === item.s ? 'text-[#3538CD]' : 'text-[#9CA3AF]'}`}>
                 {item.label}
               </span>
             </div>
@@ -373,12 +373,12 @@ export default function ApplicationFormPage() {
         {/* STEP 0: CV Upload */}
         {step === 0 && (
           <div className="flex-1">
-            <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-2xl overflow-hidden p-12 text-center animate-in zoom-in-95 duration-500">
+            <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-2xl overflow-hidden p-6 sm:p-12 text-center animate-in zoom-in-95 duration-500">
               <div className="max-w-lg mx-auto">
                 {!extracting ? (
                   <div 
                     onClick={handleCvUpload}
-                    className="group relative border-2 border-dashed border-[#D1D5DB] hover:border-[#3538CD] rounded-[40px] p-16 cursor-pointer transition-all duration-300 hover:bg-[#F4F5FA] text-center"
+                    className="group relative border-2 border-dashed border-[#D1D5DB] hover:border-[#3538CD] rounded-[40px] p-8 sm:p-16 cursor-pointer transition-all duration-300 hover:bg-[#F4F5FA] text-center"
                   >
                     <div className="w-20 h-20 bg-[#F4F5FA] group-hover:bg-[#3538CD]/10 rounded-3xl flex items-center justify-center mx-auto mb-6 transition-colors">
                       <Upload className="w-10 h-10 text-[#3538CD]" />
@@ -462,7 +462,7 @@ export default function ApplicationFormPage() {
                 isCollapsed={collapsedSections[1]} 
                 onToggle={() => toggleSection(1)}
               >
-                 <div className="grid grid-cols-2 gap-6 mb-6">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
                     <FormInput 
                       label="First Name" 
                       required 
@@ -478,7 +478,7 @@ export default function ApplicationFormPage() {
                       onChange={(val: string) => setFormData(p => ({ ...p, personal: { ...p.personal, lastName: val }}))}
                     />
                  </div>
-                 <div className="grid grid-cols-2 gap-6 mb-6">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
                     <FormSelect 
                       label="Gender" 
                       options={['Select', 'Male', 'Female', 'Other', 'Prefer not to say']} 
@@ -493,7 +493,7 @@ export default function ApplicationFormPage() {
                       onChange={(val: string) => setFormData(p => ({ ...p, personal: { ...p.personal, contactNumber: val }}))}
                     />
                  </div>
-                 <div className="grid grid-cols-2 gap-6 mb-6">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
                     <FormInput label="Email Address" required value={formData.personal.email} isLocked />
                     <FormInput 
                       label="Date of Birth" 
@@ -503,7 +503,7 @@ export default function ApplicationFormPage() {
                       onChange={(val: string) => setFormData(p => ({ ...p, personal: { ...p.personal, dob: val }}))}
                     />
                  </div>
-                 <div className="grid grid-cols-2 gap-6">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <FormInput 
                       label="LinkedIn Profile" 
                       value={formData.personal.linkedin} 
@@ -542,7 +542,7 @@ export default function ApplicationFormPage() {
                 </div>
 
                 <div className="space-y-6">
-                  <div className="grid grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <FormInput 
                       label="Highest Qualification" 
                       value={formData.professional.highestQualification} 
@@ -604,7 +604,7 @@ export default function ApplicationFormPage() {
                                }} className="p-1 text-red-500 hover:bg-red-50 rounded"><Trash2 className="w-4 h-4"/></button>
                              </div>
                              
-                             <div className="grid grid-cols-2 gap-4 mb-4 pr-20">
+                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 sm:pr-20">
                                <FormInput 
                                  label="Company" 
                                  value={exp.company} 
@@ -624,7 +624,7 @@ export default function ApplicationFormPage() {
                                  }}
                                />
                              </div>
-                             <div className="grid grid-cols-2 gap-4 mb-2 pr-20">
+                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-2 sm:pr-20">
                                <FormMonthYearPicker 
                                  label="From (Year/Month)" 
                                  value={exp.from} 
@@ -733,7 +733,7 @@ export default function ApplicationFormPage() {
                 isCollapsed={collapsedSections[3]} 
                 onToggle={() => toggleSection(3)}
               >
-                 <div className={`grid gap-4 ${isFresher ? 'grid-cols-3' : 'grid-cols-4'}`}>
+                 <div className={`grid gap-4 grid-cols-1 sm:grid-cols-2 ${isFresher ? 'lg:grid-cols-3' : 'lg:grid-cols-4'}`}>
                     <FormSelect 
                       label="CTC Type" 
                       options={['Annual', 'Monthly']} 
@@ -777,7 +777,7 @@ export default function ApplicationFormPage() {
                       onChange={(val: string) => setFormData(p => ({ ...p, address: { ...p.address, street: val }}))}
                     />
                  </div>
-                 <div className="grid grid-cols-2 gap-6 mb-6">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
                     <FormSelect 
                       label="Country" 
                       options={['Select', 'India', 'USA', 'UK', 'Germany']} 
@@ -791,7 +791,7 @@ export default function ApplicationFormPage() {
                       onChange={(val: string) => setFormData(p => ({ ...p, address: { ...p.address, state: val }}))}
                     />
                  </div>
-                 <div className="grid grid-cols-2 gap-6">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <FormInput 
                       label="Town/City" 
                       value={formData.address.city} 
@@ -961,8 +961,8 @@ export default function ApplicationFormPage() {
 
         {/* Fixed Action Bar for Step 2 and 3 */}
         {step > 0 && (
-           <div className="fixed bottom-0 left-0 right-0 bg-white/60 backdrop-blur-xl border-t border-[#E5E7EB] px-6 py-6 z-50">
-              <div className="max-w-4xl mx-auto flex items-center justify-between">
+           <div className="fixed bottom-0 left-0 right-0 bg-white/60 backdrop-blur-xl border-t border-[#E5E7EB] px-4 sm:px-6 py-4 sm:py-6 z-50">
+              <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
                  {step === 1 ? (
                     <>
                        <button onClick={() => setStep(0)} className="text-[#6B7280] hover:text-[#3538CD] font-black text-[11px] transition-colors uppercase tracking-[0.2em] flex items-center gap-2">
@@ -1006,7 +1006,7 @@ export default function ApplicationFormPage() {
         )}
 
         {/* Global Footer */}
-        <div className="py-10 border-t border-[#E5E7EB] mt-auto flex justify-between items-center text-[10px] font-black text-[#9CA3AF] uppercase tracking-[0.2em] px-2">
+        <div className="py-10 border-t border-[#E5E7EB] mt-auto flex flex-col sm:flex-row justify-between items-center gap-3 text-[10px] font-black text-[#9CA3AF] uppercase tracking-[0.2em] px-2">
            <div>Powered by CollabCRM</div>
            <div className="flex gap-10">
               <button className="hover:text-[#3538CD] transition-colors">Privacy Policy</button>
@@ -1032,7 +1032,7 @@ function FormCollapsibleCard({ title, subtitle, children, isCollapsed, onToggle 
     <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden transition-all duration-300">
       <button 
         onClick={onToggle}
-        className="w-full px-8 py-6 flex items-center justify-between hover:bg-[#F9FAFB] transition-colors group"
+        className="w-full px-5 sm:px-8 py-5 sm:py-6 flex items-center justify-between hover:bg-[#F9FAFB] transition-colors group"
       >
         <div>
            <h3 className="text-sm font-black text-[#111827] uppercase tracking-widest group-hover:text-[#3538CD] transition-colors">{title}</h3>
@@ -1042,7 +1042,7 @@ function FormCollapsibleCard({ title, subtitle, children, isCollapsed, onToggle 
            <ChevronDown className="w-4 h-4" />
         </div>
       </button>
-      <div className={`transition-all duration-300 ${isCollapsed ? 'max-h-0 opacity-0' : 'max-h-[2000px] opacity-100 p-8 pt-0'}`}>
+      <div className={`transition-all duration-300 ${isCollapsed ? 'max-h-0 opacity-0' : 'max-h-[2000px] opacity-100 p-5 sm:p-8 pt-0'}`}>
          <div className="border-t border-[#F3F4F6] pt-8">
             {children}
          </div>
@@ -1198,13 +1198,13 @@ function FormTextarea({ label, value }: any) {
 
 function ReviewCard({ title, data, onEdit }: { title: string, data: any[], onEdit: () => void }) {
   return (
-    <div className="bg-white rounded-[32px] border border-[#E5E7EB] p-10 shadow-sm relative overflow-hidden group">
+    <div className="bg-white rounded-[32px] border border-[#E5E7EB] p-5 sm:p-10 shadow-sm relative overflow-hidden group">
       <div className="absolute top-0 left-0 w-1.5 h-full bg-[#3538CD]/5 group-hover:bg-[#3538CD]/20 transition-all" />
       <div className="flex items-center justify-between mb-8 border-b border-[#F3F4F6] pb-6">
         <h3 className="text-sm font-black text-[#111827] uppercase tracking-[0.15em]">{title}</h3>
         <button onClick={onEdit} className="text-[#3538CD] font-black text-[10px] uppercase tracking-widest px-4 py-2 bg-[#3538CD]/5 rounded-lg border border-[#3538CD]/10 hover:bg-[#3538CD]/10 transition-colors">Edit Section</button>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-y-10 gap-x-12">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-10 gap-x-12">
         {data.map((item, i) => (
           <div key={i} className="space-y-2">
             <p className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest">{item.label}</p>
