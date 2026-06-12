@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   X, Eye, EyeOff, Building2, ArrowRight, ShieldCheck, Mail, Lock, ArrowLeft, KeyRound, CheckCircle2
@@ -47,6 +47,17 @@ export default function AuthModal({
   });
   const [profileVisibility, setProfileVisibility] = useState<'visible' | 'private'>('visible');
   const [allowRecruiterContact, setAllowRecruiterContact] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

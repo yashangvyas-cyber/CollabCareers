@@ -99,7 +99,20 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [activeMobileFilterTab, setActiveMobileFilterTab] = useState('Location');
   const itemsPerPage = 6;
+
+  // Lock body scroll when mobile filters are open to prevent double scrollbars
+  useEffect(() => {
+    if (showMobileFilters) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [showMobileFilters]);
 
   // Combine store jobs with defaults if store is sparse
   const displayJobs = useMemo(() => {
@@ -281,59 +294,103 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
         </div>
       </div>
 
-      {/* ── Mobile Filter Bottom Sheet ── */}
+      {/* ── Mobile Filter Bottom Sheet (Dual-Pane Premium Design) ── */}
       {showMobileFilters && (
-        <div className="fixed inset-0 z-[100] sm:hidden">
+        <div className="fixed inset-0 z-[100] sm:hidden flex flex-col justify-end">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowMobileFilters(false)} />
-          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl max-h-[80vh] overflow-y-auto animate-in slide-in-from-bottom duration-300">
-            <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-[#F3F4F6] sticky top-0 bg-white z-10 rounded-t-3xl">
+          <div className="relative bg-white rounded-t-3xl shadow-2xl flex flex-col h-[85vh] animate-in slide-in-from-bottom duration-300">
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[#F3F4F6] shrink-0">
               <h3 className="text-base font-black text-[#111827]">Filter Jobs</h3>
-              <button onClick={() => setShowMobileFilters(false)} className="p-2 hover:bg-[#F3F4F6] rounded-xl transition-colors">
+              <button onClick={() => setShowMobileFilters(false)} className="p-2 hover:bg-[#F3F4F6] rounded-xl transition-colors bg-[#F9FAFB]">
                 <X className="w-5 h-5 text-[#6B7280]" />
               </button>
             </div>
-            <div className="p-5 space-y-5">
-              {[
-                { label: 'Location', icon: <MapPin className="w-4 h-4 text-[#3538CD]" />, value: locationFilter, options: locations, onChange: setLocationFilter },
-                { label: 'Experience', icon: <Clock className="w-4 h-4 text-[#3538CD]" />, value: experienceFilter, options: experienceLevels, onChange: setExperienceFilter },
-                { label: 'Employment Type', icon: <Briefcase className="w-4 h-4 text-[#3538CD]" />, value: employmentFilter, options: Array.from(new Set(displayJobs.map(j => j.employmentType))), onChange: setEmploymentFilter },
-                { label: 'Job Type', icon: <Building2 className="w-4 h-4 text-[#3538CD]" />, value: jobTypeFilter, options: Array.from(new Set(displayJobs.map(j => j.jobType))), onChange: setJobTypeFilter },
-                ...(categories.length > 0 ? [{ label: 'Category', icon: <Tags className="w-4 h-4 text-[#3538CD]" />, value: categoryFilter, options: categories, onChange: setCategoryFilter }] : []),
-                { label: 'Business Unit', icon: <Building2 className="w-4 h-4 text-[#3538CD]" />, value: buFilter, options: businessUnits, onChange: setBuFilter },
-              ].map((f) => (
-                <div key={f.label} className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    {f.icon}
-                    <span className="text-xs font-black text-[#374151] uppercase tracking-widest">{f.label}</span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {f.options.map(opt => (
-                      <button
-                        key={opt}
-                        onClick={() => f.onChange(f.value === opt ? '' : opt)}
-                        className={`px-3 py-2 text-xs font-bold rounded-xl border transition-all ${
-                          f.value === opt
-                            ? 'bg-[#3538CD] text-white border-[#3538CD]'
-                            : 'bg-white text-[#374151] border-[#E5E7EB] hover:border-[#3538CD]/30'
-                        }`}
-                      >
-                        {opt}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
+            
+            {/* Dual Pane Body */}
+            <div className="flex flex-1 overflow-hidden">
+              {(() => {
+                const filterGroups = [
+                  { label: 'Location', value: locationFilter, options: locations, onChange: setLocationFilter },
+                  { label: 'Experience', value: experienceFilter, options: experienceLevels, onChange: setExperienceFilter },
+                  { label: 'Employment', value: employmentFilter, options: Array.from(new Set(displayJobs.map(j => j.employmentType))), onChange: setEmploymentFilter },
+                  { label: 'Job Type', value: jobTypeFilter, options: Array.from(new Set(displayJobs.map(j => j.jobType))), onChange: setJobTypeFilter },
+                  ...(categories.length > 0 ? [{ label: 'Category', value: categoryFilter, options: categories, onChange: setCategoryFilter }] : []),
+                  { label: 'Business Unit', value: buFilter, options: businessUnits, onChange: setBuFilter },
+                ];
+                
+                const activeGroup = filterGroups.find(g => g.label === activeMobileFilterTab) || filterGroups[0];
+
+                return (
+                  <>
+                    {/* Left Pane: Categories */}
+                    <div className="w-[35%] bg-[#F9FAFB] border-r border-[#E5E7EB] overflow-y-auto">
+                      {filterGroups.map(group => (
+                        <button
+                          key={group.label}
+                          onClick={() => setActiveMobileFilterTab(group.label)}
+                          className={`w-full text-left px-4 py-4 text-xs font-black uppercase tracking-widest relative transition-colors ${
+                            activeMobileFilterTab === group.label
+                              ? 'bg-white text-[#3538CD]'
+                              : 'text-[#6B7280] hover:bg-[#F3F4F6]'
+                          }`}
+                        >
+                          {activeMobileFilterTab === group.label && (
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#3538CD]" />
+                          )}
+                          {group.label}
+                          {group.value && (
+                            <div className="mt-1 w-1.5 h-1.5 rounded-full bg-[#3538CD]" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Right Pane: Options */}
+                    <div className="flex-1 bg-white overflow-y-auto p-4 custom-scrollbar">
+                      <div className="space-y-3">
+                        {activeGroup.options.length === 0 ? (
+                          <p className="text-xs text-[#9CA3AF] font-medium text-center mt-10">No options available.</p>
+                        ) : (
+                          activeGroup.options.map(opt => (
+                            <button
+                              key={opt}
+                              onClick={() => activeGroup.onChange(activeGroup.value === opt ? '' : opt)}
+                              className="w-full flex items-center justify-between p-3 rounded-xl border transition-all"
+                              style={{
+                                borderColor: activeGroup.value === opt ? '#3538CD' : '#E5E7EB',
+                                backgroundColor: activeGroup.value === opt ? '#EEF2FF' : '#FFFFFF'
+                              }}
+                            >
+                              <span className={`text-sm font-bold ${activeGroup.value === opt ? 'text-[#3538CD]' : 'text-[#374151]'}`}>
+                                {opt}
+                              </span>
+                              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
+                                activeGroup.value === opt ? 'border-[#3538CD] bg-[#3538CD]' : 'border-[#D1D5DB]'
+                              }`}>
+                                {activeGroup.value === opt && <div className="w-2 h-2 rounded-full bg-white" />}
+                              </div>
+                            </button>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
-            <div className="sticky bottom-0 bg-white border-t border-[#F3F4F6] px-5 py-4 flex gap-3">
+
+            {/* Footer */}
+            <div className="px-5 py-4 border-t border-[#F3F4F6] bg-white flex gap-3 shrink-0">
               <button
                 onClick={() => { clearFilters(); setShowMobileFilters(false); }}
-                className="flex-1 py-3 text-[11px] font-black text-[#6B7280] border border-[#E5E7EB] rounded-xl uppercase tracking-widest hover:bg-[#F9FAFB] transition-colors"
+                className="flex-1 py-3.5 text-[11px] font-black text-[#6B7280] border-2 border-[#E5E7EB] rounded-xl uppercase tracking-widest hover:bg-[#F9FAFB] transition-colors"
               >
                 Clear All
               </button>
               <button
                 onClick={() => setShowMobileFilters(false)}
-                className="flex-1 py-3 text-[11px] font-black text-white bg-[#3538CD] rounded-xl uppercase tracking-widest hover:bg-[#292bb0] transition-colors shadow-lg shadow-[#3538CD]/20"
+                className="flex-1 py-3.5 text-[11px] font-black text-white bg-[#3538CD] rounded-xl uppercase tracking-widest hover:bg-[#292bb0] transition-colors shadow-lg shadow-[#3538CD]/20"
               >
                 Show {filteredJobs.length} Jobs
               </button>
