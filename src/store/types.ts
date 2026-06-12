@@ -56,6 +56,7 @@ export interface Job {
   evaluationCriteria: string[];
   createdAt: string;
   targetDate?: string;
+  category?: string;
 }
 
 export interface Candidate {

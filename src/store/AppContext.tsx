@@ -27,6 +27,7 @@ const initialState: AppState = {
   jobs: [
     {
       id: 'd1',
+      category: 'Engineering',
       title: 'React Developer',
       businessUnit: 'MindInventory',
       recruiter: 'Sarah Chen',
@@ -67,6 +68,7 @@ We build tools used by thousands of teams. Our frontend squad is small, collabor
     },
     {
       id: 'd2',
+      category: 'Design',
       title: 'UI/UX Designer',
       businessUnit: '300Mind',
       recruiter: 'Michael Park',
@@ -101,6 +103,7 @@ Design is a first-class citizen at MindInventory. You will work on products that
     },
     {
       id: 'd3',
+      category: 'Engineering',
       title: 'Flutter Developer',
       businessUnit: 'MindInventory',
       recruiter: 'James Wilson',
@@ -135,6 +138,7 @@ Ship fast, learn faster. Our mobile team is small and the codebase is well-maint
     },
     {
       id: 'd4',
+      category: 'Management',
       title: 'Project Manager',
       businessUnit: 'CollabCRM',
       recruiter: 'Lisa Ray',
@@ -176,6 +180,7 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
     },
     {
       id: 'd5',
+      category: 'Analytics',
       title: 'Business Analyst',
       businessUnit: '300Mind',
       recruiter: 'David Kim',
@@ -194,6 +199,7 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
     },
     {
       id: 'd6',
+      category: 'Engineering',
       title: 'Node.js Backend Engineer',
       businessUnit: 'MindInventory',
       recruiter: 'James Wilson',
@@ -212,6 +218,7 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
     },
     {
       id: 'd7',
+      category: 'Engineering',
       title: 'DevOps Engineer',
       businessUnit: 'MindInventory',
       recruiter: 'Michael Park',
@@ -230,6 +237,7 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
     },
     {
       id: 'd8',
+      category: 'Quality Assurance',
       title: 'QA Engineer',
       businessUnit: 'CollabCRM',
       recruiter: 'Sarah Chen',
@@ -248,6 +256,7 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
     },
     {
       id: 'd9',
+      category: 'Design',
       title: 'Product Designer',
       businessUnit: '300Mind',
       recruiter: 'Lisa Ray',
@@ -266,6 +275,7 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
     },
     {
       id: 'd10',
+      category: 'Analytics',
       title: 'Data Analyst',
       businessUnit: '300Mind',
       recruiter: 'David Kim',
@@ -284,6 +294,7 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
     },
     {
       id: 'd11',
+      category: 'Engineering',
       title: 'iOS Developer',
       businessUnit: 'CollabCRM',
       recruiter: 'Sarah Chen',
@@ -302,6 +313,7 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
     },
     {
       id: 'd12',
+      category: 'Engineering',
       title: 'Android Developer',
       businessUnit: 'CollabCRM',
       recruiter: 'Michael Park',
@@ -320,6 +332,7 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
     },
     {
       id: 'd13',
+      category: 'Design',
       title: '2D Artist',
       businessUnit: 'MindInventory',
       recruiter: 'Sarah Chen',

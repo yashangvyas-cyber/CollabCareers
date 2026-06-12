@@ -3,7 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import PortalLayout from '../components/PortalLayout';
 import AuthModal from '../components/AuthModal';
 import {
-  MapPin, Briefcase, Building2, Clock,
+  MapPin, Briefcase, Building2, Clock, Tags,
   ArrowRight, Bookmark, ChevronRight, ArrowLeft, Copy, CheckCheck, X, CheckCircle
 } from 'lucide-react';
 import { useApp } from '../store/AppContext';
@@ -154,6 +154,7 @@ export default function JobDetailPage() {
     { label: 'Job ID', value: jobCode(job.id) },
     { label: 'Location', value: job.location, icon: <MapPin className="w-3.5 h-3.5 text-[#3538CD]" /> },
     { label: 'Business Unit', value: job.businessUnit, icon: <Building2 className="w-3.5 h-3.5 text-[#3538CD]" /> },
+    ...(job.category ? [{ label: 'Job Category', value: job.category, icon: <Tags className="w-3.5 h-3.5 text-[#3538CD]" /> }] : []),
     { label: 'Employment Type', value: job.employmentType, icon: <Briefcase className="w-3.5 h-3.5 text-[#3538CD]" /> },
     { label: 'Job Type', value: job.jobType, icon: <Building2 className="w-3.5 h-3.5 text-[#3538CD]" /> },
     { label: 'Experience', value: job.experience, icon: <Clock className="w-3.5 h-3.5 text-[#3538CD]" /> },

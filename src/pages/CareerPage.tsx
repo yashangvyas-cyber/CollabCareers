@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PortalLayout from '../components/PortalLayout';
-import { Search, MapPin, Briefcase, Clock, ChevronDown, X, Building2, Bookmark, LayoutGrid, List, ArrowRight, UserCircle2 } from 'lucide-react';
+import { Search, MapPin, Briefcase, Clock, ChevronDown, X, Building2, Bookmark, LayoutGrid, List, ArrowRight, UserCircle2, Tags } from 'lucide-react';
 import AuthModal from '../components/AuthModal';
 import { useApp } from '../store/AppContext';
 
@@ -93,6 +93,7 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
   const [locationFilter, setLocationFilter] = useState('');
   const [employmentFilter, setEmploymentFilter] = useState('');
   const [jobTypeFilter, setJobTypeFilter] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
   const [experienceFilter, setExperienceFilter] = useState('');
   const [buFilter, setBuFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -111,6 +112,7 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
     if (locationFilter && job.location !== locationFilter) return false;
     if (employmentFilter && job.employmentType !== employmentFilter) return false;
     if (jobTypeFilter && job.jobType !== jobTypeFilter) return false;
+    if (categoryFilter && job.category !== categoryFilter) return false;
     if (experienceFilter && job.experience !== experienceFilter) return false;
     if (buFilter && job.businessUnit !== buFilter) return false;
     return true;
@@ -129,6 +131,7 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
     setLocationFilter('');
     setEmploymentFilter('');
     setJobTypeFilter('');
+    setCategoryFilter('');
     setExperienceFilter('');
     setBuFilter('');
     setCurrentPage(1);
@@ -137,6 +140,8 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
   const locations = Array.from(new Set(displayJobs.map(j => j.location))).filter(Boolean);
   const experienceLevels = Array.from(new Set(displayJobs.map(j => j.experience))).filter(Boolean);
   const businessUnits = Array.from(new Set(displayJobs.map(j => j.businessUnit))).filter(Boolean);
+  // Category options come from the career-portal config (here: the categories present on published jobs)
+  const categories = Array.from(new Set(displayJobs.map(j => j.category).filter((c): c is string => !!c)));
 
   return (
     <PortalLayout>
@@ -196,9 +201,12 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
             <FilterPill label="Experience" icon={<Clock className="w-3.5 h-3.5" />} value={experienceFilter} options={experienceLevels} onChange={setExperienceFilter} />
             <FilterPill label="Employment" icon={<Briefcase className="w-3.5 h-3.5" />} value={employmentFilter} options={Array.from(new Set(displayJobs.map(j => j.employmentType)))} onChange={setEmploymentFilter} />
             <FilterPill label="Type" icon={<Building2 className="w-3.5 h-3.5" />} value={jobTypeFilter} options={Array.from(new Set(displayJobs.map(j => j.jobType)))} onChange={setJobTypeFilter} />
+            {categories.length > 0 && (
+              <FilterPill label="Category" icon={<Tags className="w-3.5 h-3.5" />} value={categoryFilter} options={categories} onChange={setCategoryFilter} />
+            )}
             <FilterPill label="Business Unit" icon={<Building2 className="w-3.5 h-3.5" />} value={buFilter} options={businessUnits} onChange={setBuFilter} />
 
-            {(locationFilter || experienceFilter || employmentFilter || jobTypeFilter || buFilter) && (
+            {(locationFilter || experienceFilter || employmentFilter || jobTypeFilter || categoryFilter || buFilter) && (
               <button onClick={clearFilters} className="flex items-center gap-1.5 ml-2 px-3 py-1.5 text-[10px] font-black text-[#6B7280] hover:text-red-500 transition-colors uppercase tracking-widest bg-[#F3F4F6] hover:bg-red-50 rounded-lg group">
                 <X className="w-3 h-3 group-hover:rotate-90 transition-transform" /> Clear Filters
               </button>
