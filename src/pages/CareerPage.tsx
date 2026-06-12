@@ -212,7 +212,7 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
           </div>
 
           {/* Desktop Filters Row — hidden on mobile */}
-          <div className="hidden sm:flex items-center gap-3 overflow-x-auto pb-1 scrollbar-hide">
+          <div className="hidden sm:flex items-center gap-3 flex-wrap pb-1">
             <FilterPill label="Location" icon={<MapPin className="w-3.5 h-3.5" />} value={locationFilter} options={locations} onChange={setLocationFilter} />
             <FilterPill label="Experience" icon={<Clock className="w-3.5 h-3.5" />} value={experienceFilter} options={experienceLevels} onChange={setExperienceFilter} />
             <FilterPill label="Employment" icon={<Briefcase className="w-3.5 h-3.5" />} value={employmentFilter} options={Array.from(new Set(displayJobs.map(j => j.employmentType)))} onChange={setEmploymentFilter} />
