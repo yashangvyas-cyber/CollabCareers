@@ -5,13 +5,13 @@ import { Briefcase, Mail, Phone, MapPin, FileText, ExternalLink, Linkedin, LogOu
 import { useApp } from '../store/AppContext';
 
 const brandStatusStyles: Record<string, string> = {
-  'Under Review': 'bg-[#F4F5FA] text-[#3538CD] border-[#3538CD]/20',
-  'Interview in Progress': 'bg-[#F4F5FA] text-[#3538CD] border-[#3538CD]/20',
+  'Under Review': 'bg-[#F4F5FA] text-primary border-primary/20',
+  'Interview in Progress': 'bg-[#F4F5FA] text-primary border-primary/20',
   'Decision Made': 'bg-[#F9FAFB] text-[#6B7280] border-[#E5E7EB]',
-  'Offer Made': 'bg-[#3538CD] text-white border-[#3538CD]',
+  'Offer Made': 'bg-primary text-white border-primary',
   'Rejected': 'bg-gray-100 text-gray-400 border-gray-200',
-  'Draft': 'bg-[#F4F5FA] text-[#3538CD] border border-[#3538CD]/20',
-  'Submitted': 'bg-[#F4F5FA] text-[#3538CD] border-[#3538CD]/20',
+  'Draft': 'bg-[#F4F5FA] text-primary border border-primary/20',
+  'Submitted': 'bg-[#F4F5FA] text-primary border-primary/20',
   'Withdrawn': 'bg-gray-50 text-gray-400 border-gray-200 opacity-60',
 };
 
@@ -179,7 +179,7 @@ export default function CandidateProfilePage() {
                   <div className="flex items-center gap-2 mt-4">
                     <button
                       onClick={openEditProfile}
-                      className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 border border-[#3538CD] text-[#3538CD] text-[11px] font-black rounded-xl hover:bg-[#3538CD]/5 transition-colors uppercase tracking-widest"
+                      className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 border border-primary text-primary text-[11px] font-black rounded-xl hover:bg-primary/5 transition-colors uppercase tracking-widest"
                     >
                       <Pencil className="w-3.5 h-3.5" /> Edit Profile
                     </button>
@@ -215,7 +215,7 @@ export default function CandidateProfilePage() {
                   {derivedProfile.linkedin && (
                     <div className="flex items-center gap-3">
                       <span title="LinkedIn"><Linkedin className="w-4 h-4 text-[#0A66C2] shrink-0" /></span>
-                      <a href={`https://${derivedProfile.linkedin.replace('https://', '')}`} target="_blank" className="text-sm font-bold text-[#3538CD] hover:underline">LinkedIn Profile</a>
+                      <a href={`https://${derivedProfile.linkedin.replace('https://', '')}`} target="_blank" className="text-sm font-bold text-primary hover:underline">LinkedIn Profile</a>
                     </div>
                   )}
                 </div>
@@ -226,13 +226,13 @@ export default function CandidateProfilePage() {
                 <div>
                   <p className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest mb-3">Professional Resume</p>
                   {derivedProfile.resumeName ? (
-                    <div className="flex items-center gap-3 p-3 bg-[#F9FAFB] rounded-xl border border-[#E5E7EB] group transition-all hover:bg-white hover:border-[#3538CD]/30">
-                      <FileText className="w-5 h-5 text-[#3538CD]" />
+                    <div className="flex items-center gap-3 p-3 bg-[#F9FAFB] rounded-xl border border-[#E5E7EB] group transition-all hover:bg-white hover:border-primary/30">
+                      <FileText className="w-5 h-5 text-primary" />
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-bold text-[#111827] truncate">{derivedProfile.resumeName}</p>
                         <p className="text-[10px] text-[#6B7280] font-bold">Latest Uploaded</p>
                       </div>
-                      <button className="text-[#3538CD] hover:scale-110 transition-transform">
+                      <button className="text-primary hover:scale-110 transition-transform">
                         <ExternalLink className="w-4 h-4" />
                       </button>
                     </div>
@@ -247,7 +247,7 @@ export default function CandidateProfilePage() {
                     <p className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest mb-3">Skills</p>
                     <div className="flex flex-wrap gap-2">
                       {derivedProfile.skills.map((skill: string) => (
-                        <span key={skill} className="px-3 py-1 text-[10px] font-bold bg-[#F4F5FA] text-[#3538CD] border border-[#3538CD]/10 rounded-full">
+                        <span key={skill} className="px-3 py-1 text-[10px] font-bold bg-[#F4F5FA] text-primary border border-primary/10 rounded-full">
                           {skill}
                         </span>
                       ))}
@@ -283,21 +283,21 @@ export default function CandidateProfilePage() {
               <div className="flex items-center gap-1 bg-[#F4F5FA] p-1 rounded-2xl mb-8 w-full sm:w-fit overflow-x-auto scrollbar-hide">
                 <button
                   onClick={() => setActiveTab('applications')}
-                  className={`px-6 py-2.5 text-[11px] font-black uppercase tracking-widest transition-all rounded-xl flex items-center gap-2 ${activeTab === 'applications' ? 'bg-white text-[#3538CD] shadow-sm' : 'text-[#6B7280] hover:text-[#111827]'
+                  className={`px-6 py-2.5 text-[11px] font-black uppercase tracking-widest transition-all rounded-xl flex items-center gap-2 ${activeTab === 'applications' ? 'bg-white text-primary shadow-sm' : 'text-[#6B7280] hover:text-[#111827]'
                     }`}
                 >
                   Applications
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${activeTab === 'applications' ? 'bg-[#3538CD] text-white' : 'bg-gray-200 text-gray-500'}`}>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${activeTab === 'applications' ? 'bg-primary text-white' : 'bg-gray-200 text-gray-500'}`}>
                     {displayApps.length}
                   </span>
                 </button>
                 <button
                   onClick={() => setActiveTab('saved')}
-                  className={`px-6 py-2.5 text-[11px] font-black uppercase tracking-widest transition-all rounded-xl flex items-center gap-2 ${activeTab === 'saved' ? 'bg-white text-[#3538CD] shadow-sm' : 'text-[#6B7280] hover:text-[#111827]'
+                  className={`px-6 py-2.5 text-[11px] font-black uppercase tracking-widest transition-all rounded-xl flex items-center gap-2 ${activeTab === 'saved' ? 'bg-white text-primary shadow-sm' : 'text-[#6B7280] hover:text-[#111827]'
                     }`}
                 >
                   Saved
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${activeTab === 'saved' ? 'bg-[#3538CD] text-white' : 'bg-gray-200 text-gray-500'}`}>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${activeTab === 'saved' ? 'bg-primary text-white' : 'bg-gray-200 text-gray-500'}`}>
                     {savedJobs.length}
                   </span>
                 </button>
@@ -308,7 +308,7 @@ export default function CandidateProfilePage() {
                 <div className="flex items-center gap-2 mb-4">
                   <button
                     onClick={seedDemoSavedJobs}
-                    className="px-3 py-1.5 bg-[#3538CD]/5 border border-[#3538CD]/10 rounded-lg text-[9px] font-black text-[#3538CD] uppercase tracking-widest hover:bg-[#3538CD] hover:text-white transition-all"
+                    className="px-3 py-1.5 bg-primary/5 border border-primary/10 rounded-lg text-[9px] font-black text-primary uppercase tracking-widest hover:bg-primary hover:text-white transition-all"
                   >
                     Load Demo Saved Jobs
                   </button>
@@ -326,7 +326,7 @@ export default function CandidateProfilePage() {
                   <div className="flex items-center gap-2 mb-2">
                     <button
                       onClick={() => setForceEmptyApps(false)}
-                      className="px-3 py-1.5 bg-[#3538CD]/5 border border-[#3538CD]/10 rounded-lg text-[9px] font-black text-[#3538CD] uppercase tracking-widest hover:bg-[#3538CD] hover:text-white transition-all"
+                      className="px-3 py-1.5 bg-primary/5 border border-primary/10 rounded-lg text-[9px] font-black text-primary uppercase tracking-widest hover:bg-primary hover:text-white transition-all"
                     >
                       Show Applications
                     </button>
@@ -340,12 +340,12 @@ export default function CandidateProfilePage() {
                 )}
                 {activeTab === 'applications' ? (
                   (!forceEmptyApps ? displayApps : []).map((app: any) =>(
-                    <div key={app.id} className="bg-white rounded-2xl border border-[#E5E7EB] p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:border-[#3538CD]/40 hover:shadow-xl hover:shadow-[#3538CD]/5 transition-all duration-300 relative group">
-                      <div className="absolute top-0 left-0 w-1 h-full bg-[#3538CD]/5 group-hover:bg-[#3538CD]/20 transition-all" />
+                    <div key={app.id} className="bg-white rounded-2xl border border-[#E5E7EB] p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 relative group">
+                      <div className="absolute top-0 left-0 w-1 h-full bg-primary/5 group-hover:bg-primary/20 transition-all" />
 
                       <div className="flex-1 min-w-0 pr-12">
                         <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-6 mb-3">
-                          <h4 className="text-[22px] font-black text-[#111827] group-hover:text-[#3538CD] transition-colors tracking-tighter leading-tight">
+                          <h4 className="text-[22px] font-black text-[#111827] group-hover:text-primary transition-colors tracking-tighter leading-tight">
                             {app.title}
                           </h4>
                           <span className={`w-fit px-4 py-1.5 text-[10px] font-black rounded-full border uppercase tracking-widest shadow-sm shrink-0 ${brandStatusStyles[app.status as keyof typeof brandStatusStyles] || 'bg-gray-100'}`}>
@@ -378,14 +378,14 @@ export default function CandidateProfilePage() {
                         ) : app.status === 'Applied' && !app.jobClosed ? (
                           <button
                             onClick={() => navigate(`/portal/yopmails/apply/${app.jobId}`, { state: { continueDraft: true, draftJobTitle: app.title, lastSaved: app.appliedAt } })}
-                            className="flex items-center gap-2 bg-[#3538CD] text-white px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-[#292bb0] transition-all shadow-lg shadow-[#3538CD]/20 active:scale-95 whitespace-nowrap"
+                            className="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 active:scale-95 whitespace-nowrap"
                           >
                             Continue Application <ArrowRight className="w-4 h-4" />
                           </button>
                         ) : (
                           <Link
                             to={`/portal/yopmails/application/${app.id}`}
-                            className="flex items-center gap-2 text-[#3538CD] hover:text-[#292bb0] text-[11px] font-black uppercase tracking-widest transition-all group/link"
+                            className="flex items-center gap-2 text-primary hover:text-primary-hover text-[11px] font-black uppercase tracking-widest transition-all group/link"
                           >
                             View Application <ArrowRight className="w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
                           </Link>
@@ -399,12 +399,12 @@ export default function CandidateProfilePage() {
                     return (
                       <div
                         key={js.id}
-                        className={`bg-white rounded-2xl border border-[#E5E7EB] p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:border-[#3538CD]/40 hover:shadow-xl hover:shadow-[#3538CD]/5 transition-all duration-300 relative group ${isClosed ? 'opacity-80' : ''}`}
+                        className={`bg-white rounded-2xl border border-[#E5E7EB] p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 relative group ${isClosed ? 'opacity-80' : ''}`}
                       >
-                        <div className="absolute top-0 left-0 w-1 h-full bg-[#3538CD]/5 group-hover:bg-[#3538CD]/20 transition-all" />
+                        <div className="absolute top-0 left-0 w-1 h-full bg-primary/5 group-hover:bg-primary/20 transition-all" />
 
                         <div className="flex-1 min-w-0 pr-12">
-                          <h4 className={`text-[22px] font-black transition-colors tracking-tighter leading-tight mb-3 ${isClosed ? 'text-gray-400' : 'text-[#111827] group-hover:text-[#3538CD]'}`}>
+                          <h4 className={`text-[22px] font-black transition-colors tracking-tighter leading-tight mb-3 ${isClosed ? 'text-gray-400' : 'text-[#111827] group-hover:text-primary'}`}>
                             {js.title}
                           </h4>
                           <div className="flex flex-wrap items-center gap-3 text-xs">
@@ -424,7 +424,7 @@ export default function CandidateProfilePage() {
                           ) : (
                             <Link
                               to={`/portal/yopmails/job/${js.id}`}
-                              className="flex items-center gap-2 px-6 py-3 bg-[#3538CD] text-white text-[11px] font-black rounded-xl hover:bg-[#292bb0] transition-all uppercase tracking-widest shadow-lg shadow-[#3538CD]/20 active:scale-95 whitespace-nowrap"
+                              className="flex items-center gap-2 px-6 py-3 bg-primary text-white text-[11px] font-black rounded-xl hover:bg-primary-hover transition-all uppercase tracking-widest shadow-lg shadow-primary/20 active:scale-95 whitespace-nowrap"
                             >
                               Apply Now <ArrowIcon className="w-4 h-4" />
                             </Link>
@@ -506,7 +506,7 @@ export default function CandidateProfilePage() {
                     required
                     value={editForm.firstName}
                     onChange={e => setEditForm({ ...editForm, firstName: e.target.value })}
-                    className="w-full border border-[#E5E7EB] rounded-xl px-4 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
+                    className="w-full border border-[#E5E7EB] rounded-xl px-4 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary bg-[#F9FAFB]"
                   />
                 </div>
                 <div className="space-y-1">
@@ -516,7 +516,7 @@ export default function CandidateProfilePage() {
                     required
                     value={editForm.lastName}
                     onChange={e => setEditForm({ ...editForm, lastName: e.target.value })}
-                    className="w-full border border-[#E5E7EB] rounded-xl px-4 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
+                    className="w-full border border-[#E5E7EB] rounded-xl px-4 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary bg-[#F9FAFB]"
                   />
                 </div>
               </div>
@@ -531,13 +531,13 @@ export default function CandidateProfilePage() {
                       required
                       value={editForm.email}
                       onChange={e => setEditForm({ ...editForm, email: e.target.value })}
-                      className="w-full border border-[#E5E7EB] rounded-xl pl-9 pr-3 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
+                      className="w-full border border-[#E5E7EB] rounded-xl pl-9 pr-3 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary bg-[#F9FAFB]"
                     />
                   </div>
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Phone Number</label>
-                  <div className="flex items-stretch border border-[#E5E7EB] rounded-xl bg-[#F9FAFB] focus-within:ring-4 focus-within:ring-[#3538CD]/10 focus-within:border-[#3538CD] overflow-hidden transition-all">
+                  <div className="flex items-stretch border border-[#E5E7EB] rounded-xl bg-[#F9FAFB] focus-within:ring-4 focus-within:ring-primary/10 focus-within:border-primary overflow-hidden transition-all">
                     <div className="flex items-center gap-1 pl-3 pr-2 border-r border-[#E5E7EB] shrink-0">
                       <Phone className="w-3.5 h-3.5 text-[#9CA3AF]" />
                       <select
@@ -575,7 +575,7 @@ export default function CandidateProfilePage() {
                       value={editForm.currentOrg}
                       onChange={e => setEditForm({ ...editForm, currentOrg: e.target.value })}
                       placeholder="e.g. Acme Corp"
-                      className="w-full border border-[#E5E7EB] rounded-xl px-3 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] placeholder:text-[#D1D5DB] placeholder:font-normal"
+                      className="w-full border border-[#E5E7EB] rounded-xl px-3 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary bg-[#F9FAFB] placeholder:text-[#D1D5DB] placeholder:font-normal"
                     />
                   </div>
                   <div className="space-y-1">
@@ -585,7 +585,7 @@ export default function CandidateProfilePage() {
                       value={editForm.currentDesignation}
                       onChange={e => setEditForm({ ...editForm, currentDesignation: e.target.value })}
                       placeholder="e.g. Sr. Engineer"
-                      className="w-full border border-[#E5E7EB] rounded-xl px-3 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] placeholder:text-[#D1D5DB] placeholder:font-normal"
+                      className="w-full border border-[#E5E7EB] rounded-xl px-3 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary bg-[#F9FAFB] placeholder:text-[#D1D5DB] placeholder:font-normal"
                     />
                   </div>
                 </div>
@@ -595,7 +595,7 @@ export default function CandidateProfilePage() {
                   <select
                     value={editForm.noticePeriod}
                     onChange={e => setEditForm({ ...editForm, noticePeriod: e.target.value })}
-                    className="w-full border border-[#E5E7EB] rounded-xl px-3 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] text-[#374151]"
+                    className="w-full border border-[#E5E7EB] rounded-xl px-3 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary bg-[#F9FAFB] text-[#374151]"
                   >
                     <option value="">Select notice period</option>
                     <option value="Immediate">Immediate</option>
@@ -617,7 +617,7 @@ export default function CandidateProfilePage() {
                         value={editForm.location}
                         onChange={e => setEditForm({ ...editForm, location: e.target.value })}
                         placeholder="City, Country"
-                        className="w-full border border-[#E5E7EB] rounded-xl pl-9 pr-3 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] placeholder:text-[#D1D5DB] placeholder:font-normal"
+                        className="w-full border border-[#E5E7EB] rounded-xl pl-9 pr-3 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary bg-[#F9FAFB] placeholder:text-[#D1D5DB] placeholder:font-normal"
                       />
                     </div>
                   </div>
@@ -630,7 +630,7 @@ export default function CandidateProfilePage() {
                         value={editForm.linkedin}
                         onChange={e => setEditForm({ ...editForm, linkedin: e.target.value })}
                         placeholder="linkedin.com/in/..."
-                        className="w-full border border-[#E5E7EB] rounded-xl pl-9 pr-3 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] placeholder:text-[#D1D5DB] placeholder:font-normal"
+                        className="w-full border border-[#E5E7EB] rounded-xl pl-9 pr-3 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary bg-[#F9FAFB] placeholder:text-[#D1D5DB] placeholder:font-normal"
                       />
                     </div>
                   </div>
@@ -639,11 +639,11 @@ export default function CandidateProfilePage() {
                 {/* Skills Tag Input */}
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Skills</label>
-                  <div className="border border-[#E5E7EB] rounded-xl px-3 py-2 bg-[#F9FAFB] focus-within:ring-4 focus-within:ring-[#3538CD]/10 focus-within:border-[#3538CD] min-h-[40px]">
+                  <div className="border border-[#E5E7EB] rounded-xl px-3 py-2 bg-[#F9FAFB] focus-within:ring-4 focus-within:ring-primary/10 focus-within:border-primary min-h-[40px]">
                     {editSkills.length > 0 && (
                       <div className="flex flex-wrap gap-1.5 mb-1.5">
                         {editSkills.map((skill, i) => (
-                          <span key={i} className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold bg-[#3538CD]/10 text-[#3538CD] rounded-full">
+                          <span key={i} className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold bg-primary/10 text-primary rounded-full">
                             {skill}
                             <button type="button" onClick={() => setEditSkills(editSkills.filter((_, j) => j !== i))} className="hover:text-red-500 transition-colors">
                               <X className="w-3 h-3" />
@@ -685,7 +685,7 @@ export default function CandidateProfilePage() {
                         {editResumeName || 'No resume uploaded'}
                       </span>
                     </div>
-                    <label className="cursor-pointer shrink-0 flex items-center gap-1.5 px-3 py-2 border border-[#3538CD] text-[#3538CD] text-[11px] font-black rounded-xl hover:bg-[#3538CD]/5 transition-colors uppercase tracking-widest">
+                    <label className="cursor-pointer shrink-0 flex items-center gap-1.5 px-3 py-2 border border-primary text-primary text-[11px] font-black rounded-xl hover:bg-primary/5 transition-colors uppercase tracking-widest">
                       <Upload className="w-3.5 h-3.5" />
                       Upload
                       <input
@@ -707,18 +707,18 @@ export default function CandidateProfilePage() {
                 <p className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest mb-2">Profile Visibility</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <button type="button" onClick={() => setEditVisibility('visible')}
-                    className={`relative text-left p-2.5 rounded-xl border-2 transition-all ${editVisibility === 'visible' ? 'border-[#3538CD] bg-[#3538CD]/5' : 'border-[#E5E7EB] hover:border-[#C7C9F0]'}`}>
-                    <div className={`absolute top-2 right-2 w-3 h-3 rounded-full border-2 flex items-center justify-center ${editVisibility === 'visible' ? 'border-[#3538CD]' : 'border-[#D1D5DB]'}`}>
-                      {editVisibility === 'visible' && <div className="w-1.5 h-1.5 rounded-full bg-[#3538CD]" />}
+                    className={`relative text-left p-2.5 rounded-xl border-2 transition-all ${editVisibility === 'visible' ? 'border-primary bg-primary/5' : 'border-[#E5E7EB] hover:border-[#C7C9F0]'}`}>
+                    <div className={`absolute top-2 right-2 w-3 h-3 rounded-full border-2 flex items-center justify-center ${editVisibility === 'visible' ? 'border-primary' : 'border-[#D1D5DB]'}`}>
+                      {editVisibility === 'visible' && <div className="w-1.5 h-1.5 rounded-full bg-primary" />}
                     </div>
-                    <Eye className="w-3.5 h-3.5 text-[#3538CD] mb-1" />
+                    <Eye className="w-3.5 h-3.5 text-primary mb-1" />
                     <p className="text-[11px] font-black text-[#111827] leading-tight mb-0.5">Visible to recruiters</p>
                     <p className="text-[9px] text-[#6B7280] leading-snug">Discoverable without application</p>
                   </button>
                   <button type="button" onClick={() => setEditVisibility('private')}
-                    className={`relative text-left p-2.5 rounded-xl border-2 transition-all ${editVisibility === 'private' ? 'border-[#3538CD] bg-[#3538CD]/5' : 'border-[#E5E7EB] hover:border-[#C7C9F0]'}`}>
-                    <div className={`absolute top-2 right-2 w-3 h-3 rounded-full border-2 flex items-center justify-center ${editVisibility === 'private' ? 'border-[#3538CD]' : 'border-[#D1D5DB]'}`}>
-                      {editVisibility === 'private' && <div className="w-1.5 h-1.5 rounded-full bg-[#3538CD]" />}
+                    className={`relative text-left p-2.5 rounded-xl border-2 transition-all ${editVisibility === 'private' ? 'border-primary bg-primary/5' : 'border-[#E5E7EB] hover:border-[#C7C9F0]'}`}>
+                    <div className={`absolute top-2 right-2 w-3 h-3 rounded-full border-2 flex items-center justify-center ${editVisibility === 'private' ? 'border-primary' : 'border-[#D1D5DB]'}`}>
+                      {editVisibility === 'private' && <div className="w-1.5 h-1.5 rounded-full bg-primary" />}
                     </div>
                     <EyeOff className="w-3.5 h-3.5 text-[#6B7280] mb-1" />
                     <p className="text-[11px] font-black text-[#111827] leading-tight mb-0.5">Browse privately</p>
@@ -729,7 +729,7 @@ export default function CandidateProfilePage() {
                 <label className="flex items-center justify-between gap-3 mt-3 cursor-pointer">
                   <span className="text-xs font-bold text-[#374151]">Allow recruiters to contact me for future roles</span>
                   <button type="button" onClick={() => setEditAllowContact(v => !v)}
-                    className={`relative rounded-full transition-colors shrink-0 ${editAllowContact ? 'bg-[#3538CD]' : 'bg-[#D1D5DB]'}`}
+                    className={`relative rounded-full transition-colors shrink-0 ${editAllowContact ? 'bg-primary' : 'bg-[#D1D5DB]'}`}
                     style={{ minWidth: '2.5rem', height: '1.375rem' }}>
                     <span className={`absolute top-0.5 left-0.5 bg-white rounded-full shadow transition-transform ${editAllowContact ? 'translate-x-[1.125rem]' : ''}`} style={{ width: '1.125rem', height: '1.125rem' }} />
                   </button>
@@ -747,7 +747,7 @@ export default function CandidateProfilePage() {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-[#3538CD] text-white text-sm font-black rounded-xl hover:bg-[#292bb0] transition-all shadow-lg shadow-[#3538CD]/20 uppercase tracking-widest"
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-primary text-white text-sm font-black rounded-xl hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 uppercase tracking-widest"
                 >
                   <Check className="w-4 h-4" /> Save Changes
                 </button>

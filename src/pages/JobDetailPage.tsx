@@ -43,7 +43,7 @@ function renderDescription(text: string) {
           <ul className="space-y-2.5">
             {bulletLines.map((b, j) => (
               <li key={j} className="flex items-start gap-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#3538CD] mt-[7px] shrink-0" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[#9CA3AF] mt-[7px] shrink-0" />
                 <span className="text-[15px] text-[#374151] leading-relaxed font-medium">
                   {b.replace(/^•\s*/, '').trim()}
                 </span>
@@ -92,7 +92,7 @@ export default function JobDetailPage() {
         <div className="max-w-7xl mx-auto px-6 py-24 text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Job Not Found</h1>
           <p className="text-gray-500 mb-8">The job you're looking for might have been moved or removed.</p>
-          <Link to="/portal/yopmails" className="px-6 py-3 bg-[#3538CD] text-white font-bold rounded-xl uppercase tracking-widest text-xs">
+          <Link to="/portal/yopmails" className="px-6 py-3 bg-primary text-white font-bold rounded-xl uppercase tracking-widest text-xs">
             Back to All Jobs
           </Link>
         </div>
@@ -152,12 +152,12 @@ export default function JobDetailPage() {
   const metaItems = [
     { label: 'Posted', value: formatPostedDate(job.createdAt) },
     { label: 'Job ID', value: jobCode(job.id) },
-    { label: 'Location', value: job.location, icon: <MapPin className="w-3.5 h-3.5 text-[#3538CD]" /> },
-    { label: 'Business Unit', value: job.businessUnit, icon: <Building2 className="w-3.5 h-3.5 text-[#3538CD]" /> },
-    ...(job.category ? [{ label: 'Job Category', value: job.category, icon: <Tags className="w-3.5 h-3.5 text-[#3538CD]" /> }] : []),
-    { label: 'Employment Type', value: job.employmentType, icon: <Briefcase className="w-3.5 h-3.5 text-[#3538CD]" /> },
-    { label: 'Job Type', value: job.jobType, icon: <Building2 className="w-3.5 h-3.5 text-[#3538CD]" /> },
-    { label: 'Experience', value: job.experience, icon: <Clock className="w-3.5 h-3.5 text-[#3538CD]" /> },
+    { label: 'Location', value: job.location, icon: <MapPin className="w-3.5 h-3.5 text-[#9CA3AF]" /> },
+    { label: 'Business Unit', value: job.businessUnit, icon: <Building2 className="w-3.5 h-3.5 text-[#9CA3AF]" /> },
+    ...(job.category ? [{ label: 'Job Category', value: job.category, icon: <Tags className="w-3.5 h-3.5 text-[#9CA3AF]" /> }] : []),
+    { label: 'Employment Type', value: job.employmentType, icon: <Briefcase className="w-3.5 h-3.5 text-[#9CA3AF]" /> },
+    { label: 'Job Type', value: job.jobType, icon: <Building2 className="w-3.5 h-3.5 text-[#9CA3AF]" /> },
+    { label: 'Experience', value: job.experience, icon: <Clock className="w-3.5 h-3.5 text-[#9CA3AF]" /> },
   ];
 
   return (
@@ -166,12 +166,12 @@ export default function JobDetailPage() {
       <div className="bg-white border-b border-[#E5E7EB]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center gap-6 py-3">
-            <Link to="/portal/yopmails" className="flex items-center gap-2 text-xs font-black text-[#3538CD] uppercase tracking-widest hover:underline">
+            <Link to="/portal/yopmails" className="flex items-center gap-2 text-xs font-black text-[#6B7280] uppercase tracking-widest hover:underline">
               <ArrowLeft className="w-4 h-4" /> Back to all jobs
             </Link>
             <div className="w-[1px] h-4 bg-[#E5E7EB] hidden sm:block" />
             <nav className="items-center gap-1.5 text-sm hidden sm:flex">
-              <Link to="/portal/yopmails" className="text-[#6B7280] hover:text-[#3538CD] transition-colors">{job.businessUnit} Jobs</Link>
+              <Link to="/portal/yopmails" className="text-[#6B7280] hover:text-[#111827] transition-colors">{job.businessUnit} Jobs</Link>
               <ChevronRight className="w-3.5 h-3.5 text-[#D1D5DB]" />
               <span className="text-[#111827] font-medium">{job.title}</span>
             </nav>
@@ -210,7 +210,7 @@ export default function JobDetailPage() {
                     </div>
                     <button
                       onClick={() => navigate(`/portal/yopmails/application/${existingApplication.id}`)}
-                      className="w-full text-center text-[11px] font-black text-[#3538CD] hover:underline uppercase tracking-widest"
+                      className="w-full text-center text-[11px] font-black text-[#6B7280] hover:underline uppercase tracking-widest"
                     >
                       Track Status
                     </button>
@@ -219,7 +219,7 @@ export default function JobDetailPage() {
                   <>
                     <button
                       onClick={handleApplyClick}
-                      className="flex items-center justify-center gap-2 w-full py-3.5 bg-[#3538CD] text-white text-sm font-bold rounded-xl hover:bg-[#292bb0] transition-all shadow-lg shadow-[#3538CD]/20 mb-3"
+                      className="flex items-center justify-center gap-2 w-full py-3.5 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 mb-3"
                     >
                       Apply Now <ArrowRight className="w-4 h-4" />
                     </button>
@@ -231,11 +231,11 @@ export default function JobDetailPage() {
                     onClick={handleSaveClick}
                     className={`flex-1 flex items-center justify-center gap-2 py-3 border-2 rounded-xl text-xs font-black transition-all uppercase tracking-widest group ${
                       isSaved
-                        ? 'bg-[#3538CD]/5 border-[#3538CD] text-[#3538CD]'
+                        ? 'bg-[#F3F4F6] border-[#D1D5DB] text-[#111827]'
                         : 'border-[#E5E7EB] text-[#374151] hover:bg-[#F9FAFB] hover:border-[#D1D5DB]'
                     }`}
                   >
-                    <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-[#3538CD]' : 'group-hover:fill-[#111827]'}`} />
+                    <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-primary' : 'group-hover:fill-[#111827]'}`} />
                     {isSaved ? 'Saved' : 'Save'}
                   </button>
                   <div className="relative group/copy">
@@ -283,7 +283,7 @@ export default function JobDetailPage() {
                   <h3 className="text-[11px] font-black text-[#9CA3AF] uppercase tracking-widest mb-4">Required Skills</h3>
                   <div className="flex flex-wrap gap-2">
                     {job.skills.map(skill => (
-                      <span key={skill} className="px-3 py-1.5 text-xs font-bold bg-[#F4F5FA] text-[#3538CD] border border-[#3538CD]/10 rounded-full">
+                      <span key={skill} className="px-3 py-1.5 text-xs font-bold bg-[#F4F5FA] text-[#374151] border border-[#E5E7EB] rounded-full">
                         {skill}
                       </span>
                     ))}
@@ -299,17 +299,17 @@ export default function JobDetailPage() {
         <div className="mt-20 pt-16 border-t border-[#E5E7EB]">
           <h2 className="text-2xl font-black text-[#111827] mb-8 flex items-center gap-3">
             Similar Jobs
-            <span className="px-2.5 py-1 bg-[#F4F5FA] text-[#3538CD] text-[12px] rounded-full font-bold">{similarJobs.length} Opportunities</span>
+            <span className="px-2.5 py-1 bg-[#F4F5FA] text-[#374151] text-[12px] rounded-full font-bold">{similarJobs.length} Opportunities</span>
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {similarJobs.map(js => (
               <Link
                 key={js.id}
                 to={`/portal/yopmails/job/${js.id}`}
-                className="bg-white rounded-2xl border border-[#E5E7EB] p-6 shadow-sm hover:border-[#3538CD]/30 hover:shadow-md transition-all group"
+                className="bg-white rounded-2xl border border-[#E5E7EB] p-6 shadow-sm hover:border-primary/30 hover:shadow-md transition-all group"
               >
                 <div className="flex justify-between items-start mb-3">
-                  <h3 className="text-base font-black text-[#111827] group-hover:text-[#3538CD] transition-colors line-clamp-1">{js.title}</h3>
+                  <h3 className="text-base font-black text-[#111827] group-hover:underline transition-colors line-clamp-1">{js.title}</h3>
                   <span className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-wider whitespace-nowrap ml-2">Posted Today</span>
                 </div>
                 <div className="flex flex-wrap gap-1.5 mb-4">
@@ -326,7 +326,7 @@ export default function JobDetailPage() {
                   )}
                 </div>
                 <div className="flex items-center justify-end mt-4">
-                  <span className="text-xs font-black text-[#3538CD] flex items-center gap-1 uppercase tracking-widest group-hover:gap-2 transition-all">
+                  <span className="text-xs font-black text-primary flex items-center gap-1 uppercase tracking-widest group-hover:gap-2 transition-all">
                     View & Apply <ChevronRight className="w-3.5 h-3.5" />
                   </span>
                 </div>
@@ -334,7 +334,7 @@ export default function JobDetailPage() {
             ))}
           </div>
           <div className="mt-10 text-center">
-            <Link to="/portal/yopmails" className="inline-flex items-center gap-2 text-sm font-black text-[#3538CD] uppercase tracking-widest hover:gap-3 transition-all">
+            <Link to="/portal/yopmails" className="inline-flex items-center gap-2 text-sm font-black text-primary uppercase tracking-widest hover:gap-3 transition-all">
               View All Open Positions <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -381,13 +381,13 @@ function ReapplyModal({ isOpen, onClose, candidateName, onContinue, onStartFresh
             <p className="text-[#6B7280] font-bold">You've applied to a role with us before. Want to reuse those details to apply faster?</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <button onClick={onContinue} className="p-5 sm:p-8 bg-white border-2 border-[#E5E7EB] rounded-3xl text-left hover:border-[#3538CD] group transition-all">
-              <div className="w-12 h-12 bg-[#3538CD]/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Copy className="w-6 h-6 text-[#3538CD]" />
+            <button onClick={onContinue} className="p-5 sm:p-8 bg-white border-2 border-[#E5E7EB] rounded-3xl text-left hover:border-primary group transition-all">
+              <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Copy className="w-6 h-6 text-primary" />
               </div>
               <h3 className="text-lg font-black text-[#111827] mb-2">Reuse my previous details</h3>
               <p className="text-sm font-bold text-[#6B7280] leading-relaxed mb-6">We'll prefill this form with the resume and details from a job you applied to earlier. Just review and update anything that's changed — this job's questions stay fresh.</p>
-              <span className="inline-flex items-center gap-2 text-sm font-black text-[#3538CD] tracking-tight">Use my previous details <ArrowRight className="w-4 h-4" /></span>
+              <span className="inline-flex items-center gap-2 text-sm font-black text-primary tracking-tight">Use my previous details <ArrowRight className="w-4 h-4" /></span>
             </button>
             <button onClick={onStartFresh} className="p-5 sm:p-8 bg-white border-2 border-[#E5E7EB] rounded-3xl text-left hover:border-gray-900 group transition-all">
               <div className="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">

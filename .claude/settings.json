@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(echo \"=== tsc exit: $? ===\")",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" http://localhost:5173/)",
+      "Bash(echo \"build exit: $?\")",
+      "Read(//tmp/**)",
+      "WebFetch(domain:www.mindinventory.com)"
+    ]
+  }
+}

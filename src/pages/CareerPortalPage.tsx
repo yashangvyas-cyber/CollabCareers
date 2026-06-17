@@ -6,8 +6,10 @@ import {
   Code2, Copy, CheckCheck, ExternalLink,
   ChevronDown, ChevronUp, ChevronRight,
   SlidersHorizontal, Search, MapPin, Briefcase, TrendingUp, Wifi, Link2,
-  AlertTriangle, ShieldCheck,
+  AlertTriangle, ShieldCheck, Palette, Upload, Trash2, RotateCcw,
 } from 'lucide-react';
+import { BRAND_PRESETS, isLowContrastOnWhite, DEFAULT_APPEARANCE } from '../lib/theme';
+import type { PortalConfig } from '../store/types';
 
 const moduleItems = [
   { name: 'Job Templates', count: 5 },
@@ -118,9 +120,44 @@ export default function CareerPortalPage() {
     linkedin: '', twitter: '', instagram: '', facebook: '', youtube: '',
   });
 
-  // Legal links — local state, committed to context only on Save
-  const [localTermsUrl, setLocalTermsUrl] = useState(portalConfig?.termsUrl || '');
-  const [localPrivacyUrl, setLocalPrivacyUrl] = useState(portalConfig?.privacyPolicyUrl || '');
+  // Legal links — local state, committed to context only on Save.
+  // Prefilled with the company's standard URLs so the portal is valid out of the box.
+  const [localTermsUrl, setLocalTermsUrl] = useState(portalConfig?.termsUrl || 'https://www.mindinventory.com/terms-of-use.php');
+  const [localPrivacyUrl, setLocalPrivacyUrl] = useState(portalConfig?.privacyPolicyUrl || 'https://www.mindinventory.com/privacy-policy.php');
+
+  // Appearance — local state, committed to context only on Save
+  const [apPortalName, setApPortalName] = useState(portalConfig?.appearance?.portalName ?? DEFAULT_APPEARANCE.portalName);
+  const [apTagline, setApTagline] = useState(portalConfig?.appearance?.tagline ?? DEFAULT_APPEARANCE.tagline);
+  const [apBrandColor, setApBrandColor] = useState(portalConfig?.appearance?.brandColor ?? DEFAULT_APPEARANCE.brandColor);
+  const [apLogoUrl, setApLogoUrl] = useState(portalConfig?.appearance?.logoUrl ?? DEFAULT_APPEARANCE.logoUrl);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const apLowContrast = isLowContrastOnWhite(apBrandColor);
+
+  // Appearance applies live — every change is committed to the store immediately
+  // so the candidate portal updates without a Save step.
+  const commitAppearance = (partial: Partial<PortalConfig['appearance']>) => {
+    updatePortalConfig({ appearance: { ...portalConfig.appearance, ...partial } });
+  };
+
+  const resetAppearance = () => {
+    setApPortalName(DEFAULT_APPEARANCE.portalName);
+    setApTagline(DEFAULT_APPEARANCE.tagline);
+    setApBrandColor(DEFAULT_APPEARANCE.brandColor);
+    setApLogoUrl(DEFAULT_APPEARANCE.logoUrl);
+    commitAppearance({ ...DEFAULT_APPEARANCE });
+  };
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const url = reader.result as string;
+      setApLogoUrl(url);
+      commitAppearance({ logoUrl: url });
+    };
+    reader.readAsDataURL(file);
+  };
 
   // Footer section controlled open state (so we can force it open on validation error)
   const [footerOpen, setFooterOpen] = useState(false);
@@ -160,7 +197,16 @@ export default function CareerPortalPage() {
       return;
     }
     // Commit to context
-    updatePortalConfig({ termsUrl: localTermsUrl.trim(), privacyPolicyUrl: localPrivacyUrl.trim() });
+    updatePortalConfig({
+      termsUrl: localTermsUrl.trim(),
+      privacyPolicyUrl: localPrivacyUrl.trim(),
+      appearance: {
+        portalName: apPortalName.trim() || 'MindInventory',
+        tagline: apTagline.trim(),
+        brandColor: apBrandColor,
+        logoUrl: apLogoUrl,
+      },
+    });
     setSaveSuccess(true);
     setSaveAttempted(false);
     setSaveError('');
@@ -170,6 +216,10 @@ export default function CareerPortalPage() {
   const handleCancel = () => {
     setLocalTermsUrl(portalConfig?.termsUrl || '');
     setLocalPrivacyUrl(portalConfig?.privacyPolicyUrl || '');
+    setApPortalName(portalConfig?.appearance?.portalName ?? 'MindInventory');
+    setApTagline(portalConfig?.appearance?.tagline ?? '');
+    setApBrandColor(portalConfig?.appearance?.brandColor ?? '#3538CD');
+    setApLogoUrl(portalConfig?.appearance?.logoUrl ?? '');
     setSaveAttempted(false);
     setSaveError('');
   };
@@ -325,6 +375,142 @@ export default function CareerPortalPage() {
           )}
         </Section>
 
+
+          {/* ── Section: Appearance — brand the candidate portal ──────────── */}
+          <Section
+            title="Appearance"
+            description="Match the candidate portal to your brand — changes apply live to your portal"
+            icon={Palette}
+          >
+            <div className="max-w-2xl">
+              {/* ── Controls ── */}
+              <div className="space-y-5">
+
+                {/* Reset row — defaults match mindinventory.com */}
+                <div className="flex items-center justify-between -mt-1">
+                  <span className="text-[11px] text-[#9CA3AF]">Defaults match your company website (mindinventory.com).</span>
+                  <button
+                    onClick={resetAppearance}
+                    className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#6B7280] hover:text-[#3538CD] transition-colors"
+                  >
+                    <RotateCcw className="w-3 h-3" /> Reset to default
+                  </button>
+                </div>
+
+                {/* Logo */}
+                <div>
+                  <label className="text-xs font-semibold text-[#374151] mb-2 block">Logo</label>
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] flex items-center justify-center overflow-hidden shrink-0">
+                      {apLogoUrl ? (
+                        <img src={apLogoUrl} alt="Logo" className="w-full h-full object-contain" />
+                      ) : (
+                        <span
+                          className="w-8 h-8 rounded-lg flex items-center justify-center text-lg font-black text-white"
+                          style={{ backgroundColor: apBrandColor }}
+                        >
+                          {(apPortalName || 'M').charAt(0).toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                    <input ref={logoInputRef} type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+                    <button
+                      onClick={() => logoInputRef.current?.click()}
+                      className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-[#374151] bg-white border border-[#E5E7EB] rounded-lg hover:border-[#3538CD]/30 hover:text-[#3538CD] transition-colors shadow-sm"
+                    >
+                      <Upload className="w-3.5 h-3.5" /> Upload
+                    </button>
+                    {apLogoUrl && (
+                      <button
+                        onClick={() => { setApLogoUrl(''); commitAppearance({ logoUrl: '' }); }}
+                        className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#9CA3AF] hover:text-red-500 transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" /> Remove
+                      </button>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-[#9CA3AF] mt-1.5">
+                    PNG or SVG with a transparent background works best. No logo → we show your portal name and its initial.
+                  </p>
+                </div>
+
+                {/* Portal name */}
+                <div>
+                  <label className="text-xs font-semibold text-[#374151] mb-2 block">Portal name</label>
+                  <input
+                    type="text"
+                    value={apPortalName}
+                    onChange={e => { setApPortalName(e.target.value); commitAppearance({ portalName: e.target.value }); }}
+                    placeholder="MindInventory"
+                    className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3538CD]/20 focus:border-[#3538CD] bg-white text-[#111827]"
+                  />
+                  <p className="text-[11px] text-[#9CA3AF] mt-1.5">Shown in the header, the candidate greeting and the footer.</p>
+                </div>
+
+                {/* Tagline */}
+                <div>
+                  <label className="text-xs font-semibold text-[#374151] mb-2 block">Welcome tagline</label>
+                  <input
+                    type="text"
+                    value={apTagline}
+                    onChange={e => { setApTagline(e.target.value); commitAppearance({ tagline: e.target.value }); }}
+                    placeholder="Explore open roles and apply in minutes."
+                    className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3538CD]/20 focus:border-[#3538CD] bg-white text-[#111827]"
+                  />
+                  <p className="text-[11px] text-[#9CA3AF] mt-1.5">The sub-line first-time visitors see under the welcome.</p>
+                </div>
+
+                {/* Brand color */}
+                <div>
+                  <label className="text-xs font-semibold text-[#374151] mb-2 block">Brand color</label>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <label
+                      className="relative w-10 h-10 rounded-lg border border-[#E5E7EB] overflow-hidden shrink-0 cursor-pointer"
+                      style={{ backgroundColor: apBrandColor }}
+                    >
+                      <input
+                        type="color"
+                        value={apBrandColor}
+                        onChange={e => { setApBrandColor(e.target.value); commitAppearance({ brandColor: e.target.value }); }}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      />
+                    </label>
+                    <input
+                      type="text"
+                      value={apBrandColor}
+                      onChange={e => { setApBrandColor(e.target.value); commitAppearance({ brandColor: e.target.value }); }}
+                      className="w-28 border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-[#3538CD]/20 focus:border-[#3538CD] bg-white text-[#111827]"
+                    />
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {BRAND_PRESETS.map(p => (
+                        <button
+                          key={p.color}
+                          title={p.name}
+                          onClick={() => { setApBrandColor(p.color); commitAppearance({ brandColor: p.color }); }}
+                          className={`w-6 h-6 rounded-full border-2 transition-transform hover:scale-110 ${
+                            apBrandColor.toLowerCase() === p.color.toLowerCase() ? 'border-[#111827]' : 'border-white shadow-sm'
+                          }`}
+                          style={{ backgroundColor: p.color }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-[#9CA3AF] mt-1.5">
+                    Drives buttons, links, active filters and job titles. Status colors (Applied / Continue) stay fixed.
+                  </p>
+                  {apLowContrast && (
+                    <div className="flex items-start gap-2 mt-2.5 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg">
+                      <AlertTriangle className="w-3.5 h-3.5 text-amber-600 mt-0.5 shrink-0" />
+                      <p className="text-[11px] text-amber-700 font-medium leading-relaxed">
+                        This color is very light. On the portal it's automatically darkened where it's used as text (links, job titles, the portal name) so it stays readable — buttons keep your exact shade and flip their label colour. Pick a darker shade if you want the text to match precisely.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+            </div>
+          </Section>
 
           {/* ── Section 2: Job Filters ────────────────────────────────────── */}
           <Section

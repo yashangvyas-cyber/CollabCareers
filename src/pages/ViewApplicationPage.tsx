@@ -8,13 +8,13 @@ import {
 } from 'lucide-react';
 
 const brandStatusStyles: Record<string, string> = {
-  'Under Review': 'bg-[#F4F5FA] text-[#3538CD] border-[#3538CD]/20',
-  'Interview in Progress': 'bg-[#F4F5FA] text-[#3538CD] border-[#3538CD]/20',
+  'Under Review': 'bg-[#F4F5FA] text-primary border-primary/20',
+  'Interview in Progress': 'bg-[#F4F5FA] text-primary border-primary/20',
   'Decision Made': 'bg-[#F9FAFB] text-[#6B7280] border-[#E5E7EB]',
-  'Offer Made': 'bg-[#3538CD] text-white border-[#3538CD]',
+  'Offer Made': 'bg-primary text-white border-primary',
   'Rejected': 'bg-gray-100 text-gray-400 border-gray-200',
-  'Draft': 'bg-[#F4F5FA] text-[#3538CD] border border-[#3538CD]/20',
-  'Submitted': 'bg-[#F4F5FA] text-[#3538CD] border-[#3538CD]/20',
+  'Draft': 'bg-[#F4F5FA] text-primary border border-primary/20',
+  'Submitted': 'bg-[#F4F5FA] text-primary border-primary/20',
 };
 
 export default function ViewApplicationPage() {
@@ -73,7 +73,7 @@ export default function ViewApplicationPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
           <Link 
             to={`/portal/${slug}/profile`} 
-            className="flex items-center gap-1.5 text-xs font-black text-[#6B7280] hover:text-[#3538CD] transition-all uppercase tracking-widest"
+            className="flex items-center gap-1.5 text-xs font-black text-[#6B7280] hover:text-primary transition-all uppercase tracking-widest"
           >
             <ChevronDown className="rotate-90 w-3.5 h-3.5" />
             My Applications
@@ -137,7 +137,7 @@ export default function ViewApplicationPage() {
                 <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-2">Key Skills Required</p>
                 <div className="flex flex-wrap gap-1.5">
                   {job?.skills?.map(s => (
-                    <span key={s} className="px-3 py-1 text-[11px] font-bold bg-[#3538CD]/5 text-[#3538CD] rounded-lg border border-[#3538CD]/10">{s}</span>
+                    <span key={s} className="px-3 py-1 text-[11px] font-bold bg-primary/5 text-primary rounded-lg border border-primary/10">{s}</span>
                   )) || <span className="text-sm text-[#9CA3AF]">Not specified</span>}
                 </div>
               </div>
@@ -150,7 +150,7 @@ export default function ViewApplicationPage() {
               <InfoItem label="Email Address" value={appData.candidateInfo.email} />
               <InfoItem label="Mobile Number" value={appData.candidateInfo.phone} />
               <InfoItem label="Date of Birth" value={appData.candidateInfo.dob} />
-              <div className="sm:col-span-2 flex items-center gap-2 text-sm font-medium text-[#3538CD] pt-1">
+              <div className="sm:col-span-2 flex items-center gap-2 text-sm font-medium text-primary pt-1">
                 <Linkedin className="w-4 h-4 text-[#0A66C2]" />
                 {appData.candidateInfo.linkedin}
               </div>
@@ -165,7 +165,7 @@ export default function ViewApplicationPage() {
                     <div className="flex justify-between items-start">
                        <div>
                          <h4 className="text-sm font-black text-[#111827]">{exp.designation}</h4>
-                         <p className="text-xs font-bold text-[#3538CD]">{exp.company}</p>
+                         <p className="text-xs font-bold text-primary">{exp.company}</p>
                        </div>
                        <span className="text-[10px] font-black uppercase tracking-widest text-[#6B7280] bg-white border border-[#E5E7EB] px-2.5 py-1 rounded-md">
                          {exp.from} - {exp.to}
@@ -182,7 +182,7 @@ export default function ViewApplicationPage() {
                 <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-2">Core Skills</p>
                 <div className="flex flex-wrap gap-1.5">
                   {appData.professionalDetails.skills.map(s => (
-                    <span key={s} className="px-3 py-1 text-[11px] font-bold bg-[#3538CD]/5 text-[#3538CD] rounded-lg border border-[#3538CD]/10 uppercase tracking-tight">{s}</span>
+                    <span key={s} className="px-3 py-1 text-[11px] font-bold bg-primary/5 text-primary rounded-lg border border-primary/10 uppercase tracking-tight">{s}</span>
                   ))}
                 </div>
               </div>
@@ -218,7 +218,7 @@ export default function ViewApplicationPage() {
               <div className="sm:col-span-2">
                 <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-1.5">Portfolio URL</p>
                 <a href={appData.additionalInfo.portfolioUrl} target="_blank" rel="noreferrer"
-                  className="text-sm font-semibold text-[#3538CD] hover:underline flex items-center gap-1.5">
+                  className="text-sm font-semibold text-primary hover:underline flex items-center gap-1.5">
                   <Globe className="w-3.5 h-3.5" />
                   {appData.additionalInfo.portfolioUrl}
                 </a>
@@ -229,14 +229,14 @@ export default function ViewApplicationPage() {
 
           <AccordionCard title="Resume">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-[#F4F5FA] flex items-center justify-center text-[#3538CD] border border-[#E5E7EB] shrink-0">
+              <div className="w-12 h-12 rounded-xl bg-[#F4F5FA] flex items-center justify-center text-primary border border-[#E5E7EB] shrink-0">
                 <FileText className="w-6 h-6" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold text-[#111827] truncate">{appData.resume.filename}</p>
                 <p className="text-[10px] text-[#9CA3AF] font-medium uppercase tracking-widest mt-0.5">PDF · 2.4 MB</p>
               </div>
-              <button className="flex items-center gap-2 px-5 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-xs font-black text-[#6B7280] hover:text-[#3538CD] hover:border-[#3538CD]/30 transition-all uppercase tracking-widest shadow-sm">
+              <button className="flex items-center gap-2 px-5 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-xs font-black text-[#6B7280] hover:text-primary hover:border-primary/30 transition-all uppercase tracking-widest shadow-sm">
                 <Download className="w-3.5 h-3.5" /> Download
               </button>
             </div>
@@ -295,7 +295,7 @@ function AccordionCard({ title, children, defaultExpanded = true }: { title: str
         className="w-full flex items-center justify-between px-4 sm:px-6 py-4 hover:bg-[#F9FAFB] transition-colors text-left"
       >
         <div className="flex items-center gap-3">
-          <div className="w-0.5 h-4 bg-[#3538CD] rounded-full" />
+          <div className="w-0.5 h-4 bg-primary rounded-full" />
           <span className="text-xs font-black text-[#111827] uppercase tracking-widest">{title}</span>
         </div>
         <ChevronDown className={`w-4 h-4 text-[#9CA3AF] transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} />

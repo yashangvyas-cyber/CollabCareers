@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { AppState, Job, Candidate, Application, PortalConfig, TalentInvite, TalentInviteStatus, TalentAvailabilityStatus } from './types';
+import { DEFAULT_APPEARANCE } from '../lib/theme';
 
 interface AppContextType extends AppState {
   addJob: (job: Job) => void;
@@ -1334,8 +1335,9 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
     email: null,
   },
   portalConfig: {
-    termsUrl: '',
-    privacyPolicyUrl: '',
+    termsUrl: 'https://www.mindinventory.com/terms-of-use.php',
+    privacyPolicyUrl: 'https://www.mindinventory.com/privacy-policy.php',
+    appearance: { ...DEFAULT_APPEARANCE },
   },
 };
 
@@ -1399,7 +1401,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
         applications: mergedApps,
         candidates: mergedCandidates,
         invites: mergedInvites,
-        portalConfig: parsed.portalConfig ?? initialState.portalConfig,
+        portalConfig: {
+          ...initialState.portalConfig,
+          ...(parsed.portalConfig ?? {}),
+          appearance: {
+            ...initialState.portalConfig.appearance,
+            ...(parsed.portalConfig?.appearance ?? {}),
+          },
+        },
       };
     }
     return initialState;
@@ -1408,6 +1417,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state]);
+
+  // Live-sync portal config across tabs so an open candidate portal reflects
+  // Appearance edits made in the config tab without a manual refresh.
+  // The `storage` event only fires in *other* tabs, so this can't self-loop.
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== STORAGE_KEY || !e.newValue) return;
+      try {
+        const parsed = JSON.parse(e.newValue);
+        if (!parsed.portalConfig) return;
+        setState(prev =>
+          JSON.stringify(prev.portalConfig) === JSON.stringify(parsed.portalConfig)
+            ? prev
+            : { ...prev, portalConfig: parsed.portalConfig }
+        );
+      } catch {
+        /* ignore malformed payloads */
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
 
   const addJob = (job: Job) => {
     setState(prev => ({

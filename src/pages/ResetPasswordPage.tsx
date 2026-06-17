@@ -32,7 +32,7 @@ export default function ResetPasswordPage() {
           {/* Header */}
           <div className="px-8 pt-8 pb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-[#3538CD] rounded-lg flex items-center justify-center text-white font-black text-lg">C</div>
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-black text-lg">C</div>
               <span className="text-lg font-black text-[#111827] tracking-tight">CollabCRM</span>
             </div>
           </div>
@@ -41,7 +41,7 @@ export default function ResetPasswordPage() {
             {step === 'reset' ? (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
                 <div className="text-center mb-8">
-                  <div className="w-16 h-16 rounded-2xl bg-[#3538CD]/5 text-[#3538CD] flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 rounded-2xl bg-primary/5 text-primary flex items-center justify-center mx-auto mb-4">
                     <KeyRound className="w-8 h-8" />
                   </div>
                   <h1 className="text-2xl font-black text-[#111827] mb-2 tracking-tight">Reset Your Password</h1>
@@ -59,12 +59,12 @@ export default function ResetPasswordPage() {
                         required
                         value={formData.password}
                         onChange={e => setFormData({...formData, password: e.target.value})}
-                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] pr-12"
+                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary bg-[#F9FAFB] pr-12"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#3538CD]"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-primary"
                       >
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
@@ -79,12 +79,12 @@ export default function ResetPasswordPage() {
                         required
                         value={formData.confirmPassword}
                         onChange={e => setFormData({...formData, confirmPassword: e.target.value})}
-                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] pr-12"
+                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary bg-[#F9FAFB] pr-12"
                       />
                       <button
                         type="button"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#3538CD]"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-primary"
                       >
                         {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
@@ -93,7 +93,7 @@ export default function ResetPasswordPage() {
 
                   <button
                     type="submit"
-                    className="w-full py-4 bg-[#3538CD] text-white text-sm font-black rounded-xl hover:bg-[#292bb0] transition-all shadow-lg shadow-[#3538CD]/20 uppercase tracking-widest flex items-center justify-center gap-2 mt-4"
+                    className="w-full py-4 bg-primary text-white text-sm font-black rounded-xl hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 uppercase tracking-widest flex items-center justify-center gap-2 mt-4"
                   >
                     Reset Password <ArrowRight className="w-4 h-4" />
                   </button>
@@ -111,7 +111,7 @@ export default function ResetPasswordPage() {
 
                 <Link
                   to={`/portal/${slug}`}
-                  className="w-full py-4 bg-[#3538CD] text-white text-sm font-black rounded-xl hover:bg-[#292bb0] transition-all shadow-lg shadow-[#3538CD]/20 uppercase tracking-widest flex items-center justify-center gap-2"
+                  className="w-full py-4 bg-primary text-white text-sm font-black rounded-xl hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 uppercase tracking-widest flex items-center justify-center gap-2"
                 >
                   <ArrowLeft className="w-4 h-4" /> Back to Sign In
                 </Link>

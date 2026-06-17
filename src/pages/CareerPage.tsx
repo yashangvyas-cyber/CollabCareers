@@ -8,8 +8,8 @@ import { useApp } from '../store/AppContext';
 function Chip({ children, variant = 'default' }: { children: React.ReactNode; variant?: 'default' | 'skill' | 'active' }) {
   const styles = {
     default: 'bg-[#F3F4F6] text-[#374151] border-[#E5E7EB]',
-    skill: 'bg-primary/5 text-primary border-primary/20',
-    active: 'bg-primary text-white border-primary',
+    skill: 'bg-[#F3F4F6] text-[#4B5563] border-[#E5E7EB]',
+    active: 'bg-primary text-on-primary border-primary',
   };
   return (
     <span className={`inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full border ${styles[variant]}`}>
@@ -49,7 +49,8 @@ const PROFILE_FIELDS = [
 ];
 
 export default function CareerPage({ openAlumni = false, openRegister = false }: { openAlumni?: boolean, openRegister?: boolean }) {
-  const { jobs, currentUser, applications } = useApp();
+  const { jobs, currentUser, applications, portalConfig } = useApp();
+  const appearance = portalConfig.appearance;
   const navigate = useNavigate();
 
   // Resolve the current user's relationship to a job:
@@ -165,10 +166,10 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
           {!currentUser ? (
             <>
               <h1 className="text-sm font-bold text-[#111827] tracking-tight">
-                Welcome to <span className="text-[#3538CD]">MindInventory</span> Careers <span className="align-middle">👋</span>
+                Welcome to <span className="text-primary">{appearance.portalName}</span> Careers <span className="align-middle">👋</span>
               </h1>
               <p className="text-xs text-[#6B7280] font-medium mt-0.5">
-                Explore open roles and apply in minutes.
+                {appearance.tagline}
               </p>
             </>
           ) : isReturningUser ? (
@@ -177,7 +178,7 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
                 Welcome back, {currentUser.firstName} {currentUser.lastName} <span className="align-middle">👋</span>
               </h1>
               <p className="text-xs text-[#6B7280] font-medium mt-0.5">
-                Explore opportunities at <span className="font-semibold text-[#3538CD]">MindInventory</span>
+                Explore opportunities at <span className="font-semibold text-primary">{appearance.portalName}</span>
               </p>
             </>
           ) : (
@@ -186,7 +187,7 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
                 Welcome, {currentUser.firstName} <span className="align-middle">🎉</span>
               </h1>
               <p className="text-xs text-[#6B7280] font-medium mt-0.5">
-                Great to have you — let's find your first role at <span className="font-semibold text-[#3538CD]">MindInventory</span>.
+                Great to have you — let's find your first role at <span className="font-semibold text-primary">{appearance.portalName}</span>.
               </p>
             </>
           )}
@@ -213,13 +214,13 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
             {/* Mobile filter toggle */}
             <button
               onClick={() => setShowMobileFilters(true)}
-              className="sm:hidden flex items-center gap-1.5 px-3 py-2.5 border border-[#E5E7EB] rounded-xl text-[#374151] hover:border-[#3538CD] hover:text-[#3538CD] transition-all bg-white shrink-0 relative"
+              className="sm:hidden flex items-center gap-1.5 px-3 py-2.5 border border-[#E5E7EB] rounded-xl text-[#374151] hover:border-[#9CA3AF] hover:text-[#111827] transition-all bg-white shrink-0 relative"
             >
               <SlidersHorizontal className="w-4 h-4" />
               <span className="text-[11px] font-black uppercase tracking-wider">Filters</span>
               {(() => {
                 const c = [locationFilter, experienceFilter, employmentFilter, jobTypeFilter, categoryFilter, buFilter].filter(Boolean).length;
-                return c > 0 ? <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#3538CD] text-white text-[10px] font-black rounded-full flex items-center justify-center">{c}</span> : null;
+                return c > 0 ? <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-primary text-on-primary text-[10px] font-black rounded-full flex items-center justify-center">{c}</span> : null;
               })()}
             </button>
           </div>
@@ -245,10 +246,10 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
               {filteredJobs.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, filteredJobs.length)} of {filteredJobs.length} Jobs
             </span>
             <div className="flex items-center gap-1 bg-[#F3F4F6] rounded-lg p-1">
-              <button onClick={() => setViewMode('grid')} title="Grid view" className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white text-[#3538CD] shadow-sm' : 'text-[#9CA3AF] hover:text-[#6B7280]'}`}>
+              <button onClick={() => setViewMode('grid')} title="Grid view" className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white text-[#111827] shadow-sm' : 'text-[#9CA3AF] hover:text-[#6B7280]'}`}>
                 <LayoutGrid className="w-4 h-4" />
               </button>
-              <button onClick={() => setViewMode('list')} title="List view" className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-white text-[#3538CD] shadow-sm' : 'text-[#9CA3AF] hover:text-[#6B7280]'}`}>
+              <button onClick={() => setViewMode('list')} title="List view" className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-white text-[#111827] shadow-sm' : 'text-[#9CA3AF] hover:text-[#6B7280]'}`}>
                 <List className="w-4 h-4" />
               </button>
             </div>
@@ -268,7 +269,7 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
             return (
               <div className="flex sm:hidden items-center gap-2 flex-wrap">
                 {active.map(a => (
-                  <span key={a} className="px-2 py-1 text-[10px] font-bold bg-[#3538CD]/5 text-[#3538CD] border border-[#3538CD]/10 rounded-lg">{a}</span>
+                  <span key={a} className="px-2 py-1 text-[10px] font-bold bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB] rounded-lg">{a}</span>
                 ))}
                 <button onClick={clearFilters} className="text-[10px] font-black text-red-500 uppercase tracking-wider ml-1">Clear</button>
               </div>
@@ -281,10 +282,10 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
               {filteredJobs.length} job{filteredJobs.length !== 1 ? 's' : ''} found
             </span>
             <div className="flex items-center gap-1 bg-[#F3F4F6] rounded-lg p-0.5">
-              <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white text-[#3538CD] shadow-sm' : 'text-[#9CA3AF]'}`}>
+              <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white text-[#111827] shadow-sm' : 'text-[#9CA3AF]'}`}>
                 <LayoutGrid className="w-3.5 h-3.5" />
               </button>
-              <button onClick={() => setViewMode('list')} className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-white text-[#3538CD] shadow-sm' : 'text-[#9CA3AF]'}`}>
+              <button onClick={() => setViewMode('list')} className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-white text-[#111827] shadow-sm' : 'text-[#9CA3AF]'}`}>
                 <List className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -331,16 +332,16 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
                           onClick={() => setActiveMobileFilterTab(group.label)}
                           className={`w-full text-left px-4 py-4 text-xs font-black uppercase tracking-widest relative transition-colors ${
                             activeMobileFilterTab === group.label
-                              ? 'bg-white text-[#3538CD]'
+                              ? 'bg-white text-[#111827]'
                               : 'text-[#6B7280] hover:bg-[#F3F4F6]'
                           }`}
                         >
                           {activeMobileFilterTab === group.label && (
-                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#3538CD]" />
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
                           )}
                           {group.label}
                           {group.value && (
-                            <div className="mt-1 w-1.5 h-1.5 rounded-full bg-[#3538CD]" />
+                            <div className="mt-1 w-1.5 h-1.5 rounded-full bg-primary" />
                           )}
                         </button>
                       ))}
@@ -358,15 +359,15 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
                               onClick={() => activeGroup.onChange(activeGroup.value === opt ? '' : opt)}
                               className="w-full flex items-center justify-between p-3 rounded-xl border transition-all"
                               style={{
-                                borderColor: activeGroup.value === opt ? '#3538CD' : '#E5E7EB',
-                                backgroundColor: activeGroup.value === opt ? '#EEF2FF' : '#FFFFFF'
+                                borderColor: activeGroup.value === opt ? appearance.brandColor : '#E5E7EB',
+                                backgroundColor: activeGroup.value === opt ? `color-mix(in oklab, ${appearance.brandColor} 8%, white)` : '#FFFFFF'
                               }}
                             >
-                              <span className={`text-sm font-bold ${activeGroup.value === opt ? 'text-[#3538CD]' : 'text-[#374151]'}`}>
+                              <span className={`text-sm font-bold ${activeGroup.value === opt ? 'text-[#111827]' : 'text-[#374151]'}`}>
                                 {opt}
                               </span>
                               <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-                                activeGroup.value === opt ? 'border-[#3538CD] bg-[#3538CD]' : 'border-[#D1D5DB]'
+                                activeGroup.value === opt ? 'border-primary bg-primary' : 'border-[#D1D5DB]'
                               }`}>
                                 {activeGroup.value === opt && <div className="w-2 h-2 rounded-full bg-white" />}
                               </div>
@@ -390,7 +391,7 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
               </button>
               <button
                 onClick={() => setShowMobileFilters(false)}
-                className="flex-1 py-3.5 text-[11px] font-black text-white bg-[#3538CD] rounded-xl uppercase tracking-widest hover:bg-[#292bb0] transition-colors shadow-lg shadow-[#3538CD]/20"
+                className="flex-1 py-3.5 text-[11px] font-black text-on-primary bg-primary rounded-xl uppercase tracking-widest hover:bg-primary-hover transition-colors shadow-lg shadow-primary/20"
               >
                 Show {filteredJobs.length} Jobs
               </button>
@@ -410,21 +411,21 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
           const completed = PROFILE_FIELDS.length - missing.length;
           const pct = Math.round((completed / PROFILE_FIELDS.length) * 100);
           return (
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 rounded-xl border border-[#E0E7FF] bg-[#F5F7FF] px-4 py-2.5 shadow-sm mb-5">
-              <UserCircle2 className="w-5 h-5 text-[#4F46E5] shrink-0" />
-              <p className="text-sm font-bold text-[#3730A3] shrink-0">Your profile is {pct}% complete</p>
-              <div className="flex-1 max-w-full sm:max-w-[260px] h-1.5 bg-[#E0E7FF] rounded-full overflow-hidden">
-                <div className="h-full bg-[#4F46E5] rounded-full transition-all" style={{ width: `${pct}%` }} />
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-2.5 shadow-sm mb-5">
+              <UserCircle2 className="w-5 h-5 text-[#6B7280] shrink-0" />
+              <p className="text-sm font-bold text-[#374151] shrink-0">Your profile is {pct}% complete</p>
+              <div className="flex-1 max-w-full sm:max-w-[260px] h-1.5 bg-[#E5E7EB] rounded-full overflow-hidden">
+                <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${pct}%` }} />
               </div>
               <Link
                 to="/portal/yopmails/profile"
-                className="shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 bg-[#4F46E5] text-white text-[11px] font-black rounded-lg uppercase tracking-widest hover:bg-[#4338CA] transition-colors shadow-sm"
+                className="shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 bg-primary text-on-primary text-[11px] font-black rounded-lg uppercase tracking-widest hover:bg-primary-hover transition-colors shadow-sm"
               >
                 Complete Profile <ArrowRight className="w-3.5 h-3.5" />
               </Link>
               <button
                 onClick={() => setNudgeDismissed(true)}
-                className="shrink-0 p-1.5 text-[#818CF8] hover:text-[#3730A3] hover:bg-white rounded-md transition-colors"
+                className="shrink-0 p-1.5 text-[#9CA3AF] hover:text-[#6B7280] hover:bg-white rounded-md transition-colors"
                 title="Dismiss"
               >
                 <X className="w-4 h-4" />
@@ -441,10 +442,10 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
               return (
               <div key={job.id} className="bg-white rounded-xl border border-[#E5E7EB] p-4 sm:p-6 hover:shadow-lg hover:border-primary/30 transition-all duration-200 group">
                 <div className="flex items-start justify-between mb-3">
-                  <Link to={`/portal/yopmails/job/${job.id}`} className="text-base sm:text-lg font-semibold text-primary group-hover:text-[#292bb0] transition-colors">
+                  <Link to={`/portal/yopmails/job/${job.id}`} className="text-base sm:text-lg font-semibold text-[#111827] group-hover:underline transition-colors">
                     {job.title}
                   </Link>
-                  <button onClick={() => { if (!currentUser) { setSelectedJob(job); setAuthTab('signin'); setShowAuthModal(true); } }} className="p-2 text-[#9CA3AF] hover:text-[#3538CD] hover:bg-[#3538CD]/5 rounded-lg transition-all" title="Save Job">
+                  <button onClick={() => { if (!currentUser) { setSelectedJob(job); setAuthTab('signin'); setShowAuthModal(true); } }} className="p-2 text-[#9CA3AF] hover:text-[#374151] hover:bg-[#F3F4F6] rounded-lg transition-all" title="Save Job">
                     <Bookmark className="w-5 h-5" />
                   </button>
                 </div>
@@ -455,7 +456,7 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
                 </div>
                 <div className="space-y-2 mb-5">
                   <div className="flex items-center gap-2 text-[13px] font-bold text-[#6B7280]">
-                    <Clock className="w-3.5 h-3.5 text-primary" />
+                    <Clock className="w-3.5 h-3.5 text-[#9CA3AF]" />
                     <span>{formatExperience(job.experience)}</span>
                   </div>
                 </div>
@@ -484,7 +485,7 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
                       <span className="hidden sm:inline">Continue Application</span><span className="sm:hidden">Continue</span> <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                   ) : (
-                    <Link to={`/portal/yopmails/job/${job.id}`} className={`px-3 sm:px-6 py-2 sm:py-2.5 text-[11px] sm:text-[12px] font-black rounded-xl transition-all uppercase tracking-widest shadow-md ${appKind === 'applied' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 shadow-emerald-500/5' : 'bg-[#3538CD] text-white hover:bg-[#292bb0] shadow-[#3538CD]/10'}`}>
+                    <Link to={`/portal/yopmails/job/${job.id}`} className={`px-3 sm:px-6 py-2 sm:py-2.5 text-[11px] sm:text-[12px] font-black rounded-xl transition-all uppercase tracking-widest shadow-md ${appKind === 'applied' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 shadow-emerald-500/5' : 'bg-primary text-on-primary hover:bg-primary-hover shadow-primary/10'}`}>
                       {appKind === 'applied' ? 'Applied' : 'View & Apply'}
                     </Link>
                   )}
@@ -510,7 +511,7 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
                   {/* Left: Title + tags */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-2 flex-wrap">
-                      <Link to={`/portal/yopmails/job/${job.id}`} className="text-base font-semibold text-primary group-hover:text-[#292bb0] transition-colors">
+                      <Link to={`/portal/yopmails/job/${job.id}`} className="text-base font-semibold text-[#111827] group-hover:underline transition-colors">
                         {job.title}
                       </Link>
                       {(job.skills?.length ?? 0) > 0 && job.skills.slice(0, 2).map((skill) => (
@@ -526,7 +527,7 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
                       <Chip>{job.employmentType}</Chip>
                       {job.experience && (
                         <span className="flex items-center gap-1 text-[12px] text-[#6B7280] font-bold">
-                          <Clock className="w-3 h-3 text-primary" />{formatExperience(job.experience)}
+                          <Clock className="w-3 h-3 text-[#9CA3AF]" />{formatExperience(job.experience)}
                         </span>
                       )}
                     </div>
@@ -537,7 +538,7 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
                       {formatPostedDate(job.createdAt)}
                     </span>
                     {!appKind && (
-                      <button onClick={() => { if (!currentUser) { setSelectedJob(job); setAuthTab('signin'); setShowAuthModal(true); } }} className="p-2 text-[#9CA3AF] hover:text-[#3538CD] hover:bg-[#3538CD]/5 rounded-lg transition-all" title="Save Job">
+                      <button onClick={() => { if (!currentUser) { setSelectedJob(job); setAuthTab('signin'); setShowAuthModal(true); } }} className="p-2 text-[#9CA3AF] hover:text-[#374151] hover:bg-[#F3F4F6] rounded-lg transition-all" title="Save Job">
                         <Bookmark className="w-4 h-4" />
                       </button>
                     )}
@@ -549,7 +550,7 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
                         Continue <ArrowRight className="w-3.5 h-3.5" />
                       </button>
                     ) : (
-                      <Link to={`/portal/yopmails/job/${job.id}`} className={`px-5 py-2 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all ${appKind === 'applied' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100' : 'bg-[#F4F5FA] text-[#3538CD] hover:bg-[#3538CD] hover:text-white'}`}>
+                      <Link to={`/portal/yopmails/job/${job.id}`} className={`px-5 py-2 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all ${appKind === 'applied' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100' : 'bg-[#F4F5FA] text-primary hover:bg-primary hover:text-on-primary'}`}>
                         {appKind === 'applied' ? 'Applied' : 'View'}
                       </Link>
                     )}
@@ -574,7 +575,7 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
               className={`flex items-center gap-1 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
                 currentPage === 1 
                   ? 'text-gray-300 cursor-not-allowed' 
-                  : 'text-[#6B7280] hover:text-[#3538CD] hover:bg-[#F4F5FA]'
+                  : 'text-[#6B7280] hover:text-[#111827] hover:bg-[#F4F5FA]'
               }`}
             >
               Previous
@@ -586,8 +587,8 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
                 onClick={() => handlePageChange(i + 1)}
                 className={`w-10 h-10 rounded-xl text-xs font-black flex items-center justify-center transition-all ${
                   currentPage === i + 1
-                    ? 'bg-[#3538CD] text-white shadow-lg shadow-[#3538CD]/20'
-                    : 'text-[#6B7280] hover:bg-[#F4F5FA] hover:text-[#3538CD]'
+                    ? 'bg-primary text-on-primary shadow-lg shadow-primary/20'
+                    : 'text-[#6B7280] hover:bg-[#F4F5FA] hover:text-[#111827]'
                 }`}
               >
                 {i + 1}
@@ -600,7 +601,7 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
               className={`flex items-center gap-1 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
                 currentPage === totalPages 
                   ? 'text-gray-300 cursor-not-allowed' 
-                  : 'text-[#6B7280] hover:text-[#3538CD] hover:bg-[#F4F5FA]'
+                  : 'text-[#6B7280] hover:text-[#111827] hover:bg-[#F4F5FA]'
               }`}
             >
               Next
@@ -638,11 +639,11 @@ function FilterPill({ label, icon, value, options, onChange }: {
         onClick={() => setIsOpen(!isOpen)}
         className={`flex items-center gap-2.5 px-5 py-2.5 text-[11px] font-black rounded-xl border transition-all uppercase tracking-[0.05em] shadow-sm ${
           value 
-            ? 'bg-[#3538CD]/5 border-[#3538CD] text-[#3538CD] shadow-[#3538CD]/5' 
+            ? 'bg-[#F3F4F6] border-[#D1D5DB] text-[#111827] shadow-sm'
             : 'bg-white border-[#E5E7EB] text-[#6B7280] hover:border-[#D1D5DB] hover:bg-[#F9FAFB]'
         }`}
       >
-        <span className={value ? 'text-[#3538CD]' : 'text-[#9CA3AF]'}>{icon}</span>
+        <span className={value ? 'text-[#6B7280]' : 'text-[#9CA3AF]'}>{icon}</span>
         <span>{value || label}</span>
         {value ? (
           <div 
@@ -651,12 +652,12 @@ function FilterPill({ label, icon, value, options, onChange }: {
               onChange('');
               setIsOpen(false);
             }}
-            className="ml-1.5 p-0.5 hover:bg-[#3538CD]/10 rounded-full transition-colors"
+            className="ml-1.5 p-0.5 hover:bg-primary/10 rounded-full transition-colors"
           >
             <X className="w-3 h-3" />
           </div>
         ) : (
-          <ChevronDown className={`w-3.5 h-3.5 ml-0.5 text-[#9CA3AF] transition-transform duration-300 ${isOpen ? 'rotate-180 text-[#3538CD]' : ''}`} />
+          <ChevronDown className={`w-3.5 h-3.5 ml-0.5 text-[#9CA3AF] transition-transform duration-300 ${isOpen ? 'rotate-180 text-[#6B7280]' : ''}`} />
         )}
       </button>
 
@@ -687,7 +688,7 @@ function FilterPill({ label, icon, value, options, onChange }: {
                   }}
                   className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors ${
                     value === option 
-                      ? 'text-[#3538CD] bg-[#3538CD]/5' 
+                      ? 'text-[#111827] bg-[#F3F4F6]'
                       : 'text-[#374151] hover:bg-[#F9FAFB]'
                   }`}
                 >
@@ -737,7 +738,7 @@ function SkillsOverflow({ skills, shown }: { skills: string[]; shown: number }) 
     >
       <button
         type="button"
-        className="text-[11px] font-black text-[#3538CD] uppercase tracking-widest ml-1 select-none cursor-default"
+        className="text-[11px] font-black text-[#6B7280] uppercase tracking-widest ml-1 select-none cursor-default"
       >
         +{extra.length} More
       </button>

@@ -142,8 +142,18 @@ export default function AuthModal({
         {/* Header — Org + CollabCRM logos together */}
         <div className="px-5 sm:px-8 pt-6 sm:pt-8 pb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {/* Org logo */}
-            <div className="w-10 h-10 rounded-xl bg-[#3538CD] flex items-center justify-center text-white text-base font-black shadow-sm shrink-0">Y</div>
+            {/* Org logo — uploaded image, or the portal-name initial */}
+            {portalConfig?.appearance?.logoUrl ? (
+              <img
+                src={portalConfig.appearance.logoUrl}
+                alt={businessUnit}
+                className="h-10 w-auto max-w-[120px] object-contain shrink-0"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-on-primary text-base font-black shadow-sm shrink-0">
+                {(portalConfig?.appearance?.portalName || businessUnit || 'M').charAt(0).toUpperCase()}
+              </div>
+            )}
             {/* Org name + CollabCRM small attribution stacked */}
             <div className="flex flex-col">
               <span className="text-sm font-black text-[#111827] tracking-tight leading-tight">{businessUnit}</span>
@@ -177,7 +187,7 @@ export default function AuthModal({
                 onClick={() => setActiveTab('register')}
                 className={`flex-1 py-2.5 text-[11px] font-black text-center transition-all uppercase tracking-widest rounded-xl ${
                   activeTab === 'register'
-                    ? 'bg-white text-[#3538CD] shadow-sm'
+                    ? 'bg-white text-primary shadow-sm'
                     : 'text-[#6B7280] hover:text-[#111827]'
                 }`}
               >
@@ -187,7 +197,7 @@ export default function AuthModal({
                 onClick={() => setActiveTab('signin')}
                 className={`flex-1 py-2.5 text-[11px] font-black text-center transition-all uppercase tracking-widest rounded-xl ${
                   activeTab === 'signin'
-                    ? 'bg-white text-[#3538CD] shadow-sm'
+                    ? 'bg-white text-primary shadow-sm'
                     : 'text-[#6B7280] hover:text-[#111827]'
                 }`}
               >
@@ -216,7 +226,7 @@ export default function AuthModal({
                         confirmPassword: 'P@ssw0rd!',
                         agreeToTerms: true
                       })}
-                      className="px-2.5 py-1 bg-[#3538CD]/5 border border-[#3538CD]/10 rounded-lg text-[9px] font-black text-[#3538CD] uppercase tracking-widest hover:bg-[#3538CD] hover:text-white transition-all shadow-sm"
+                      className="px-2.5 py-1 bg-primary/5 border border-primary/10 rounded-lg text-[9px] font-black text-primary uppercase tracking-widest hover:bg-primary hover:text-white transition-all shadow-sm"
                     >
                       Auto-fill for Demo
                     </button>
@@ -228,14 +238,14 @@ export default function AuthModal({
                       <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">First Name *</label>
                       <input type="text" required value={formData.firstName}
                         onChange={e => setFormData({...formData, firstName: e.target.value})}
-                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
+                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary bg-[#F9FAFB]"
                       />
                     </div>
                     <div className="space-y-1.5">
                       <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Last Name *</label>
                       <input type="text" required value={formData.lastName}
                         onChange={e => setFormData({...formData, lastName: e.target.value})}
-                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
+                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary bg-[#F9FAFB]"
                       />
                     </div>
                   </div>
@@ -244,7 +254,7 @@ export default function AuthModal({
                     <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Email Address *</label>
                     <input type="email" required value={formData.email}
                       onChange={e => setFormData({...formData, email: e.target.value})}
-                      className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
+                      className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary bg-[#F9FAFB]"
                     />
                   </div>
 
@@ -259,10 +269,10 @@ export default function AuthModal({
                         minLength={8}
                         value={formData.password}
                         onChange={e => setFormData({...formData, password: e.target.value})}
-                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] pr-12"
+                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary bg-[#F9FAFB] pr-12"
                       />
                       <button type="button" onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#3538CD]">
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-primary">
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
@@ -299,14 +309,14 @@ export default function AuthModal({
                         placeholder=""
                         value={formData.confirmPassword}
                         onChange={e => setFormData({...formData, confirmPassword: e.target.value})}
-                        className={`w-full border rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] pr-12 ${
+                        className={`w-full border rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary bg-[#F9FAFB] pr-12 ${
                           formData.confirmPassword.length > 0 && formData.confirmPassword !== formData.password
                             ? 'border-red-300 focus:ring-red-100 focus:border-red-400'
                             : 'border-[#E5E7EB]'
                         }`}
                       />
                       <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#3538CD]">
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-primary">
                         {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
@@ -323,18 +333,18 @@ export default function AuthModal({
                     <p className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest mb-3">Profile Visibility</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <button type="button" onClick={() => setProfileVisibility('visible')}
-                        className={`relative text-left p-4 rounded-2xl border-2 transition-all ${profileVisibility === 'visible' ? 'border-[#3538CD] bg-[#3538CD]/5' : 'border-[#E5E7EB] bg-white hover:border-[#C7C9F0]'}`}>
-                        <div className={`absolute top-3 right-3 w-4 h-4 rounded-full border-2 flex items-center justify-center ${profileVisibility === 'visible' ? 'border-[#3538CD]' : 'border-[#D1D5DB]'}`}>
-                          {profileVisibility === 'visible' && <div className="w-2 h-2 rounded-full bg-[#3538CD]" />}
+                        className={`relative text-left p-4 rounded-2xl border-2 transition-all ${profileVisibility === 'visible' ? 'border-primary bg-primary/5' : 'border-[#E5E7EB] bg-white hover:border-[#C7C9F0]'}`}>
+                        <div className={`absolute top-3 right-3 w-4 h-4 rounded-full border-2 flex items-center justify-center ${profileVisibility === 'visible' ? 'border-primary' : 'border-[#D1D5DB]'}`}>
+                          {profileVisibility === 'visible' && <div className="w-2 h-2 rounded-full bg-primary" />}
                         </div>
-                        <Eye className="w-5 h-5 text-[#3538CD] mb-2" />
+                        <Eye className="w-5 h-5 text-primary mb-2" />
                         <p className="text-xs font-black text-[#111827] leading-tight mb-1">Visible to recruiters</p>
                         <p className="text-[10px] text-[#6B7280] leading-snug">Discoverable without an application</p>
                       </button>
                       <button type="button" onClick={() => setProfileVisibility('private')}
-                        className={`relative text-left p-4 rounded-2xl border-2 transition-all ${profileVisibility === 'private' ? 'border-[#3538CD] bg-[#3538CD]/5' : 'border-[#E5E7EB] bg-white hover:border-[#C7C9F0]'}`}>
-                        <div className={`absolute top-3 right-3 w-4 h-4 rounded-full border-2 flex items-center justify-center ${profileVisibility === 'private' ? 'border-[#3538CD]' : 'border-[#D1D5DB]'}`}>
-                          {profileVisibility === 'private' && <div className="w-2 h-2 rounded-full bg-[#3538CD]" />}
+                        className={`relative text-left p-4 rounded-2xl border-2 transition-all ${profileVisibility === 'private' ? 'border-primary bg-primary/5' : 'border-[#E5E7EB] bg-white hover:border-[#C7C9F0]'}`}>
+                        <div className={`absolute top-3 right-3 w-4 h-4 rounded-full border-2 flex items-center justify-center ${profileVisibility === 'private' ? 'border-primary' : 'border-[#D1D5DB]'}`}>
+                          {profileVisibility === 'private' && <div className="w-2 h-2 rounded-full bg-primary" />}
                         </div>
                         <EyeOff className="w-5 h-5 text-[#6B7280] mb-2" />
                         <p className="text-xs font-black text-[#111827] leading-tight mb-1">Browse privately</p>
@@ -343,7 +353,7 @@ export default function AuthModal({
                     </div>
                     {/* Dynamic info banner */}
                     <div className="mt-3 flex items-start gap-2 px-3 py-2.5 bg-[#F4F5FA] rounded-xl border border-[#E5E7EB]">
-                      <span className="text-[#3538CD] mt-0.5 shrink-0 text-sm">ℹ</span>
+                      <span className="text-primary mt-0.5 shrink-0 text-sm">ℹ</span>
                       <p className="text-[11px] text-[#374151] leading-snug">
                         {profileVisibility === 'visible'
                           ? 'Your profile, CV, and contact details will be visible to the recruitment team.'
@@ -355,7 +365,7 @@ export default function AuthModal({
                     <label className="flex items-center justify-between gap-3 mt-3 cursor-pointer">
                       <span className="text-[11px] font-bold text-[#374151]">Allow recruiters to contact me for future roles</span>
                       <button type="button" onClick={() => setAllowRecruiterContact(v => !v)}
-                        className={`relative rounded-full transition-colors shrink-0 ${allowRecruiterContact ? 'bg-[#3538CD]' : 'bg-[#D1D5DB]'}`}
+                        className={`relative rounded-full transition-colors shrink-0 ${allowRecruiterContact ? 'bg-primary' : 'bg-[#D1D5DB]'}`}
                         style={{ minWidth: '2.5rem', height: '1.375rem' }}>
                         <span className={`absolute top-0.5 left-0.5 bg-white rounded-full shadow transition-transform ${allowRecruiterContact ? 'translate-x-[1.125rem]' : ''}`}
                           style={{ width: '1.125rem', height: '1.125rem' }} />
@@ -368,11 +378,11 @@ export default function AuthModal({
                    <label className="flex items-center gap-2.5 cursor-pointer pt-1">
                     <input type="checkbox" required checked={formData.agreeToTerms}
                       onChange={e => setFormData({...formData, agreeToTerms: e.target.checked})}
-                      className="w-4 h-4 border-2 border-[#D1D5DB] rounded accent-[#3538CD]" />
+                      className="w-4 h-4 border-2 border-[#D1D5DB] rounded accent-primary" />
                     <span className="text-[11px] font-bold text-[#6B7280]">
                       I agree to the{' '}
                       {portalConfig?.termsUrl ? (
-                        <a href={portalConfig.termsUrl} target="_blank" rel="noopener noreferrer" className="text-[#3538CD] hover:underline">
+                        <a href={portalConfig.termsUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                           Terms of Service
                         </a>
                       ) : (
@@ -381,7 +391,7 @@ export default function AuthModal({
                       {portalConfig?.privacyPolicyUrl && (
                         <>
                           {' '}and{' '}
-                          <a href={portalConfig.privacyPolicyUrl} target="_blank" rel="noopener noreferrer" className="text-[#3538CD] hover:underline">
+                          <a href={portalConfig.privacyPolicyUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                             Privacy Policy
                           </a>
                         </>
@@ -390,7 +400,7 @@ export default function AuthModal({
                   </label>
 
                   <button type="submit"
-                    className="w-full py-4 bg-[#3538CD] text-white text-sm font-black rounded-xl hover:bg-[#292bb0] transition-all shadow-lg shadow-[#3538CD]/20 uppercase tracking-widest flex items-center justify-center gap-2">
+                    className="w-full py-4 bg-primary text-white text-sm font-black rounded-xl hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 uppercase tracking-widest flex items-center justify-center gap-2">
                     Create Account <ArrowRight className="w-4 h-4" />
                   </button>
                 </form>
@@ -406,7 +416,7 @@ export default function AuthModal({
                         email: 'alex.patel@example.com',
                         password: 'password123'
                       })}
-                      className="px-2.5 py-1 bg-[#3538CD]/5 border border-[#3538CD]/10 rounded-lg text-[9px] font-black text-[#3538CD] uppercase tracking-widest hover:bg-[#3538CD] hover:text-white transition-all shadow-sm"
+                      className="px-2.5 py-1 bg-primary/5 border border-primary/10 rounded-lg text-[9px] font-black text-primary uppercase tracking-widest hover:bg-primary hover:text-white transition-all shadow-sm"
                     >
                       Auto-fill for Demo
                     </button>
@@ -418,14 +428,14 @@ export default function AuthModal({
                       required
                       value={formData.email}
                       onChange={e => setFormData({...formData, email: e.target.value})}
-                      className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
+                      className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary bg-[#F9FAFB]"
                     />
                   </div>
 
                   <div className="space-y-1.5">
                     <div className="flex justify-between">
                       <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Password *</label>
-                      <button type="button" onClick={() => { setForgotEmail(formData.email); setModalState('forgot-password'); }} className="text-[10px] font-black text-[#3538CD] uppercase hover:underline">Forgot password?</button>
+                      <button type="button" onClick={() => { setForgotEmail(formData.email); setModalState('forgot-password'); }} className="text-[10px] font-black text-primary uppercase hover:underline">Forgot password?</button>
                     </div>
                     <div className="relative">
                       <input
@@ -433,12 +443,12 @@ export default function AuthModal({
                         required
                         value={formData.password}
                         onChange={e => setFormData({...formData, password: e.target.value})}
-                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] pr-12"
+                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary bg-[#F9FAFB] pr-12"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#3538CD]"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-primary"
                       >
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
@@ -447,7 +457,7 @@ export default function AuthModal({
 
                   <button
                     type="submit"
-                    className="w-full py-4 bg-[#3538CD] text-white text-sm font-black rounded-xl hover:bg-[#292bb0] transition-all shadow-lg shadow-[#3538CD]/20 uppercase tracking-widest flex items-center justify-center gap-2"
+                    className="w-full py-4 bg-primary text-white text-sm font-black rounded-xl hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 uppercase tracking-widest flex items-center justify-center gap-2"
                   >
                     Sign In & Continue <ArrowRight className="w-4 h-4" />
                   </button>
@@ -455,13 +465,13 @@ export default function AuthModal({
               )}
 
               <div className="mt-8 flex flex-col items-center gap-2 pt-6 border-t border-[#E5E7EB]">
-                 <div className="flex items-center gap-2 text-[#3538CD]">
+                 <div className="flex items-center gap-2 text-primary">
                     <ShieldCheck className="w-4 h-4" />
                     <span className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Previously worked here?</span>
                  </div>
                  <button
                     onClick={() => setModalState('alumni-verify')}
-                    className="text-xs font-black text-[#3538CD] hover:underline"
+                    className="text-xs font-black text-primary hover:underline"
                   >
                     Fast-track your application →
                   </button>
@@ -471,13 +481,13 @@ export default function AuthModal({
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
               <button 
                 onClick={() => setModalState('auth')}
-                className="flex items-center gap-1.5 text-[10px] font-black text-[#6B7280] uppercase tracking-widest hover:text-[#3538CD] mb-8 transition-colors"
+                className="flex items-center gap-1.5 text-[10px] font-black text-[#6B7280] uppercase tracking-widest hover:text-primary mb-8 transition-colors"
               >
                 <ArrowLeft className="w-3.5 h-3.5" /> Back to Register
               </button>
 
               <div className="text-center mb-8">
-                <div className="w-16 h-16 rounded-2xl bg-[#3538CD]/5 text-[#3538CD] flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 rounded-2xl bg-primary/5 text-primary flex items-center justify-center mx-auto mb-4">
                   <ShieldCheck className="w-8 h-8" />
                 </div>
                 <h3 className="text-xl font-black text-[#111827] mb-2">Alumni Verification</h3>
@@ -498,7 +508,7 @@ export default function AuthModal({
                         setFormData({...formData, email: 'alex.patel@yopmails.com'});
                         setError(null);
                       }}
-                      className="px-2.5 py-1 bg-[#3538CD]/5 border border-[#3538CD]/10 rounded-lg text-[9px] font-black text-[#3538CD] uppercase tracking-widest hover:bg-[#3538CD] hover:text-white transition-all shadow-sm"
+                      className="px-2.5 py-1 bg-primary/5 border border-primary/10 rounded-lg text-[9px] font-black text-primary uppercase tracking-widest hover:bg-primary hover:text-white transition-all shadow-sm"
                     >
                       Use Demo Alumni Email
                     </button>
@@ -512,7 +522,7 @@ export default function AuthModal({
                       setError(null);
                     }}
                     placeholder="e.g. name@yopmails.com"
-                    className={`w-full border ${error ? 'border-red-500' : 'border-[#E5E7EB]'} rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] transition-all`}
+                    className={`w-full border ${error ? 'border-red-500' : 'border-[#E5E7EB]'} rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary bg-[#F9FAFB] transition-all`}
                   />
                   {error && (
                     <p className="text-[10px] font-black text-red-500 uppercase tracking-widest ml-1 mt-2">{error}</p>
@@ -528,7 +538,7 @@ export default function AuthModal({
                 <button
                   type="submit"
                   disabled={verifying}
-                  className="w-full py-4 bg-[#3538CD] text-white text-sm font-black rounded-xl hover:bg-[#292bb0] transition-all shadow-lg shadow-[#3538CD]/20 uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full py-4 bg-primary text-white text-sm font-black rounded-xl hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   {verifying ? (
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -542,7 +552,7 @@ export default function AuthModal({
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
                <button 
                 onClick={() => setModalState('alumni-verify')}
-                className="flex items-center gap-1.5 text-[10px] font-black text-[#6B7280] uppercase tracking-widest hover:text-[#3538CD] mb-8 transition-colors"
+                className="flex items-center gap-1.5 text-[10px] font-black text-[#6B7280] uppercase tracking-widest hover:text-primary mb-8 transition-colors"
               >
                 <ArrowLeft className="w-3.5 h-3.5" /> Back
               </button>
@@ -557,9 +567,9 @@ export default function AuthModal({
                 </p>
                 
                 {/* Verified Info Box */}
-                <div className="bg-[#3538CD]/5 border border-[#3538CD]/10 rounded-2xl p-4 text-left mb-8 flex items-center gap-4">
+                <div className="bg-primary/5 border border-primary/10 rounded-2xl p-4 text-left mb-8 flex items-center gap-4">
                   <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm">
-                    <Building2 className="w-5 h-5 text-[#3538CD]" />
+                    <Building2 className="w-5 h-5 text-primary" />
                   </div>
                   <div>
                     <h4 className="text-sm font-black text-[#111827]">Senior Software Engineer</h4>
@@ -594,7 +604,7 @@ export default function AuthModal({
                       value={formData.signInEmail}
                       onChange={e => setFormData({...formData, signInEmail: e.target.value})}
                       placeholder="your.email@example.com"
-                      className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
+                      className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary bg-[#F9FAFB]"
                     />
                     <p className="text-[10px] font-bold text-[#9CA3AF] ml-1 mt-1">This will be used to sign in to your CollabCRM account</p>
                  </div>
@@ -607,7 +617,7 @@ export default function AuthModal({
                         required
                         value={formData.firstName}
                         onChange={e => setFormData({...formData, firstName: e.target.value})}
-                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
+                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary bg-[#F9FAFB]"
                       />
                     </div>
                     <div className="space-y-1.5 text-left">
@@ -617,7 +627,7 @@ export default function AuthModal({
                         required
                         value={formData.lastName}
                         onChange={e => setFormData({...formData, lastName: e.target.value})}
-                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB]"
+                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary bg-[#F9FAFB]"
                       />
                     </div>
                  </div>
@@ -630,12 +640,12 @@ export default function AuthModal({
                         required
                         value={formData.password}
                         onChange={e => setFormData({...formData, password: e.target.value})}
-                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] pr-12"
+                        className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary bg-[#F9FAFB] pr-12"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#3538CD]"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-primary"
                       >
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
@@ -645,7 +655,7 @@ export default function AuthModal({
 
                    <button
                     type="submit"
-                    className="w-full py-4 bg-[#3538CD] text-white text-sm font-black rounded-xl hover:bg-[#292bb0] transition-all shadow-lg shadow-[#3538CD]/20 uppercase tracking-widest flex items-center justify-center gap-2 mt-4"
+                    className="w-full py-4 bg-primary text-white text-sm font-black rounded-xl hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 uppercase tracking-widest flex items-center justify-center gap-2 mt-4"
                   >
                     Submit <ArrowRight className="w-4 h-4" />
                   </button>
@@ -656,13 +666,13 @@ export default function AuthModal({
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
               <button
                 onClick={() => { setModalState('auth'); setActiveTab('signin'); }}
-                className="flex items-center gap-1.5 text-[10px] font-black text-[#6B7280] uppercase tracking-widest hover:text-[#3538CD] mb-8 transition-colors"
+                className="flex items-center gap-1.5 text-[10px] font-black text-[#6B7280] uppercase tracking-widest hover:text-primary mb-8 transition-colors"
               >
                 <ArrowLeft className="w-3.5 h-3.5" /> Back to Sign In
               </button>
 
               <div className="text-center mb-8">
-                <div className="w-16 h-16 rounded-2xl bg-[#3538CD]/5 text-[#3538CD] flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 rounded-2xl bg-primary/5 text-primary flex items-center justify-center mx-auto mb-4">
                   <KeyRound className="w-8 h-8" />
                 </div>
                 <h3 className="text-xl font-black text-[#111827] mb-2">Forgot Password?</h3>
@@ -688,13 +698,13 @@ export default function AuthModal({
                     value={forgotEmail}
                     onChange={e => setForgotEmail(e.target.value)}
                     placeholder="your.email@example.com"
-                    className="w-full border border-[#E5E7EB] rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-[#3538CD]/10 focus:border-[#3538CD] bg-[#F9FAFB] transition-all"
+                    className="w-full border border-[#E5E7EB] rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary bg-[#F9FAFB] transition-all"
                   />
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full py-4 bg-[#3538CD] text-white text-sm font-black rounded-xl hover:bg-[#292bb0] transition-all shadow-lg shadow-[#3538CD]/20 uppercase tracking-widest flex items-center justify-center gap-2"
+                  className="w-full py-4 bg-primary text-white text-sm font-black rounded-xl hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 uppercase tracking-widest flex items-center justify-center gap-2"
                 >
                   Send Reset Link <ArrowRight className="w-4 h-4" />
                 </button>
@@ -720,7 +730,7 @@ export default function AuthModal({
                   Didn't receive it? Check your spam folder or{' '}
                   <button
                     onClick={() => setModalState('forgot-password')}
-                    className="text-[#3538CD] font-black hover:underline"
+                    className="text-primary font-black hover:underline"
                   >
                     Resend Email
                   </button>
@@ -729,7 +739,7 @@ export default function AuthModal({
 
               <button
                 onClick={() => { setModalState('auth'); setActiveTab('signin'); }}
-                className="w-full py-4 bg-[#3538CD] text-white text-sm font-black rounded-xl hover:bg-[#292bb0] transition-all shadow-lg shadow-[#3538CD]/20 uppercase tracking-widest flex items-center justify-center gap-2"
+                className="w-full py-4 bg-primary text-white text-sm font-black rounded-xl hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 uppercase tracking-widest flex items-center justify-center gap-2"
               >
                 <ArrowLeft className="w-4 h-4" /> Back to Sign In
               </button>

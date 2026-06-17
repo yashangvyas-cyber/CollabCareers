@@ -8,8 +8,8 @@ export default function ConfirmationPage() {
       <div className="max-w-2xl mx-auto px-6 py-16 flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-700">
         
         {/* Large Checkmark Icon */}
-        <div className="w-20 h-20 rounded-full bg-[#3538CD]/10 flex items-center justify-center mb-8">
-          <div className="w-16 h-16 rounded-full bg-[#3538CD] flex items-center justify-center shadow-lg shadow-[#3538CD]/20">
+        <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-8">
+          <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
             <Check className="w-10 h-10 text-white stroke-[3px]" />
           </div>
         </div>
@@ -25,14 +25,14 @@ export default function ConfirmationPage() {
 
         {/* Application ID Pill */}
         <div className="inline-flex items-center px-4 py-1.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-full text-sm font-semibold text-[#374151] mb-12">
-          Application ID: <span className="text-[#3538CD] ml-1.5 font-bold">CC-2044-0312</span>
+          Application ID: <span className="text-primary ml-1.5 font-bold">CC-2044-0312</span>
         </div>
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
           <Link
             to="/portal/yopmails/profile"
-            className="flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 bg-[#3538CD] text-white text-sm font-bold rounded-xl hover:bg-[#292bb0] transition-all shadow-lg shadow-[#3538CD]/20"
+            className="flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary-hover transition-all shadow-lg shadow-primary/20"
           >
             <List className="w-4 h-4" /> View My Applications
           </Link>

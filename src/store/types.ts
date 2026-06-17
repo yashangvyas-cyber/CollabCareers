@@ -131,9 +131,21 @@ export interface Application {
   resumeUrl: string;
 }
 
+export interface PortalAppearance {
+  /** Customer-facing portal/company name — feeds the header, all greeting states and footer */
+  portalName: string;
+  /** Short welcome sub-line shown to guests under the greeting */
+  tagline: string;
+  /** Single brand colour (hex) — drives buttons, links, active filters, job titles */
+  brandColor: string;
+  /** Uploaded logo as a data URL; empty string falls back to the portal-name initial */
+  logoUrl: string;
+}
+
 export interface PortalConfig {
   termsUrl: string;
   privacyPolicyUrl: string;
+  appearance: PortalAppearance;
 }
 
 export interface AppState {
