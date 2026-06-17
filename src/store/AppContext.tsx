@@ -1407,8 +1407,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
           appearance: {
             ...initialState.portalConfig.appearance,
             ...(parsed.portalConfig?.appearance ?? {}),
-            // Portal name + hero are system-set for this demo, so always force the defaults
+            // Brand name / colour / hero are system-set for this MindInventory prototype,
+            // so always force the defaults (overriding any stale saved values)
             portalName: initialState.portalConfig.appearance.portalName,
+            brandColor: initialState.portalConfig.appearance.brandColor,
             heroEnabled: initialState.portalConfig.appearance.heroEnabled,
             heroImageUrl: initialState.portalConfig.appearance.heroImageUrl,
           },

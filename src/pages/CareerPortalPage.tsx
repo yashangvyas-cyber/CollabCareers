@@ -388,9 +388,9 @@ export default function CareerPortalPage() {
               {/* ── Controls ── */}
               <div className="space-y-5">
 
-                {/* Reset row — defaults match mindinventory.com */}
+                {/* Reset row — restore default branding */}
                 <div className="flex items-center justify-between -mt-1">
-                  <span className="text-[11px] text-[#9CA3AF]">Defaults match your company website (mindinventory.com).</span>
+                  <span className="text-[11px] text-[#9CA3AF]">Reset restores your default branding.</span>
                   <button
                     onClick={resetAppearance}
                     className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#6B7280] hover:text-[#3538CD] transition-colors"
@@ -404,7 +404,7 @@ export default function CareerPortalPage() {
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <p className="text-xs font-semibold text-[#374151]">Hero banner</p>
-                      <p className="text-[11px] text-[#9CA3AF] mt-0.5">A wide image shown between the welcome and the job filters (like Red Hat / Intel careers).</p>
+                      <p className="text-[11px] text-[#9CA3AF] mt-0.5">A wide banner shown between the welcome message and the job filters.</p>
                     </div>
                     <Toggle
                       checked={apHeroEnabled}
@@ -498,7 +498,7 @@ export default function CareerPortalPage() {
                     </div>
                   </div>
                   <p className="text-[11px] text-[#9CA3AF] mt-1.5">
-                    Drives buttons, links, active filters and job titles. Status colors (Applied / Continue) stay fixed.
+                    Applied to primary buttons and links across the portal. Job content (titles, filters, icons) and status colors stay neutral.
                   </p>
                   {apLowContrast && (
                     <div className="flex items-start gap-2 mt-2.5 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg">
