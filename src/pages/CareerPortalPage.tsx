@@ -6,7 +6,7 @@ import {
   Code2, Copy, CheckCheck, ExternalLink,
   ChevronDown, ChevronUp, ChevronRight,
   SlidersHorizontal, Search, MapPin, Briefcase, TrendingUp, Wifi, Link2,
-  AlertTriangle, ShieldCheck, Palette, Upload, Trash2, RotateCcw,
+  AlertTriangle, ShieldCheck, Palette, Upload, Trash2,
 } from 'lucide-react';
 import { BRAND_PRESETS, isLowContrastOnWhite, DEFAULT_APPEARANCE } from '../lib/theme';
 import type { PortalConfig } from '../store/types';
@@ -137,14 +137,6 @@ export default function CareerPortalPage() {
   // so the candidate portal updates without a Save step.
   const commitAppearance = (partial: Partial<PortalConfig['appearance']>) => {
     updatePortalConfig({ appearance: { ...portalConfig.appearance, ...partial } });
-  };
-
-  const resetAppearance = () => {
-    setApTagline(DEFAULT_APPEARANCE.tagline);
-    setApBrandColor(DEFAULT_APPEARANCE.brandColor);
-    setApHeroEnabled(DEFAULT_APPEARANCE.heroEnabled);
-    setApHeroImageUrl(DEFAULT_APPEARANCE.heroImageUrl);
-    commitAppearance({ ...DEFAULT_APPEARANCE });
   };
 
   const handleHeroUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -387,16 +379,6 @@ export default function CareerPortalPage() {
             <div className="max-w-2xl">
               {/* ── Controls ── */}
               <div className="space-y-5">
-
-                {/* Reset row — restore default branding */}
-                <div className="flex items-center justify-end -mt-1">
-                  <button
-                    onClick={resetAppearance}
-                    className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#6B7280] hover:text-[#3538CD] transition-colors"
-                  >
-                    <RotateCcw className="w-3 h-3" /> Reset to default
-                  </button>
-                </div>
 
                 {/* Hero banner — optional image between the greeting and the filters */}
                 <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
