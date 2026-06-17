@@ -5,7 +5,12 @@
       "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" http://localhost:5173/)",
       "Bash(echo \"build exit: $?\")",
       "Read(//tmp/**)",
-      "WebFetch(domain:www.mindinventory.com)"
+      "WebFetch(domain:www.mindinventory.com)",
+      "Read(//home/yashang/Downloads/**)",
+      "Bash(cd /home/yashang/.gemini/antigravity/scratch/collab-careers-prototype *)"
+    ],
+    "additionalDirectories": [
+      "/home/yashang/Downloads"
     ]
   }
 }

@@ -194,6 +194,17 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
         </div>
       </div>
 
+      {/* Hero banner — optional, sits between the greeting and the filters (set in Appearance config) */}
+      {appearance.heroEnabled && appearance.heroImageUrl && (
+        <div className="bg-[#F9FAFB] pt-3 sm:pt-4">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6">
+            <div className="rounded-xl sm:rounded-2xl overflow-hidden border border-[#E5E7EB] shadow-sm">
+              <img src={appearance.heroImageUrl} alt="" className="w-full h-40 sm:h-56 object-cover" />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Search + Filter — contained white card, sticky */}
       <div ref={filterRef} className="sticky top-[49px] z-40 bg-[#F9FAFB] pt-3 sm:pt-4 pb-2 sm:pb-3">
         <div className="max-w-7xl mx-auto px-3 sm:px-6">

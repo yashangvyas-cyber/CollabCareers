@@ -1407,6 +1407,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
           appearance: {
             ...initialState.portalConfig.appearance,
             ...(parsed.portalConfig?.appearance ?? {}),
+            // Portal name + hero are system-set for this demo, so always force the defaults
+            portalName: initialState.portalConfig.appearance.portalName,
+            heroEnabled: initialState.portalConfig.appearance.heroEnabled,
+            heroImageUrl: initialState.portalConfig.appearance.heroImageUrl,
           },
         },
       };

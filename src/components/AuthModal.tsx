@@ -142,22 +142,11 @@ export default function AuthModal({
         {/* Header — Org + CollabCRM logos together */}
         <div className="px-5 sm:px-8 pt-6 sm:pt-8 pb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {/* Org logo — uploaded image, or the portal-name initial */}
-            {portalConfig?.appearance?.logoUrl ? (
-              <img
-                src={portalConfig.appearance.logoUrl}
-                alt={businessUnit}
-                className="h-10 w-auto max-w-[120px] object-contain shrink-0"
-              />
-            ) : (
-              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-on-primary text-base font-black shadow-sm shrink-0">
-                {(portalConfig?.appearance?.portalName || businessUnit || 'M').charAt(0).toUpperCase()}
-              </div>
-            )}
-            {/* Org name + CollabCRM small attribution stacked */}
-            <div className="flex flex-col">
+            {/* Org branding — logo and/or name (each shown when present) */}
+            <img src="/mindinventory-logo.svg" alt={businessUnit} className="h-8 w-auto shrink-0" />
+            {businessUnit && (
               <span className="text-sm font-black text-[#111827] tracking-tight leading-tight">{businessUnit}</span>
-            </div>
+            )}
           </div>
           <button 
             onClick={onClose}

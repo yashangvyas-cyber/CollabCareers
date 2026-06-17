@@ -132,14 +132,16 @@ export interface Application {
 }
 
 export interface PortalAppearance {
-  /** Customer-facing portal/company name — feeds the header, all greeting states and footer */
+  /** Portal/company name — system-set, shown in header, greeting and footer */
   portalName: string;
-  /** Short welcome sub-line shown to guests under the greeting */
+  /** Short welcome sub-line shown under the greeting */
   tagline: string;
-  /** Single brand colour (hex) — drives buttons, links, active filters, job titles */
+  /** Single brand colour (hex) — drives primary buttons */
   brandColor: string;
-  /** Uploaded logo as a data URL; empty string falls back to the portal-name initial */
-  logoUrl: string;
+  /** Whether the hero banner (between greeting and filters) is shown */
+  heroEnabled: boolean;
+  /** Hero banner image as a data URL; shown only when heroEnabled is true */
+  heroImageUrl: string;
 }
 
 export interface PortalConfig {

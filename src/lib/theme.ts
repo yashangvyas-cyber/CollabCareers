@@ -11,7 +11,8 @@ export const DEFAULT_APPEARANCE: PortalAppearance = {
   portalName: 'MindInventory',
   tagline: 'Explore open roles and apply in minutes.',
   brandColor: '#ED184F',
-  logoUrl: '',
+  heroEnabled: true,
+  heroImageUrl: '/hero-banner.jpg',
 };
 
 

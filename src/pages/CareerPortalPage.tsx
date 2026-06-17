@@ -125,12 +125,12 @@ export default function CareerPortalPage() {
   const [localTermsUrl, setLocalTermsUrl] = useState(portalConfig?.termsUrl || 'https://www.mindinventory.com/terms-of-use.php');
   const [localPrivacyUrl, setLocalPrivacyUrl] = useState(portalConfig?.privacyPolicyUrl || 'https://www.mindinventory.com/privacy-policy.php');
 
-  // Appearance — local state, committed to context only on Save
-  const [apPortalName, setApPortalName] = useState(portalConfig?.appearance?.portalName ?? DEFAULT_APPEARANCE.portalName);
+  // Appearance — local state, applied live to the store on change
   const [apTagline, setApTagline] = useState(portalConfig?.appearance?.tagline ?? DEFAULT_APPEARANCE.tagline);
   const [apBrandColor, setApBrandColor] = useState(portalConfig?.appearance?.brandColor ?? DEFAULT_APPEARANCE.brandColor);
-  const [apLogoUrl, setApLogoUrl] = useState(portalConfig?.appearance?.logoUrl ?? DEFAULT_APPEARANCE.logoUrl);
-  const logoInputRef = useRef<HTMLInputElement>(null);
+  const [apHeroEnabled, setApHeroEnabled] = useState(portalConfig?.appearance?.heroEnabled ?? DEFAULT_APPEARANCE.heroEnabled);
+  const [apHeroImageUrl, setApHeroImageUrl] = useState(portalConfig?.appearance?.heroImageUrl ?? DEFAULT_APPEARANCE.heroImageUrl);
+  const heroInputRef = useRef<HTMLInputElement>(null);
   const apLowContrast = isLowContrastOnWhite(apBrandColor);
 
   // Appearance applies live — every change is committed to the store immediately
@@ -140,21 +140,22 @@ export default function CareerPortalPage() {
   };
 
   const resetAppearance = () => {
-    setApPortalName(DEFAULT_APPEARANCE.portalName);
     setApTagline(DEFAULT_APPEARANCE.tagline);
     setApBrandColor(DEFAULT_APPEARANCE.brandColor);
-    setApLogoUrl(DEFAULT_APPEARANCE.logoUrl);
+    setApHeroEnabled(DEFAULT_APPEARANCE.heroEnabled);
+    setApHeroImageUrl(DEFAULT_APPEARANCE.heroImageUrl);
     commitAppearance({ ...DEFAULT_APPEARANCE });
   };
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleHeroUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = () => {
       const url = reader.result as string;
-      setApLogoUrl(url);
-      commitAppearance({ logoUrl: url });
+      setApHeroImageUrl(url);
+      commitAppearance({ heroEnabled: true, heroImageUrl: url });
+      setApHeroEnabled(true);
     };
     reader.readAsDataURL(file);
   };
@@ -201,10 +202,11 @@ export default function CareerPortalPage() {
       termsUrl: localTermsUrl.trim(),
       privacyPolicyUrl: localPrivacyUrl.trim(),
       appearance: {
-        portalName: apPortalName.trim() || 'MindInventory',
+        ...portalConfig.appearance,
         tagline: apTagline.trim(),
         brandColor: apBrandColor,
-        logoUrl: apLogoUrl,
+        heroEnabled: apHeroEnabled,
+        heroImageUrl: apHeroImageUrl,
       },
     });
     setSaveSuccess(true);
@@ -216,10 +218,10 @@ export default function CareerPortalPage() {
   const handleCancel = () => {
     setLocalTermsUrl(portalConfig?.termsUrl || '');
     setLocalPrivacyUrl(portalConfig?.privacyPolicyUrl || '');
-    setApPortalName(portalConfig?.appearance?.portalName ?? 'MindInventory');
-    setApTagline(portalConfig?.appearance?.tagline ?? '');
-    setApBrandColor(portalConfig?.appearance?.brandColor ?? '#3538CD');
-    setApLogoUrl(portalConfig?.appearance?.logoUrl ?? '');
+    setApTagline(portalConfig?.appearance?.tagline ?? DEFAULT_APPEARANCE.tagline);
+    setApBrandColor(portalConfig?.appearance?.brandColor ?? DEFAULT_APPEARANCE.brandColor);
+    setApHeroEnabled(portalConfig?.appearance?.heroEnabled ?? DEFAULT_APPEARANCE.heroEnabled);
+    setApHeroImageUrl(portalConfig?.appearance?.heroImageUrl ?? DEFAULT_APPEARANCE.heroImageUrl);
     setSaveAttempted(false);
     setSaveError('');
   };
@@ -397,54 +399,54 @@ export default function CareerPortalPage() {
                   </button>
                 </div>
 
-                {/* Logo */}
-                <div>
-                  <label className="text-xs font-semibold text-[#374151] mb-2 block">Logo</label>
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] flex items-center justify-center overflow-hidden shrink-0">
-                      {apLogoUrl ? (
-                        <img src={apLogoUrl} alt="Logo" className="w-full h-full object-contain" />
+                {/* Hero banner — optional image between the greeting and the filters */}
+                <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-semibold text-[#374151]">Hero banner</p>
+                      <p className="text-[11px] text-[#9CA3AF] mt-0.5">A wide image shown between the welcome and the job filters (like Red Hat / Intel careers).</p>
+                    </div>
+                    <Toggle
+                      checked={apHeroEnabled}
+                      onChange={() => { const next = !apHeroEnabled; setApHeroEnabled(next); commitAppearance({ heroEnabled: next }); }}
+                    />
+                  </div>
+
+                  {apHeroEnabled && (
+                    <div className="mt-4 pt-4 border-t border-[#E5E7EB]">
+                      <input ref={heroInputRef} type="file" accept="image/*" onChange={handleHeroUpload} className="hidden" />
+                      {apHeroImageUrl ? (
+                        <div className="space-y-3">
+                          <div className="rounded-lg overflow-hidden border border-[#E5E7EB]">
+                            <img src={apHeroImageUrl} alt="Hero banner" className="w-full h-32 object-cover" />
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => heroInputRef.current?.click()}
+                              className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-[#374151] bg-white border border-[#E5E7EB] rounded-lg hover:border-[#3538CD]/30 hover:text-[#3538CD] transition-colors shadow-sm"
+                            >
+                              <Upload className="w-3.5 h-3.5" /> Replace
+                            </button>
+                            <button
+                              onClick={() => { setApHeroImageUrl(''); commitAppearance({ heroImageUrl: '' }); }}
+                              className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#9CA3AF] hover:text-red-500 transition-colors"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" /> Remove
+                            </button>
+                          </div>
+                        </div>
                       ) : (
-                        <span
-                          className="w-8 h-8 rounded-lg flex items-center justify-center text-lg font-black text-white"
-                          style={{ backgroundColor: apBrandColor }}
+                        <button
+                          onClick={() => heroInputRef.current?.click()}
+                          className="w-full flex flex-col items-center justify-center gap-2 py-8 border-2 border-dashed border-[#D1D5DB] rounded-lg text-[#6B7280] hover:border-[#3538CD]/40 hover:text-[#3538CD] hover:bg-white transition-colors"
                         >
-                          {(apPortalName || 'M').charAt(0).toUpperCase()}
-                        </span>
+                          <Upload className="w-5 h-5" />
+                          <span className="text-xs font-semibold">Upload hero image</span>
+                          <span className="text-[10px] text-[#9CA3AF]">Wide image recommended (e.g. 1600 × 400)</span>
+                        </button>
                       )}
                     </div>
-                    <input ref={logoInputRef} type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
-                    <button
-                      onClick={() => logoInputRef.current?.click()}
-                      className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-[#374151] bg-white border border-[#E5E7EB] rounded-lg hover:border-[#3538CD]/30 hover:text-[#3538CD] transition-colors shadow-sm"
-                    >
-                      <Upload className="w-3.5 h-3.5" /> Upload
-                    </button>
-                    {apLogoUrl && (
-                      <button
-                        onClick={() => { setApLogoUrl(''); commitAppearance({ logoUrl: '' }); }}
-                        className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#9CA3AF] hover:text-red-500 transition-colors"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" /> Remove
-                      </button>
-                    )}
-                  </div>
-                  <p className="text-[11px] text-[#9CA3AF] mt-1.5">
-                    PNG or SVG with a transparent background works best. No logo → we show your portal name and its initial.
-                  </p>
-                </div>
-
-                {/* Portal name */}
-                <div>
-                  <label className="text-xs font-semibold text-[#374151] mb-2 block">Portal name</label>
-                  <input
-                    type="text"
-                    value={apPortalName}
-                    onChange={e => { setApPortalName(e.target.value); commitAppearance({ portalName: e.target.value }); }}
-                    placeholder="MindInventory"
-                    className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3538CD]/20 focus:border-[#3538CD] bg-white text-[#111827]"
-                  />
-                  <p className="text-[11px] text-[#9CA3AF] mt-1.5">Shown in the header, the candidate greeting and the footer.</p>
+                  )}
                 </div>
 
                 {/* Tagline */}

@@ -48,20 +48,12 @@ export default function PortalLayout({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
           {/* Left: Logo + Navigation */}
           <div className="flex items-center gap-5">
-            {/* Company Logo — uploaded image (or the portal-name initial) + the portal name */}
+            {/* Company branding — logo and/or portal name (each shown when present) */}
             <Link to="/portal/yopmails" className="flex items-center gap-2.5">
-              {appearance.logoUrl ? (
-                <img
-                  src={appearance.logoUrl}
-                  alt={appearance.portalName}
-                  className="h-8 w-auto max-w-[150px] object-contain"
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center text-on-primary text-sm font-black shadow-sm">
-                  {appearance.portalName.charAt(0).toUpperCase()}
-                </div>
+              <img src="/mindinventory-logo.svg" alt={appearance.portalName} className="h-8 w-auto" />
+              {appearance.portalName && (
+                <span className="text-sm font-black text-[#111827] tracking-tight">{appearance.portalName}</span>
               )}
-              <span className="text-sm font-black text-[#111827] tracking-tight">{appearance.portalName}</span>
             </Link>
           </div>
 
