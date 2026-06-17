@@ -389,8 +389,7 @@ export default function CareerPortalPage() {
               <div className="space-y-5">
 
                 {/* Reset row — restore default branding */}
-                <div className="flex items-center justify-between -mt-1">
-                  <span className="text-[11px] text-[#9CA3AF]">Reset restores your default branding.</span>
+                <div className="flex items-center justify-end -mt-1">
                   <button
                     onClick={resetAppearance}
                     className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#6B7280] hover:text-[#3538CD] transition-colors"
