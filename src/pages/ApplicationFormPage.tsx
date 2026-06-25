@@ -107,7 +107,7 @@ export default function ApplicationFormPage() {
   const [isFresher, setIsFresher] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [jobClosed, setJobClosed] = useState(false);
-  const [syncProfile, setSyncProfile] = useState(true); // "also update my profile with this data"
+  const [syncProfile, setSyncProfile] = useState(false); // "also update my profile with this data"
 
   const [formData, setFormData] = useState(() => getDefaultFormData(currentUser));
 
@@ -972,23 +972,46 @@ export default function ApplicationFormPage() {
               )}
             </div>
 
-            {/* Sync-to-profile opt-in (first-time / from-scratch applications only) */}
-            {isFreshApplication && (
-              <label className="flex items-start gap-3 p-5 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm cursor-pointer hover:border-primary/40 transition-colors">
-                <input
-                  type="checkbox"
-                  checked={syncProfile}
-                  onChange={(e) => setSyncProfile(e.target.checked)}
-                  className="mt-0.5 w-5 h-5 rounded-md border-2 border-[#D1D5DB] text-primary accent-primary cursor-pointer shrink-0"
-                />
-                <div>
-                  <p className="text-sm font-black text-[#111827]">Also update my profile with this information</p>
-                  <p className="text-xs font-bold text-[#6B7280] mt-0.5 leading-relaxed">
-                    We'll save these details to your profile so your next application is even faster. You can edit them anytime.
-                  </p>
-                </div>
-              </label>
-            )}
+            {/* Profile sync radio group */}
+            <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-6 sm:p-8">
+              <h4 className="text-sm font-black text-[#111827] mb-4">Do you want to update your profile with the information entered above?</h4>
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={() => setSyncProfile(true)}
+                  className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all ${
+                    syncProfile
+                      ? 'border-primary bg-primary/5'
+                      : 'border-[#E5E7EB] hover:border-[#C7C9F0]'
+                  }`}
+                >
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${syncProfile ? 'border-primary' : 'border-[#D1D5DB]'}`}>
+                    {syncProfile && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
+                  </div>
+                  <div>
+                    <p className="text-sm font-black text-[#111827]">Yes, update my profile</p>
+                    <p className="text-xs font-bold text-[#6B7280] mt-0.5">Save these details so your next application is even faster.</p>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSyncProfile(false)}
+                  className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all ${
+                    !syncProfile
+                      ? 'border-primary bg-primary/5'
+                      : 'border-[#E5E7EB] hover:border-[#C7C9F0]'
+                  }`}
+                >
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${!syncProfile ? 'border-primary' : 'border-[#D1D5DB]'}`}>
+                    {!syncProfile && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
+                  </div>
+                  <div>
+                    <p className="text-sm font-black text-[#111827]">No, use it only for this application</p>
+                    <p className="text-xs font-bold text-[#6B7280] mt-0.5">Your profile stays unchanged.</p>
+                  </div>
+                </button>
+              </div>
+            </div>
 
             {/* Action Bar spacer */}
             <div className="h-24" />

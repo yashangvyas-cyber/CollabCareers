@@ -9,6 +9,7 @@ import JobDetailPage from './pages/JobDetailPage';
 import ApplicationFormPage from './pages/ApplicationFormPage';
 import ConfirmationPage from './pages/ConfirmationPage';
 import CandidateProfilePage from './pages/CandidateProfilePage';
+import EditProfilePage from './pages/EditProfilePage';
 import AlumniApplicationPage from './pages/AlumniApplicationPage';
 import JobApplicationsPage from './pages/JobApplicationsPage';
 import FlowMapPage from './pages/FlowMapPage';
@@ -58,6 +59,7 @@ function App() {
           <Route path="/portal/:slug/apply/:jobId" element={<ApplicationFormPage />} />
           <Route path="/portal/:slug/confirmation/:jobId" element={<ConfirmationPage />} />
           <Route path="/portal/:slug/profile" element={<CandidateProfilePage />} />
+          <Route path="/portal/:slug/profile/edit" element={<EditProfilePage />} />
           <Route path="/portal/:slug/application/:applicationId" element={<ViewApplicationPage />} />
           <Route path="/portal/:slug/alumni-verify" element={<CareerPage openAlumni={true} />} />
           <Route path="/portal/:slug/alumni/apply/:jobId" element={<AlumniApplicationPage />} />
