@@ -101,6 +101,8 @@ export default function ApplicationFormPage() {
 
   const [step, setStep] = useState(0); // 0 = CV Upload, 1 = Form, 2 = Review
   const [extracting, setExtracting] = useState(false);
+  // Which source the candidate picked on step 0 (gates the Next button)
+  const [step0Choice, setStep0Choice] = useState<'' | 'upload' | 'profile'>('');
   const [resumeName, setResumeName] = useState('');
   const [isFresher, setIsFresher] = useState(false);
   const [showToast, setShowToast] = useState(false);
@@ -241,8 +243,55 @@ export default function ApplicationFormPage() {
     setTimeout(() => {
       setResumeName('Alex_Patel_Resume.pdf');
       setExtracting(false);
-      setStep(1);
+      setStep0Choice('upload');
     }, 2000);
+  };
+
+  // The candidate's richest profile snapshot = their latest application's saved form
+  // (the profile page derives from the same source), overlaid with account fields.
+  const latestProfileApp = applications
+    .filter(a => a.candidateId === currentUser?.id && a.answers?._fullFormData)
+    .sort((a, b) => new Date(b.appliedAt).getTime() - new Date(a.appliedAt).getTime())[0];
+
+  // Show the "use my profile" shortcut only when there's genuinely something to pull
+  const hasProfileData = !!currentUser && (
+    !!currentUser.resumeUrl || !!currentUser.skills?.length ||
+    !!currentUser.currentDesignation || !!currentUser.currentOrg ||
+    !!currentUser.city || !!currentUser.linkedin || !!latestProfileApp
+  );
+
+  // Prefill the form straight from the candidate's profile (skipping the CV upload)
+  const fetchFromProfile = () => {
+    const merged = mergeFormData(currentUser, latestProfileApp?.answers?._fullFormData);
+    setFormData({
+      ...merged,
+      personal: {
+        ...merged.personal,
+        firstName: currentUser?.firstName || merged.personal.firstName,
+        lastName: currentUser?.lastName || merged.personal.lastName,
+        email: currentUser?.email || merged.personal.email,
+        contactNumber: currentUser?.phone || merged.personal.contactNumber,
+        linkedin: currentUser?.linkedin || merged.personal.linkedin,
+        gender: currentUser?.gender || merged.personal.gender,
+        dob: currentUser?.dateOfBirth || merged.personal.dob,
+        maritalStatus: currentUser?.maritalStatus || merged.personal.maritalStatus,
+      },
+      professional: {
+        ...merged.professional,
+        noticePeriod: currentUser?.noticePeriod || merged.professional.noticePeriod,
+        skills: currentUser?.skills?.length ? currentUser.skills : merged.professional.skills,
+      },
+      address: {
+        ...merged.address,
+        street: currentUser?.address || merged.address.street,
+        country: currentUser?.country || merged.address.country,
+        state: currentUser?.state || merged.address.state,
+        city: currentUser?.city || merged.address.city,
+        zip: currentUser?.zipCode || merged.address.zip,
+      },
+    });
+    setResumeName(currentUser?.resumeUrl || latestProfileApp?.resumeUrl || 'Profile Resume');
+    setStep0Choice('profile');
   };
 
   const handleSaveDraft = () => {
@@ -376,18 +425,86 @@ export default function ApplicationFormPage() {
             <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-2xl overflow-hidden p-6 sm:p-12 text-center animate-in zoom-in-95 duration-500">
               <div className="max-w-lg mx-auto">
                 {!extracting ? (
-                  <div 
-                    onClick={handleCvUpload}
-                    className="group relative border-2 border-dashed border-[#D1D5DB] hover:border-primary rounded-[40px] p-8 sm:p-16 cursor-pointer transition-all duration-300 hover:bg-[#F4F5FA] text-center"
-                  >
-                    <div className="w-20 h-20 bg-[#F4F5FA] group-hover:bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-6 transition-colors">
-                      <Upload className="w-10 h-10 text-primary" />
+                  <>
+                  {step0Choice === 'upload' ? (
+                    <div className="flex items-center gap-4 border-2 border-primary/30 bg-primary/5 rounded-[40px] p-6 sm:p-8 text-left">
+                      <div className="w-14 h-14 bg-white rounded-2xl border border-primary/20 flex items-center justify-center shrink-0">
+                        <FileText className="w-7 h-7 text-primary" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-0.5">Resume uploaded</p>
+                        <p className="text-base font-black text-[#111827] truncate">{resumeName}</p>
+                      </div>
+                      <button
+                        onClick={() => { setStep0Choice(''); setResumeName(''); }}
+                        className="ml-auto text-xs font-black text-[#6B7280] hover:text-primary uppercase tracking-widest hover:underline shrink-0"
+                      >
+                        Change
+                      </button>
                     </div>
-                    <h3 className="text-2xl font-black text-[#111827] mb-3">Upload your Resume</h3>
-                    <p className="text-[#6B7280] mb-8 font-medium">Drag and drop your CV here or click to browse</p>
-                    
-                    <p className="text-xs text-[#9CA3AF] font-bold uppercase tracking-widest">Accepted formats: PDF, DOC, DOCX · Max 5MB</p>
+                  ) : (
+                    <div
+                      onClick={handleCvUpload}
+                      className="group relative border-2 border-dashed border-[#D1D5DB] hover:border-primary rounded-[40px] p-8 sm:p-16 cursor-pointer transition-all duration-300 hover:bg-[#F4F5FA] text-center"
+                    >
+                      <div className="w-20 h-20 bg-[#F4F5FA] group-hover:bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-6 transition-colors">
+                        <Upload className="w-10 h-10 text-primary" />
+                      </div>
+                      <h3 className="text-2xl font-black text-[#111827] mb-3">Upload your Resume</h3>
+                      <p className="text-[#6B7280] mb-8 font-medium">Drag and drop your CV here or click to browse</p>
+
+                      <p className="text-xs text-[#9CA3AF] font-bold uppercase tracking-widest">Accepted formats: PDF, DOC, DOCX · Max 5MB</p>
+                    </div>
+                  )}
+
+                  {hasProfileData && (
+                    <>
+                      <div className="flex items-center gap-3 my-6">
+                        <div className="flex-1 h-px bg-[#E5E7EB]" />
+                        <span className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">or</span>
+                        <div className="flex-1 h-px bg-[#E5E7EB]" />
+                      </div>
+                      <button
+                        onClick={fetchFromProfile}
+                        className={`w-full flex items-center gap-4 px-5 py-4 border-2 rounded-2xl transition-all text-left group ${
+                          step0Choice === 'profile'
+                            ? 'border-primary bg-primary/5'
+                            : 'border-[#E5E7EB] hover:border-primary hover:bg-primary/5'
+                        }`}
+                      >
+                        <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/15 transition-colors">
+                          <Sparkles className="w-5 h-5 text-primary" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-black text-[#111827]">Use my profile details</p>
+                          <p className="text-xs text-[#6B7280] truncate">
+                            {currentUser?.resumeUrl
+                              ? `Prefill with your saved resume (${currentUser.resumeUrl}) & details`
+                              : 'Prefill the form from your saved profile'}
+                          </p>
+                        </div>
+                        {step0Choice === 'profile'
+                          ? <CheckCircle className="w-5 h-5 text-primary ml-auto shrink-0" />
+                          : <ArrowRight className="w-5 h-5 text-primary ml-auto shrink-0" />}
+                      </button>
+                    </>
+                  )}
+
+                  {/* Next — enabled once a source is chosen */}
+                  <div className="mt-8 flex justify-end">
+                    <button
+                      onClick={() => { setStep(1); window.scrollTo(0, 0); }}
+                      disabled={!step0Choice}
+                      className={`px-10 py-3.5 text-xs font-black rounded-2xl uppercase tracking-widest flex items-center gap-2 transition-all ${
+                        step0Choice
+                          ? 'bg-primary text-white hover:bg-primary-hover shadow-xl shadow-primary/30 active:scale-95'
+                          : 'bg-[#E5E7EB] text-[#9CA3AF] cursor-not-allowed'
+                      }`}
+                    >
+                      Next <ArrowRight className="w-4 h-4" />
+                    </button>
                   </div>
+                  </>
                 ) : (
                   <div className="py-10">
                     <div className="relative w-24 h-24 mx-auto mb-8">

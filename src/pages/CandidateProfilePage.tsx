@@ -4,6 +4,18 @@ import PortalLayout from '../components/PortalLayout';
 import { Briefcase, Mail, Phone, MapPin, FileText, ExternalLink, Linkedin, LogOut, ArrowRight, Clock, Pencil, X, Check, Eye, EyeOff, Bookmark, Upload } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 
+// Country → states, for the dependent Country/State dropdowns in Edit Profile
+const COUNTRY_STATES: Record<string, string[]> = {
+  India: ['Gujarat', 'Maharashtra', 'Karnataka', 'Delhi', 'Telangana', 'Tamil Nadu', 'Uttar Pradesh', 'Rajasthan', 'West Bengal', 'Kerala'],
+  'United States': ['California', 'New York', 'Texas', 'Florida', 'Washington', 'Illinois', 'Massachusetts'],
+  'United Kingdom': ['England', 'Scotland', 'Wales', 'Northern Ireland'],
+  Canada: ['Ontario', 'Quebec', 'British Columbia', 'Alberta'],
+  Australia: ['New South Wales', 'Victoria', 'Queensland', 'Western Australia'],
+  Germany: ['Bavaria', 'Berlin', 'Hesse', 'North Rhine-Westphalia'],
+  'United Arab Emirates': ['Dubai', 'Abu Dhabi', 'Sharjah'],
+  Singapore: ['Singapore'],
+};
+
 const brandStatusStyles: Record<string, string> = {
   'Under Review': 'bg-[#F4F5FA] text-primary border-primary/20',
   'Interview in Progress': 'bg-[#F4F5FA] text-primary border-primary/20',
@@ -67,8 +79,12 @@ export default function CandidateProfilePage() {
     currentOrg: '',
     currentDesignation: '',
     noticePeriod: '',
-    location: '',
     linkedin: '',
+    address: '',
+    country: '',
+    state: '',
+    city: '',
+    zipCode: '',
   });
   const [editSkills, setEditSkills] = useState<string[]>([]);
   const [skillInput, setSkillInput] = useState('');
@@ -89,8 +105,12 @@ export default function CandidateProfilePage() {
       currentOrg: currentUser?.currentOrg || derivedProfile.currentOrg || '',
       currentDesignation: currentUser?.currentDesignation || derivedProfile.designation || '',
       noticePeriod: currentUser?.noticePeriod || derivedProfile.noticePeriod || '',
-      location: currentUser?.location || derivedProfile.location || '',
       linkedin: currentUser?.linkedin || derivedProfile.linkedin || '',
+      address: currentUser?.address || '',
+      country: currentUser?.country || '',
+      state: currentUser?.state || '',
+      city: currentUser?.city || '',
+      zipCode: currentUser?.zipCode || '',
     });
     setEditSkills(currentUser?.skills?.length ? currentUser.skills : derivedProfile.skills);
     setSkillInput('');
@@ -489,8 +509,13 @@ export default function CandidateProfilePage() {
                   currentDesignation: editForm.currentDesignation.trim(),
                   noticePeriod: editForm.noticePeriod,
                   skills: pendingSkills,
-                  location: editForm.location.trim() || undefined,
                   linkedin: editForm.linkedin.trim() || undefined,
+                  address: editForm.address.trim() || undefined,
+                  country: editForm.country.trim() || undefined,
+                  state: editForm.state.trim() || undefined,
+                  city: editForm.city.trim() || undefined,
+                  zipCode: editForm.zipCode.trim() || undefined,
+                  location: [editForm.city.trim(), editForm.country.trim()].filter(Boolean).join(', ') || undefined,
                   ...(editResumeName ? { resumeUrl: editResumeName } : {}),
                   profileVisibility: editVisibility,
                   allowRecruiterContact: editAllowContact,
@@ -590,36 +615,23 @@ export default function CandidateProfilePage() {
                   </div>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Notice Period</label>
-                  <select
-                    value={editForm.noticePeriod}
-                    onChange={e => setEditForm({ ...editForm, noticePeriod: e.target.value })}
-                    className="w-full border border-[#E5E7EB] rounded-xl px-3 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary bg-[#F9FAFB] text-[#374151]"
-                  >
-                    <option value="">Select notice period</option>
-                    <option value="Immediate">Immediate</option>
-                    <option value="15 days">15 days</option>
-                    <option value="30 days">30 days</option>
-                    <option value="45 days">45 days</option>
-                    <option value="60 days">60 days</option>
-                    <option value="90 days">90 days</option>
-                  </select>
-                </div>
-
+                {/* Notice Period + LinkedIn */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Location</label>
-                    <div className="relative">
-                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#9CA3AF]" />
-                      <input
-                        type="text"
-                        value={editForm.location}
-                        onChange={e => setEditForm({ ...editForm, location: e.target.value })}
-                        placeholder="City, Country"
-                        className="w-full border border-[#E5E7EB] rounded-xl pl-9 pr-3 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary bg-[#F9FAFB] placeholder:text-[#D1D5DB] placeholder:font-normal"
-                      />
-                    </div>
+                    <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Notice Period</label>
+                    <select
+                      value={editForm.noticePeriod}
+                      onChange={e => setEditForm({ ...editForm, noticePeriod: e.target.value })}
+                      className="w-full border border-[#E5E7EB] rounded-xl px-3 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary bg-[#F9FAFB] text-[#374151]"
+                    >
+                      <option value="">Select notice period</option>
+                      <option value="Immediate">Immediate</option>
+                      <option value="15 days">15 days</option>
+                      <option value="30 days">30 days</option>
+                      <option value="45 days">45 days</option>
+                      <option value="60 days">60 days</option>
+                      <option value="90 days">90 days</option>
+                    </select>
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">LinkedIn</label>
@@ -631,6 +643,67 @@ export default function CandidateProfilePage() {
                         onChange={e => setEditForm({ ...editForm, linkedin: e.target.value })}
                         placeholder="linkedin.com/in/..."
                         className="w-full border border-[#E5E7EB] rounded-xl pl-9 pr-3 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary bg-[#F9FAFB] placeholder:text-[#D1D5DB] placeholder:font-normal"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Address block */}
+                <div className="space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="space-y-1 sm:col-span-2">
+                      <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Address</label>
+                      <input
+                        type="text"
+                        value={editForm.address}
+                        onChange={e => setEditForm({ ...editForm, address: e.target.value })}
+                        placeholder="Street address"
+                        className="w-full border border-[#E5E7EB] rounded-xl px-3 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary bg-[#F9FAFB] placeholder:text-[#D1D5DB] placeholder:font-normal"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Country</label>
+                      <select
+                        value={editForm.country}
+                        onChange={e => setEditForm({ ...editForm, country: e.target.value, state: '' })}
+                        className="w-full border border-[#E5E7EB] rounded-xl px-3 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary bg-[#F9FAFB] text-[#374151]"
+                      >
+                        <option value="">Select country</option>
+                        {Object.keys(COUNTRY_STATES).map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">State</label>
+                      <select
+                        value={editForm.state}
+                        onChange={e => setEditForm({ ...editForm, state: e.target.value })}
+                        disabled={!editForm.country}
+                        className="w-full border border-[#E5E7EB] rounded-xl px-3 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary bg-[#F9FAFB] text-[#374151] disabled:bg-[#F3F4F6] disabled:text-[#9CA3AF] disabled:cursor-not-allowed"
+                      >
+                        <option value="">{editForm.country ? 'Select state' : 'Select country first'}</option>
+                        {(COUNTRY_STATES[editForm.country] || []).map(s => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Town / City</label>
+                      <input
+                        type="text"
+                        value={editForm.city}
+                        onChange={e => setEditForm({ ...editForm, city: e.target.value })}
+                        placeholder="Town / City"
+                        className="w-full border border-[#E5E7EB] rounded-xl px-3 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary bg-[#F9FAFB] placeholder:text-[#D1D5DB] placeholder:font-normal"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">Zip / Postal Code</label>
+                      <input
+                        type="text"
+                        value={editForm.zipCode}
+                        onChange={e => setEditForm({ ...editForm, zipCode: e.target.value })}
+                        placeholder="Zip / Postal Code"
+                        className="w-full border border-[#E5E7EB] rounded-xl px-3 py-2 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary bg-[#F9FAFB] placeholder:text-[#D1D5DB] placeholder:font-normal"
                       />
                     </div>
                   </div>

@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import CRMLayout from '../components/CRMLayout';
 import {
-  Mail, Phone, MapPin, Copy, FileText, ExternalLink,
+  Mail, Phone, Copy, FileText, ExternalLink,
   Check, X, Link2, Archive,
   CalendarDays, Send, MoreVertical,
   Pencil, Ban, Info, Eye, Clock,
@@ -283,17 +283,6 @@ export default function TalentPoolDetailsPage() {
                     </div>
                   )}
 
-                  {candidate.location && (
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-[#F9FAFB] flex items-center justify-center">
-                        <MapPin className="w-4 h-4 text-[#6B7280]" />
-                      </div>
-                      <div>
-                        <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Location</p>
-                        <span className="text-sm font-bold text-[#374151]">{candidate.location}</span>
-                      </div>
-                    </div>
-                  )}
 
                   {candidate.linkedin && (
                     <div className="flex items-center gap-3">

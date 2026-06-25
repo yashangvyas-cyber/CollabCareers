@@ -7,7 +7,9 @@
       "Read(//tmp/**)",
       "WebFetch(domain:www.mindinventory.com)",
       "Read(//home/yashang/Downloads/**)",
-      "Bash(cd /home/yashang/.gemini/antigravity/scratch/collab-careers-prototype *)"
+      "Bash(cd /home/yashang/.gemini/antigravity/scratch/collab-careers-prototype *)",
+      "Bash(awk \"/id: 'c1'/{flag=1} flag{print NR\\\\\": \\\\\"\\\\$0} /resumeUrl|skills|currentDesignation|currentOrg|linkedin|city/{if\\(flag\\)c++} flag && /},/{print \\\\\"---END---\\\\\"; exit}\" src/store/AppContext.tsx)",
+      "Bash(awk \"/candidateId: 'c1'/{n++; start=NR} n>=1 && /_fullFormData/{print \\\\\"_fullFormData found near line \\\\\" NR; found=1} END{if\\(!found\\) print \\\\\"NO _fullFormData in any c1 application block \\(within scan\\)\\\\\"}\" src/store/AppContext.tsx)"
     ],
     "additionalDirectories": [
       "/home/yashang/Downloads"
