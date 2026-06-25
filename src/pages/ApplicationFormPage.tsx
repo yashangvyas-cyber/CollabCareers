@@ -965,28 +965,28 @@ export default function ApplicationFormPage() {
               <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
                  {step === 1 ? (
                     <>
-                       <button onClick={() => setStep(0)} className="text-[#6B7280] hover:text-primary font-black text-[11px] transition-colors uppercase tracking-[0.2em] flex items-center gap-2">
-                         <span className="text-lg">←</span> Change Resume
-                       </button>
-                       <div className="flex gap-4">
-                          <button 
+                       <div className="flex items-center gap-3 sm:gap-4">
+                          <button onClick={() => setStep(0)} className="text-[#6B7280] hover:text-primary font-black text-[11px] transition-colors uppercase tracking-[0.2em] flex items-center gap-2">
+                            <span className="text-lg">←</span> Change Resume
+                          </button>
+                          <button
                             onClick={handleSaveDraft}
-                            className="px-8 py-3.5 border-2 border-[#E5E7EB] text-[#374151] text-xs font-black rounded-2xl hover:bg-white transition-all uppercase tracking-widest shadow-sm active:scale-95"
+                            className="px-6 py-3 border-2 border-[#E5E7EB] text-[#374151] text-xs font-black rounded-2xl hover:bg-white transition-all uppercase tracking-widest shadow-sm active:scale-95"
                           >
                             Save Draft
                           </button>
-                           <button 
-                             onClick={() => { setStep(2); window.scrollTo(0, 0); }}
-                             disabled={jobClosed}
-                             className={`px-10 py-3.5 text-white text-xs font-black rounded-2xl shadow-xl transition-all uppercase tracking-widest flex items-center gap-2 active:scale-95 ${
-                               jobClosed 
-                                 ? 'bg-gray-300 cursor-not-allowed shadow-none' 
-                                 : 'bg-primary hover:bg-primary-hover shadow-primary/30'
-                             }`}
-                           >
-                             Continue to Review <ArrowRight className="w-4 h-4" />
-                           </button>
                        </div>
+                       <button
+                         onClick={() => { setStep(2); window.scrollTo(0, 0); }}
+                         disabled={jobClosed}
+                         className={`px-10 py-3.5 text-white text-xs font-black rounded-2xl shadow-xl transition-all uppercase tracking-widest flex items-center gap-2 active:scale-95 ${
+                           jobClosed
+                             ? 'bg-gray-300 cursor-not-allowed shadow-none'
+                             : 'bg-primary hover:bg-primary-hover shadow-primary/30'
+                         }`}
+                       >
+                         Continue to Review <ArrowRight className="w-4 h-4" />
+                       </button>
                     </>
                  ) : (
                     <>
