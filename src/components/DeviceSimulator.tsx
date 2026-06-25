@@ -52,7 +52,7 @@ function Toolbar({ mode, onChange }: { mode: DeviceMode; onChange: (m: DeviceMod
   };
 
   return (
-    <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-[99999]" style={{ animation: 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+    <div className="fixed top-3 left-1/2 -translate-x-1/2 z-[99999]" style={{ animation: 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)' }}>
       <div className="flex items-center gap-1 bg-[#0f0f1a]/95 backdrop-blur-2xl rounded-2xl p-1.5 shadow-2xl border border-white/[0.08]"
         style={{ boxShadow: '0 20px 60px -15px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)' }}>
         {(Object.keys(PRESETS) as DeviceMode[]).map((key) => (
