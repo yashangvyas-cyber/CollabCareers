@@ -110,6 +110,7 @@ export default function ApplicationFormPage() {
   const [syncProfile, setSyncProfile] = useState(false); // "also update my profile with this data"
 
   const [formData, setFormData] = useState(() => getDefaultFormData(currentUser));
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [collapsedSections, setCollapsedSections] = useState<Record<number, boolean>>({
     1: false, 2: false, 3: false, 4: false, 5: false
@@ -312,6 +313,69 @@ export default function ApplicationFormPage() {
   // i.e. nothing was prefilled from a previous application or a resumed draft.
   const isFreshApplication =
     !prefillSource && !location.state?.continueDraft && !location.state?.prefillFrom;
+
+  const validateStep1 = () => {
+    const newErrors: Record<string, string> = {};
+    let firstErrorSection: number | null = null;
+
+    const addError = (field: string, msg: string, section: number) => {
+      newErrors[field] = msg;
+      if (!firstErrorSection) firstErrorSection = section;
+    };
+
+    if (!formData.professional.highestQualification) addError('highestQualification', 'Required', 2);
+    
+    if (!isFresher) {
+      if (!formData.professional.expYears && !formData.professional.expMonths) {
+        addError('expYears', 'Required', 2);
+        addError('expMonths', 'Required', 2);
+      }
+      if (!formData.professional.noticePeriod) {
+        addError('noticePeriod', 'Required', 2);
+      }
+    }
+
+    const { ctcType, currency, currentCtc, expectedCtc } = formData.salary;
+    const hasSalaryInput = isFresher ? !!expectedCtc : !!currentCtc || !!expectedCtc;
+    
+    if (hasSalaryInput) {
+      if (!ctcType || ctcType === 'Select') addError('ctcType', 'Required', 3);
+      if (!currency || currency === 'Select') addError('currency', 'Required', 3);
+      if (!expectedCtc) addError('expectedCtc', 'Required', 3);
+      if (!isFresher && !currentCtc) addError('currentCtc', 'Required', 3);
+    }
+
+    const { street, country, state, city, zip } = formData.address;
+    if (!street) addError('street', 'Required', 4);
+    if (!country || country === 'Select') addError('country', 'Required', 4);
+    if (!state || state === 'Select') addError('state', 'Required', 4);
+    if (!city) addError('city', 'Required', 4);
+    if (!zip) addError('zip', 'Required', 4);
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      if (firstErrorSection && collapsedSections[firstErrorSection]) {
+        setCollapsedSections(prev => ({ ...prev, [firstErrorSection as number]: false }));
+      }
+      
+      setTimeout(() => {
+        const firstErrorEl = document.querySelector('.error-field');
+        if (firstErrorEl) {
+          firstErrorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+      return false;
+    }
+    return true;
+  };
+
+  const handleContinueToReview = () => {
+    if (validateStep1()) {
+      setStep(2);
+      window.scrollTo(0, 0);
+    }
+  };
 
   const handleSubmit = () => {
     submitApplication({
@@ -596,12 +660,6 @@ export default function ApplicationFormPage() {
                     />
                  </div>
                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
-                    <FormSelect 
-                      label="Gender" 
-                      options={['Select', 'Male', 'Female', 'Other', 'Prefer not to say']} 
-                      value={formData.personal.gender} 
-                      onChange={(val: string) => setFormData(p => ({ ...p, personal: { ...p.personal, gender: val }}))}
-                    />
                     <FormPhoneInput 
                       label="Contact Number" 
                       required 
@@ -609,31 +667,40 @@ export default function ApplicationFormPage() {
                       isExtracted={!!resumeName} 
                       onChange={(val: string) => setFormData(p => ({ ...p, personal: { ...p.personal, contactNumber: val }}))}
                     />
-                 </div>
-                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
                     <FormInput label="Email Address" required value={formData.personal.email} isLocked />
-                    <FormInput 
-                      label="Date of Birth" 
-                      value={formData.personal.dob} 
-                      type="date" 
-                      isExtracted={!!resumeName} 
-                      onChange={(val: string) => setFormData(p => ({ ...p, personal: { ...p.personal, dob: val }}))}
-                    />
                  </div>
-                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                 <div className="mb-6">
                     <FormInput 
                       label="LinkedIn Profile" 
                       value={formData.personal.linkedin} 
                       placeholder="linkedin.com/in/..." 
                       onChange={(val: string) => setFormData(p => ({ ...p, personal: { ...p.personal, linkedin: val }}))}
                     />
-                    <FormSelect 
-                      label="Marital Status" 
-                      options={['Select', 'Single', 'Married', 'Other']} 
-                      value={formData.personal.maritalStatus} 
-                      onChange={(val: string) => setFormData(p => ({ ...p, personal: { ...p.personal, maritalStatus: val }}))}
-                    />
                  </div>
+                 <div className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl p-5 sm:p-6 mb-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                       <FormSelect 
+                         label="Gender" 
+                         options={['Select', 'Male', 'Female', 'Other', 'Prefer not to say']} 
+                         value={formData.personal.gender} 
+                         onChange={(val: string) => setFormData(p => ({ ...p, personal: { ...p.personal, gender: val }}))}
+                       />
+                       <FormInput 
+                         label="Date of Birth" 
+                         value={formData.personal.dob} 
+                         type="date" 
+                         isExtracted={!!resumeName} 
+                         onChange={(val: string) => setFormData(p => ({ ...p, personal: { ...p.personal, dob: val }}))}
+                       />
+                       <FormSelect 
+                         label="Marital Status" 
+                         options={['Select', 'Single', 'Married', 'Other']} 
+                         value={formData.personal.maritalStatus} 
+                         onChange={(val: string) => setFormData(p => ({ ...p, personal: { ...p.personal, maritalStatus: val }}))}
+                       />
+                    </div>
+                 </div>
+                 <p className="text-xs text-[#9CA3AF] px-2 mb-2">Providing this information is optional. It is collected for record-keeping purposes only and will not be used in employment decisions. Choosing not to provide it will not affect your application.</p>
               </FormCollapsibleCard>
 
               {/* Section 2 — Professional Details */}
@@ -662,13 +729,15 @@ export default function ApplicationFormPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <FormInput 
                       label="Highest Qualification" 
+                      required
+                      error={errors.highestQualification}
                       value={formData.professional.highestQualification} 
                       isExtracted={!!resumeName} 
                       onChange={(val: string) => setFormData(p => ({ ...p, professional: { ...p.professional, highestQualification: val }}))}
                     />
                     {!isFresher && (
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest">Total Experience</label>
+                      <div className={`space-y-2 ${(errors.expYears || errors.expMonths) ? 'error-field' : ''}`}>
+                        <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest">Total Experience <span className="text-red-500">*</span></label>
                         <div className="grid grid-cols-2 gap-3">
                           <div className="relative">
                             <input 
@@ -676,7 +745,9 @@ export default function ApplicationFormPage() {
                               placeholder="Years" 
                               defaultValue={formData.professional.expYears} 
                               onChange={(e) => setFormData(p => ({ ...p, professional: { ...p.professional, expYears: e.target.value }}))}
-                              className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary" 
+                              className={`w-full border rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-4 ${
+                                errors.expYears ? 'bg-white border-red-500 text-[#111827] focus:ring-red-500/10 focus:border-red-500' : 'border-[#E5E7EB] focus:ring-primary/10 focus:border-primary'
+                              }`} 
                             />
                             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-[#9CA3AF] uppercase">Yrs</span>
                           </div>
@@ -686,11 +757,14 @@ export default function ApplicationFormPage() {
                               placeholder="Months" 
                               defaultValue={formData.professional.expMonths} 
                               onChange={(e) => setFormData(p => ({ ...p, professional: { ...p.professional, expMonths: e.target.value }}))}
-                              className="w-full border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary" 
+                              className={`w-full border rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-4 ${
+                                errors.expMonths ? 'bg-white border-red-500 text-[#111827] focus:ring-red-500/10 focus:border-red-500' : 'border-[#E5E7EB] focus:ring-primary/10 focus:border-primary'
+                              }`} 
                             />
                             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-[#9CA3AF] uppercase">Mos</span>
                           </div>
                         </div>
+                        {(errors.expYears || errors.expMonths) && <p className="text-xs text-red-500 font-bold ml-1">{errors.expYears || errors.expMonths}</p>}
                       </div>
                     )}
                   </div>
@@ -816,7 +890,9 @@ export default function ApplicationFormPage() {
                       </div>
                       <FormInput 
                         label="Notice Period (Days)" 
-                        type="number" 
+                        type="number"
+                        required
+                        error={errors.noticePeriod}
                         value={formData.professional.noticePeriod} 
                         onChange={(val: string) => setFormData(p => ({ ...p, professional: { ...p.professional, noticePeriod: val }}))}
                       />
@@ -836,11 +912,6 @@ export default function ApplicationFormPage() {
                          </button>
                       </div>
                    </div>
-                   <FormTextarea 
-                     label="Additional Notes" 
-                     value={formData.professional.remarks} 
-                     onChange={(val: string) => setFormData(p => ({ ...p, professional: { ...p.professional, remarks: val }}))}
-                   />
               </FormCollapsibleCard>
 
               {/* Section 3 — Salary Information */}
@@ -855,12 +926,14 @@ export default function ApplicationFormPage() {
                       label="CTC Type" 
                       options={['Annual', 'Monthly']} 
                       value={formData.salary.ctcType} 
+                      error={errors.ctcType}
                       onChange={(val: string) => setFormData(p => ({ ...p, salary: { ...p.salary, ctcType: val }}))}
                     />
                     <FormSelect 
                       label="Currency" 
                       options={['INR', 'USD', 'GBP', 'EUR']} 
                       value={formData.salary.currency} 
+                      error={errors.currency}
                       onChange={(val: string) => setFormData(p => ({ ...p, salary: { ...p.salary, currency: val }}))}
                     />
                     {!isFresher && (
@@ -868,6 +941,7 @@ export default function ApplicationFormPage() {
                         label="Current CTC" 
                         type="number" 
                         value={formData.salary.currentCtc} 
+                        error={errors.currentCtc}
                         onChange={(val: string) => setFormData(p => ({ ...p, salary: { ...p.salary, currentCtc: val }}))}
                       />
                     )}
@@ -875,6 +949,7 @@ export default function ApplicationFormPage() {
                       label="Expected CTC" 
                       type="number" 
                       value={formData.salary.expectedCtc} 
+                      error={errors.expectedCtc}
                       onChange={(val: string) => setFormData(p => ({ ...p, salary: { ...p.salary, expectedCtc: val }}))}
                     />
                  </div>
@@ -890,33 +965,43 @@ export default function ApplicationFormPage() {
                  <div className="grid grid-cols-1 mb-6">
                     <FormInput 
                       label="Address" 
+                      required
                       value={formData.address.street} 
+                      error={errors.street}
                       onChange={(val: string) => setFormData(p => ({ ...p, address: { ...p.address, street: val }}))}
                     />
                  </div>
                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
                     <FormSelect 
                       label="Country" 
+                      required
                       options={['Select', 'India', 'USA', 'UK', 'Germany']} 
                       value={formData.address.country} 
+                      error={errors.country}
                       onChange={(val: string) => setFormData(p => ({ ...p, address: { ...p.address, country: val }}))}
                     />
                     <FormSelect 
                       label="State" 
+                      required
                       options={['Select', 'Gujarat', 'Maharashtra', 'Karnataka', 'New York']} 
                       value={formData.address.state} 
+                      error={errors.state}
                       onChange={(val: string) => setFormData(p => ({ ...p, address: { ...p.address, state: val }}))}
                     />
                  </div>
                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <FormInput 
                       label="Town/City" 
+                      required
                       value={formData.address.city} 
+                      error={errors.city}
                       onChange={(val: string) => setFormData(p => ({ ...p, address: { ...p.address, city: val }}))}
                     />
                     <FormInput 
                       label="Zip/Postal Code" 
+                      required
                       value={formData.address.zip} 
+                      error={errors.zip}
                       onChange={(val: string) => setFormData(p => ({ ...p, address: { ...p.address, zip: val }}))}
                     />
                  </div>
@@ -1116,7 +1201,7 @@ export default function ApplicationFormPage() {
                             Save Draft
                           </button>
                            <button
-                             onClick={() => { setStep(2); window.scrollTo(0, 0); }}
+                             onClick={handleContinueToReview}
                              disabled={jobClosed}
                              className={`px-10 py-3.5 text-white text-xs font-black rounded-2xl shadow-xl transition-all uppercase tracking-widest flex items-center gap-2 active:scale-95 ${
                                jobClosed
@@ -1192,11 +1277,11 @@ function FormCollapsibleCard({ title, subtitle, children, isCollapsed, onToggle 
 }
 
 function FormInput(props: any) {
-  const { label, required, value, isExtracted, isLocked, type = 'text', placeholder, onChange } = props;
+  const { label, required, value, isExtracted, isLocked, type = 'text', placeholder, onChange, error } = props;
   const showSparkle = !!isExtracted && !isLocked && type !== 'date';
   
   return (
-    <div className="space-y-2 group">
+    <div className={`space-y-2 group ${error ? 'error-field' : ''}`}>
       <label className="text-[10px] font-black text-[#6B7280] ml-1 flex items-center gap-1.5 min-h-[1.2rem]">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
@@ -1211,7 +1296,9 @@ function FormInput(props: any) {
           className={`w-full border rounded-xl px-5 py-3.5 text-sm font-bold transition-all focus:outline-none focus:ring-4 ${
             isLocked 
               ? 'bg-[#F3F4F6] border-[#E5E7EB] text-[#9CA3AF] pl-10 cursor-not-allowed shadow-inner' 
-              : 'bg-white border-[#E5E7EB] text-[#111827] focus:ring-primary/10 focus:border-primary hover:border-[#D1D5DB] hover:shadow-sm cursor-text'
+              : error
+                ? 'bg-white border-red-500 text-[#111827] focus:ring-red-500/10 focus:border-red-500 cursor-text'
+                : 'bg-white border-[#E5E7EB] text-[#111827] focus:ring-primary/10 focus:border-primary hover:border-[#D1D5DB] hover:shadow-sm cursor-text'
           }`}
         />
         {showSparkle && (
@@ -1220,13 +1307,14 @@ function FormInput(props: any) {
            </div>
         )}
       </div>
+      {error && <p className="text-xs text-red-500 font-bold ml-1">{error}</p>}
     </div>
   );
 }
 
- function FormPhoneInput({ label, required, value, isExtracted: _isExtracted, onChange }: any) {
+ function FormPhoneInput({ label, required, value, isExtracted: _isExtracted, onChange, error }: any) {
   return (
-    <div className="space-y-2">
+    <div className={`space-y-2 ${error ? 'error-field' : ''}`}>
       <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">{label} {required && <span className="text-red-500">*</span>}</label>
       <div className="flex gap-2">
          <div className="w-[72px] shrink-0 relative">
@@ -1242,34 +1330,44 @@ function FormInput(props: any) {
               type="text" 
               defaultValue={value}
               onChange={(e) => onChange?.(e.target.value)}
-              className="w-full border border-[#E5E7EB] rounded-xl px-5 py-3.5 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary placeholder:text-gray-300" 
+              className={`w-full border rounded-xl px-5 py-3.5 text-sm font-bold focus:outline-none focus:ring-4 placeholder:text-gray-300 ${
+                error
+                  ? 'bg-white border-red-500 text-[#111827] focus:ring-red-500/10 focus:border-red-500'
+                  : 'bg-white border-[#E5E7EB] text-[#111827] focus:ring-primary/10 focus:border-primary'
+              }`} 
               placeholder="98765 43210"
             />
          </div>
       </div>
+      {error && <p className="text-xs text-red-500 font-bold ml-1">{error}</p>}
     </div>
   );
 }
 
- function FormSelect({ label, options, value, onChange }: any) {
+ function FormSelect({ label, options, value, onChange, error, required }: any) {
   return (
-    <div className="space-y-2">
-      <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">{label}</label>
+    <div className={`space-y-2 ${error ? 'error-field' : ''}`}>
+      <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1">{label} {required && <span className="text-red-500">*</span>}</label>
       <div className="relative">
         <select
           defaultValue={value}
           onChange={(e) => onChange?.(e.target.value)}
-          className="w-full border border-[#E5E7EB] bg-white rounded-xl px-5 py-3.5 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary appearance-none text-[#111827] hover:border-[#D1D5DB] transition-all"
+          className={`w-full border bg-white rounded-xl px-5 py-3.5 text-sm font-bold focus:outline-none focus:ring-4 appearance-none text-[#111827] transition-all ${
+            error
+              ? 'border-red-500 focus:ring-red-500/10 focus:border-red-500'
+              : 'border-[#E5E7EB] focus:ring-primary/10 focus:border-primary hover:border-[#D1D5DB]'
+          }`}
         >
           {options.map((opt: string) => <option key={opt} value={opt === 'Select' ? '' : opt}>{opt}</option>)}
         </select>
         <ChevronDown className="w-4 h-4 text-[#9CA3AF] absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none" />
       </div>
+      {error && <p className="text-xs text-red-500 font-bold ml-1">{error}</p>}
     </div>
   );
 }
 
-function FormMonthYearPicker({ label, required, value, isLocked, onChange }: any) {
+function FormMonthYearPicker({ label, required, value, isLocked, onChange, error }: any) {
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 40 }, (_, i) => String(currentYear - i));
@@ -1291,34 +1389,43 @@ function FormMonthYearPicker({ label, required, value, isLocked, onChange }: any
   }
 
   return (
-    <div className="space-y-2 group">
+    <div className={`space-y-2 group ${error ? 'error-field' : ''}`}>
       <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1 flex items-center gap-1.5 min-h-[1.2rem]">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       <div className="flex gap-2">
         <div className="relative flex-1">
           <select
-            value={month || ''}
+            value={month}
             onChange={(e) => handleMonthChange(e.target.value)}
-            className="w-full border border-[#E5E7EB] bg-white rounded-xl px-4 py-3.5 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary appearance-none text-[#111827] hover:border-[#D1D5DB] transition-all"
+            className={`w-full border rounded-xl pl-4 pr-8 py-3.5 text-sm font-bold appearance-none transition-colors focus:outline-none focus:ring-4 ${
+              error
+                ? 'bg-white border-red-500 text-[#111827] focus:ring-red-500/10 focus:border-red-500'
+                : 'bg-[#F9FAFB] border-[#E5E7EB] text-[#111827] focus:ring-primary/10 focus:border-primary hover:border-[#D1D5DB]'
+            }`}
           >
             <option value="" disabled>Month</option>
             {months.map(m => <option key={m} value={m}>{m}</option>)}
           </select>
-          <ChevronDown className="w-4 h-4 text-[#9CA3AF] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <ChevronDown className="w-3.5 h-3.5 text-[#9CA3AF] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
-        <div className="relative flex-1">
+        <div className="relative w-24">
           <select
-            value={year || ''}
+            value={year}
             onChange={(e) => handleYearChange(e.target.value)}
-            className="w-full border border-[#E5E7EB] bg-white rounded-xl px-4 py-3.5 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary appearance-none text-[#111827] hover:border-[#D1D5DB] transition-all"
+            className={`w-full border rounded-xl pl-4 pr-8 py-3.5 text-sm font-bold appearance-none transition-colors focus:outline-none focus:ring-4 ${
+              error
+                ? 'bg-white border-red-500 text-[#111827] focus:ring-red-500/10 focus:border-red-500'
+                : 'bg-[#F9FAFB] border-[#E5E7EB] text-[#111827] focus:ring-primary/10 focus:border-primary hover:border-[#D1D5DB]'
+            }`}
           >
             <option value="" disabled>Year</option>
             {years.map(y => <option key={y} value={y}>{y}</option>)}
           </select>
-          <ChevronDown className="w-4 h-4 text-[#9CA3AF] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <ChevronDown className="w-3.5 h-3.5 text-[#9CA3AF] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
       </div>
+      {error && <p className="text-xs text-red-500 font-bold ml-1">{error}</p>}
     </div>
   );
 }
