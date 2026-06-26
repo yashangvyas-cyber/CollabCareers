@@ -119,7 +119,7 @@ export interface Application {
   candidateId: string;
   jobId: string;
   status:
-    | 'Applied' | 'Under Review' | 'Shortlisted' | 'Interview in Progress' | 'Active'
+    | 'Draft' | 'Applied' | 'Under Review' | 'Shortlisted' | 'Interview in Progress' | 'Active'
     | 'On Hold' | 'Future'
     | 'Offered' | 'Offer Accepted'
     | 'Selected' | 'Rejected' | 'Cancelled' | 'Withdrawn' | 'Joined' | 'Offer Declined'

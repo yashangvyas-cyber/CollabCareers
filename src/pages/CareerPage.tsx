@@ -47,14 +47,14 @@ export default function CareerPage({ openAlumni = false, openRegister = false }:
   const navigate = useNavigate();
 
   // Resolve the current user's relationship to a job:
-  //  - 'draft'   → an in-progress application (status 'Applied') on an open job → "Continue Application"
+  //  - 'draft'   → an in-progress draft application on an open job → "Continue Application"
   //  - 'applied' → a submitted application being processed → "Applied"
   //  - null      → not applied yet → "View & Apply"
   const getJobAppState = (job: any): { kind: 'draft' | 'applied' | null; app: any } => {
     if (!currentUser) return { kind: null, app: null };
     const app = applications.find(a => a.candidateId === currentUser.id && a.jobId === job.id);
     if (!app) return { kind: null, app: null };
-    const isDraft = app.status === 'Applied' && job.status !== 'Close';
+    const isDraft = app.status === 'Draft' && job.status !== 'Close';
     return { kind: isDraft ? 'draft' : 'applied', app };
   };
 

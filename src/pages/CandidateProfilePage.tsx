@@ -4,15 +4,41 @@ import PortalLayout from '../components/PortalLayout';
 import { Briefcase, Mail, Phone, MapPin, FileText, ExternalLink, Linkedin, LogOut, ArrowRight, Clock, Pencil, Bookmark } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 
-const brandStatusStyles: Record<string, string> = {
+const portalStatusLabel: Record<string, string> = {
+  'Applied': 'Applied',
+  'Under Review': 'Under Review',
+  'Shortlisted': 'Under Review',
+  'Interview in Progress': 'Interview In Progress',
+  'Offered': 'Offered',
+  'Offer Accepted': 'Offer Accepted',
+  'Offer Declined': 'Offer Declined',
+  'Offer Revoked': 'Offer On Hold',
+  'Withdrawn': 'Application Withdrawn',
+  'On Hold': 'Under Review',
+  'Rejected': 'Not Selected',
+  'Selected': 'Under Review',
+  'Joined': 'Joined',
+  'Not Joined': 'Application Closed',
+  'Archived': 'Application Closed',
+  'Cancelled': 'Application Closed',
+  'No Show': 'Application Closed',
+  'Future': 'Under Review',
+  'Active': 'Under Review',
+};
+
+const portalStatusColor: Record<string, string> = {
+  'Applied': 'bg-blue-50 text-blue-600 border-blue-200',
   'Under Review': 'bg-[#F4F5FA] text-primary border-primary/20',
-  'Interview in Progress': 'bg-[#F4F5FA] text-primary border-primary/20',
-  'Decision Made': 'bg-[#F9FAFB] text-[#6B7280] border-[#E5E7EB]',
-  'Offer Made': 'bg-primary text-white border-primary',
-  'Rejected': 'bg-gray-100 text-gray-400 border-gray-200',
-  'Draft': 'bg-[#F4F5FA] text-primary border border-primary/20',
-  'Submitted': 'bg-[#F4F5FA] text-primary border-primary/20',
-  'Withdrawn': 'bg-gray-50 text-gray-400 border-gray-200 opacity-60',
+  'Interview In Progress': 'bg-amber-50 text-amber-600 border-amber-200',
+  'Offered': 'bg-emerald-50 text-emerald-600 border-emerald-200',
+  'Offer Accepted': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  'Offer Declined': 'bg-orange-50 text-orange-600 border-orange-200',
+  'Offer On Hold': 'bg-yellow-50 text-yellow-600 border-yellow-200',
+  'Application Withdrawn': 'bg-gray-50 text-gray-400 border-gray-200',
+  'Not Selected': 'bg-red-50 text-red-500 border-red-200',
+  'Joined': 'bg-emerald-100 text-emerald-700 border-emerald-300',
+  'Application Closed': 'bg-gray-100 text-gray-400 border-gray-200',
+  'Draft': 'bg-[#FFF7ED] text-amber-600 border-amber-200',
 };
 
 
@@ -62,6 +88,8 @@ export default function CandidateProfilePage() {
       ...a,
       company: job?.businessUnit || 'MindInventory',
       title: job?.title || 'Job Opportunity',
+      location: job?.location || '',
+      type: job?.employmentType || '',
       jobClosed: job?.status === 'Close',
     };
   });
@@ -73,7 +101,7 @@ export default function CandidateProfilePage() {
   const derivedProfile = {
     phone: profileData?.personal?.contactNumber || null,
     location: currentUser?.location || (profileData?.address?.city
-      ? `${profileData.address.city}, ${profileData.address.country}`
+      ? [profileData.address.city, profileData.address.state, profileData.address.country].filter(Boolean).join(', ')
       : null),
     linkedin: currentUser?.linkedin || profileData?.personal?.linkedin || null,
     designation: currentUser?.currentDesignation || profileData?.professional?.currentDesignation || null,
@@ -152,13 +180,12 @@ export default function CandidateProfilePage() {
 
                 {/* Resume */}
                 <div>
-                  <p className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest mb-3">Professional Resume</p>
+                  <p className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest mb-3">Resume</p>
                   {derivedProfile.resumeName ? (
                     <div className="flex items-center gap-3 p-3 bg-[#F9FAFB] rounded-xl border border-[#E5E7EB] group transition-all hover:bg-white hover:border-primary/30">
                       <FileText className="w-5 h-5 text-primary" />
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-bold text-[#111827] truncate">{derivedProfile.resumeName}</p>
-                        <p className="text-[10px] text-[#6B7280] font-bold">Latest Uploaded</p>
                       </div>
                       <button className="text-primary hover:scale-110 transition-transform">
                         <ExternalLink className="w-4 h-4" />
@@ -196,7 +223,7 @@ export default function CandidateProfilePage() {
                       {derivedProfile.noticePeriod && (
                         <div className="flex items-center gap-3 text-sm font-medium text-[#374151]">
                           <span title="Notice Period"><Clock className="w-4 h-4 text-[#6B7280] shrink-0" /></span>
-                          <span>{derivedProfile.noticePeriod}</span>
+                          <span>{derivedProfile.noticePeriod}{/^\d+$/.test(derivedProfile.noticePeriod) ? ' days' : ''}</span>
                         </div>
                       )}
                     </div>
@@ -267,7 +294,11 @@ export default function CandidateProfilePage() {
                   </div>
                 )}
                 {activeTab === 'applications' ? (
-                  (!forceEmptyApps ? displayApps : []).map((app: any) =>(
+                  (!forceEmptyApps ? displayApps : []).map((app: any) => {
+                    const isDraft = app.status === 'Draft';
+                    const displayLabel = isDraft ? 'Draft' : (portalStatusLabel[app.status] || app.status);
+                    const displayColor = portalStatusColor[displayLabel] || 'bg-gray-100 text-gray-500 border-gray-200';
+                    return (
                     <div key={app.id} className="bg-white rounded-2xl border border-[#E5E7EB] p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 relative group">
                       <div className="absolute top-0 left-0 w-1 h-full bg-primary/5 group-hover:bg-primary/20 transition-all" />
 
@@ -276,15 +307,33 @@ export default function CandidateProfilePage() {
                           <h4 className="text-[22px] font-black text-[#111827] group-hover:text-primary transition-colors tracking-tighter leading-tight">
                             {app.title}
                           </h4>
-                          <span className={`w-fit px-4 py-1.5 text-[10px] font-black rounded-full border uppercase tracking-widest shadow-sm shrink-0 ${brandStatusStyles[app.status as keyof typeof brandStatusStyles] || 'bg-gray-100'}`}>
-                            {app.status}
-                          </span>
+                          {displayLabel && (
+                            <span className={`w-fit px-4 py-1.5 text-[10px] font-black rounded-full border uppercase tracking-widest shadow-sm shrink-0 ${displayColor}`}>
+                              {displayLabel}
+                            </span>
+                          )}
                         </div>
 
-                        <div className="flex items-center gap-3 text-xs">
+                        <div className="flex flex-wrap items-center gap-3 text-xs">
                           <p className="font-bold text-[#6B7280]">{app.company}</p>
-                          <span className="w-1 h-1 rounded-full bg-[#D1D5DB]" />
-                          <p className="font-black text-[#9CA3AF] uppercase tracking-widest text-[9px]">{formatDate(app.appliedAt)}</p>
+                          {app.location && (
+                            <>
+                              <span className="w-1 h-1 rounded-full bg-[#D1D5DB]" />
+                              <p className="font-medium text-[#6B7280]">{app.location}</p>
+                            </>
+                          )}
+                          {app.type && (
+                            <>
+                              <span className="w-1 h-1 rounded-full bg-[#D1D5DB]" />
+                              <p className="font-medium text-[#6B7280]">{app.type}</p>
+                            </>
+                          )}
+                          {!isDraft && (
+                            <>
+                              <span className="w-1 h-1 rounded-full bg-[#D1D5DB]" />
+                              <p className="font-black text-[#9CA3AF] uppercase tracking-widest text-[9px]">{formatDate(app.appliedAt)}</p>
+                            </>
+                          )}
                           {app.jobClosed && (
                             <div className="flex items-center gap-1.5 ml-2 text-[9px] font-black text-[#f87171] uppercase tracking-widest bg-red-50 px-2 py-0.5 rounded-md border border-red-100">
                               Archived
@@ -303,7 +352,7 @@ export default function CandidateProfilePage() {
                               On {formatDate(app.appliedAt)}
                             </p>
                           </div>
-                        ) : app.status === 'Applied' && !app.jobClosed ? (
+                        ) : isDraft && !app.jobClosed ? (
                           <button
                             onClick={() => navigate(`/portal/yopmails/apply/${app.jobId}`, { state: { continueDraft: true, draftJobTitle: app.title, lastSaved: app.appliedAt } })}
                             className="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 active:scale-95 whitespace-nowrap"
@@ -320,7 +369,7 @@ export default function CandidateProfilePage() {
                         )}
                       </div>
                     </div>
-                  ))
+                  );})
                 ) : (
                   savedJobs.map((js: any) => {
                     const isClosed = js.status === 'Close';

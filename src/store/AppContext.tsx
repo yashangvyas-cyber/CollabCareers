@@ -1037,17 +1037,17 @@ Design is a first-class citizen at MindInventory. You will work on products that
       id: 'a5',
       candidateId: 'c1',
       jobId: 'd8', // QA Engineer
-      status: 'Applied',
+      status: 'Draft',
       appliedAt: new Date(Date.now() - 86400000 * 15).toISOString(),
       answers: { _fullFormData: { personal: { contactNumber: '+91 98765 43210' } } },
       resumeUrl: 'Alex_Patel_Resume.pdf'
     },
-    // Alex (c1) — in-progress drafts (status 'Applied') so the listing shows "Continue Application"
+    // Alex (c1) — in-progress drafts (status 'Draft') so the listing shows "Continue Application"
     {
       id: 'ad1',
       candidateId: 'c1',
       jobId: 'd3', // Flutter Developer
-      status: 'Applied',
+      status: 'Draft',
       appliedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
       answers: { _fullFormData: { personal: { contactNumber: '+91 98765 43210' } } },
       resumeUrl: 'Alex_Patel_Resume.pdf'
@@ -1056,7 +1056,7 @@ Design is a first-class citizen at MindInventory. You will work on products that
       id: 'ad2',
       candidateId: 'c1',
       jobId: 'd6', // Node.js Backend Engineer
-      status: 'Applied',
+      status: 'Draft',
       appliedAt: new Date(Date.now() - 86400000 * 3).toISOString(),
       answers: { _fullFormData: { personal: { contactNumber: '+91 98765 43210' } } },
       resumeUrl: 'Alex_Patel_Resume.pdf'
@@ -1065,7 +1065,7 @@ Design is a first-class citizen at MindInventory. You will work on products that
       id: 'ad3',
       candidateId: 'c1',
       jobId: 'd9', // Product Designer
-      status: 'Applied',
+      status: 'Draft',
       appliedAt: new Date(Date.now() - 86400000 * 4).toISOString(),
       answers: { _fullFormData: { personal: { contactNumber: '+91 98765 43210' } } },
       resumeUrl: 'Alex_Patel_Resume.pdf'
@@ -1487,14 +1487,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const submitApplication = (app: Application) => {
     setState(prev => ({
       ...prev,
-      applications: [...prev.applications.filter(a => !(a.jobId === app.jobId && a.candidateId === app.candidateId && a.status === 'Applied')), app],
+      applications: [...prev.applications.filter(a => !(a.jobId === app.jobId && a.candidateId === app.candidateId && a.status === 'Draft')), app],
     }));
   };
 
   const saveDraft = (app: Application) => {
     setState(prev => ({
       ...prev,
-      applications: [...prev.applications.filter(a => !(a.jobId === app.jobId && a.candidateId === app.candidateId && a.status === 'Applied')), app],
+      applications: [...prev.applications.filter(a => !(a.jobId === app.jobId && a.candidateId === app.candidateId && a.status === 'Draft')), app],
     }));
   };
 

@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import PortalLayout from '../components/PortalLayout';
 import {
-  ChevronDown, CheckCircle, Lock, Check, X,
+  ChevronDown, CheckCircle, Lock, Check,
   Plus, ArrowUp, ArrowDown, Trash2, FileText, Upload,
   Eye, EyeOff, ArrowLeft, Sparkles, ChevronRight,
 } from 'lucide-react';
 import { useApp } from '../store/AppContext';
+import SkillsMultiSelect from '../components/SkillsMultiSelect';
 
 // Country → states, for the dependent Country/State dropdowns in the address section
 const COUNTRY_STATES: Record<string, string[]> = {
@@ -70,10 +71,9 @@ export default function EditProfilePage() {
   }));
 
   const [isFresher, setIsFresher] = useState(!!currentUser?.isFresher);
-  const [skillInput, setSkillInput] = useState('');
   const [resumeName, setResumeName] = useState(currentUser?.resumeUrl || latestApp?.resumeUrl || '');
   const [visibility, setVisibility] = useState<'visible' | 'private'>(currentUser?.profileVisibility || 'visible');
-  const [allowContact, setAllowContact] = useState(currentUser?.allowRecruiterContact || false);
+  const [allowContact, setAllowContact] = useState(currentUser?.allowRecruiterContact ?? true);
 
   // Demo / locked logic for visibility.
   // PRODUCTION rule: the lock would key off a real submitted application, i.e.
@@ -86,22 +86,10 @@ export default function EditProfilePage() {
   const hasSubmittedApplication = forceSubmittedDemo;
   const effectiveVisibility = hasSubmittedApplication ? 'visible' : visibility;
 
-  const addSkill = () => {
-    const v = skillInput.trim();
-    if (!v) return;
-    if (!formData.professional.skills.includes(v)) {
-      setFormData(p => ({ ...p, professional: { ...p.professional, skills: [...p.professional.skills, v] } }));
-    }
-    setSkillInput('');
-  };
 
-  const removeSkill = (skill: string) =>
-    setFormData(p => ({ ...p, professional: { ...p.professional, skills: p.professional.skills.filter((s: string) => s !== skill) } }));
 
   const handleSave = () => {
-    const pendingSkills = skillInput.trim() && !formData.professional.skills.includes(skillInput.trim())
-      ? [...formData.professional.skills, skillInput.trim()]
-      : formData.professional.skills;
+    const pendingSkills = formData.professional.skills;
 
     updateCurrentUser({
       firstName: formData.personal.firstName.trim(),
@@ -337,7 +325,7 @@ export default function EditProfilePage() {
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-2 sm:pr-20">
                           <ProfileMonthYearPicker
-                            label="From (Year/Month)" value={exp.from}
+                            label="From (Month/Year)" value={exp.from}
                             onChange={(val: string) => {
                               const newExp = [...formData.professional.experiences];
                               newExp[i].from = val;
@@ -346,7 +334,7 @@ export default function EditProfilePage() {
                           />
                           <div>
                             <ProfileMonthYearPicker
-                              label="To (Year/Month)" value={exp.to} isLocked={exp.isCurrent}
+                              label="To (Month/Year)" value={exp.to} isLocked={exp.isCurrent}
                               onChange={(val: string) => {
                                 const newExp = [...formData.professional.experiences];
                                 newExp[i].to = val;
@@ -421,30 +409,10 @@ export default function EditProfilePage() {
 
           {/* Section 3 — Skills */}
           <SectionCard title="Skills" caption="Add your key skills">
-            <div className="p-4 bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl flex flex-wrap gap-2 items-center focus-within:ring-4 focus-within:ring-primary/10 focus-within:border-primary transition-all">
-              {formData.professional.skills.map((skill: string) => (
-                <span key={skill} className="px-3 py-1 text-[10px] font-bold bg-[#F4F5FA] text-primary border border-primary/10 rounded-full flex items-center gap-1.5">
-                  {skill}
-                  <button type="button" onClick={() => removeSkill(skill)}>
-                    <X className="w-3 h-3 text-[#9CA3AF] cursor-pointer hover:text-red-500" />
-                  </button>
-                </span>
-              ))}
-              <input
-                type="text"
-                value={skillInput}
-                onChange={(e) => setSkillInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if ((e.key === 'Enter' || e.key === ',') && skillInput.trim()) {
-                    e.preventDefault();
-                    addSkill();
-                  }
-                }}
-                onBlur={addSkill}
-                placeholder="Type a skill and press Enter"
-                className="flex-1 min-w-[160px] bg-transparent text-[11px] font-bold focus:outline-none placeholder:text-[#9CA3AF] placeholder:font-normal py-1.5"
-              />
-            </div>
+            <SkillsMultiSelect
+              skills={formData.professional.skills}
+              onChange={(newSkills) => setFormData(p => ({ ...p, professional: { ...p.professional, skills: newSkills } }))}
+            />
           </SectionCard>
 
           {/* Section 4 — Address */}
