@@ -345,7 +345,12 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
       salaryRange: { min: '5', max: '9', currency: '₹', type: 'Annual' },
       status: 'Open',
       publishOnCollabCareers: true,
-      customFields: [],
+      customFields: [
+        { id: 'd13_q1', label: 'Portfolio / ArtStation URL', type: 'Text', required: true },
+        { id: 'd13_q2', label: 'Preferred Art Style', type: 'Dropdown', required: true, options: [{ id: 'as1', value: 'Realistic' }, { id: 'as2', value: 'Stylized / Cartoon' }, { id: 'as3', value: 'Pixel Art' }, { id: 'as4', value: 'Anime / Manga' }] },
+        { id: 'd13_q3', label: 'Primary Software', type: 'Dropdown', required: true, options: [{ id: 'sw1', value: 'Adobe Photoshop' }, { id: 'sw2', value: 'Adobe Illustrator' }, { id: 'sw3', value: 'Procreate' }, { id: 'sw4', value: 'Clip Studio Paint' }] },
+        { id: 'd13_q4', label: 'Are you comfortable with 2D animation?', type: 'Yes/No', required: false },
+      ],
       evaluationCriteria: ['Portfolio quality'],
       createdAt: new Date(Date.now() - 86400000 * 8).toISOString(),
       description: 'Create compelling 2D game and app assets for our product studio.',

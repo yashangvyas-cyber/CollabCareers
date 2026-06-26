@@ -24,7 +24,7 @@ const flows = [
       { label: 'Job Listings (Browse)', path: '/portal/yopmails', badge: 'Start' },
       { label: 'Job Detail View', path: '/portal/yopmails/job/1', badge: 'UX' },
       { label: 'Register / CV Upload', path: '/portal/yopmails/register?job=1', badge: 'Alumni Flow' },
-      { label: 'Smart Application Form', path: '/portal/yopmails/apply/1', badge: 'Auto-Prefill' },
+      { label: 'Smart Application Form', path: '/portal/yopmails/apply/d13', badge: 'Auto-Prefill' },
       { label: 'View Submitted App', path: '/portal/yopmails/application/a1', badge: 'Read-only' },
       { label: 'Candidate Profile', path: '/portal/yopmails/profile', badge: 'One-Click' },
       { label: 'Alumni Verification', path: '/portal/yopmails/alumni-verify', badge: 'Verify' },
@@ -74,7 +74,7 @@ export default function PrototypeHome() {
             {[
               { label: 'Browse Jobs', icon: '1', path: '/portal/yopmails' },
               { label: 'Upload CV', icon: '2', path: '/portal/yopmails/register?job=1' },
-              { label: 'Smart Apply', icon: '3', path: '/portal/yopmails/apply/1' },
+              { label: 'Smart Apply', icon: '3', path: '/portal/yopmails/apply/d13' },
               { label: 'One-Click Profile', icon: '4', path: '/portal/yopmails/profile' },
               { label: 'Alumni Verify', icon: '5', path: '/portal/yopmails/alumni-verify' }
             ].map((step, i) => (

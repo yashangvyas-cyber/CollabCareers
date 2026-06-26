@@ -4,7 +4,7 @@ import PortalLayout from '../components/PortalLayout';
 import { 
   ChevronDown, CheckCircle, Upload, Zap, Sparkles, 
   Lock, ArrowRight, Download, X, FileText,
-  Plus, ExternalLink, ArrowUp, ArrowDown, Trash2
+  Plus, ExternalLink, ArrowUp, ArrowDown, Trash2, Info
 } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 import { Job, CustomField } from '../store/types';
@@ -29,7 +29,7 @@ const getDefaultFormData = (currentUser: any) => ({
     gender: 'Male',
     contactNumber: currentUser?.phone || '98765 43210',
     email: currentUser?.email || 'alex.patel@example.com',
-    dob: '12/05/1998',
+    dob: '1998-05-12',
     linkedin: 'linkedin.com/in/alexpatel',
     maritalStatus: 'Single',
   },
@@ -678,6 +678,7 @@ export default function ApplicationFormPage() {
                     />
                  </div>
                  <div className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl p-5 sm:p-6 mb-2">
+                    <h4 className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest mb-4">Additional Details (Optional)</h4>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                        <FormSelect 
                          label="Gender" 
@@ -700,7 +701,10 @@ export default function ApplicationFormPage() {
                        />
                     </div>
                  </div>
-                 <p className="text-xs text-[#9CA3AF] px-2 mb-2">Providing this information is optional. It is collected for record-keeping purposes only and will not be used in employment decisions. Choosing not to provide it will not affect your application.</p>
+                 <div className="flex gap-2 items-start px-2 mb-2 text-[#9CA3AF]">
+                    <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                    <p className="text-xs italic leading-relaxed">Providing this information is optional. It is collected for record-keeping purposes only and will not be used in employment decisions. Choosing not to provide it will not affect your application.</p>
+                 </div>
               </FormCollapsibleCard>
 
               {/* Section 2 — Professional Details */}
@@ -1282,7 +1286,7 @@ function FormInput(props: any) {
   
   return (
     <div className={`space-y-2 group ${error ? 'error-field' : ''}`}>
-      <label className="text-[10px] font-black text-[#6B7280] ml-1 flex items-center gap-1.5 min-h-[1.2rem]">
+      <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest ml-1 flex items-center gap-1.5 min-h-[1.2rem]">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       <div className="relative">
