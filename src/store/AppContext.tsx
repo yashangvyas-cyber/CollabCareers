@@ -22,7 +22,7 @@ interface AppContextType extends AppState {
   discardCandidate: (candidateId: string, reason: string) => void;
 }
 
-const STORAGE_KEY = 'collab_careers_state_v18';
+const STORAGE_KEY = 'collab_careers_state_v19';
 
 const initialState: AppState = {
   jobs: [
@@ -1031,7 +1031,37 @@ Design is a first-class citizen at MindInventory. You will work on products that
       jobId: 'd5',
       status: 'Applied',
       appliedAt: new Date(Date.now() - 86400000 * 1).toISOString(),
-      answers: { _fullFormData: { personal: { contactNumber: '+91 98765 43210' } } },
+      // Most-recent c1 application → drives the signed-in profile & Edit Profile prefill.
+      // Keep this as the richest snapshot so the profile shows complete data out of the box.
+      answers: {
+        _fullFormData: {
+          personal: {
+            firstName: 'Alex',
+            lastName: 'Patel',
+            email: 'alex.patel@example.com',
+            contactNumber: '+91 98765 43210',
+            gender: 'Male',
+            dob: '1998-05-12',
+            linkedin: 'linkedin.com/in/alexpatel',
+            maritalStatus: 'Single',
+          },
+          professional: {
+            experiences: [
+              { id: 1, from: '2022-Jan', to: 'Present', company: 'TechSolutions Inc.', designation: 'Senior Frontend Engineer', description: 'Building accessible, high-performance web apps with React and TypeScript. Leading a small frontend team.', isCurrent: true },
+            ],
+            expYears: '3',
+            expMonths: '2',
+            highestQualification: 'B.Tech Computer Science',
+            noticePeriod: '30',
+            skills: ['React', 'TypeScript', 'JavaScript', 'Tailwind CSS', 'Redux', 'Node.js'],
+            currentOrg: 'TechSolutions Inc.',
+            currentDesignation: 'Senior Frontend Engineer',
+            remarks: '',
+          },
+          salary: { ctcType: 'Annual', currency: 'INR', currentCtc: '18.5', expectedCtc: '24' },
+          address: { street: '402, Skyline Apartments, Satellite', city: 'Ahmedabad', state: 'Gujarat', country: 'India', zip: '380015' },
+        },
+      },
       resumeUrl: 'Alex_Patel_Resume.pdf'
     },
     {
