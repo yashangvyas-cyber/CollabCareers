@@ -22,7 +22,7 @@ interface AppContextType extends AppState {
   discardCandidate: (candidateId: string, reason: string) => void;
 }
 
-const STORAGE_KEY = 'collab_careers_state_v16';
+const STORAGE_KEY = 'collab_careers_state_v18';
 
 const initialState: AppState = {
   jobs: [
@@ -514,7 +514,8 @@ Design is a first-class citizen at MindInventory. You will work on products that
       email: 'alex.patel@example.com',
       phone: '+91 98765 43210',
       isAlumni: false,
-      profileVisibility: 'private' as const,
+      profileVisibility: 'visible' as const,
+      allowRecruiterContact: true,
     },
     {
       id: 'c2',

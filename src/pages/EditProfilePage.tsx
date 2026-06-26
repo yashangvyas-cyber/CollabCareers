@@ -177,8 +177,8 @@ export default function EditProfilePage() {
               </label>
             </div>
           </SectionCard>
-          {/* Section 1 — Candidate Information */}
-          <SectionCard title="Candidate Information" caption="Personal details">
+          {/* Section 1 — Personal Information */}
+          <SectionCard title="Personal Information" caption="Personal details">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
               <ProfileInput
                 label="First Name" required
