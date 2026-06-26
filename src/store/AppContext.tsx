@@ -68,41 +68,6 @@ Why MindInventory:
 We build tools used by thousands of teams. Our frontend squad is small, collaborative, and obsessed with quality. You will have genuine ownership over product decisions and a clear path to grow into senior engineering roles.`
     },
     {
-      id: 'd2',
-      category: 'Design',
-      title: 'UI/UX Designer',
-      businessUnit: '300Mind',
-      recruiter: 'Michael Park',
-      location: 'Remote',
-      experience: '2+ Years Experience',
-      employmentType: 'Full-time',
-      jobType: 'Remote',
-      skills: ['Figma', 'Design Systems', 'Prototyping'],
-      salaryRange: { min: '10', max: '16', currency: '₹', type: 'Annual' },
-      status: 'Open',
-      publishOnCollabCareers: true,
-      customFields: [{ id: '2', label: 'Behance link', type: 'Text', required: true }],
-      evaluationCriteria: ['Design systems mastery'],
-      createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-      description: `We are looking for a talented UI/UX Designer to join our product design team. You will be the voice of the user in every product decision — crafting interfaces that are both beautiful and intuitive, and ensuring design quality from concept to shipped code.
-
-What you'll do:
-• Own the end-to-end design process — from discovery and wireframes to high-fidelity prototypes
-• Build and maintain a scalable, consistent design system in Figma
-• Conduct user research and usability tests, synthesising insights into actionable design decisions
-• Partner closely with engineering to ensure implementation quality and fidelity
-• Advocate for accessibility and inclusive design practices across all products
-
-What you'll bring:
-• 2+ years of product design experience in a technology environment
-• Mastery of Figma, including components, variables, and auto-layout
-• A portfolio demonstrating both strong visual craft and deep UX thinking
-• Ability to clearly articulate and justify every design decision to stakeholders
-
-Why MindInventory:
-Design is a first-class citizen at MindInventory. You will work on products that touch real users every day, with the latitude to set the design direction end-to-end and see your work ship within weeks.`
-    },
-    {
       id: 'd3',
       category: 'Engineering',
       title: 'Flutter Developer',
@@ -136,6 +101,25 @@ What you'll bring:
 
 Why MindInventory:
 Ship fast, learn faster. Our mobile team is small and the codebase is well-maintained — you will have end-to-end ownership of features from day one, with experienced mentors to support your growth.`
+    },
+    {
+      id: 'd7',
+      category: 'Engineering',
+      title: 'DevOps Engineer',
+      businessUnit: 'MindInventory',
+      recruiter: 'Michael Park',
+      location: 'Remote',
+      experience: '4+ Years Experience',
+      employmentType: 'Contract',
+      jobType: 'Remote',
+      skills: ['AWS', 'Docker', 'Kubernetes'],
+      salaryRange: { min: '1500', max: '2500', currency: '₹', type: 'Weekly' },
+      status: 'Open',
+      publishOnCollabCareers: true,
+      customFields: [],
+      evaluationCriteria: ['Infrastructure automation experience'],
+      createdAt: new Date(Date.now() - 86400000 * 12).toISOString(),
+      description: 'Cloud infrastructure management and CI/CD pipelines.'
     },
     {
       id: 'd4',
@@ -199,6 +183,65 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
       description: 'Bridging the gap between business needs and technical solutions.'
     },
     {
+      id: 'd13',
+      category: 'Design',
+      title: '2D Artist',
+      businessUnit: 'MindInventory',
+      recruiter: 'Sarah Chen',
+      location: 'Ahmedabad',
+      experience: '1+ Years Experience',
+      employmentType: 'Full-time',
+      jobType: 'On-site',
+      skills: ['Illustrator', 'Photoshop', 'After Effects'],
+      salaryRange: { min: '5', max: '9', currency: '₹', type: 'Annual' },
+      status: 'Open',
+      publishOnCollabCareers: true,
+      customFields: [
+        { id: 'd13_q1', label: 'Portfolio / ArtStation URL', type: 'Text', required: true },
+        { id: 'd13_q2', label: 'Preferred Art Style', type: 'Dropdown', required: true, options: [{ id: 'as1', value: 'Realistic' }, { id: 'as2', value: 'Stylized / Cartoon' }, { id: 'as3', value: 'Pixel Art' }, { id: 'as4', value: 'Anime / Manga' }] },
+        { id: 'd13_q3', label: 'Primary Software', type: 'Dropdown', required: true, options: [{ id: 'sw1', value: 'Adobe Photoshop' }, { id: 'sw2', value: 'Adobe Illustrator' }, { id: 'sw3', value: 'Procreate' }, { id: 'sw4', value: 'Clip Studio Paint' }] },
+        { id: 'd13_q4', label: 'Are you comfortable with 2D animation?', type: 'Yes/No', required: false },
+      ],
+      evaluationCriteria: ['Portfolio quality'],
+      createdAt: new Date(Date.now() - 86400000 * 8).toISOString(),
+      description: 'Create compelling 2D game and app assets for our product studio.',
+    },
+    {
+      id: 'd2',
+      category: 'Design',
+      title: 'UI/UX Designer',
+      businessUnit: '300Mind',
+      recruiter: 'Michael Park',
+      location: 'Remote',
+      experience: '2+ Years Experience',
+      employmentType: 'Full-time',
+      jobType: 'Remote',
+      skills: ['Figma', 'Design Systems', 'Prototyping'],
+      salaryRange: { min: '10', max: '16', currency: '₹', type: 'Annual' },
+      status: 'Open',
+      publishOnCollabCareers: true,
+      customFields: [{ id: '2', label: 'Behance link', type: 'Text', required: true }],
+      evaluationCriteria: ['Design systems mastery'],
+      createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+      description: `We are looking for a talented UI/UX Designer to join our product design team. You will be the voice of the user in every product decision — crafting interfaces that are both beautiful and intuitive, and ensuring design quality from concept to shipped code.
+
+What you'll do:
+• Own the end-to-end design process — from discovery and wireframes to high-fidelity prototypes
+• Build and maintain a scalable, consistent design system in Figma
+• Conduct user research and usability tests, synthesising insights into actionable design decisions
+• Partner closely with engineering to ensure implementation quality and fidelity
+• Advocate for accessibility and inclusive design practices across all products
+
+What you'll bring:
+• 2+ years of product design experience in a technology environment
+• Mastery of Figma, including components, variables, and auto-layout
+• A portfolio demonstrating both strong visual craft and deep UX thinking
+• Ability to clearly articulate and justify every design decision to stakeholders
+
+Why MindInventory:
+Design is a first-class citizen at MindInventory. You will work on products that touch real users every day, with the latitude to set the design direction end-to-end and see your work ship within weeks.`
+    },
+    {
       id: 'd6',
       category: 'Engineering',
       title: 'Node.js Backend Engineer',
@@ -216,25 +259,6 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
       evaluationCriteria: ['System architecture skills'],
       createdAt: new Date(Date.now() - 86400000 * 7).toISOString(),
       description: 'Build scalable backend services for our applications.'
-    },
-    {
-      id: 'd7',
-      category: 'Engineering',
-      title: 'DevOps Engineer',
-      businessUnit: 'MindInventory',
-      recruiter: 'Michael Park',
-      location: 'Remote',
-      experience: '4+ Years Experience',
-      employmentType: 'Contract',
-      jobType: 'Remote',
-      skills: ['AWS', 'Docker', 'Kubernetes'],
-      salaryRange: { min: '1500', max: '2500', currency: '₹', type: 'Weekly' },
-      status: 'Open',
-      publishOnCollabCareers: true,
-      customFields: [],
-      evaluationCriteria: ['Infrastructure automation experience'],
-      createdAt: new Date(Date.now() - 86400000 * 12).toISOString(),
-      description: 'Cloud infrastructure management and CI/CD pipelines.'
     },
     {
       id: 'd8',
@@ -330,31 +354,7 @@ We run lean and ship often. As a PM here, your decisions have direct product imp
       evaluationCriteria: ['Android architecture components knowledge'],
       createdAt: new Date(Date.now() - 86400000 * 9).toISOString(),
       description: 'Build robust native Android apps.'
-    },
-    {
-      id: 'd13',
-      category: 'Design',
-      title: '2D Artist',
-      businessUnit: 'MindInventory',
-      recruiter: 'Sarah Chen',
-      location: 'Ahmedabad',
-      experience: '1+ Years Experience',
-      employmentType: 'Full-time',
-      jobType: 'On-site',
-      skills: ['Illustrator', 'Photoshop', 'After Effects'],
-      salaryRange: { min: '5', max: '9', currency: '₹', type: 'Annual' },
-      status: 'Open',
-      publishOnCollabCareers: true,
-      customFields: [
-        { id: 'd13_q1', label: 'Portfolio / ArtStation URL', type: 'Text', required: true },
-        { id: 'd13_q2', label: 'Preferred Art Style', type: 'Dropdown', required: true, options: [{ id: 'as1', value: 'Realistic' }, { id: 'as2', value: 'Stylized / Cartoon' }, { id: 'as3', value: 'Pixel Art' }, { id: 'as4', value: 'Anime / Manga' }] },
-        { id: 'd13_q3', label: 'Primary Software', type: 'Dropdown', required: true, options: [{ id: 'sw1', value: 'Adobe Photoshop' }, { id: 'sw2', value: 'Adobe Illustrator' }, { id: 'sw3', value: 'Procreate' }, { id: 'sw4', value: 'Clip Studio Paint' }] },
-        { id: 'd13_q4', label: 'Are you comfortable with 2D animation?', type: 'Yes/No', required: false },
-      ],
-      evaluationCriteria: ['Portfolio quality'],
-      createdAt: new Date(Date.now() - 86400000 * 8).toISOString(),
-      description: 'Create compelling 2D game and app assets for our product studio.',
-    },
+    }
   ],
   candidates: [
     // ── Fully populated showcase candidates ──────────────────────────────────

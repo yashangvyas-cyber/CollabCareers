@@ -27,7 +27,7 @@ export default function AuthModal({
   const navigate = useNavigate();
   
   // States: 'auth' | 'alumni-verify' | 'alumni-success'
-  const [modalState, setModalState] = useState<'auth' | 'alumni-verify' | 'alumni-success' | 'forgot-password' | 'email-sent'>(initialState);
+  const [modalState, setModalState] = useState<'auth' | 'alumni-verify' | 'alumni-success' | 'forgot-password' | 'email-sent' | 'verify-email'>(initialState);
   const [activeTab, setActiveTab] = useState<'register' | 'signin'>(initialTab);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -35,6 +35,8 @@ export default function AuthModal({
   const [error, setError] = useState<string | null>(null);
   const [verifiedWorkEmail, setVerifiedWorkEmail] = useState('');
   const [forgotEmail, setForgotEmail] = useState('');
+  const [countdown, setCountdown] = useState(30);
+  const [showResentToast, setShowResentToast] = useState(false);
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -53,11 +55,32 @@ export default function AuthModal({
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'auto';
+      setCountdown(30);
+      setShowResentToast(false);
     }
     return () => {
       document.body.style.overflow = 'auto';
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    if (modalState === 'verify-email') {
+      setCountdown(30);
+      setShowResentToast(false);
+    }
+  }, [modalState]);
+
+  useEffect(() => {
+    let timer: any;
+    if (modalState === 'verify-email' && countdown > 0) {
+      timer = setInterval(() => {
+        setCountdown(prev => prev - 1);
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [modalState, countdown]);
 
   if (!isOpen) return null;
 
@@ -68,6 +91,10 @@ export default function AuthModal({
       return;
     }
     setError(null);
+    setModalState('verify-email');
+  };
+
+  const handleVerifyEmailContinue = () => {
     registerCandidate({
       id: Date.now().toString(),
       firstName: formData.firstName,
@@ -81,6 +108,14 @@ export default function AuthModal({
     onAuthSuccess?.();
     onClose();
     navigate(redirectTo || `/portal/yopmails/apply/${jobId}`);
+  };
+
+  const handleResend = () => {
+    setCountdown(30);
+    setShowResentToast(true);
+    setTimeout(() => {
+      setShowResentToast(false);
+    }, 3000);
   };
 
   const handleSignIn = (e: React.FormEvent) => {
@@ -732,6 +767,72 @@ export default function AuthModal({
               >
                 <ArrowLeft className="w-4 h-4" /> Back to Sign In
               </button>
+            </div>
+          ) : modalState === 'verify-email' ? (
+            /* Screen 3 — Verify Email (Sign Up Prototype) */
+            <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 rounded-2xl bg-primary/5 text-primary flex items-center justify-center mx-auto mb-4 animate-pulse">
+                  <Mail className="w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-black text-[#111827] mb-2">Verify your email</h3>
+                <p className="text-sm text-[#6B7280] font-medium leading-relaxed px-4 text-center">
+                  We've sent a verification link to{' '}
+                  <span className="inline-block px-2.5 py-0.5 bg-primary/10 text-primary rounded-full font-black text-xs">
+                    {formData.email}
+                  </span>
+                  . Please check your inbox and click the link to verify your account.
+                </p>
+              </div>
+
+              {showResentToast && (
+                <div className="flex items-center justify-center gap-2 px-4 py-2.5 mb-4 bg-emerald-50 border border-emerald-200 rounded-xl animate-in fade-in slide-in-from-bottom-2 duration-200">
+                  <span className="text-[12px] font-bold text-emerald-800">Verification link sent</span>
+                </div>
+              )}
+
+              <div className="text-center mb-6">
+                {countdown > 0 ? (
+                  <p className="text-[12px] font-bold text-[#9CA3AF]">
+                    Resend link in <span className="font-black text-[#6B7280]">{countdown}s</span>
+                  </p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleResend}
+                    className="text-[12px] font-black text-primary hover:underline uppercase tracking-widest"
+                  >
+                    Resend link
+                  </button>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={handleVerifyEmailContinue}
+                className="w-full py-4 bg-primary text-white text-sm font-black rounded-xl hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 uppercase tracking-widest flex items-center justify-center gap-2 mb-4"
+              >
+                I've verified — Continue <ArrowRight className="w-4 h-4" />
+              </button>
+
+              <div className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl p-4 text-center mb-6">
+                <p className="text-[11px] font-bold text-[#9CA3AF] leading-relaxed">
+                  Prototype — no real email is sent. Click <span className="text-[#6B7280]">Continue</span> to simulate verifying.
+                </p>
+              </div>
+
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setModalState('auth');
+                    setActiveTab('signin');
+                  }}
+                  className="inline-flex items-center gap-1.5 text-xs font-black text-[#6B7280] hover:text-primary uppercase tracking-widest transition-colors"
+                >
+                  <ArrowLeft className="w-4 h-4" /> Back to Sign In
+                </button>
+              </div>
             </div>
           ) : null}
 

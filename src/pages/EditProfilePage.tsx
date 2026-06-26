@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import PortalLayout from '../components/PortalLayout';
 import {
   ChevronDown, CheckCircle, Lock, Check, X,
   Plus, ArrowUp, ArrowDown, Trash2, FileText, Upload,
-  Eye, EyeOff, ArrowLeft, Sparkles,
+  Eye, EyeOff, ArrowLeft, Sparkles, ChevronRight,
 } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 
@@ -145,11 +145,19 @@ export default function EditProfilePage() {
     <PortalLayout>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 min-h-[80vh] flex flex-col">
 
-        {/* Page header */}
-        <div className="mb-8">
-          <button onClick={backToProfile} className="flex items-center gap-2 text-[#6B7280] hover:text-primary font-black text-[11px] uppercase tracking-[0.2em] transition-colors mb-4">
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-6 mb-4">
+          <Link to={`/portal/${slug}/profile`} className="flex items-center gap-2 text-xs font-black text-[#6B7280] uppercase tracking-widest hover:underline">
             <ArrowLeft className="w-4 h-4" /> Back to Profile
-          </button>
+          </Link>
+          <div className="w-[1px] h-4 bg-[#E5E7EB] hidden sm:block" />
+          <nav className="items-center gap-1.5 text-sm hidden sm:flex">
+            <Link to={`/portal/${slug}/profile`} className="text-[#6B7280] hover:text-[#111827] transition-colors">Profile</Link>
+            <ChevronRight className="w-3.5 h-3.5 text-[#D1D5DB]" />
+            <span className="text-[#111827] font-medium">Edit Profile</span>
+          </nav>
+        </div>
+        <div className="mb-8">
           <h1 className="text-3xl font-black text-[#111827] tracking-tight">Edit Profile</h1>
         </div>
 

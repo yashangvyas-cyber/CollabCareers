@@ -11,7 +11,8 @@
       "Bash(awk \"/id: 'c1'/{flag=1} flag{print NR\\\\\": \\\\\"\\\\$0} /resumeUrl|skills|currentDesignation|currentOrg|linkedin|city/{if\\(flag\\)c++} flag && /},/{print \\\\\"---END---\\\\\"; exit}\" src/store/AppContext.tsx)",
       "Bash(awk \"/candidateId: 'c1'/{n++; start=NR} n>=1 && /_fullFormData/{print \\\\\"_fullFormData found near line \\\\\" NR; found=1} END{if\\(!found\\) print \\\\\"NO _fullFormData in any c1 application block \\(within scan\\)\\\\\"}\" src/store/AppContext.tsx)",
       "Bash(git --no-pager diff --stat HEAD)",
-      "Bash(git --no-pager diff HEAD src/pages/ApplicationFormPage.tsx)"
+      "Bash(git --no-pager diff HEAD src/pages/ApplicationFormPage.tsx)",
+      "Read(//home/yashang/.gemini/antigravity-ide/brain/d2c8c06c-b7cf-4be7-8d56-29d495eaaae1/**)"
     ],
     "additionalDirectories": [
       "/home/yashang/Downloads"
