@@ -75,6 +75,17 @@ export default function EditProfilePage() {
   const [visibility, setVisibility] = useState<'visible' | 'private'>(currentUser?.profileVisibility || 'visible');
   const [allowContact, setAllowContact] = useState(currentUser?.allowRecruiterContact || false);
 
+  // Demo / locked logic for visibility.
+  // PRODUCTION rule: the lock would key off a real submitted application, i.e.
+  //   applications.some(a => a.candidateId === currentUser?.id && a.status === 'Applied')
+  // But the prototype's demo user already has submissions, which would lock this
+  // permanently and hide the "before" state. So we drive the "after submission"
+  // scenario from the demo toggle instead — toggle OFF shows the editable/private-allowed
+  // state, toggle ON simulates "applied → now visible & locked".
+  const [forceSubmittedDemo, setForceSubmittedDemo] = useState(false);
+  const hasSubmittedApplication = forceSubmittedDemo;
+  const effectiveVisibility = hasSubmittedApplication ? 'visible' : visibility;
+
   const addSkill = () => {
     const v = skillInput.trim();
     if (!v) return;
@@ -119,7 +130,7 @@ export default function EditProfilePage() {
       zipCode: formData.address.zip.trim() || undefined,
       location: [formData.address.city.trim(), formData.address.country].filter(Boolean).join(', ') || undefined,
       ...(resumeName ? { resumeUrl: resumeName } : {}),
-      profileVisibility: visibility,
+      profileVisibility: effectiveVisibility,
       allowRecruiterContact: allowContact,
     });
     backToProfile();
@@ -509,29 +520,55 @@ export default function EditProfilePage() {
 
 
           {/* Profile Visibility */}
-          <SectionCard title="Profile Visibility" caption="Control who can see your profile">
+          <SectionCard 
+            title="Profile Visibility" 
+            caption="Control who can see your profile"
+            headerAction={
+              /* TEMP DEMO BUTTON: Remove before production */
+              <button
+                type="button"
+                onClick={() => setForceSubmittedDemo(!forceSubmittedDemo)}
+                className="px-3 py-1.5 text-[10px] uppercase tracking-widest font-black rounded-lg bg-primary/5 border border-primary/10 text-primary hover:bg-primary/10 transition-colors whitespace-nowrap"
+              >
+                Demo: Simulate Submitted App
+              </button>
+            }
+          >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <button type="button" onClick={() => setVisibility('visible')}
-                className={`relative text-left p-4 rounded-xl border-2 transition-all ${visibility === 'visible' ? 'border-primary bg-primary/5' : 'border-[#E5E7EB] hover:border-[#C7C9F0]'}`}>
-                <div className={`absolute top-3 right-3 w-4 h-4 rounded-full border-2 flex items-center justify-center ${visibility === 'visible' ? 'border-primary' : 'border-[#D1D5DB]'}`}>
-                  {visibility === 'visible' && <div className="w-2 h-2 rounded-full bg-primary" />}
+              <button type="button" onClick={() => !hasSubmittedApplication && setVisibility('visible')}
+                className={`relative text-left p-4 rounded-xl border-2 transition-all ${effectiveVisibility === 'visible' ? 'border-primary bg-primary/5' : 'border-[#E5E7EB] hover:border-[#C7C9F0]'}`}>
+                <div className={`absolute top-3 right-3 w-4 h-4 rounded-full border-2 flex items-center justify-center ${effectiveVisibility === 'visible' ? 'border-primary' : 'border-[#D1D5DB]'}`}>
+                  {effectiveVisibility === 'visible' && <div className="w-2 h-2 rounded-full bg-primary" />}
                 </div>
                 <Eye className="w-4 h-4 text-primary mb-1.5" />
                 <p className="text-xs font-black text-[#111827] leading-tight mb-0.5">Visible to recruiters</p>
                 <p className="text-[10px] text-[#6B7280] leading-snug">Discoverable without application</p>
               </button>
-              <button type="button" onClick={() => setVisibility('private')}
-                className={`relative text-left p-4 rounded-xl border-2 transition-all ${visibility === 'private' ? 'border-primary bg-primary/5' : 'border-[#E5E7EB] hover:border-[#C7C9F0]'}`}>
-                <div className={`absolute top-3 right-3 w-4 h-4 rounded-full border-2 flex items-center justify-center ${visibility === 'private' ? 'border-primary' : 'border-[#D1D5DB]'}`}>
-                  {visibility === 'private' && <div className="w-2 h-2 rounded-full bg-primary" />}
+              <button type="button" onClick={() => { if (!hasSubmittedApplication) setVisibility('private'); }}
+                disabled={hasSubmittedApplication}
+                className={`relative text-left p-4 rounded-xl border-2 transition-all ${hasSubmittedApplication ? 'opacity-60 cursor-not-allowed bg-[#F9FAFB] border-[#E5E7EB]' : effectiveVisibility === 'private' ? 'border-primary bg-primary/5' : 'border-[#E5E7EB] hover:border-[#C7C9F0]'}`}>
+                <div className={`absolute top-3 right-3 w-4 h-4 rounded-full border-2 flex items-center justify-center ${effectiveVisibility === 'private' ? 'border-primary' : 'border-[#D1D5DB]'}`}>
+                  {effectiveVisibility === 'private' && <div className="w-2 h-2 rounded-full bg-primary" />}
                 </div>
-                <EyeOff className="w-4 h-4 text-[#6B7280] mb-1.5" />
+                {hasSubmittedApplication ? (
+                  <Lock className="w-4 h-4 text-[#6B7280] mb-1.5" />
+                ) : (
+                  <EyeOff className="w-4 h-4 text-[#6B7280] mb-1.5" />
+                )}
                 <p className="text-xs font-black text-[#111827] leading-tight mb-0.5">Browse privately</p>
                 <p className="text-[10px] text-[#6B7280] leading-snug">Only visible on active applications</p>
               </button>
             </div>
-            {visibility === 'visible' && (
-              <label className="flex items-center justify-between gap-3 mt-4 cursor-pointer">
+            {hasSubmittedApplication && (
+              <div className="mt-4 p-3 bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl flex items-start gap-2.5">
+                <Lock className="w-4 h-4 text-[#9CA3AF] shrink-0 mt-0.5" />
+                <p className="text-xs font-bold text-[#6B7280] leading-relaxed">
+                  Your profile became visible when you submitted an application, so it can no longer be set to private.
+                </p>
+              </div>
+            )}
+            {effectiveVisibility === 'visible' && (
+              <label className="flex items-center justify-between gap-3 mt-5 cursor-pointer">
                 <span className="text-xs font-bold text-[#374151]">Allow recruiters to contact me for future roles</span>
                 <button type="button" onClick={() => setAllowContact(v => !v)}
                   className={`relative rounded-full transition-colors shrink-0 ${allowContact ? 'bg-primary' : 'bg-[#D1D5DB]'}`}
@@ -564,12 +601,15 @@ export default function EditProfilePage() {
 }
 
 // ── Profile-style section card (always open, flat) ──
-function SectionCard({ title, caption, children }: { title: string; caption: string; children: React.ReactNode }) {
+function SectionCard({ title, caption, children, headerAction }: { title: string; caption: string; children: React.ReactNode; headerAction?: React.ReactNode }) {
   return (
     <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-6 sm:p-8">
-      <div className="mb-6">
-        <h3 className="text-sm font-black text-[#111827]">{title}</h3>
-        <p className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest mt-1">{caption}</p>
+      <div className="mb-6 flex justify-between items-start gap-4">
+        <div>
+          <h3 className="text-sm font-black text-[#111827]">{title}</h3>
+          <p className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest mt-1">{caption}</p>
+        </div>
+        {headerAction && <div>{headerAction}</div>}
       </div>
       {children}
     </div>
