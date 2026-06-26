@@ -399,12 +399,6 @@ export default function EditProfilePage() {
               )}
             </div>
 
-            <div className="mt-5">
-              <ProfileTextarea
-                label="Additional Notes" value={formData.professional.remarks}
-                onChange={(val: string) => setFormData(p => ({ ...p, professional: { ...p.professional, remarks: val } }))}
-              />
-            </div>
           </SectionCard>
 
           {/* Section 3 — Skills */}
