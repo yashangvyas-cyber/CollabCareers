@@ -102,6 +102,7 @@ export default function ApplicationFormPage() {
 
   const [step, setStep] = useState(0); // 0 = CV Upload, 1 = Form, 2 = Review
   const [extracting, setExtracting] = useState(false);
+  const [reExtracting, setReExtracting] = useState(false); // re-parsing a resume swapped in on Step 2
   const [resumeName, setResumeName] = useState('');
   const [showPrefillBanner, setShowPrefillBanner] = useState(true);
   const [isFresher, setIsFresher] = useState(false);
@@ -247,6 +248,15 @@ export default function ApplicationFormPage() {
       setStep(1);
       window.scrollTo(0, 0);
     }, 2000);
+  };
+
+  // Re-parsing a resume swapped in from Step 2 (after the initial CV upload step)
+  const handleResumeChange = (file: File) => {
+    setReExtracting(true);
+    setTimeout(() => {
+      setResumeName(file.name);
+      setReExtracting(false);
+    }, 1800);
   };
 
   // The candidate's richest profile snapshot = their latest application's saved form
@@ -612,22 +622,32 @@ export default function ApplicationFormPage() {
                   <h3 className="text-sm font-black text-[#111827] uppercase tracking-widest">Resume</h3>
                   <p className="text-[11px] text-[#6B7280] font-bold mt-0.5">The resume used for this application</p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="flex-1 flex items-center gap-2 px-4 py-2.5 border border-[#E5E7EB] rounded-xl bg-[#F9FAFB] min-w-0">
-                    <FileText className="w-4 h-4 text-[#9CA3AF] shrink-0" />
-                    <span className={`text-sm truncate ${resumeName ? 'font-bold text-[#374151]' : 'font-normal text-[#9CA3AF]'}`}>
-                      {resumeName || 'No resume uploaded'}
-                    </span>
+                {reExtracting ? (
+                  <div className="flex items-center gap-3 px-4 py-3 border border-primary/20 bg-primary/5 rounded-xl">
+                    <div className="relative w-5 h-5 shrink-0">
+                      <div className="absolute inset-0 border-2 border-primary/20 rounded-full" />
+                      <div className="absolute inset-0 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                    </div>
+                    <span className="text-sm font-bold text-primary">Parsing your new resume…</span>
                   </div>
-                  <label className="cursor-pointer shrink-0 flex items-center gap-1.5 px-4 py-2.5 border border-primary text-primary text-[11px] font-black rounded-xl hover:bg-primary/5 transition-colors uppercase tracking-widest">
-                    <Upload className="w-3.5 h-3.5" />
-                    Change
-                    <input
-                      type="file" accept=".pdf,.doc,.docx" className="hidden"
-                      onChange={(e) => { const f = e.target.files?.[0]; if (f) setResumeName(f.name); }}
-                    />
-                  </label>
-                </div>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 flex items-center gap-2 px-4 py-2.5 border border-[#E5E7EB] rounded-xl bg-[#F9FAFB] min-w-0">
+                      <FileText className="w-4 h-4 text-[#9CA3AF] shrink-0" />
+                      <span className={`text-sm truncate ${resumeName ? 'font-bold text-[#374151]' : 'font-normal text-[#9CA3AF]'}`}>
+                        {resumeName || 'No resume uploaded'}
+                      </span>
+                    </div>
+                    <label className="cursor-pointer shrink-0 flex items-center gap-1.5 px-4 py-2.5 border border-primary text-primary text-[11px] font-black rounded-xl hover:bg-primary/5 transition-colors uppercase tracking-widest">
+                      <Upload className="w-3.5 h-3.5" />
+                      Change
+                      <input
+                        type="file" accept=".pdf,.doc,.docx" className="hidden"
+                        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleResumeChange(f); e.target.value = ''; }}
+                      />
+                    </label>
+                  </div>
+                )}
               </div>
 
               {/* Section 1 — Personal Information */}
