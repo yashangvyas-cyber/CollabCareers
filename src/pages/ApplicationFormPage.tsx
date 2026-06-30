@@ -102,9 +102,8 @@ export default function ApplicationFormPage() {
 
   const [step, setStep] = useState(0); // 0 = CV Upload, 1 = Form, 2 = Review
   const [extracting, setExtracting] = useState(false);
-  // Which source the candidate picked on step 0 (gates the Next button)
-  const [step0Choice, setStep0Choice] = useState<'' | 'upload' | 'profile'>('');
   const [resumeName, setResumeName] = useState('');
+  const [showPrefillBanner, setShowPrefillBanner] = useState(true);
   const [isFresher, setIsFresher] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [jobClosed, setJobClosed] = useState(false);
@@ -245,7 +244,8 @@ export default function ApplicationFormPage() {
     setTimeout(() => {
       setResumeName('Alex_Patel_Resume.pdf');
       setExtracting(false);
-      setStep0Choice('upload');
+      setStep(1);
+      window.scrollTo(0, 0);
     }, 2000);
   };
 
@@ -293,7 +293,8 @@ export default function ApplicationFormPage() {
       },
     });
     setResumeName(currentUser?.resumeUrl || latestProfileApp?.resumeUrl || 'Profile Resume');
-    setStep0Choice('profile');
+    setStep(1);
+    window.scrollTo(0, 0);
   };
 
   const handleSaveDraft = () => {
@@ -491,36 +492,18 @@ export default function ApplicationFormPage() {
               <div className="max-w-lg mx-auto">
                 {!extracting ? (
                   <>
-                  {step0Choice === 'upload' ? (
-                    <div className="flex items-center gap-4 border-2 border-primary/30 bg-primary/5 rounded-[40px] p-6 sm:p-8 text-left">
-                      <div className="w-14 h-14 bg-white rounded-2xl border border-primary/20 flex items-center justify-center shrink-0">
-                        <FileText className="w-7 h-7 text-primary" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-0.5">Resume uploaded</p>
-                        <p className="text-base font-black text-[#111827] truncate">{resumeName}</p>
-                      </div>
-                      <button
-                        onClick={() => { setStep0Choice(''); setResumeName(''); }}
-                        className="ml-auto text-xs font-black text-[#6B7280] hover:text-primary uppercase tracking-widest hover:underline shrink-0"
-                      >
-                        Change
-                      </button>
+                  <div
+                    onClick={handleCvUpload}
+                    className="group relative border-2 border-dashed border-[#D1D5DB] hover:border-primary rounded-[40px] p-8 sm:p-16 cursor-pointer transition-all duration-300 hover:bg-[#F4F5FA] text-center"
+                  >
+                    <div className="w-20 h-20 bg-[#F4F5FA] group-hover:bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-6 transition-colors">
+                      <Upload className="w-10 h-10 text-primary" />
                     </div>
-                  ) : (
-                    <div
-                      onClick={handleCvUpload}
-                      className="group relative border-2 border-dashed border-[#D1D5DB] hover:border-primary rounded-[40px] p-8 sm:p-16 cursor-pointer transition-all duration-300 hover:bg-[#F4F5FA] text-center"
-                    >
-                      <div className="w-20 h-20 bg-[#F4F5FA] group-hover:bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-6 transition-colors">
-                        <Upload className="w-10 h-10 text-primary" />
-                      </div>
-                      <h3 className="text-2xl font-black text-[#111827] mb-3">Upload your Resume</h3>
-                      <p className="text-[#6B7280] mb-8 font-medium">Drag and drop your CV here or click to browse</p>
+                    <h3 className="text-2xl font-black text-[#111827] mb-3">Upload your Resume</h3>
+                    <p className="text-[#6B7280] mb-8 font-medium">Drag and drop your CV here or click to browse</p>
 
-                      <p className="text-xs text-[#9CA3AF] font-bold uppercase tracking-widest">Accepted formats: PDF, DOC, DOCX · Max 5MB</p>
-                    </div>
-                  )}
+                    <p className="text-xs text-[#9CA3AF] font-bold uppercase tracking-widest">Accepted formats: PDF, DOC, DOCX · Max 5MB</p>
+                  </div>
 
                   {hasProfileData && (
                     <>
@@ -531,11 +514,7 @@ export default function ApplicationFormPage() {
                       </div>
                       <button
                         onClick={fetchFromProfile}
-                        className={`w-full flex items-center gap-4 px-5 py-4 border-2 rounded-2xl transition-all text-left group ${
-                          step0Choice === 'profile'
-                            ? 'border-primary bg-primary/5'
-                            : 'border-[#E5E7EB] hover:border-primary hover:bg-primary/5'
-                        }`}
+                        className="w-full flex items-center gap-4 px-5 py-4 border-2 border-[#E5E7EB] hover:border-primary hover:bg-primary/5 rounded-2xl transition-all text-left group"
                       >
                         <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/15 transition-colors">
                           <Sparkles className="w-5 h-5 text-primary" />
@@ -548,27 +527,10 @@ export default function ApplicationFormPage() {
                               : 'Prefill the form from your saved profile'}
                           </p>
                         </div>
-                        {step0Choice === 'profile'
-                          ? <CheckCircle className="w-5 h-5 text-primary ml-auto shrink-0" />
-                          : <ArrowRight className="w-5 h-5 text-primary ml-auto shrink-0" />}
+                        <ArrowRight className="w-5 h-5 text-primary ml-auto shrink-0" />
                       </button>
                     </>
                   )}
-
-                  {/* Next — enabled once a source is chosen */}
-                  <div className="mt-8 flex justify-end">
-                    <button
-                      onClick={() => { setStep(1); window.scrollTo(0, 0); }}
-                      disabled={!step0Choice}
-                      className={`px-10 py-3.5 text-xs font-black rounded-2xl uppercase tracking-widest flex items-center gap-2 transition-all ${
-                        step0Choice
-                          ? 'bg-primary text-white hover:bg-primary-hover shadow-xl shadow-primary/30 active:scale-95'
-                          : 'bg-[#E5E7EB] text-[#9CA3AF] cursor-not-allowed'
-                      }`}
-                    >
-                      Next <ArrowRight className="w-4 h-4" />
-                    </button>
-                  </div>
                   </>
                 ) : (
                   <div className="py-10">
@@ -610,17 +572,24 @@ export default function ApplicationFormPage() {
               </div>
             )}
 
-            {prefillSource && (
+            {prefillSource && showPrefillBanner && (
               <div className="bg-primary/5 border border-primary/20 rounded-2xl p-5 flex items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
                 <div className="w-10 h-10 bg-primary rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-primary/20">
                   <Sparkles className="w-6 h-6 text-white" />
                 </div>
-                <div>
+                <div className="flex-1 min-w-0">
                   <p className="text-sm font-black text-primary tracking-wide uppercase tracking-widest text-[10px]">Prefilled from your previous application</p>
                   <p className="text-sm text-primary/80 font-bold mt-0.5">
                     ✦ {prefillSource.title} · {prefillSource.date}
                   </p>
                 </div>
+                <button
+                  onClick={() => setShowPrefillBanner(false)}
+                  className="shrink-0 p-1.5 rounded-lg text-primary/50 hover:text-primary hover:bg-primary/10 transition-colors"
+                  aria-label="Dismiss"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
             )}
 
@@ -637,10 +606,34 @@ export default function ApplicationFormPage() {
             )}
 
             <div className="space-y-6">
+              {/* Resume — the file used to prefill this application */}
+              <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm p-5 sm:p-8">
+                <div className="mb-4">
+                  <h3 className="text-sm font-black text-[#111827] uppercase tracking-widest">Resume</h3>
+                  <p className="text-[11px] text-[#6B7280] font-bold mt-0.5">The resume used for this application</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 flex items-center gap-2 px-4 py-2.5 border border-[#E5E7EB] rounded-xl bg-[#F9FAFB] min-w-0">
+                    <FileText className="w-4 h-4 text-[#9CA3AF] shrink-0" />
+                    <span className={`text-sm truncate ${resumeName ? 'font-bold text-[#374151]' : 'font-normal text-[#9CA3AF]'}`}>
+                      {resumeName || 'No resume uploaded'}
+                    </span>
+                  </div>
+                  <label className="cursor-pointer shrink-0 flex items-center gap-1.5 px-4 py-2.5 border border-primary text-primary text-[11px] font-black rounded-xl hover:bg-primary/5 transition-colors uppercase tracking-widest">
+                    <Upload className="w-3.5 h-3.5" />
+                    Change
+                    <input
+                      type="file" accept=".pdf,.doc,.docx" className="hidden"
+                      onChange={(e) => { const f = e.target.files?.[0]; if (f) setResumeName(f.name); }}
+                    />
+                  </label>
+                </div>
+              </div>
+
               {/* Section 1 — Personal Information */}
-              <FormCollapsibleCard 
-                id={1} 
-                title="Personal Information" 
+              <FormCollapsibleCard
+                id={1}
+                title="Personal Information"
                 isCollapsed={collapsedSections[1]} 
                 onToggle={() => toggleSection(1)}
               >
