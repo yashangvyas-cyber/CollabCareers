@@ -102,7 +102,6 @@ export default function ApplicationFormPage() {
 
   const [step, setStep] = useState(0); // 0 = CV Upload, 1 = Form, 2 = Review
   const [extracting, setExtracting] = useState(false);
-  const [reExtracting, setReExtracting] = useState(false); // re-parsing a resume swapped in on Step 2
   const [resumeName, setResumeName] = useState('');
   const [showPrefillBanner, setShowPrefillBanner] = useState(true);
   const [isFresher, setIsFresher] = useState(false);
@@ -250,15 +249,6 @@ export default function ApplicationFormPage() {
     }, 2000);
   };
 
-  // Re-parsing a resume swapped in from Step 2 (after the initial CV upload step)
-  const handleResumeChange = (file: File) => {
-    setReExtracting(true);
-    setTimeout(() => {
-      setResumeName(file.name);
-      setReExtracting(false);
-    }, 1800);
-  };
-
   // The candidate's richest profile snapshot = their latest application's saved form
   // (the profile page derives from the same source), overlaid with account fields.
   const latestProfileApp = applications
@@ -321,11 +311,6 @@ export default function ApplicationFormPage() {
     setTimeout(() => setShowToast(false), 3000);
   };
 
-  // A "fresh" application = applying for the first time or starting from scratch,
-  // i.e. nothing was prefilled from a previous application or a resumed draft.
-  const isFreshApplication =
-    !prefillSource && !location.state?.continueDraft && !location.state?.prefillFrom;
-
   const validateStep1 = () => {
     const newErrors: Record<string, string> = {};
     let firstErrorSection: number | null = null;
@@ -335,7 +320,7 @@ export default function ApplicationFormPage() {
       if (!firstErrorSection) firstErrorSection = section;
     };
 
-    if (!formData.professional.highestQualification) addError('highestQualification', 'Required', 2);
+    if (!formData.professional.highestQualification) addError('highestQualification', 'Required', 1);
     
     if (!isFresher) {
       if (!formData.professional.expYears && !formData.professional.expMonths) {
@@ -400,17 +385,19 @@ export default function ApplicationFormPage() {
       resumeUrl: resumeName || 'Manually Filled',
     });
 
-    // Optionally sync this application's data back to the candidate's profile.
-    if (isFreshApplication && syncProfile) {
-      updateCurrentUser({
-        firstName: formData.personal.firstName,
-        lastName: formData.personal.lastName,
-        phone: formData.personal.contactNumber,
-        gender: formData.personal.gender,
-        dateOfBirth: formData.personal.dob,
-        linkedin: formData.personal.linkedin,
-        maritalStatus: formData.personal.maritalStatus,
-        highestQualification: formData.professional.highestQualification,
+    // Personal information ALWAYS syncs back to the candidate's profile,
+    // regardless of the choice below. The rest of the profile (professional,
+    // salary, address) only syncs when the candidate opts in via `syncProfile`.
+    updateCurrentUser({
+      firstName: formData.personal.firstName,
+      lastName: formData.personal.lastName,
+      phone: formData.personal.contactNumber,
+      gender: formData.personal.gender,
+      dateOfBirth: formData.personal.dob,
+      linkedin: formData.personal.linkedin,
+      maritalStatus: formData.personal.maritalStatus,
+      highestQualification: formData.professional.highestQualification,
+      ...(syncProfile ? {
         noticePeriod: formData.professional.noticePeriod,
         skills: formData.professional.skills,
         currentCtc: formData.salary.currentCtc,
@@ -422,8 +409,8 @@ export default function ApplicationFormPage() {
         state: formData.address.state,
         country: formData.address.country,
         zipCode: formData.address.zip,
-      });
-    }
+      } : {}),
+    });
 
     navigate(`/portal/yopmails/confirmation/${job.id}`);
   };
@@ -616,38 +603,17 @@ export default function ApplicationFormPage() {
             )}
 
             <div className="space-y-6">
-              {/* Resume — the file used to prefill this application */}
+              {/* Resume — read-only; to change it, go back to the CV Upload step */}
               <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm p-5 sm:p-8">
                 <div className="mb-4">
                   <h3 className="text-sm font-black text-[#111827] uppercase tracking-widest">Resume</h3>
-                  <p className="text-[11px] text-[#6B7280] font-bold mt-0.5">The resume used for this application</p>
                 </div>
-                {reExtracting ? (
-                  <div className="flex items-center gap-3 px-4 py-3 border border-primary/20 bg-primary/5 rounded-xl">
-                    <div className="relative w-5 h-5 shrink-0">
-                      <div className="absolute inset-0 border-2 border-primary/20 rounded-full" />
-                      <div className="absolute inset-0 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                    </div>
-                    <span className="text-sm font-bold text-primary">Parsing your new resume…</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1 flex items-center gap-2 px-4 py-2.5 border border-[#E5E7EB] rounded-xl bg-[#F9FAFB] min-w-0">
-                      <FileText className="w-4 h-4 text-[#9CA3AF] shrink-0" />
-                      <span className={`text-sm truncate ${resumeName ? 'font-bold text-[#374151]' : 'font-normal text-[#9CA3AF]'}`}>
-                        {resumeName || 'No resume uploaded'}
-                      </span>
-                    </div>
-                    <label className="cursor-pointer shrink-0 flex items-center gap-1.5 px-4 py-2.5 border border-primary text-primary text-[11px] font-black rounded-xl hover:bg-primary/5 transition-colors uppercase tracking-widest">
-                      <Upload className="w-3.5 h-3.5" />
-                      Change
-                      <input
-                        type="file" accept=".pdf,.doc,.docx" className="hidden"
-                        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleResumeChange(f); e.target.value = ''; }}
-                      />
-                    </label>
-                  </div>
-                )}
+                <div className="flex items-center gap-2 px-4 py-2.5 border border-[#E5E7EB] rounded-xl bg-[#F9FAFB] min-w-0">
+                  <FileText className="w-4 h-4 text-[#9CA3AF] shrink-0" />
+                  <span className={`text-sm truncate ${resumeName ? 'font-bold text-[#374151]' : 'font-normal text-[#9CA3AF]'}`}>
+                    {resumeName || 'No resume uploaded'}
+                  </span>
+                </div>
               </div>
 
               {/* Section 1 — Personal Information */}
@@ -683,12 +649,20 @@ export default function ApplicationFormPage() {
                     />
                     <FormInput label="Email Address" required value={formData.personal.email} isLocked />
                  </div>
-                 <div className="mb-6">
-                    <FormInput 
-                      label="LinkedIn Profile" 
-                      value={formData.personal.linkedin} 
-                      placeholder="linkedin.com/in/..." 
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+                    <FormInput
+                      label="LinkedIn Profile"
+                      value={formData.personal.linkedin}
+                      placeholder="linkedin.com/in/..."
                       onChange={(val: string) => setFormData(p => ({ ...p, personal: { ...p.personal, linkedin: val }}))}
+                    />
+                    <FormInput
+                      label="Highest Qualification"
+                      required
+                      error={errors.highestQualification}
+                      value={formData.professional.highestQualification}
+                      isExtracted={!!resumeName}
+                      onChange={(val: string) => setFormData(p => ({ ...p, professional: { ...p.professional, highestQualification: val }}))}
                     />
                  </div>
                  <div className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl p-5 sm:p-6 mb-2">
@@ -744,16 +718,8 @@ export default function ApplicationFormPage() {
                 </div>
 
                 <div className="space-y-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <FormInput 
-                      label="Highest Qualification" 
-                      required
-                      error={errors.highestQualification}
-                      value={formData.professional.highestQualification} 
-                      isExtracted={!!resumeName} 
-                      onChange={(val: string) => setFormData(p => ({ ...p, professional: { ...p.professional, highestQualification: val }}))}
-                    />
-                    {!isFresher && (
+                  {!isFresher && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                       <div className={`space-y-2 ${(errors.expYears || errors.expMonths) ? 'error-field' : ''}`}>
                         <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest">Total Experience <span className="text-red-500">*</span></label>
                         <div className="grid grid-cols-2 gap-3">
@@ -784,8 +750,8 @@ export default function ApplicationFormPage() {
                         </div>
                         {(errors.expYears || errors.expMonths) && <p className="text-xs text-red-500 font-bold ml-1">{errors.expYears || errors.expMonths}</p>}
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
 
                   {!isFresher && (
                     <>
@@ -1071,7 +1037,11 @@ export default function ApplicationFormPage() {
 
             {/* Profile sync radio group */}
             <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-6 sm:p-8">
-              <h4 className="text-sm font-black text-[#111827] mb-4">Do you want to update your profile with the information entered above?</h4>
+              <h4 className="text-sm font-black text-[#111827] mb-1.5">Update your profile with these details?</h4>
+              <div className="flex gap-2 items-start mb-4 text-[#6B7280]">
+                <Info className="w-3.5 h-3.5 shrink-0 mt-0.5 text-primary" />
+                <p className="text-xs font-bold leading-relaxed">Your <b className="text-[#111827]">personal information</b> is always kept in sync with your profile. This choice only controls whether your <b className="text-[#111827]">professional, salary &amp; address</b> details are updated too.</p>
+              </div>
               <div className="space-y-3">
                 <button
                   type="button"
@@ -1086,8 +1056,8 @@ export default function ApplicationFormPage() {
                     {syncProfile && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
                   </div>
                   <div>
-                    <p className="text-sm font-black text-[#111827]">Yes, update my profile</p>
-                    <p className="text-xs font-bold text-[#6B7280] mt-0.5">Save these details so your next application is even faster.</p>
+                    <p className="text-sm font-black text-[#111827]">Yes, update my full profile</p>
+                    <p className="text-xs font-bold text-[#6B7280] mt-0.5">Also save my professional, salary &amp; address details for faster future applications.</p>
                   </div>
                 </button>
                 <button
@@ -1103,8 +1073,8 @@ export default function ApplicationFormPage() {
                     {!syncProfile && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
                   </div>
                   <div>
-                    <p className="text-sm font-black text-[#111827]">No, use it only for this application</p>
-                    <p className="text-xs font-bold text-[#6B7280] mt-0.5">Your profile stays unchanged.</p>
+                    <p className="text-sm font-black text-[#111827]">No, only update my personal information</p>
+                    <p className="text-xs font-bold text-[#6B7280] mt-0.5">We'll keep your personal details current — the rest of your profile stays unchanged.</p>
                   </div>
                 </button>
               </div>

@@ -212,18 +212,25 @@ export default function EditProfilePage() {
                 onChange={(val: string) => setFormData(p => ({ ...p, personal: { ...p.personal, gender: val } }))}
               />
             </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+              <ProfileInput
+                label="LinkedIn Profile"
+                value={formData.personal.linkedin}
+                placeholder="linkedin.com/in/..."
+                onChange={(val: string) => setFormData(p => ({ ...p, personal: { ...p.personal, linkedin: val } }))}
+              />
+              <ProfileInput
+                label="Highest Qualification"
+                value={formData.professional.highestQualification}
+                onChange={(val: string) => setFormData(p => ({ ...p, professional: { ...p.professional, highestQualification: val } }))}
+              />
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <ProfileSelect
                 label="Marital Status"
                 options={['Select', 'Single', 'Married', 'Other']}
                 value={formData.personal.maritalStatus}
                 onChange={(val: string) => setFormData(p => ({ ...p, personal: { ...p.personal, maritalStatus: val } }))}
-              />
-              <ProfileInput
-                label="LinkedIn Profile"
-                value={formData.personal.linkedin}
-                placeholder="linkedin.com/in/..."
-                onChange={(val: string) => setFormData(p => ({ ...p, personal: { ...p.personal, linkedin: val } }))}
               />
             </div>
           </SectionCard>
@@ -246,13 +253,8 @@ export default function EditProfilePage() {
             </div>
 
             <div className="space-y-5">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <ProfileInput
-                  label="Highest Qualification"
-                  value={formData.professional.highestQualification}
-                  onChange={(val: string) => setFormData(p => ({ ...p, professional: { ...p.professional, highestQualification: val } }))}
-                />
-                {!isFresher && (
+              {!isFresher && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest">Total Experience</label>
                     <div className="grid grid-cols-2 gap-3">
@@ -276,8 +278,8 @@ export default function EditProfilePage() {
                       </div>
                     </div>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
 
               {!isFresher && (
                 <>
