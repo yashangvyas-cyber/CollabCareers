@@ -1,6 +1,6 @@
 import { ReactNode, useState, useRef, useEffect, CSSProperties } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Lock, LogOut, ChevronDown, Briefcase, Bookmark } from 'lucide-react';
+import { User, Lock, LogOut, ChevronDown, Briefcase, Bookmark } from 'lucide-react';
 import CollabCRMIcon from './CollabCRMIcon';
 import { useApp } from '../store/AppContext';
 import { darkenHex, readableTextColor, accessibleOnWhite } from '../lib/theme';
@@ -113,24 +113,15 @@ export default function PortalLayout({
                     role="menu"
                     className="absolute right-0 mt-2 w-72 bg-white rounded-2xl border border-[#E5E7EB] shadow-xl shadow-[#111827]/5 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150"
                   >
-                    {/* Identity header — doubles as the "My Profile" link */}
-                    <Link
-                      to="/portal/yopmails/profile"
-                      onClick={() => setMenuOpen(false)}
-                      className="flex items-center gap-3 px-5 py-4 bg-[#F9FAFB] hover:bg-primary/5 transition-colors group/id"
-                    >
-                      <div className="w-11 h-11 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-black shrink-0">
-                        {currentUser.firstName.charAt(0)}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-black text-[#111827] truncate">{currentUser.firstName} {currentUser.lastName}</p>
-                        <p className="text-xs text-[#6B7280] truncate">{currentUser.email}</p>
-                        <p className="text-[10px] font-black text-primary uppercase tracking-widest mt-1 opacity-70 group-hover/id:opacity-100 transition-opacity">View Profile →</p>
-                      </div>
-                    </Link>
-
-                    {/* Activity */}
-                    <div className="py-2 border-t border-[#F3F4F6]">
+                    {/* Profile & activity */}
+                    <div className="py-2">
+                      <Link
+                        to="/portal/yopmails/profile"
+                        onClick={() => setMenuOpen(false)}
+                        className="flex items-center gap-3 px-5 py-2.5 text-sm font-bold text-[#374151] hover:bg-[#F9FAFB] hover:text-primary transition-colors"
+                      >
+                        <User className="w-4 h-4 text-[#9CA3AF]" /> My Profile
+                      </Link>
                       <Link
                         to="/portal/yopmails/profile?tab=applications"
                         onClick={() => setMenuOpen(false)}
