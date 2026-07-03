@@ -1,9 +1,11 @@
-import { ReactNode, useState, CSSProperties } from 'react';
-import { Link } from 'react-router-dom';
+import { ReactNode, useState, useRef, useEffect, CSSProperties } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Pencil, Lock, LogOut, ChevronDown, Briefcase, Bookmark } from 'lucide-react';
 import CollabCRMIcon from './CollabCRMIcon';
 import { useApp } from '../store/AppContext';
 import { darkenHex, readableTextColor, accessibleOnWhite } from '../lib/theme';
 import AuthModal from './AuthModal';
+import ChangePasswordModal from './ChangePasswordModal';
 
 interface PortalLayoutProps {
   children: ReactNode;
@@ -15,7 +17,8 @@ export default function PortalLayout({
   children,
   showAuth = true,
 }: PortalLayoutProps) {
-  const { currentUser, portalConfig } = useApp();
+  const { currentUser, portalConfig, logoutCandidate } = useApp();
+  const navigate = useNavigate();
   const appearance = portalConfig.appearance;
   // Scope the customer's brand colour to the portal subtree by overriding the
   // Tailwind theme variables — every `*-primary` utility below recolours live.
@@ -30,6 +33,32 @@ export default function PortalLayout({
   } as CSSProperties;
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authTab, setAuthTab] = useState<'register' | 'signin'>('register');
+
+  // Account dropdown menu (top-right avatar) + Change Password modal.
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Close the account menu on outside-click or Escape.
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onDown = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMenuOpen(false); };
+    document.addEventListener('mousedown', onDown);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [menuOpen]);
+
+  const handleLogout = () => {
+    setMenuOpen(false);
+    logoutCandidate();
+    navigate('/portal/yopmails');
+  };
 
   const handleSignInClick = () => {
     setAuthTab('signin');
@@ -60,24 +89,93 @@ export default function PortalLayout({
           {/* Right: Auth */}
           <div className="flex items-center gap-3">
             {currentUser ? (
-              <>
-              <Link
-                to="/portal/yopmails/profile"
-                className="flex items-center gap-2.5 group hover:opacity-80 transition-opacity"
-                title="My Profile"
-              >
-                <div className="text-right hidden sm:block">
-                  <p className="text-sm font-semibold text-[#111827] leading-tight group-hover:text-primary transition-colors">
-                    {currentUser.firstName} {currentUser.lastName}
-                  </p>
-                  <p className="text-xs text-[#6B7280] leading-tight">({currentUser.email})</p>
-                </div>
-                <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold group-hover:bg-primary/20 transition-colors shrink-0">
-                  {currentUser.firstName.charAt(0)}
-                </div>
-              </Link>
+              <div className="relative" ref={menuRef}>
+                <button
+                  onClick={() => setMenuOpen(o => !o)}
+                  className="flex items-center gap-2.5 group hover:opacity-90 transition-opacity"
+                  aria-haspopup="menu"
+                  aria-expanded={menuOpen}
+                >
+                  <div className="text-right hidden sm:block">
+                    <p className="text-sm font-semibold text-[#111827] leading-tight group-hover:text-primary transition-colors">
+                      {currentUser.firstName} {currentUser.lastName}
+                    </p>
+                    <p className="text-xs text-[#6B7280] leading-tight">({currentUser.email})</p>
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold group-hover:bg-primary/20 transition-colors shrink-0">
+                    {currentUser.firstName.charAt(0)}
+                  </div>
+                  <ChevronDown className={`w-4 h-4 text-[#9CA3AF] transition-transform ${menuOpen ? 'rotate-180' : ''}`} />
+                </button>
 
-              </>
+                {menuOpen && (
+                  <div
+                    role="menu"
+                    className="absolute right-0 mt-2 w-72 bg-white rounded-2xl border border-[#E5E7EB] shadow-xl shadow-[#111827]/5 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150"
+                  >
+                    {/* Identity header — doubles as the "My Profile" link */}
+                    <Link
+                      to="/portal/yopmails/profile"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-3 px-5 py-4 bg-[#F9FAFB] hover:bg-primary/5 transition-colors group/id"
+                    >
+                      <div className="w-11 h-11 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-black shrink-0">
+                        {currentUser.firstName.charAt(0)}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-black text-[#111827] truncate">{currentUser.firstName} {currentUser.lastName}</p>
+                        <p className="text-xs text-[#6B7280] truncate">{currentUser.email}</p>
+                        <p className="text-[10px] font-black text-primary uppercase tracking-widest mt-1 opacity-70 group-hover/id:opacity-100 transition-opacity">View Profile →</p>
+                      </div>
+                    </Link>
+
+                    {/* Activity */}
+                    <div className="py-2 border-t border-[#F3F4F6]">
+                      <Link
+                        to="/portal/yopmails/profile?tab=applications"
+                        onClick={() => setMenuOpen(false)}
+                        className="flex items-center gap-3 px-5 py-2.5 text-sm font-bold text-[#374151] hover:bg-[#F9FAFB] hover:text-primary transition-colors"
+                      >
+                        <Briefcase className="w-4 h-4 text-[#9CA3AF]" /> My Applications
+                      </Link>
+                      <Link
+                        to="/portal/yopmails/profile?tab=saved"
+                        onClick={() => setMenuOpen(false)}
+                        className="flex items-center gap-3 px-5 py-2.5 text-sm font-bold text-[#374151] hover:bg-[#F9FAFB] hover:text-primary transition-colors"
+                      >
+                        <Bookmark className="w-4 h-4 text-[#9CA3AF]" /> Saved Jobs
+                      </Link>
+                    </div>
+
+                    {/* Account settings */}
+                    <div className="py-2 border-t border-[#F3F4F6]">
+                      <Link
+                        to="/portal/yopmails/profile/edit"
+                        onClick={() => setMenuOpen(false)}
+                        className="flex items-center gap-3 px-5 py-2.5 text-sm font-bold text-[#374151] hover:bg-[#F9FAFB] hover:text-primary transition-colors"
+                      >
+                        <Pencil className="w-4 h-4 text-[#9CA3AF]" /> Edit Profile
+                      </Link>
+                      <button
+                        onClick={() => { setMenuOpen(false); setShowChangePassword(true); }}
+                        className="w-full flex items-center gap-3 px-5 py-2.5 text-sm font-bold text-[#374151] hover:bg-[#F9FAFB] hover:text-primary transition-colors text-left"
+                      >
+                        <Lock className="w-4 h-4 text-[#9CA3AF]" /> Change Password
+                      </button>
+                    </div>
+
+                    {/* Logout */}
+                    <div className="py-2 border-t border-[#F3F4F6]">
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-3 px-5 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 transition-colors text-left"
+                      >
+                        <LogOut className="w-4 h-4" /> Log Out
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : showAuth ? (
               <>
                 <button
@@ -108,6 +206,12 @@ export default function PortalLayout({
         jobId="1"
         initialTab={authTab}
         redirectTo="/portal/yopmails/profile"
+      />
+
+      {/* Change Password Modal */}
+      <ChangePasswordModal
+        isOpen={showChangePassword}
+        onClose={() => setShowChangePassword(false)}
       />
 
       {/* Content */}

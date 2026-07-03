@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import PortalLayout from '../components/PortalLayout';
-import { Briefcase, Mail, Phone, MapPin, FileText, ExternalLink, Linkedin, LogOut, ArrowRight, Clock, Pencil, Bookmark } from 'lucide-react';
+import { Briefcase, Mail, Phone, MapPin, FileText, ExternalLink, Linkedin, ArrowRight, Clock, Pencil, Bookmark } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 
 const portalStatusLabel: Record<string, string> = {
@@ -48,9 +48,14 @@ const formatDate = (dateString: string) => {
 };
 
 export default function CandidateProfilePage() {
-  const { currentUser, logoutCandidate, updateCurrentUser, applications, jobs } = useApp();
+  const { currentUser, updateCurrentUser, applications, jobs } = useApp();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'applications' | 'saved'>('applications');
+  // Deep-linkable tab: /profile?tab=saved opens the Saved tab directly (used by
+  // the header account menu's "My Applications" / "Saved Jobs" entries).
+  const [searchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab') === 'saved' ? 'saved' : 'applications';
+  const [activeTab, setActiveTab] = useState<'applications' | 'saved'>(tabParam);
+  useEffect(() => { setActiveTab(tabParam); }, [tabParam]);
   const [forceEmptyApps, setForceEmptyApps] = useState(false);
 
   const openEditProfile = () => navigate('/portal/yopmails/profile/edit');
@@ -111,11 +116,6 @@ export default function CandidateProfilePage() {
     resumeName: currentUser?.resumeUrl || latestApp?.resumeUrl || null,
   };
 
-  const handleLogout = () => {
-    logoutCandidate();
-    navigate('/portal/yopmails');
-  };
-
   return (
     <>
       <PortalLayout>
@@ -132,19 +132,12 @@ export default function CandidateProfilePage() {
                     <p className="text-sm font-bold text-[#6B7280] mt-1">{derivedProfile.designation}</p>
                   )}
 
-                  <div className="flex items-center gap-2 mt-4">
+                  <div className="mt-4">
                     <button
                       onClick={openEditProfile}
-                      className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 border border-primary text-primary text-[11px] font-black rounded-xl hover:bg-primary/5 transition-colors uppercase tracking-widest"
+                      className="w-full flex items-center justify-center gap-1.5 px-4 py-2.5 border border-primary text-primary text-[11px] font-black rounded-xl hover:bg-primary/5 transition-colors uppercase tracking-widest"
                     >
                       <Pencil className="w-3.5 h-3.5" /> Edit Profile
-                    </button>
-                    <button
-                      onClick={handleLogout}
-                      title="Sign Out"
-                      className="p-2.5 border border-[#E5E7EB] text-[#9CA3AF] rounded-xl hover:bg-gray-50 hover:text-gray-600 hover:border-gray-300 transition-colors"
-                    >
-                      <LogOut className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
