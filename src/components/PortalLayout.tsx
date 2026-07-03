@@ -1,6 +1,6 @@
 import { ReactNode, useState, useRef, useEffect, CSSProperties } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Pencil, Lock, LogOut, ChevronDown, Briefcase, Bookmark } from 'lucide-react';
+import { Lock, LogOut, ChevronDown, Briefcase, Bookmark } from 'lucide-react';
 import CollabCRMIcon from './CollabCRMIcon';
 import { useApp } from '../store/AppContext';
 import { darkenHex, readableTextColor, accessibleOnWhite } from '../lib/theme';
@@ -149,13 +149,6 @@ export default function PortalLayout({
 
                     {/* Account settings */}
                     <div className="py-2 border-t border-[#F3F4F6]">
-                      <Link
-                        to="/portal/yopmails/profile/edit"
-                        onClick={() => setMenuOpen(false)}
-                        className="flex items-center gap-3 px-5 py-2.5 text-sm font-bold text-[#374151] hover:bg-[#F9FAFB] hover:text-primary transition-colors"
-                      >
-                        <Pencil className="w-4 h-4 text-[#9CA3AF]" /> Edit Profile
-                      </Link>
                       <button
                         onClick={() => { setMenuOpen(false); setShowChangePassword(true); }}
                         className="w-full flex items-center gap-3 px-5 py-2.5 text-sm font-bold text-[#374151] hover:bg-[#F9FAFB] hover:text-primary transition-colors text-left"
