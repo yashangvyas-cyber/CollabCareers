@@ -22,7 +22,7 @@ interface AppContextType extends AppState {
   discardCandidate: (candidateId: string, reason: string) => void;
 }
 
-const STORAGE_KEY = 'collab_careers_state_v19';
+const STORAGE_KEY = 'collab_careers_state_v20';
 
 const initialState: AppState = {
   jobs: [
@@ -997,13 +997,33 @@ Design is a first-class citizen at MindInventory. You will work on products that
       jobId: 'd1',
       status: 'Under Review',
       appliedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-      answers: { 
-        _fullFormData: { 
-          personal: { contactNumber: '+91 98765 43210', linkedin: 'linkedin.com/in/alexpatel' }, 
-          address: { address: '402, Skyline Apartments, Satellite', city: 'Ahmedabad', country: 'India' }, 
-          professional: { currentOrg: 'TechSolutions Inc.', currentDesignation: 'Senior Frontend Engineer', skills: ['React', 'TypeScript', 'Tailwind CSS'] },
-          salary: { ctcType: 'Annual', currency: 'INR (₹)', currentCtc: '18,50,000', expectedCtc: '24,00,000' }
-        } 
+      // Rich "view application" demo: multiple experiences + all 4 custom answers.
+      answers: {
+        d1_q1: 'https://github.com/alexpatel-dev',
+        d1_q2: '4',
+        d1_q3: 'Yes',
+        d1_q4: 'Hybrid',
+        _fullFormData: {
+          personal: {
+            firstName: 'Alex', lastName: 'Patel', email: 'alex.patel@example.com',
+            contactNumber: '+91 98765 43210', gender: 'Male', dob: '1998-05-12',
+            linkedin: 'linkedin.com/in/alexpatel', maritalStatus: 'Single',
+          },
+          professional: {
+            experiences: [
+              { id: 1, from: '2022-Jan', to: 'Present', company: 'TechSolutions Inc.', designation: 'Senior Frontend Engineer', description: 'Leading a 4-member frontend team building accessible, high-performance web apps with React and TypeScript.', isCurrent: true },
+              { id: 2, from: '2020-Jun', to: '2021-Dec', company: 'PixelWorks Studio', designation: 'Frontend Developer', description: 'Built and maintained client dashboards and e-commerce storefronts using React, Redux and REST APIs.', isCurrent: false },
+              { id: 3, from: '2019-Jan', to: '2020-May', company: 'CodeCraft Solutions', designation: 'Junior Web Developer', description: 'Started my career developing responsive marketing sites and internal tools with JavaScript and CSS.', isCurrent: false },
+            ],
+            expYears: '4', expMonths: '2',
+            highestQualification: 'B.Tech Computer Science',
+            noticePeriod: '30',
+            skills: ['React', 'TypeScript', 'JavaScript', 'Tailwind CSS', 'Redux', 'Node.js'],
+            currentOrg: 'TechSolutions Inc.', currentDesignation: 'Senior Frontend Engineer', remarks: '',
+          },
+          salary: { ctcType: 'Annual', currency: 'INR', currentCtc: '18.5', expectedCtc: '24' },
+          address: { street: '402, Skyline Apartments, Satellite', city: 'Ahmedabad', state: 'Gujarat', country: 'India', zip: '380015' },
+        },
       },
       resumeUrl: 'Alex_Patel_Resume.pdf'
     },
@@ -1013,7 +1033,29 @@ Design is a first-class citizen at MindInventory. You will work on products that
       jobId: 'd2',
       status: 'Interview in Progress',
       appliedAt: new Date(Date.now() - 86400000 * 5).toISOString(),
-      answers: { _fullFormData: { personal: { contactNumber: '+91 98765 43210' }, address: { city: 'Ahmedabad', country: 'India' }, professional: { currentDesignation: 'Senior Developer' } } },
+      // Two-experience scenario for the view-application page.
+      answers: {
+        _fullFormData: {
+          personal: {
+            firstName: 'Alex', lastName: 'Patel', email: 'alex.patel@example.com',
+            contactNumber: '+91 98765 43210', gender: 'Male', dob: '1998-05-12',
+            linkedin: 'linkedin.com/in/alexpatel', maritalStatus: 'Single',
+          },
+          professional: {
+            experiences: [
+              { id: 1, from: '2022-Jan', to: 'Present', company: 'TechSolutions Inc.', designation: 'Senior Frontend Engineer', description: 'Design-focused frontend work: building the design system and component library used across all products.', isCurrent: true },
+              { id: 2, from: '2020-Jun', to: '2021-Dec', company: 'PixelWorks Studio', designation: 'UI Developer', description: 'Translated Figma designs into pixel-perfect, accessible interfaces.', isCurrent: false },
+            ],
+            expYears: '4', expMonths: '2',
+            highestQualification: 'B.Tech Computer Science',
+            noticePeriod: '30',
+            skills: ['Figma', 'React', 'Tailwind CSS', 'CSS', 'HTML'],
+            currentOrg: 'TechSolutions Inc.', currentDesignation: 'Senior Frontend Engineer', remarks: '',
+          },
+          salary: { ctcType: 'Annual', currency: 'INR', currentCtc: '18.5', expectedCtc: '24' },
+          address: { street: '402, Skyline Apartments, Satellite', city: 'Ahmedabad', state: 'Gujarat', country: 'India', zip: '380015' },
+        },
+      },
       resumeUrl: 'Alex_Patel_Resume.pdf'
     },
     {
@@ -1022,7 +1064,27 @@ Design is a first-class citizen at MindInventory. You will work on products that
       jobId: 'd4',
       status: 'Selected',
       appliedAt: new Date(Date.now() - 86400000 * 10).toISOString(),
-      answers: { _fullFormData: { personal: { contactNumber: '+91 98765 43210' }, address: { city: 'Ahmedabad', country: 'India' } } },
+      // Minimal scenario: single experience, optional fields (gender/DOB/marital/
+      // LinkedIn) left blank — demos the "Not provided" states on the view page.
+      answers: {
+        _fullFormData: {
+          personal: {
+            firstName: 'Alex', lastName: 'Patel', email: 'alex.patel@example.com',
+            contactNumber: '+91 98765 43210',
+          },
+          professional: {
+            experiences: [
+              { id: 1, from: '2022-Jan', to: 'Present', company: 'TechSolutions Inc.', designation: 'Senior Frontend Engineer', description: '', isCurrent: true },
+            ],
+            expYears: '4', expMonths: '0',
+            highestQualification: 'B.Tech Computer Science',
+            noticePeriod: '30',
+            skills: ['Agile', 'Jira', 'React'],
+          },
+          salary: {},
+          address: { street: '402, Skyline Apartments, Satellite', city: 'Ahmedabad', state: 'Gujarat', country: 'India', zip: '380015' },
+        },
+      },
       resumeUrl: 'Alex_Patel_Resume.pdf'
     },
     {
@@ -1048,8 +1110,9 @@ Design is a first-class citizen at MindInventory. You will work on products that
           professional: {
             experiences: [
               { id: 1, from: '2022-Jan', to: 'Present', company: 'TechSolutions Inc.', designation: 'Senior Frontend Engineer', description: 'Building accessible, high-performance web apps with React and TypeScript. Leading a small frontend team.', isCurrent: true },
+              { id: 2, from: '2020-Jun', to: '2021-Dec', company: 'PixelWorks Studio', designation: 'Frontend Developer', description: 'Built and maintained client dashboards and e-commerce storefronts using React and Redux.', isCurrent: false },
             ],
-            expYears: '3',
+            expYears: '4',
             expMonths: '2',
             highestQualification: 'B.Tech Computer Science',
             noticePeriod: '30',

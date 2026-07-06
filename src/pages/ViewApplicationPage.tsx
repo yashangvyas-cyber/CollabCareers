@@ -29,9 +29,42 @@ export default function ViewApplicationPage() {
   const canWithdraw = job.status !== 'Close' && 
     !['Not Considered', 'Joined', 'Not Joined', 'Withdrawn'].includes(application.status);
 
+  // The submitted snapshot saved by the application form. Every section below
+  // renders from this (no hardcoded candidate data) so each application shows
+  // exactly what was submitted.
+  const fd: any = application.answers?._fullFormData || {};
+  const personal = fd.personal || {};
+  const professional = fd.professional || {};
+  const salary = fd.salary || {};
+  const address = fd.address || {};
+  const experiences: any[] = professional.experiences || [];
+
+  // Custom-question answers = everything in `answers` except the form snapshot.
+  const customAnswers: Record<string, any> = Object.fromEntries(
+    Object.entries(application.answers || {}).filter(([k]) => k !== '_fullFormData')
+  );
+  const customFields = job.customFields || [];
+
+  const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+
+  const formatDob = (d?: string) => {
+    if (!d) return '';
+    const dt = new Date(d);
+    return isNaN(dt.getTime()) ? d : dt.toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
+  };
+
+  const totalExperience = [
+    professional.expYears ? `${professional.expYears} ${professional.expYears === '1' ? 'Year' : 'Years'}` : '',
+    professional.expMonths && professional.expMonths !== '0' ? `${professional.expMonths} ${professional.expMonths === '1' ? 'Month' : 'Months'}` : '',
+  ].filter(Boolean).join(' ');
+
+  const noticePeriod = professional.noticePeriod
+    ? `${professional.noticePeriod}${/^\d+$/.test(professional.noticePeriod) ? ' Days' : ''}`
+    : '';
+
   const appData = {
     jobTitle: job?.title || 'React Developer',
-    company: job?.businessUnit || 'MindInventory',
     location: job?.location || 'Ahmedabad',
     employmentType: job?.employmentType || 'Full-time',
     jobType: job?.jobType || 'On-site',
@@ -40,31 +73,7 @@ export default function ViewApplicationPage() {
     status: application?.status || 'Applied',
     jobClosed: job?.status === 'Close',
     description: job?.description || 'Expert React developer needed for performance-critical web applications.',
-    candidateInfo: {
-      fullName: 'Alex Patel',
-      email: 'alex.patel@example.com',
-      phone: '+91 98765 43210',
-      dob: '15 June 1996',
-      linkedin: 'linkedin.com/in/alexpatel'
-    },
-    professionalDetails: {
-      experiences: [
-        { id: 1, from: '2021-Aug', to: '2026-May', description: 'I am passionate about building accessible and performant web applications.', company: 'TechSolutions Inc.', designation: 'Senior Frontend Engineer', isCurrent: false }
-      ],
-      totalExperience: '5 Years',
-      highestQualification: 'B.Tech in Computer Science',
-      noticePeriod: '30 Days',
-      skills: ['React', 'TypeScript', 'Node.js', 'Tailwind CSS', 'Redux'],
-      generalRemarks: 'Passionate about building accessible and performant web applications.'
-    },
-    salaryInfo: { ctcType: 'Annual', currency: 'INR (₹)', currentCtc: '18,50,000', expectedCtc: '24,00,000' },
-    address: { address: '402, Skyline Apartments, Satellite', country: 'India', state: 'Gujarat', townCity: 'Ahmedabad', zipCode: '380015' },
-    additionalInfo: { portfolioUrl: 'https://alexpatel.dev', reloate: 'Yes' },
-    resume: { filename: 'Alex_Patel_Resume.pdf' }
   };
-
-  const formatDate = (dateString: string) =>
-    new Date(dateString).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 
   return (
     <PortalLayout>
@@ -144,88 +153,124 @@ export default function ViewApplicationPage() {
             </div>
           </AccordionCard>
 
-          <AccordionCard title="Personal Profile">
+          <AccordionCard title="Personal Information">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-5">
-              <InfoItem label="Full Name" value={appData.candidateInfo.fullName} />
-              <InfoItem label="Email Address" value={appData.candidateInfo.email} />
-              <InfoItem label="Mobile Number" value={appData.candidateInfo.phone} />
-              <InfoItem label="Date of Birth" value={appData.candidateInfo.dob} />
-              <div className="sm:col-span-2 flex items-center gap-2 text-sm font-medium text-primary pt-1">
-                <Linkedin className="w-4 h-4 text-[#0A66C2]" />
-                {appData.candidateInfo.linkedin}
+              <InfoItem label="Full Name" value={[personal.firstName, personal.lastName].filter(Boolean).join(' ')} />
+              <InfoItem label="Email Address" value={personal.email} />
+              <InfoItem label="Contact Number" value={personal.contactNumber} />
+              <InfoItem label="Highest Qualification" value={professional.highestQualification} />
+              <div className="sm:col-span-2">
+                <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-1.5">LinkedIn Profile</p>
+                {personal.linkedin ? (
+                  <a href={`https://${String(personal.linkedin).replace('https://', '')}`} target="_blank" rel="noreferrer"
+                    className="flex items-center gap-2 text-sm font-semibold text-primary hover:underline w-fit">
+                    <Linkedin className="w-4 h-4 text-[#0A66C2]" />
+                    {personal.linkedin}
+                  </a>
+                ) : (
+                  <span className="text-sm text-[#D1D5DB]">Not provided</span>
+                )}
+              </div>
+              {/* Optional demographic details — mirrors the form's optional group */}
+              <div className="sm:col-span-2 bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl p-4">
+                <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-3">Additional Details (Optional)</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-4">
+                  <InfoItem label="Gender" value={personal.gender} />
+                  <InfoItem label="Date of Birth" value={formatDob(personal.dob)} />
+                  <InfoItem label="Marital Status" value={personal.maritalStatus} />
+                </div>
               </div>
             </div>
           </AccordionCard>
 
           <AccordionCard title="Professional Details">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-5">
-              <div className="sm:col-span-2 space-y-4">
-                {appData.professionalDetails.experiences.map((exp: any) => (
-                  <div key={exp.id} className="bg-[#F9FAFB] p-4 rounded-xl border border-[#E5E7EB]">
-                    <div className="flex justify-between items-start">
-                       <div>
-                         <h4 className="text-sm font-black text-[#111827]">{exp.designation}</h4>
-                         <p className="text-xs font-bold text-primary">{exp.company}</p>
-                       </div>
-                       <span className="text-[10px] font-black uppercase tracking-widest text-[#6B7280] bg-white border border-[#E5E7EB] px-2.5 py-1 rounded-md">
-                         {exp.from} - {exp.to}
-                       </span>
+              {experiences.length > 0 && (
+                <div className="sm:col-span-2 space-y-4">
+                  <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">
+                    Experience ({experiences.length})
+                  </p>
+                  {experiences.map((exp: any) => (
+                    <div key={exp.id} className="bg-[#F9FAFB] p-4 rounded-xl border border-[#E5E7EB]">
+                      <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-2">
+                         <div>
+                           <h4 className="text-sm font-black text-[#111827]">{exp.designation}</h4>
+                           <p className="text-xs font-bold text-primary">{exp.company}</p>
+                         </div>
+                         <div className="flex items-center gap-2 shrink-0">
+                           {exp.isCurrent && (
+                             <span className="text-[10px] font-black uppercase tracking-widest text-green-700 bg-green-50 border border-green-200 px-2.5 py-1 rounded-md">Current</span>
+                           )}
+                           <span className="text-[10px] font-black uppercase tracking-widest text-[#6B7280] bg-white border border-[#E5E7EB] px-2.5 py-1 rounded-md">
+                             {exp.from} - {exp.to}
+                           </span>
+                         </div>
+                      </div>
+                      {exp.description && <p className="text-xs font-medium text-[#4B5563] mt-3 leading-relaxed">{exp.description}</p>}
                     </div>
-                    {exp.description && <p className="text-xs font-medium text-[#4B5563] mt-3 leading-relaxed">{exp.description}</p>}
-                  </div>
-                ))}
-              </div>
-              <InfoItem label="Total Experience" value={appData.professionalDetails.totalExperience} />
-              <InfoItem label="Highest Qualification" value={appData.professionalDetails.highestQualification} />
-              <InfoItem label="Notice Period" value={appData.professionalDetails.noticePeriod} />
-              <div className="sm:col-span-2 pt-1">
-                <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-2">Core Skills</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {appData.professionalDetails.skills.map(s => (
-                    <span key={s} className="px-3 py-1 text-[11px] font-bold bg-primary/5 text-primary rounded-lg border border-primary/10 uppercase tracking-tight">{s}</span>
                   ))}
                 </div>
+              )}
+              <InfoItem label="Total Experience" value={totalExperience} />
+              <InfoItem label="Notice Period" value={noticePeriod} />
+              <div className="sm:col-span-2 pt-1">
+                <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-2">Skills</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {(professional.skills || []).length > 0 ? (professional.skills || []).map((s: string) => (
+                    <span key={s} className="px-3 py-1 text-[11px] font-bold bg-primary/5 text-primary rounded-lg border border-primary/10 uppercase tracking-tight">{s}</span>
+                  )) : <span className="text-sm text-[#D1D5DB]">Not provided</span>}
+                </div>
               </div>
-              <div className="sm:col-span-2">
-                <InfoItem label="Additional Notes" value={appData.professionalDetails.generalRemarks} />
-              </div>
+            </div>
+          </AccordionCard>
+
+          <AccordionCard title="Salary Information">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-5">
+              <InfoItem label="CTC Type" value={salary.ctcType} />
+              <InfoItem label="Currency" value={salary.currency} />
+              <InfoItem label="Current CTC" value={salary.currentCtc} />
+              <InfoItem label="Expected CTC" value={salary.expectedCtc} />
             </div>
           </AccordionCard>
 
           <AccordionCard title="Address Information">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-5">
               <div className="sm:col-span-2">
-                <InfoItem label="Residential Address" value={appData.address.address} />
+                <InfoItem label="Residential Address" value={address.street || address.address} />
               </div>
-              <InfoItem label="Country" value={appData.address.country} />
-              <InfoItem label="State" value={appData.address.state} />
-              <InfoItem label="Town / City" value={appData.address.townCity} />
-              <InfoItem label="Zip / Postal Code" value={appData.address.zipCode} />
+              <InfoItem label="Town / City" value={address.city} />
+              <InfoItem label="State" value={address.state} />
+              <InfoItem label="Country" value={address.country} />
+              <InfoItem label="Zip / Postal Code" value={address.zip || address.zipCode} />
             </div>
           </AccordionCard>
 
-          <AccordionCard title="Salary Information">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-5">
-              <InfoItem label="CTC Type" value={appData.salaryInfo.ctcType} />
-              <InfoItem label="Currency" value={appData.salaryInfo.currency} />
-              <InfoItem label="Current CTC" value={`₹ ${appData.salaryInfo.currentCtc}`} />
-              <InfoItem label="Expected CTC" value={`₹ ${appData.salaryInfo.expectedCtc}`} />
-            </div>
-          </AccordionCard>
-
-          <AccordionCard title="Additional Information">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-5">
-              <div className="sm:col-span-2">
-                <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-1.5">Portfolio URL</p>
-                <a href={appData.additionalInfo.portfolioUrl} target="_blank" rel="noreferrer"
-                  className="text-sm font-semibold text-primary hover:underline flex items-center gap-1.5">
-                  <Globe className="w-3.5 h-3.5" />
-                  {appData.additionalInfo.portfolioUrl}
-                </a>
+          {customFields.length > 0 && (
+            <AccordionCard title="Additional Information">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-5">
+                {customFields.map((field: any) => {
+                  const answer = customAnswers[field.id] ?? customAnswers[field.label];
+                  const isUrl = typeof answer === 'string' && /^https?:\/\//.test(answer);
+                  return (
+                    <div key={field.id} className={field.type === 'Text' ? 'sm:col-span-2' : ''}>
+                      <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-1.5">{field.label}</p>
+                      {isUrl ? (
+                        <a href={answer} target="_blank" rel="noreferrer"
+                          className="text-sm font-semibold text-primary hover:underline flex items-center gap-1.5 w-fit">
+                          <Globe className="w-3.5 h-3.5" />
+                          {answer}
+                        </a>
+                      ) : (
+                        <div className="text-sm font-semibold text-[#111827] leading-relaxed">
+                          {answer || <span className="text-[#D1D5DB] font-normal">Not provided</span>}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
-              <InfoItem label="Open to Relocate?" value={appData.additionalInfo.reloate} />
-            </div>
-          </AccordionCard>
+            </AccordionCard>
+          )}
 
           <AccordionCard title="Resume">
             <div className="flex items-center gap-4">
@@ -233,7 +278,7 @@ export default function ViewApplicationPage() {
                 <FileText className="w-6 h-6" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-[#111827] truncate">{appData.resume.filename}</p>
+                <p className="text-sm font-bold text-[#111827] truncate">{application.resumeUrl || 'Resume.pdf'}</p>
                 <p className="text-[10px] text-[#9CA3AF] font-medium uppercase tracking-widest mt-0.5">PDF · 2.4 MB</p>
               </div>
               <button className="flex items-center gap-2 px-5 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-xs font-black text-[#6B7280] hover:text-primary hover:border-primary/30 transition-all uppercase tracking-widest shadow-sm">
