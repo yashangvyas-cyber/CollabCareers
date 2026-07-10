@@ -6,7 +6,7 @@ import {
   Code2, Copy, CheckCheck, ExternalLink,
   ChevronDown, ChevronUp, ChevronRight,
   SlidersHorizontal, Search, MapPin, Briefcase, TrendingUp, Wifi, Link2,
-  AlertTriangle, ShieldCheck, Palette, Upload, Trash2, Globe, Share2,
+  AlertTriangle, ShieldCheck, Palette, Upload, Trash2, Globe,
 } from 'lucide-react';
 import { BRAND_PRESETS, isLowContrastOnWhite, DEFAULT_APPEARANCE } from '../lib/theme';
 import type { PortalConfig } from '../store/types';
@@ -140,10 +140,8 @@ export default function CareerPortalPage() {
   // Local state, prefilled with sensible defaults; reset on Cancel.
   const [seoTitle, setSeoTitle] = useState(DEFAULT_SEO_TITLE);
   const [seoDescription, setSeoDescription] = useState(DEFAULT_SEO_DESCRIPTION);
-  const [seoOgImageUrl, setSeoOgImageUrl] = useState('');
   const [seoGoogleJobs, setSeoGoogleJobs] = useState(true);
   const [seoIndexable, setSeoIndexable] = useState(true);
-  const ogInputRef = useRef<HTMLInputElement>(null);
 
   // Appearance — local state, applied live to the store on change
   const [apTagline, setApTagline] = useState(portalConfig?.appearance?.tagline ?? DEFAULT_APPEARANCE.tagline);
@@ -169,14 +167,6 @@ export default function CareerPortalPage() {
       commitAppearance({ heroEnabled: true, heroImageUrl: url });
       setApHeroEnabled(true);
     };
-    reader.readAsDataURL(file);
-  };
-
-  const handleOgUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => setSeoOgImageUrl(reader.result as string);
     reader.readAsDataURL(file);
   };
 
@@ -244,7 +234,6 @@ export default function CareerPortalPage() {
     setApHeroImageUrl(portalConfig?.appearance?.heroImageUrl ?? DEFAULT_APPEARANCE.heroImageUrl);
     setSeoTitle(DEFAULT_SEO_TITLE);
     setSeoDescription(DEFAULT_SEO_DESCRIPTION);
-    setSeoOgImageUrl('');
     setSeoGoogleJobs(true);
     setSeoIndexable(true);
     setSaveAttempted(false);
@@ -584,54 +573,6 @@ export default function CareerPortalPage() {
                 />
                 <p className="text-[11px] text-[#9CA3AF] mt-1.5">
                   The summary shown under the title. It doesn't affect ranking, but it wins the click — aim for {SEO_DESC_LIMIT} characters or fewer.
-                </p>
-              </div>
-
-              {/* Social share image (og:image) */}
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Share2 className="w-3.5 h-3.5 text-[#374151]" />
-                  <label className="text-xs font-semibold text-[#374151]">Social share image</label>
-                </div>
-                <input ref={ogInputRef} type="file" accept="image/*" onChange={handleOgUpload} className="hidden" />
-                {seoOgImageUrl ? (
-                  <div className="space-y-3">
-                    {/* Link-preview card — mirrors how the link renders on LinkedIn / Slack */}
-                    <div className="rounded-lg overflow-hidden border border-[#E5E7EB] max-w-md">
-                      <img src={seoOgImageUrl} alt="Social share" className="w-full h-40 object-cover" />
-                      <div className="px-3 py-2 bg-[#F9FAFB] border-t border-[#E5E7EB]">
-                        <p className="text-[10px] uppercase tracking-wide text-[#9CA3AF]">{portalBase}</p>
-                        <p className="text-xs font-semibold text-[#1A1A2E] truncate">{seoTitle.trim() || DEFAULT_SEO_TITLE}</p>
-                        <p className="text-[11px] text-[#6B7280] truncate">{seoDescription.trim() || DEFAULT_SEO_DESCRIPTION}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => ogInputRef.current?.click()}
-                        className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-[#374151] bg-white border border-[#E5E7EB] rounded-lg hover:border-[#3538CD]/30 hover:text-[#3538CD] transition-colors shadow-sm"
-                      >
-                        <Upload className="w-3.5 h-3.5" /> Replace
-                      </button>
-                      <button
-                        onClick={() => setSeoOgImageUrl('')}
-                        className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#9CA3AF] hover:text-red-500 transition-colors"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" /> Remove
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => ogInputRef.current?.click()}
-                    className="w-full max-w-md flex flex-col items-center justify-center gap-2 py-8 border-2 border-dashed border-[#D1D5DB] rounded-lg text-[#6B7280] hover:border-[#3538CD]/40 hover:text-[#3538CD] hover:bg-[#F9FAFB] transition-colors"
-                  >
-                    <Upload className="w-5 h-5" />
-                    <span className="text-xs font-semibold">Upload share image</span>
-                    <span className="text-[10px] text-[#9CA3AF]">Recommended 1200 × 630</span>
-                  </button>
-                )}
-                <p className="text-[11px] text-[#9CA3AF] mt-1.5">
-                  The preview card shown when your careers link is shared on LinkedIn, WhatsApp, Slack, etc.
                 </p>
               </div>
 
