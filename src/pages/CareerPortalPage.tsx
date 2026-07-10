@@ -21,6 +21,17 @@ const moduleItems = [
   { name: 'Career Portal', count: null, active: true, path: '/crm/career-portal' },
 ];
 
+// SEO best-practice character limits — Google typically truncates beyond these.
+const SEO_TITLE_LIMIT = 60;
+const SEO_DESC_LIMIT = 160;
+const DEFAULT_SEO_TITLE = 'MindInventory Careers — Open Jobs & Opportunities';
+const DEFAULT_SEO_DESCRIPTION =
+  'Explore open roles at MindInventory and grow your career with us. Browse jobs across engineering, design, QA and more — apply online in minutes.';
+
+// Character-counter colour: neutral when empty, green within budget, amber when over.
+const seoCounterColor = (len: number, limit: number) =>
+  len === 0 ? 'text-[#9CA3AF]' : len <= limit ? 'text-emerald-600' : 'text-amber-600';
+
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface SectionProps {
   title: string;

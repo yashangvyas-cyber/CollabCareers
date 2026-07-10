@@ -3,7 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import PortalLayout from '../components/PortalLayout';
 import AuthModal from '../components/AuthModal';
 import {
-  MapPin, Briefcase, Building2, Clock, Tags, IndianRupee,
+  MapPin, Briefcase, Building2, Clock, Tags, Wallet,
   ArrowRight, Bookmark, ChevronRight, ArrowLeft, Copy, CheckCheck, X, CheckCircle
 } from 'lucide-react';
 import { useApp } from '../store/AppContext';
@@ -171,7 +171,7 @@ export default function JobDetailPage() {
     { label: 'Employment Type', value: job.employmentType, icon: <Briefcase className="w-3.5 h-3.5 text-[#9CA3AF]" /> },
     { label: 'Job Type', value: job.jobType, icon: <Building2 className="w-3.5 h-3.5 text-[#9CA3AF]" /> },
     { label: 'Experience', value: job.experience, icon: <Clock className="w-3.5 h-3.5 text-[#9CA3AF]" /> },
-    ...(showSalaryRow ? [{ label: 'Salary Range', value: salaryValue as string, icon: <IndianRupee className="w-3.5 h-3.5 text-[#9CA3AF]" /> }] : []),
+    ...(showSalaryRow ? [{ label: 'Salary Range', value: salaryValue as string, icon: <Wallet className="w-3.5 h-3.5 text-[#9CA3AF]" /> }] : []),
   ];
 
   return (
