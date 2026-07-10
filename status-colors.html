@@ -1,0 +1,302 @@
+<title>Career Portal — Application Status Colors</title>
+<style>
+  :root{
+    --ground:#FBFAFC; --panel:#FFFFFF; --ink:#17151C; --ink-soft:#565264;
+    --line:#E9E7EE; --line-soft:#F1F0F5; --brand:#ED184F; --brand-soft:#FCE7EE;
+    --mono-bg:#F5F4F8; --mono-ink:#3B3846; --shadow:0 1px 2px rgba(20,16,30,.05),0 8px 24px -14px rgba(20,16,30,.18);
+    --tile-light:#FBFAFC; --tile-dark:#0E1116;
+    --radius:14px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --ground:#0C0D12; --panel:#14151C; --ink:#ECEBF2; --ink-soft:#9C99AC;
+      --line:#26262F; --line-soft:#1C1D25; --brand:#FF4D78; --brand-soft:#2A1119;
+      --mono-bg:#1A1B23; --mono-ink:#C7C4D4;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -16px rgba(0,0,0,.6);
+      --tile-light:#F4F3F7; --tile-dark:#0A0B0F;
+    }
+  }
+  :root[data-theme="light"]{
+    --ground:#FBFAFC; --panel:#FFFFFF; --ink:#17151C; --ink-soft:#565264;
+    --line:#E9E7EE; --line-soft:#F1F0F5; --brand:#ED184F; --brand-soft:#FCE7EE;
+    --mono-bg:#F5F4F8; --mono-ink:#3B3846; --shadow:0 1px 2px rgba(20,16,30,.05),0 8px 24px -14px rgba(20,16,30,.18);
+    --tile-light:#FBFAFC; --tile-dark:#0E1116;
+  }
+  :root[data-theme="dark"]{
+    --ground:#0C0D12; --panel:#14151C; --ink:#ECEBF2; --ink-soft:#9C99AC;
+    --line:#26262F; --line-soft:#1C1D25; --brand:#FF4D78; --brand-soft:#2A1119;
+    --mono-bg:#1A1B23; --mono-ink:#C7C4D4;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -16px rgba(0,0,0,.6);
+    --tile-light:#F4F3F7; --tile-dark:#0A0B0F;
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);
+    font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;line-height:1.5;}
+  .mono{font-family:ui-monospace,"SFMono-Regular","JetBrains Mono","Menlo",Consolas,monospace;
+    font-variant-numeric:tabular-nums;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px 96px;}
+
+  /* Header */
+  header{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--ground) 86%,transparent);
+    backdrop-filter:blur(12px);border-bottom:1px solid var(--line);}
+  .hd{max-width:1080px;margin:0 auto;padding:16px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+  .brandmark{width:9px;height:26px;border-radius:3px;background:var(--brand);flex:none;}
+  .hd h1{font-size:15px;font-weight:700;letter-spacing:-.01em;margin:0;}
+  .hd .sub{font-size:12px;color:var(--ink-soft);margin:0;}
+  .hd .spacer{flex:1;}
+  .toggle{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--panel);}
+  .toggle button{border:0;background:transparent;color:var(--ink-soft);font:inherit;font-size:12px;font-weight:600;
+    padding:6px 14px;cursor:pointer;letter-spacing:.01em;}
+  .toggle button[aria-pressed="true"]{background:var(--ink);color:var(--ground);}
+
+  /* Intro */
+  .eyebrow{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--brand);}
+  .lede{margin:40px 0 8px;font-size:30px;font-weight:800;letter-spacing:-.025em;line-height:1.1;text-wrap:balance;max-width:20ch;}
+  .lede-sub{margin:0;max-width:66ch;color:var(--ink-soft);font-size:15px;}
+
+  .note{margin:28px 0 8px;display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:12px;
+    background:var(--brand-soft);border:1px solid color-mix(in srgb,var(--brand) 24%,transparent);}
+  .note b{color:var(--ink);}
+  .note p{margin:0;font-size:13.5px;color:var(--ink);}
+  .note .ico{color:var(--brand);font-weight:800;flex:none;}
+
+  h2.sec{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);
+    margin:56px 0 4px;display:flex;align-items:center;gap:10px;}
+  h2.sec::after{content:"";height:1px;background:var(--line);flex:1;}
+
+  /* Cards grid */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-top:20px;}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);
+    overflow:hidden;display:flex;flex-direction:column;}
+  .card-top{padding:16px 16px 14px;border-bottom:1px solid var(--line-soft);}
+  .card-name{font-size:15px;font-weight:700;letter-spacing:-.01em;margin:0 0 3px;}
+  .feeds{font-size:11px;color:var(--ink-soft);line-height:1.5;}
+  .feeds .k{font-family:ui-monospace,monospace;color:var(--ink);background:var(--line-soft);
+    padding:1px 5px;border-radius:5px;font-size:10.5px;margin-right:4px;display:inline-block;margin-top:3px;}
+
+  .previews{display:grid;grid-template-columns:1fr 1fr;}
+  .preview{padding:22px 14px;display:flex;flex-direction:column;align-items:center;gap:8px;}
+  .preview:first-child{border-right:1px solid var(--line-soft);}
+  .preview.on-light{background:var(--tile-light);}
+  .preview.on-dark{background:var(--tile-dark);}
+  .preview .caps{font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:.6;}
+  .preview.on-light .caps{color:#6b7280;}
+  .preview.on-dark .caps{color:#8b8f9c;}
+  .badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;border:1px solid;
+    padding:5px 12px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;}
+  .badge .dot{width:6px;height:6px;border-radius:999px;background:currentColor;opacity:.85;}
+
+  .spec{padding:12px 14px 14px;display:flex;flex-direction:column;gap:2px;}
+  .spec .row{display:grid;grid-template-columns:52px 1fr;align-items:center;gap:8px;padding:5px 0;}
+  .spec .lab{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);}
+  .swatch-line{display:flex;align-items:center;gap:8px;min-width:0;}
+  .chip{width:16px;height:16px;border-radius:5px;border:1px solid rgba(0,0,0,.12);flex:none;}
+  :root[data-theme="dark"] .chip, .chip{border-color:color-mix(in srgb,var(--ink) 18%,transparent);}
+  .copy{font-family:ui-monospace,monospace;font-size:11.5px;color:var(--mono-ink);background:transparent;border:0;
+    padding:2px 4px;border-radius:5px;cursor:pointer;text-align:left;letter-spacing:0;}
+  .copy:hover{background:var(--mono-bg);}
+  .spec .theme-tag{grid-column:1/3;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--ink-soft);margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);}
+  .spec .theme-tag:first-child{margin-top:0;padding-top:0;border-top:0;}
+  .tw{margin:2px 14px 14px;background:var(--mono-bg);border-radius:9px;padding:9px 11px;}
+  .tw button{font-family:ui-monospace,monospace;font-size:11px;color:var(--mono-ink);background:transparent;border:0;
+    cursor:pointer;text-align:left;width:100%;line-height:1.55;word-break:break-word;}
+  .tw .lab{font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);
+    display:block;margin-bottom:4px;}
+
+  /* Code block */
+  .codeblock{margin-top:20px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);overflow:hidden;}
+  .codeblock .bar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line-soft);}
+  .codeblock .bar .fname{font-family:ui-monospace,monospace;font-size:12px;color:var(--ink-soft);}
+  .codeblock .bar .spacer{flex:1;}
+  .codeblock .bar button{font:inherit;font-size:12px;font-weight:600;color:var(--brand);background:transparent;
+    border:1px solid color-mix(in srgb,var(--brand) 30%,transparent);border-radius:8px;padding:5px 12px;cursor:pointer;}
+  .codeblock pre{margin:0;padding:16px;overflow-x:auto;font-family:ui-monospace,monospace;font-size:12px;line-height:1.7;color:var(--mono-ink);}
+  .codeblock pre .cm{color:var(--ink-soft);}
+  .codeblock pre .st{color:var(--brand);}
+
+  footer{margin-top:64px;padding-top:20px;border-top:1px solid var(--line);color:var(--ink-soft);font-size:12.5px;}
+
+  #toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);opacity:0;pointer-events:none;
+    background:var(--ink);color:var(--ground);font-size:13px;font-weight:600;padding:9px 16px;border-radius:999px;
+    box-shadow:var(--shadow);transition:opacity .18s,transform .18s;z-index:60;}
+  #toast.show{opacity:1;transform:translate(-50%,0);}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+  :focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:4px;}
+  @media (max-width:560px){.previews{grid-template-columns:1fr}.preview:first-child{border-right:0;border-bottom:1px solid var(--line-soft)}.lede{font-size:25px}}
+</style>
+
+<header>
+  <div class="hd">
+    <span class="brandmark" aria-hidden="true"></span>
+    <div>
+      <h1>Application Status Colors</h1>
+      <p class="sub">CollabCareers candidate portal · <span class="mono">portalStatusColor</span></p>
+    </div>
+    <span class="spacer"></span>
+    <div class="toggle" role="group" aria-label="Preview theme">
+      <button id="tl" aria-pressed="false">Light</button>
+      <button id="td" aria-pressed="false">Dark</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <p class="eyebrow" style="margin-top:44px">Design handoff · 12 statuses</p>
+  <h1 class="lede">A distinct font + background for every portal status.</h1>
+  <p class="lede-sub">These are the statuses a candidate sees on their own applications — the right-hand column of your mapping. Each one now gets its own hue, so states no longer collide. Values map 1:1 to Tailwind's default palette, and every text-on-background pair clears WCAG AA (4.5:1) in both light and dark.</p>
+
+  <div class="note">
+    <span class="ico" aria-hidden="true">✦</span>
+    <p><b>What this fixes.</b> In the current portal, <b>Draft</b>, <b>Interview In Progress</b> and <b>Offer On Hold</b> all render amber, and the three closed states share one gray — so different statuses look identical. This palette gives each a separate hue (or, for the neutral states, a separate shade) while keeping the brand pink <span class="mono">#ED184F</span> reserved for buttons and links, never for status.</p>
+  </div>
+
+  <h2 class="sec">Status swatches</h2>
+  <div class="grid" id="grid"></div>
+
+  <h2 class="sec">Drop-in replacement</h2>
+  <p class="lede-sub" style="margin-top:12px">Replace the <span class="mono">portalStatusColor</span> map in <span class="mono">CandidateProfilePage.tsx</span> (and the matching map in <span class="mono">ViewApplicationPage.tsx</span>). Dark variants use Tailwind's <span class="mono">dark:</span> prefix.</p>
+  <div class="codeblock">
+    <div class="bar">
+      <span class="fname">portalStatusColor.ts</span>
+      <span class="spacer"></span>
+      <button id="copyAll">Copy all</button>
+    </div>
+    <pre id="code"></pre>
+  </div>
+
+  <footer>
+    Contrast verified with WCAG 2.1 relative-luminance (all pairs ≥ 4.5:1, AA for normal text). Neutral states — Draft / Withdrawn / Closed — deliberately share the gray family but differ in temperature and shade so they stay distinguishable. Brand accent <span class="mono">#ED184F</span> stays out of the status set.
+  </footer>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const DATA=[
+ {name:"Draft",feeds:["(unsubmitted)"],tw:"slate-100 / slate-600 / slate-300",twd:"slate-800 / slate-300 / slate-700",
+  L:{bg:"#F1F5F9",tx:"#475569",bd:"#CBD5E1",c:6.92},D:{bg:"#1E293B",tx:"#CBD5E1",bd:"#334155",c:9.85}},
+ {name:"Applied",feeds:["applied"],tw:"blue-50 / blue-700 / blue-200",twd:"blue-950 / blue-300 / blue-900",
+  L:{bg:"#EFF6FF",tx:"#1D4ED8",bd:"#BFDBFE",c:6.16},D:{bg:"#172554",tx:"#93C5FD",bd:"#1E3A8A",c:8.15}},
+ {name:"Under Review",feeds:["under-review","shortlisted","on-hold","selected"],tw:"indigo-50 / indigo-700 / indigo-200",twd:"indigo-950 / indigo-300 / indigo-900",
+  L:{bg:"#EEF2FF",tx:"#4338CA",bd:"#C7D2FE",c:7.07},D:{bg:"#1E1B4B",tx:"#A5B4FC",bd:"#312E81",c:8.02}},
+ {name:"Interview In Progress",feeds:["interview"],tw:"amber-50 / amber-700 / amber-200",twd:"amber-950 / amber-300 / amber-900",
+  L:{bg:"#FFFBEB",tx:"#B45309",bd:"#FDE68A",c:4.84},D:{bg:"#451A03",tx:"#FCD34D",bd:"#78350F",c:10.39}},
+ {name:"Offered",feeds:["offered"],tw:"cyan-50 / cyan-700 / cyan-200",twd:"cyan-950 / cyan-300 / cyan-900",
+  L:{bg:"#ECFEFF",tx:"#0E7490",bd:"#A5F3FC",c:5.15},D:{bg:"#083344",tx:"#67E8F9",bd:"#164E63",c:9.24}},
+ {name:"Offer Accepted",feeds:["offer-accepted"],tw:"emerald-50 / emerald-700 / emerald-200",twd:"emerald-950 / emerald-300 / emerald-900",
+  L:{bg:"#ECFDF5",tx:"#047857",bd:"#A7F3D0",c:5.21},D:{bg:"#022C22",tx:"#6EE7B7",bd:"#064E3B",c:9.94}},
+ {name:"Offer Declined",feeds:["offer-declined"],tw:"orange-50 / orange-700 / orange-200",twd:"orange-950 / orange-300 / orange-900",
+  L:{bg:"#FFF7ED",tx:"#C2410C",bd:"#FED7AA",c:4.88},D:{bg:"#431407",tx:"#FDBA74",bd:"#7C2D12",c:9.28}},
+ {name:"Offer On Hold",feeds:["offer-revoked"],tw:"yellow-50 / yellow-700 / yellow-200",twd:"yellow-950 / yellow-300 / yellow-900",
+  L:{bg:"#FEFCE8",tx:"#A16207",bd:"#FEF08A",c:4.76},D:{bg:"#422006",tx:"#FDE047",bd:"#713F12",c:11.06}},
+ {name:"Application Withdrawn",feeds:["withdrawn"],tw:"zinc-50 / zinc-600 / zinc-200",twd:"zinc-900 / zinc-300 / zinc-700",
+  L:{bg:"#FAFAFA",tx:"#52525B",bd:"#E4E4E7",c:7.41},D:{bg:"#18181B",tx:"#D4D4D8",bd:"#3F3F46",c:11.99}},
+ {name:"Not Selected",feeds:["rejected"],tw:"red-50 / red-700 / red-200",twd:"red-950 / red-300 / red-900",
+  L:{bg:"#FEF2F2",tx:"#B91C1C",bd:"#FECACA",c:5.91},D:{bg:"#450A0A",tx:"#FCA5A5",bd:"#7F1D1D",c:8.51}},
+ {name:"Joined",feeds:["joined"],tw:"teal-50 / teal-700 / teal-200",twd:"teal-950 / teal-300 / teal-900",
+  L:{bg:"#F0FDFA",tx:"#0F766E",bd:"#99F6E4",c:5.25},D:{bg:"#042F2E",tx:"#5EEAD4",bd:"#134E4A",c:9.78}},
+ {name:"Application Closed",feeds:["not-joined","archived","cancelled"],tw:"stone-100 / stone-600 / stone-200",twd:"stone-900 / stone-300 / stone-700",
+  L:{bg:"#F5F5F4",tx:"#57534E",bd:"#E7E5E4",c:6.99},D:{bg:"#1C1917",tx:"#D6D3D1",bd:"#44403C",c:11.74}},
+];
+
+const grid=document.getElementById('grid');
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+
+function badge(name,s){
+  const b=el('span','badge');
+  b.style.background=s.bg;b.style.color=s.tx;b.style.borderColor=s.bd;
+  b.appendChild(el('span','dot'));
+  b.appendChild(document.createTextNode(name));
+  return b;
+}
+function specRow(lab,val,swatch){
+  const row=el('div','row');
+  row.appendChild(el('span','lab',lab));
+  const line=el('div','swatch-line');
+  const chip=el('span','chip');chip.style.background=swatch;line.appendChild(chip);
+  const btn=el('button','copy mono');btn.textContent=val;btn.title='Copy '+val;
+  btn.onclick=()=>copy(val);
+  line.appendChild(btn);row.appendChild(line);
+  return row;
+}
+
+DATA.forEach(d=>{
+  const card=el('div','card');
+  const top=el('div','card-top');
+  top.appendChild(el('div','card-name',d.name));
+  const feeds=el('div','feeds');
+  feeds.appendChild(document.createTextNode('Job application status → '));
+  d.feeds.forEach(f=>feeds.appendChild(el('span','k',f)));
+  top.appendChild(feeds);
+  card.appendChild(top);
+
+  const prev=el('div','previews');
+  const pl=el('div','preview on-light');pl.appendChild(el('span','caps','Light'));pl.appendChild(badge(d.name,d.L));
+  const pd=el('div','preview on-dark');pd.appendChild(el('span','caps','Dark'));pd.appendChild(badge(d.name,d.D));
+  prev.appendChild(pl);prev.appendChild(pd);
+  card.appendChild(prev);
+
+  const spec=el('div','spec');
+  spec.appendChild(el('div','theme-tag','Light · AA '+d.L.c.toFixed(2)+':1'));
+  spec.appendChild(specRow('Bg',d.L.bg,d.L.bg));
+  spec.appendChild(specRow('Text',d.L.tx,d.L.tx));
+  spec.appendChild(specRow('Border',d.L.bd,d.L.bd));
+  spec.appendChild(el('div','theme-tag','Dark · AA '+d.D.c.toFixed(2)+':1'));
+  spec.appendChild(specRow('Bg',d.D.bg,d.D.bg));
+  spec.appendChild(specRow('Text',d.D.tx,d.D.tx));
+  spec.appendChild(specRow('Border',d.D.bd,d.D.bd));
+  card.appendChild(spec);
+
+  const tw=el('div','tw');
+  const twb=el('button','');
+  twb.innerHTML='<span class="lab">Tailwind · light / dark</span>'+d.tw+'\n'+d.twd;
+  const twClass=twClasses(d);
+  twb.title='Copy Tailwind classes';
+  twb.onclick=()=>copy(twClass);
+  tw.appendChild(twb);
+  card.appendChild(tw);
+
+  grid.appendChild(card);
+});
+
+function twClasses(d){
+  const [lb,lt,lbd]=d.tw.split(' / ');
+  const [db,dt,dbd]=d.twd.split(' / ');
+  return `bg-${lb} text-${lt} border-${lbd} dark:bg-${db} dark:text-${dt} dark:border-${dbd}`;
+}
+
+// Ready-to-paste code
+const codeEl=document.getElementById('code');
+let code=`<span class="cm">// CandidateProfilePage.tsx — replace portalStatusColor</span>\n`;
+code+=`<span class="cm">// class order: bg / text / border, then dark: variants</span>\n`;
+code+=`const portalStatusColor: Record&lt;string, string&gt; = {\n`;
+DATA.forEach(d=>{
+  const key=`'${d.name}':`.padEnd(26);
+  code+=`  ${key}<span class="st">'${twClasses(d)}'</span>,\n`;
+});
+code+=`};`;
+codeEl.innerHTML=code;
+const plainCode=(()=>{
+  let c="const portalStatusColor: Record<string, string> = {\n";
+  DATA.forEach(d=>{c+=`  ${("'"+d.name+"':").padEnd(26)}'${twClasses(d)}',\n`;});
+  return c+"};\n";
+})();
+document.getElementById('copyAll').onclick=()=>copy(plainCode,'Full map copied');
+
+// Theme toggle
+const root=document.documentElement, tl=document.getElementById('tl'), tdb=document.getElementById('td');
+function setTheme(t){root.setAttribute('data-theme',t);tl.setAttribute('aria-pressed',t==='light');tdb.setAttribute('aria-pressed',t==='dark');}
+tl.onclick=()=>setTheme('light');tdb.onclick=()=>setTheme('dark');
+(function(){const d=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;setTheme(d?'dark':'light');})();
+
+// Copy + toast
+const toast=document.getElementById('toast');let tmr;
+function copy(text,msg){
+  navigator.clipboard&&navigator.clipboard.writeText(text).then(()=>ping(msg||('Copied '+text))).catch(()=>ping('Copy failed'));
+}
+function ping(m){toast.textContent=m;toast.classList.add('show');clearTimeout(tmr);tmr=setTimeout(()=>toast.classList.remove('show'),1400);}
+</script>

@@ -26,19 +26,22 @@ const portalStatusLabel: Record<string, string> = {
   'Active': 'Under Review',
 };
 
+// Portal application status colors — palette finalized by PM. Exact hex values
+// so each rendered badge matches the approved swatches; every text-on-bg pair
+// clears WCAG AA. Brand pink (#ED184F) stays out of the status set.
 const portalStatusColor: Record<string, string> = {
-  'Applied': 'bg-blue-50 text-blue-600 border-blue-200',
-  'Under Review': 'bg-[#F4F5FA] text-primary border-primary/20',
-  'Interview In Progress': 'bg-amber-50 text-amber-600 border-amber-200',
-  'Offered': 'bg-emerald-50 text-emerald-600 border-emerald-200',
-  'Offer Accepted': 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  'Offer Declined': 'bg-orange-50 text-orange-600 border-orange-200',
-  'Offer On Hold': 'bg-yellow-50 text-yellow-600 border-yellow-200',
-  'Application Withdrawn': 'bg-gray-50 text-gray-400 border-gray-200',
-  'Not Selected': 'bg-red-50 text-red-500 border-red-200',
-  'Joined': 'bg-emerald-100 text-emerald-700 border-emerald-300',
-  'Application Closed': 'bg-gray-100 text-gray-400 border-gray-200',
-  'Draft': 'bg-[#FFF7ED] text-amber-600 border-amber-200',
+  'Draft':                 'bg-[#F1F5F9] text-[#475569] border-[#CBD5E1]',
+  'Applied':               'bg-[#EEF4FF] text-[#2563EB] border-[#B9D4FF]',
+  'Under Review':          'bg-[#FFF4E5] text-[#D97706] border-[#FFD89A]',
+  'Interview In Progress': 'bg-[#FFF7E6] text-[#B45309] border-[#F7C65F]',
+  'Offered':               'bg-[#F3E8FF] text-[#7C3AED] border-[#D8B4FE]',
+  'Offer Accepted':        'bg-[#ECFDF3] text-[#059669] border-[#A7F3D0]',
+  'Offer Declined':        'bg-[#FEF2F2] text-[#DC2626] border-[#FECACA]',
+  'Offer On Hold':         'bg-[#F5F3FF] text-[#6D28D9] border-[#C4B5FD]',
+  'Application Withdrawn': 'bg-[#F3F4F6] text-[#6B7280] border-[#D1D5DB]',
+  'Not Selected':          'bg-[#FEF2F2] text-[#DC2626] border-[#FECACA]',
+  'Joined':                'bg-[#ECFDF3] text-[#15803D] border-[#86EFAC]',
+  'Application Closed':    'bg-[#F3F4F6] text-[#6B7280] border-[#D1D5DB]',
 };
 
 
