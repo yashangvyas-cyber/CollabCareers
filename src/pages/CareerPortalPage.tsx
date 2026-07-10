@@ -6,7 +6,7 @@ import {
   Code2, Copy, CheckCheck, ExternalLink,
   ChevronDown, ChevronUp, ChevronRight,
   SlidersHorizontal, Search, MapPin, Briefcase, TrendingUp, Wifi, Link2,
-  AlertTriangle, ShieldCheck, Palette, Upload, Trash2, Globe,
+  AlertTriangle, ShieldCheck, Palette, Upload, Trash2,
 } from 'lucide-react';
 import { BRAND_PRESETS, isLowContrastOnWhite, DEFAULT_APPEARANCE } from '../lib/theme';
 import type { PortalConfig } from '../store/types';
@@ -140,8 +140,6 @@ export default function CareerPortalPage() {
   // Local state, prefilled with sensible defaults; reset on Cancel.
   const [seoTitle, setSeoTitle] = useState(DEFAULT_SEO_TITLE);
   const [seoDescription, setSeoDescription] = useState(DEFAULT_SEO_DESCRIPTION);
-  const [seoGoogleJobs, setSeoGoogleJobs] = useState(true);
-  const [seoIndexable, setSeoIndexable] = useState(true);
 
   // Appearance — local state, applied live to the store on change
   const [apTagline, setApTagline] = useState(portalConfig?.appearance?.tagline ?? DEFAULT_APPEARANCE.tagline);
@@ -234,8 +232,6 @@ export default function CareerPortalPage() {
     setApHeroImageUrl(portalConfig?.appearance?.heroImageUrl ?? DEFAULT_APPEARANCE.heroImageUrl);
     setSeoTitle(DEFAULT_SEO_TITLE);
     setSeoDescription(DEFAULT_SEO_DESCRIPTION);
-    setSeoGoogleJobs(true);
-    setSeoIndexable(true);
     setSaveAttempted(false);
     setSaveError('');
   };
@@ -532,7 +528,7 @@ export default function CareerPortalPage() {
               <div className="flex items-start gap-2.5 bg-sky-50 border border-sky-100 rounded-lg px-3.5 py-2.5">
                 <Search className="w-4 h-4 text-sky-600 mt-0.5 shrink-0" />
                 <p className="text-xs text-sky-700 font-medium leading-relaxed">
-                  These settings define the <strong>title</strong> and <strong>summary</strong> search engines like Google show for your careers page. Good copy improves click-through from search and social shares. Individual job pages generate their own SEO automatically.
+                  These settings define how your main careers page appears on search engines. Individual job pages generate their own SEO automatically.
                 </p>
               </div>
 
@@ -551,9 +547,6 @@ export default function CareerPortalPage() {
                   placeholder="e.g. MindInventory Careers — Open Jobs & Opportunities"
                   className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3538CD]/20 focus:border-[#3538CD] bg-white text-[#111827] placeholder:text-[#D1D5DB]"
                 />
-                <p className="text-[11px] text-[#9CA3AF] mt-1.5">
-                  The clickable headline in search results and the browser-tab title. Keep it under {SEO_TITLE_LIMIT} characters so it isn't cut off.
-                </p>
               </div>
 
               {/* Meta description */}
@@ -571,57 +564,6 @@ export default function CareerPortalPage() {
                   placeholder="e.g. Explore open roles at MindInventory and apply online in minutes."
                   className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3538CD]/20 focus:border-[#3538CD] bg-white text-[#111827] placeholder:text-[#D1D5DB] resize-none leading-relaxed"
                 />
-                <p className="text-[11px] text-[#9CA3AF] mt-1.5">
-                  The summary shown under the title. It doesn't affect ranking, but it wins the click — aim for {SEO_DESC_LIMIT} characters or fewer.
-                </p>
-              </div>
-
-              {/* Search engine options */}
-              <div className="pt-4 border-t border-[#F3F4F6]">
-                <h4 className="text-xs font-semibold text-[#374151] uppercase tracking-wider mb-1">Search engine options</h4>
-                <div className="flex flex-col divide-y divide-[#F3F4F6]">
-
-                  {/* Google for Jobs */}
-                  <div className="flex items-center justify-between py-3">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                        seoGoogleJobs ? 'bg-[#3538CD]/10' : 'bg-[#F3F4F6]'
-                      }`}>
-                        <Briefcase className={`w-4 h-4 transition-colors ${seoGoogleJobs ? 'text-[#3538CD]' : 'text-[#9CA3AF]'}`} />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-[#1A1A2E]">List roles on Google for Jobs</p>
-                        <p className="text-xs text-[#6B7280] mt-0.5">Adds JobPosting structured data so your jobs can appear in Google's jobs results.</p>
-                      </div>
-                    </div>
-                    <Toggle checked={seoGoogleJobs} onChange={() => setSeoGoogleJobs(v => !v)} />
-                  </div>
-
-                  {/* Indexing */}
-                  <div className="flex items-center justify-between py-3">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                        seoIndexable ? 'bg-[#3538CD]/10' : 'bg-[#F3F4F6]'
-                      }`}>
-                        <Globe className={`w-4 h-4 transition-colors ${seoIndexable ? 'text-[#3538CD]' : 'text-[#9CA3AF]'}`} />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-[#1A1A2E]">Allow search engines to index this page</p>
-                        <p className="text-xs text-[#6B7280] mt-0.5">Turn off to keep the portal live but hidden from Google.</p>
-                      </div>
-                    </div>
-                    <Toggle checked={seoIndexable} onChange={() => setSeoIndexable(v => !v)} />
-                  </div>
-                </div>
-
-                {!seoIndexable && (
-                  <div className="flex items-start gap-2 mt-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg">
-                    <AlertTriangle className="w-3.5 h-3.5 text-amber-600 mt-0.5 shrink-0" />
-                    <p className="text-[11px] text-amber-700 font-medium leading-relaxed">
-                      Search engines are asked not to index this page (<span className="font-mono">noindex</span>). It won't appear in search results until this is turned back on.
-                    </p>
-                  </div>
-                )}
               </div>
 
               {/* Live Google search-result preview */}
