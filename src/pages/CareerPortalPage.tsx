@@ -6,7 +6,7 @@ import {
   Code2, Copy, CheckCheck, ExternalLink,
   ChevronDown, ChevronUp, ChevronRight,
   SlidersHorizontal, Search, MapPin, Briefcase, TrendingUp, Wifi, Link2,
-  AlertTriangle, ShieldCheck, Palette, Upload, Trash2,
+  AlertTriangle, ShieldCheck, Palette, Upload, Trash2, Globe, Share2,
 } from 'lucide-react';
 import { BRAND_PRESETS, isLowContrastOnWhite, DEFAULT_APPEARANCE } from '../lib/theme';
 import type { PortalConfig } from '../store/types';
@@ -136,6 +136,15 @@ export default function CareerPortalPage() {
   const [localTermsUrl, setLocalTermsUrl] = useState(portalConfig?.termsUrl || 'https://www.mindinventory.com/terms-of-use.php');
   const [localPrivacyUrl, setLocalPrivacyUrl] = useState(portalConfig?.privacyPolicyUrl || 'https://www.mindinventory.com/privacy-policy.php');
 
+  // SEO — how the careers landing page appears in search & when shared.
+  // Local state, prefilled with sensible defaults; reset on Cancel.
+  const [seoTitle, setSeoTitle] = useState(DEFAULT_SEO_TITLE);
+  const [seoDescription, setSeoDescription] = useState(DEFAULT_SEO_DESCRIPTION);
+  const [seoOgImageUrl, setSeoOgImageUrl] = useState('');
+  const [seoGoogleJobs, setSeoGoogleJobs] = useState(true);
+  const [seoIndexable, setSeoIndexable] = useState(true);
+  const ogInputRef = useRef<HTMLInputElement>(null);
+
   // Appearance — local state, applied live to the store on change
   const [apTagline, setApTagline] = useState(portalConfig?.appearance?.tagline ?? DEFAULT_APPEARANCE.tagline);
   const [apBrandColor, setApBrandColor] = useState(portalConfig?.appearance?.brandColor ?? DEFAULT_APPEARANCE.brandColor);
@@ -160,6 +169,14 @@ export default function CareerPortalPage() {
       commitAppearance({ heroEnabled: true, heroImageUrl: url });
       setApHeroEnabled(true);
     };
+    reader.readAsDataURL(file);
+  };
+
+  const handleOgUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setSeoOgImageUrl(reader.result as string);
     reader.readAsDataURL(file);
   };
 
@@ -225,6 +242,11 @@ export default function CareerPortalPage() {
     setApBrandColor(portalConfig?.appearance?.brandColor ?? DEFAULT_APPEARANCE.brandColor);
     setApHeroEnabled(portalConfig?.appearance?.heroEnabled ?? DEFAULT_APPEARANCE.heroEnabled);
     setApHeroImageUrl(portalConfig?.appearance?.heroImageUrl ?? DEFAULT_APPEARANCE.heroImageUrl);
+    setSeoTitle(DEFAULT_SEO_TITLE);
+    setSeoDescription(DEFAULT_SEO_DESCRIPTION);
+    setSeoOgImageUrl('');
+    setSeoGoogleJobs(true);
+    setSeoIndexable(true);
     setSaveAttempted(false);
     setSaveError('');
   };
@@ -501,6 +523,187 @@ export default function CareerPortalPage() {
                     </div>
                   )}
                 </div>
+              </div>
+
+            </div>
+          </Section>
+
+          {/* ── Section: SEO & Search Visibility ──────────────────────────── */}
+          <Section
+            title="SEO & Search Visibility"
+            description="Control how your careers page appears in Google and when shared"
+            icon={Search}
+            iconBg="bg-sky-50"
+            iconColor="text-sky-600"
+            defaultOpen={true}
+          >
+            <div className="max-w-2xl space-y-5">
+
+              {/* Why this matters */}
+              <div className="flex items-start gap-2.5 bg-sky-50 border border-sky-100 rounded-lg px-3.5 py-2.5">
+                <Search className="w-4 h-4 text-sky-600 mt-0.5 shrink-0" />
+                <p className="text-xs text-sky-700 font-medium leading-relaxed">
+                  These settings define the <strong>title</strong> and <strong>summary</strong> search engines like Google show for your careers page. Good copy improves click-through from search and social shares. Individual job pages generate their own SEO automatically.
+                </p>
+              </div>
+
+              {/* Meta title */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-semibold text-[#374151]">Meta title</label>
+                  <span className={`text-[11px] font-mono ${seoCounterColor(seoTitle.length, SEO_TITLE_LIMIT)}`}>
+                    {seoTitle.length} / {SEO_TITLE_LIMIT}
+                  </span>
+                </div>
+                <input
+                  type="text"
+                  value={seoTitle}
+                  onChange={e => setSeoTitle(e.target.value)}
+                  placeholder="e.g. MindInventory Careers — Open Jobs & Opportunities"
+                  className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3538CD]/20 focus:border-[#3538CD] bg-white text-[#111827] placeholder:text-[#D1D5DB]"
+                />
+                <p className="text-[11px] text-[#9CA3AF] mt-1.5">
+                  The clickable headline in search results and the browser-tab title. Keep it under {SEO_TITLE_LIMIT} characters so it isn't cut off.
+                </p>
+              </div>
+
+              {/* Meta description */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-semibold text-[#374151]">Meta description</label>
+                  <span className={`text-[11px] font-mono ${seoCounterColor(seoDescription.length, SEO_DESC_LIMIT)}`}>
+                    {seoDescription.length} / {SEO_DESC_LIMIT}
+                  </span>
+                </div>
+                <textarea
+                  value={seoDescription}
+                  onChange={e => setSeoDescription(e.target.value)}
+                  rows={3}
+                  placeholder="e.g. Explore open roles at MindInventory and apply online in minutes."
+                  className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3538CD]/20 focus:border-[#3538CD] bg-white text-[#111827] placeholder:text-[#D1D5DB] resize-none leading-relaxed"
+                />
+                <p className="text-[11px] text-[#9CA3AF] mt-1.5">
+                  The summary shown under the title. It doesn't affect ranking, but it wins the click — aim for {SEO_DESC_LIMIT} characters or fewer.
+                </p>
+              </div>
+
+              {/* Social share image (og:image) */}
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Share2 className="w-3.5 h-3.5 text-[#374151]" />
+                  <label className="text-xs font-semibold text-[#374151]">Social share image</label>
+                </div>
+                <input ref={ogInputRef} type="file" accept="image/*" onChange={handleOgUpload} className="hidden" />
+                {seoOgImageUrl ? (
+                  <div className="space-y-3">
+                    {/* Link-preview card — mirrors how the link renders on LinkedIn / Slack */}
+                    <div className="rounded-lg overflow-hidden border border-[#E5E7EB] max-w-md">
+                      <img src={seoOgImageUrl} alt="Social share" className="w-full h-40 object-cover" />
+                      <div className="px-3 py-2 bg-[#F9FAFB] border-t border-[#E5E7EB]">
+                        <p className="text-[10px] uppercase tracking-wide text-[#9CA3AF]">{portalBase}</p>
+                        <p className="text-xs font-semibold text-[#1A1A2E] truncate">{seoTitle.trim() || DEFAULT_SEO_TITLE}</p>
+                        <p className="text-[11px] text-[#6B7280] truncate">{seoDescription.trim() || DEFAULT_SEO_DESCRIPTION}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => ogInputRef.current?.click()}
+                        className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-[#374151] bg-white border border-[#E5E7EB] rounded-lg hover:border-[#3538CD]/30 hover:text-[#3538CD] transition-colors shadow-sm"
+                      >
+                        <Upload className="w-3.5 h-3.5" /> Replace
+                      </button>
+                      <button
+                        onClick={() => setSeoOgImageUrl('')}
+                        className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#9CA3AF] hover:text-red-500 transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" /> Remove
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => ogInputRef.current?.click()}
+                    className="w-full max-w-md flex flex-col items-center justify-center gap-2 py-8 border-2 border-dashed border-[#D1D5DB] rounded-lg text-[#6B7280] hover:border-[#3538CD]/40 hover:text-[#3538CD] hover:bg-[#F9FAFB] transition-colors"
+                  >
+                    <Upload className="w-5 h-5" />
+                    <span className="text-xs font-semibold">Upload share image</span>
+                    <span className="text-[10px] text-[#9CA3AF]">Recommended 1200 × 630</span>
+                  </button>
+                )}
+                <p className="text-[11px] text-[#9CA3AF] mt-1.5">
+                  The preview card shown when your careers link is shared on LinkedIn, WhatsApp, Slack, etc.
+                </p>
+              </div>
+
+              {/* Search engine options */}
+              <div className="pt-4 border-t border-[#F3F4F6]">
+                <h4 className="text-xs font-semibold text-[#374151] uppercase tracking-wider mb-1">Search engine options</h4>
+                <div className="flex flex-col divide-y divide-[#F3F4F6]">
+
+                  {/* Google for Jobs */}
+                  <div className="flex items-center justify-between py-3">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                        seoGoogleJobs ? 'bg-[#3538CD]/10' : 'bg-[#F3F4F6]'
+                      }`}>
+                        <Briefcase className={`w-4 h-4 transition-colors ${seoGoogleJobs ? 'text-[#3538CD]' : 'text-[#9CA3AF]'}`} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-[#1A1A2E]">List roles on Google for Jobs</p>
+                        <p className="text-xs text-[#6B7280] mt-0.5">Adds JobPosting structured data so your jobs can appear in Google's jobs results.</p>
+                      </div>
+                    </div>
+                    <Toggle checked={seoGoogleJobs} onChange={() => setSeoGoogleJobs(v => !v)} />
+                  </div>
+
+                  {/* Indexing */}
+                  <div className="flex items-center justify-between py-3">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                        seoIndexable ? 'bg-[#3538CD]/10' : 'bg-[#F3F4F6]'
+                      }`}>
+                        <Globe className={`w-4 h-4 transition-colors ${seoIndexable ? 'text-[#3538CD]' : 'text-[#9CA3AF]'}`} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-[#1A1A2E]">Allow search engines to index this page</p>
+                        <p className="text-xs text-[#6B7280] mt-0.5">Turn off to keep the portal live but hidden from Google.</p>
+                      </div>
+                    </div>
+                    <Toggle checked={seoIndexable} onChange={() => setSeoIndexable(v => !v)} />
+                  </div>
+                </div>
+
+                {!seoIndexable && (
+                  <div className="flex items-start gap-2 mt-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg">
+                    <AlertTriangle className="w-3.5 h-3.5 text-amber-600 mt-0.5 shrink-0" />
+                    <p className="text-[11px] text-amber-700 font-medium leading-relaxed">
+                      Search engines are asked not to index this page (<span className="font-mono">noindex</span>). It won't appear in search results until this is turned back on.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Live Google search-result preview */}
+              <div className="pt-4 border-t border-[#F3F4F6]">
+                <p className="text-xs font-semibold text-[#374151] mb-2">Search result preview</p>
+                <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <div className="w-6 h-6 rounded-full bg-[#3538CD]/10 flex items-center justify-center shrink-0">
+                      <span className="text-[10px] font-bold text-[#3538CD]">M</span>
+                    </div>
+                    <div className="leading-tight">
+                      <p className="text-[13px] text-[#202124]">MindInventory</p>
+                      <p className="text-[11px] text-[#5F6368]">{portalBase} › {slug}</p>
+                    </div>
+                  </div>
+                  <p className="text-[#1a0dab] text-lg leading-snug truncate">
+                    {seoTitle.trim() || DEFAULT_SEO_TITLE}
+                  </p>
+                  <p className="text-[13px] text-[#4d5156] leading-snug mt-0.5">
+                    {seoDescription.trim() || DEFAULT_SEO_DESCRIPTION}
+                  </p>
+                </div>
+                <p className="text-[11px] text-[#9CA3AF] mt-1.5">Approximate — actual appearance varies by search engine and device.</p>
               </div>
 
             </div>
