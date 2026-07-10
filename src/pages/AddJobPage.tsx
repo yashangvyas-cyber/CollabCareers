@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CRMLayout from '../components/CRMLayout';
-import { GripVertical, Trash2, Plus, ChevronDown, Info, X, AlertCircle, Copy, CheckCheck, Check } from 'lucide-react';
+import { GripVertical, Trash2, Plus, ChevronDown, Info, X, AlertCircle, Copy, CheckCheck } from 'lucide-react';
 import { useApp } from '../store/AppContext';
 import { CustomField, FieldType, Job } from '../store/types';
 
@@ -103,14 +103,6 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void 
   );
 }
 
-// Channels a salary range can be surfaced on, once the recruiter opts to show it.
-// Titles are self-explanatory, so no per-option description is needed.
-const SALARY_CHANNELS: { id: 'publicLink' | 'website' | 'careerPortal'; label: string }[] = [
-  { id: 'publicLink',   label: 'Public link' },
-  { id: 'website',      label: 'Publish on Website' },
-  { id: 'careerPortal', label: 'CollabCRM Career Portal' },
-];
-
 export default function AddJobPage() {
   const { addJob } = useApp();
   const navigate = useNavigate();
@@ -149,13 +141,10 @@ export default function AddJobPage() {
   const [publishCollabCareers, setPublishCollabCareers] = useState(true);
   const [copiedLink, setCopiedLink] = useState(false);
 
-  // Salary visibility — recruiter chooses whether to reveal the salary range and,
-  // if so, on which public-facing channels. Only offered once a range is entered.
+  // Salary visibility — when on, the salary range is shown wherever this job is
+  // posted. Only offered once a range is entered.
   const [showSalary, setShowSalary] = useState(false);
-  const [salaryChannels, setSalaryChannels] = useState<('publicLink' | 'website' | 'careerPortal')[]>([]);
   const hasSalaryRange = jobData.minSalary.trim() !== '' || jobData.maxSalary.trim() !== '';
-  const toggleSalaryChannel = (id: 'publicLink' | 'website' | 'careerPortal') =>
-    setSalaryChannels(prev => (prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]));
 
   // Helper to generate slug from title
   const getSlug = (title: string) => {
@@ -259,10 +248,7 @@ export default function AddJobPage() {
       description: jobData.description || `As a ${jobData.title} at ${jobData.businessUnit}, you will be at the forefront of building high-performance web applications. You will collaborate closely with product managers, UX designers, and senior engineers to translate complex requirements into elegant front-end solutions.\n\nWe prioritize clean code, performance optimization, and accessibility. You'll spend your day working with modern state management libraries, while contributing to our shared component library and ensuring a seamless experience across all device types.\n\nWe are a fast-paced team that values innovation and continuous learning. If you thrive in an environment where you can take ownership of features from conception to deployment, and if you are passionate about staying up-to-date with the latest developments in your ecosystem, we would love to have you on board.`,
       status: jobData.status,
       publishOnCollabCareers: publishCollabCareers,
-      salaryVisibility: {
-        show: hasSalaryRange && showSalary,
-        channels: hasSalaryRange && showSalary ? salaryChannels : [],
-      },
+      showSalaryToCandidates: hasSalaryRange && showSalary,
       customFields: customFields,
       createdAt: new Date().toISOString(),
     };
@@ -383,37 +369,13 @@ export default function AddJobPage() {
           <div className="mt-6 pt-5 border-t border-[#F3F4F6] animate-in fade-in slide-in-from-top-2 duration-300">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h4 className="text-sm font-bold text-[#374151]">Show salary to candidates</h4>
+                <h4 className="text-sm font-bold text-[#374151]">Show salary range to candidates</h4>
                 <p className="text-xs text-[#6B7280] mt-0.5 max-w-md font-medium">
-                  Display this salary range on the channels where the job appears.
+                  When on, the salary range appears wherever this job is posted.
                 </p>
               </div>
               <Toggle checked={showSalary} onChange={() => setShowSalary(!showSalary)} />
             </div>
-
-            {showSalary && (
-              <div className="mt-4 flex flex-wrap items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                <span className="text-xs font-semibold text-[#374151] mr-1">Visible on:</span>
-                {SALARY_CHANNELS.map(ch => {
-                  const isOn = salaryChannels.includes(ch.id);
-                  return (
-                    <button
-                      key={ch.id}
-                      type="button"
-                      onClick={() => toggleSalaryChannel(ch.id)}
-                      className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors ${
-                        isOn ? 'border-[#3538CD] bg-[#EEF2FF] text-[#3538CD]' : 'border-[#E5E7EB] bg-white text-[#374151] hover:bg-[#F9FAFB]'
-                      }`}
-                    >
-                      {isOn
-                        ? <Check className="w-3.5 h-3.5 shrink-0" strokeWidth={3} />
-                        : <span className="w-3.5 h-3.5 shrink-0 rounded border border-[#D1D5DB]" />}
-                      {ch.label}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
           </div>
         )}
       </FormSection>

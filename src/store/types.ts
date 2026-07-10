@@ -52,10 +52,7 @@ export interface Job {
   description: string;
   status: 'Open' | 'Draft' | 'Close';
   publishOnCollabCareers: boolean;
-  salaryVisibility?: {
-    show: boolean;
-    channels: ('publicLink' | 'website' | 'careerPortal')[];
-  };
+  showSalaryToCandidates?: boolean;
   customFields: CustomField[];
   evaluationCriteria: string[];
   createdAt: string;
