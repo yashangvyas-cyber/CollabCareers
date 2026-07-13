@@ -29,7 +29,7 @@ export default function InviteEmailCompose({
   const openJobs = jobs.filter(j => j.status === 'Open');
   const selectedJob = jobId ? jobs.find(j => j.id === jobId) : null;
   const templateSubject = selectedJob
-    ? `Invitation to Apply — ${selectedJob.title} at ${selectedJob.businessUnit}`
+    ? `Invitation to Apply for the Role | ${selectedJob.title} | ${selectedJob.businessUnit}`
     : '';
 
   // Duplicate pending invite check
@@ -250,9 +250,10 @@ export default function InviteEmailCompose({
                   <span className="text-sm font-black text-[#111827] tracking-tight">CollabCRM</span>
                 </div>
                 <div className="px-8 py-6 space-y-4 text-sm text-[#374151] leading-relaxed">
-                  <p>Hi <strong>{candidate.firstName} {candidate.lastName}</strong>,</p>
-                  <p>We came across your profile in the CollabCRM Career Portal. Based on your background and the skills you have highlighted, we think you would be a strong match for an open role on our team.</p>
+                  <p>Dear <strong>{candidate.firstName} {candidate.lastName}</strong>,</p>
+                  <p>We came across your profile in our talent pool records and believe your background and experience may be a good fit for a current opportunity within our organization.</p>
                   <p>We would like to invite you to apply for the following position:</p>
+                  <p className="font-bold text-[#111827]">Job Details:</p>
                   {selectedJob ? (
                     <table className="w-full border border-[#E5E7EB] rounded-lg overflow-hidden text-sm border-collapse">
                       <tbody>
@@ -260,6 +261,7 @@ export default function InviteEmailCompose({
                           ['Job Title', selectedJob.title],
                           ['Location', selectedJob.location],
                           ['Employment Type', selectedJob.employmentType],
+                          ['Job Type', selectedJob.jobType],
                           ['Experience Required', selectedJob.experience],
                         ].map(([label, value]) => (
                           <tr key={label} className="border-b border-[#F3F4F6] last:border-0">
@@ -278,12 +280,13 @@ export default function InviteEmailCompose({
                   <div className="text-center py-2">
                     <span className="inline-block px-8 py-3 bg-[#3538CD] text-white font-black text-sm rounded-xl cursor-pointer">Apply Now →</span>
                   </div>
-                  <p className="text-[#6B7280]">If you have any questions about the role or the application process, feel free to reply to this email.</p>
-                  <p className="text-[#6B7280] text-xs">We request you to add <span className="text-[#3538CD] font-medium">noreply@yopmails.com</span> to your whitelist so you can receive timely updates.</p>
+                  <p className="text-[#6B7280]">You can log in to our Career Portal using the email address where you received this invitation. <span className="text-[#3538CD] font-medium underline cursor-pointer">Click here to log in.</span></p>
+                  <p className="text-[#6B7280]">If you have any questions about the role or the application process, feel free to get in touch with us.</p>
                   <div className="pt-4 border-t border-[#F3F4F6]">
-                    <p>Regards,</p>
-                    <p className="font-bold">HR Team</p>
-                    <p className="text-[#9CA3AF]">CollabCRM</p>
+                    <p>Best Regards,</p>
+                    <p className="font-bold">{selectedJob ? selectedJob.recruiter : 'Recruitment Team'}</p>
+                    <p className="text-[#6B7280]">Talent Acquisition</p>
+                    <p className="text-[#9CA3AF]">{selectedJob ? selectedJob.businessUnit : 'MindInventory'}</p>
                   </div>
                 </div>
               </div>
