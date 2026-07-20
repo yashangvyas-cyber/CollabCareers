@@ -115,6 +115,50 @@ export interface Candidate {
   availabilityStatus?: TalentAvailabilityStatus;
 }
 
+/** How the recruiter released the offer — mirrors the three tabs of the
+ *  internal "Mark Offer to - {name}" modal. */
+export type OfferMode = 'digital_sign' | 'manual' | 'verbal';
+
+export interface OfferDocument {
+  fileName: string;
+  fileUrl: string;
+  /** Bytes — rendered as "PDF · 1.2 MB". */
+  fileSize: number;
+  uploadedAt: string;
+}
+
+export interface OfferSignature {
+  status: 'pending' | 'signed' | 'declined';
+  /** The same link that goes out in the offer email's "Review & Sign Offer"
+   *  button, so the candidate can start signing from the portal too. */
+  signUrl: string;
+  signedAt?: string;
+  signatories: {
+    name: string;
+    email: string;
+    party: 'company' | 'candidate';
+    signedAt?: string;
+  }[];
+}
+
+export interface OfferDetail {
+  mode: OfferMode;
+  /** Internally labelled "Tentative Joining Date"; the career portal shows the
+   *  same value as "Expected Joining Date". Maps to offer_detail_joining_date. */
+  joiningDate: string;
+  offeredAt: string;
+  offeredByName: string;
+  /** Always present for digital_sign, optional for manual, never for verbal. */
+  document?: OfferDocument;
+  /** digital_sign only. */
+  signature?: OfferSignature;
+  /** Maps to offer_detail_remarks. */
+  remarks?: string;
+  /** Set when the candidate declines from the career portal. */
+  declinedAt?: string;
+  declineReason?: string;
+}
+
 export interface Application {
   id: string;
   candidateId: string;
@@ -130,6 +174,7 @@ export interface Application {
   appliedAt: string;
   answers: Record<string, any>;
   resumeUrl: string;
+  offer?: OfferDetail;
 }
 
 export interface PortalAppearance {

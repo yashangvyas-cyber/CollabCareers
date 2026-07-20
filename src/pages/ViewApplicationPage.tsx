@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import PortalLayout from '../components/PortalLayout';
 import { useApp } from '../store/AppContext';
-import { 
+import {
   Download, Globe, Linkedin, FileText,
-  ChevronDown, MapPin, Briefcase, Building2, Clock, X, AlertTriangle
+  ChevronDown, MapPin, Briefcase, Building2, Clock, X, AlertTriangle,
+  Award, Calendar, PenLine, CheckCircle2, XCircle
 } from 'lucide-react';
 
 const brandStatusStyles: Record<string, string> = {
@@ -17,17 +18,71 @@ const brandStatusStyles: Record<string, string> = {
   'Submitted': 'bg-[#F4F5FA] text-primary border-primary/20',
 };
 
+// Offer status badges reuse the PM-approved portal palette, so the card matches
+// the badges on My Applications. 'Offer Revoked' surfaces as 'Offer On Hold'.
+const portalOfferStatusLabel: Record<string, string> = {
+  'Offered': 'Offered',
+  'Offer Accepted': 'Offer Accepted',
+  'Offer Declined': 'Offer Declined',
+  'Offer Revoked': 'Offer On Hold',
+};
+
+const offerHeading: Record<string, string> = {
+  'Offered': 'You have an offer',
+  'Offer Accepted': 'Offer accepted',
+  'Offer Declined': 'Offer declined',
+  'Offer Revoked': 'Your offer is on hold',
+};
+
+const offerStatusPill: Record<string, string> = {
+  'Offered':         'bg-[#F3E8FF] text-[#7C3AED] border-[#D8B4FE]',
+  'Offer Accepted':  'bg-[#ECFDF3] text-[#059669] border-[#A7F3D0]',
+  'Offer Declined':  'bg-[#FEF2F2] text-[#DC2626] border-[#FECACA]',
+  'Offer Revoked':   'bg-[#F5F3FF] text-[#6D28D9] border-[#C4B5FD]',
+};
+
+const signaturePill: Record<string, string> = {
+  pending:  'bg-[#FFF4E5] text-[#D97706] border-[#FFD89A]',
+  signed:   'bg-[#ECFDF3] text-[#059669] border-[#A7F3D0]',
+  declined: 'bg-[#FEF2F2] text-[#DC2626] border-[#FECACA]',
+};
+
+// The Send Offer compose screen accepts DOCX & PDF, so the type is derived from
+// the file name rather than assumed to be PDF.
+const fileKind = (fileName: string) => (fileName.split('.').pop() || 'file').toUpperCase();
+
+const formatFileSize = (bytes: number) => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
 export default function ViewApplicationPage() {
   const { slug, applicationId } = useParams();
   const navigate = useNavigate();
-  const { applications, jobs, withdrawApplication } = useApp();
+  const { applications, jobs, withdrawApplication, declineOffer, portalConfig } = useApp();
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
+  const [isDeclineModalOpen, setIsDeclineModalOpen] = useState(false);
+  const [declineReason, setDeclineReason] = useState('');
 
   const application = applications.find(a => a.id === applicationId) || applications[0];
   const job = jobs.find(j => j.id === application.jobId) || jobs[0];
 
-  const canWithdraw = job.status !== 'Close' && 
-    !['Not Considered', 'Joined', 'Not Joined', 'Withdrawn'].includes(application.status);
+  const canWithdraw = job.status !== 'Close' &&
+    !['Not Considered', 'Joined', 'Not Joined', 'Withdrawn', 'Offer Declined'].includes(application.status);
+
+  // ── Offer ───────────────────────────────────────────────────────────────────
+  // The card stays visible past 'Offered' so the candidate keeps access to the
+  // document after accepting/declining. On 'Offer Revoked' the portal shows
+  // "Offer On Hold" and the document + actions are withdrawn.
+  const offer = application.offer;
+  const offerStatuses = ['Offered', 'Offer Accepted', 'Offer Declined', 'Offer Revoked'];
+  const showOfferCard = !!offer && offerStatuses.includes(application.status);
+  const offerRevoked = application.status === 'Offer Revoked';
+  const offerLive = application.status === 'Offered' && !offerRevoked;
+  // Document is hidden once the offer is revoked, whatever the mode.
+  const offerDoc = offerRevoked ? undefined : offer?.document;
+  const canDecline = offerLive;
 
   // The submitted snapshot saved by the application form. Every section below
   // renders from this (no hardcoded candidate data) so each application shows
@@ -132,6 +187,150 @@ export default function ViewApplicationPage() {
           </p>
           <div className="h-px flex-1 bg-[#F3F4F6]" />
         </div>
+
+        {/* Offer card — the most important thing on the page, so it sits above
+            the accordions and is always expanded. */}
+        {showOfferCard && offer && (
+          <div className="mb-6 bg-white rounded-2xl border-2 border-primary/20 shadow-sm overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
+            {/* Header */}
+            <div className="px-5 sm:px-6 py-5 bg-primary/5 border-b border-primary/10 flex items-start justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="w-11 h-11 rounded-2xl bg-primary text-white flex items-center justify-center shrink-0 shadow-sm">
+                  <Award className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-black text-[#111827] tracking-tight">
+                    {offerHeading[application.status] || 'You have an offer'}
+                  </h2>
+                  <p className="text-xs font-semibold text-[#6B7280] mt-0.5">
+                    {job.title} · {portalConfig.appearance.portalName}
+                  </p>
+                </div>
+              </div>
+              <span className={`shrink-0 px-3 py-1 text-[10px] font-black rounded-full border uppercase tracking-widest ${offerStatusPill[application.status] || 'bg-gray-100 text-gray-500 border-gray-200'}`}>
+                {portalOfferStatusLabel[application.status] || application.status}
+              </span>
+            </div>
+
+            {/* Dates — "Tentative Joining Date" internally, "Expected" here */}
+            <div className="px-5 sm:px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div className="space-y-1.5">
+                <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">Expected Joining Date</p>
+                <p className="text-sm font-semibold text-[#111827] flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-[#9CA3AF]" />
+                  {formatDate(offer.joiningDate)}
+                </p>
+              </div>
+              <div className="space-y-1.5">
+                <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">Offer Received On</p>
+                <p className="text-sm font-semibold text-[#111827] flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-[#9CA3AF]" />
+                  {formatDate(offer.offeredAt)}
+                </p>
+              </div>
+            </div>
+
+            {/* Mode-specific supporting line — shown when there's no document to
+                look at, so the card never feels empty. */}
+            {!offerDoc && !offerRevoked && (
+              <div className="px-5 sm:px-6 pb-5 -mt-1">
+                <p className="text-xs font-medium text-[#6B7280] leading-relaxed">
+                  {offer.mode === 'verbal'
+                    ? 'Your offer has been shared with you directly by the recruitment team.'
+                    : 'Your offer details have been sent to your registered email address.'}
+                </p>
+              </div>
+            )}
+
+            {offerRevoked && (
+              <div className="px-5 sm:px-6 pb-5 -mt-1">
+                <p className="text-xs font-medium text-[#6B7280] leading-relaxed">
+                  This offer is currently on hold. The recruitment team will get in touch with you regarding the next steps.
+                </p>
+              </div>
+            )}
+
+            {/* Document row — digital_sign always, manual when attached */}
+            {offerDoc && (
+              <div className="px-5 sm:px-6 py-4 border-t border-[#F3F4F6] flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-[#F4F5FA] flex items-center justify-center text-primary border border-[#E5E7EB] shrink-0">
+                  <FileText className="w-6 h-6" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-[#111827] truncate">{offerDoc.fileName}</p>
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
+                    <span className="text-[10px] text-[#9CA3AF] font-medium uppercase tracking-widest">
+                      {fileKind(offerDoc.fileName)} · {formatFileSize(offerDoc.fileSize)}
+                    </span>
+                    {offer.signature && (
+                      <span className={`px-2 py-0.5 text-[10px] font-black rounded-md border uppercase tracking-widest ${signaturePill[offer.signature.status]}`}>
+                        {offer.signature.status === 'pending' && 'Awaiting your signature'}
+                        {offer.signature.status === 'signed' && `Signed ${offer.signature.signedAt ? formatDate(offer.signature.signedAt) : ''}`}
+                        {offer.signature.status === 'declined' && 'Declined'}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                {/* Manual mode = plain download. Digital sign gets the primary
+                    CTA below instead, so it only needs a quiet download here. */}
+                <a
+                  href={offerDoc.fileUrl}
+                  className="shrink-0 flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-xs font-black text-[#6B7280] hover:text-primary hover:border-primary/30 transition-all uppercase tracking-widest shadow-sm"
+                >
+                  <Download className="w-3.5 h-3.5" /> Download
+                </a>
+              </div>
+            )}
+
+            {/* Actions */}
+            {(offer.signature || canDecline) && !offerRevoked && (
+              <div className="px-5 sm:px-6 py-4 bg-[#F9FAFB] border-t border-[#E5E7EB] flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                {/* Same link that goes out in the offer email */}
+                {offer.signature && (
+                  <a
+                    href={offer.signature.signUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-primary text-white text-xs font-black rounded-2xl hover:opacity-90 transition-all uppercase tracking-widest shadow-lg"
+                  >
+                    {offer.signature.status === 'signed' ? (
+                      <><CheckCircle2 className="w-4 h-4" /> View Signed Offer</>
+                    ) : (
+                      <><PenLine className="w-4 h-4" /> Review &amp; Sign Offer</>
+                    )}
+                  </a>
+                )}
+                {canDecline && (
+                  <button
+                    onClick={() => setIsDeclineModalOpen(true)}
+                    className={`${offer.signature ? 'sm:flex-none' : 'flex-1'} flex items-center justify-center gap-2 px-6 py-3.5 bg-white border-2 border-[#E5E7EB] text-[#6B7280] hover:text-red-600 hover:border-red-200 hover:bg-red-50 text-xs font-black rounded-2xl transition-all uppercase tracking-widest`}
+                  >
+                    <XCircle className="w-4 h-4" /> Decline Offer
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Outcome footer once the candidate has responded */}
+            {application.status === 'Offer Declined' && (
+              <div className="px-5 sm:px-6 py-4 bg-[#FEF2F2] border-t border-[#FECACA]">
+                <p className="text-xs font-bold text-[#DC2626]">
+                  You declined this offer{offer.declinedAt ? ` on ${formatDate(offer.declinedAt)}` : ''}.
+                </p>
+                {offer.declineReason && (
+                  <p className="text-xs font-medium text-[#B91C1C] mt-1">Reason: {offer.declineReason}</p>
+                )}
+              </div>
+            )}
+            {application.status === 'Offer Accepted' && (
+              <div className="px-5 sm:px-6 py-4 bg-[#ECFDF3] border-t border-[#A7F3D0]">
+                <p className="text-xs font-bold text-[#059669]">
+                  You have accepted this offer. We look forward to having you on board!
+                </p>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Accordion sections */}
         <div className="space-y-3">
@@ -289,6 +488,55 @@ export default function ViewApplicationPage() {
 
         </div>
       </div>
+
+      {/* Decline Offer Modal */}
+      {isDeclineModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+          <div className="absolute inset-0 bg-[#111827]/60 backdrop-blur-sm" onClick={() => setIsDeclineModalOpen(false)} />
+          <div className="relative bg-white rounded-[32px] shadow-2xl w-full max-w-md overflow-hidden border border-[#E5E7EB] animate-in fade-in zoom-in duration-200">
+            <div className="p-8">
+              <div className="w-14 h-14 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mb-6">
+                <XCircle className="w-7 h-7" />
+              </div>
+              <h3 className="text-2xl font-black text-[#111827] tracking-tight mb-2">Decline this offer?</h3>
+              <p className="text-[#6B7280] text-sm font-medium leading-relaxed mb-6">
+                You're about to decline the offer for <span className="font-black text-[#111827]">{job.title}</span>.
+                This cannot be undone and the recruitment team will be notified.
+              </p>
+              <div className="mb-7">
+                <label className="block text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-2">
+                  Reason <span className="text-[#D1D5DB]">(Optional)</span>
+                </label>
+                <textarea
+                  value={declineReason}
+                  onChange={e => setDeclineReason(e.target.value)}
+                  rows={3}
+                  placeholder="Let the team know why you're declining…"
+                  className="w-full px-4 py-3 text-sm font-medium text-[#111827] bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl outline-none focus:border-primary/40 focus:bg-white transition-all resize-none placeholder:text-[#D1D5DB]"
+                />
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setIsDeclineModalOpen(false)}
+                  className="flex-1 px-6 py-3.5 bg-[#F9FAFB] text-[#111827] text-xs font-black rounded-2xl hover:bg-[#F3F4F6] transition-all uppercase tracking-widest border border-[#E5E7EB]"
+                >
+                  Keep Offer
+                </button>
+                <button
+                  onClick={() => {
+                    declineOffer(application.id, declineReason.trim() || undefined);
+                    setIsDeclineModalOpen(false);
+                    setDeclineReason('');
+                  }}
+                  className="flex-1 px-6 py-3.5 bg-red-600 text-white text-xs font-black rounded-2xl hover:bg-red-700 transition-all uppercase tracking-widest shadow-lg"
+                >
+                  Yes, Decline
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Withdraw Modal */}
       {isWithdrawModalOpen && (

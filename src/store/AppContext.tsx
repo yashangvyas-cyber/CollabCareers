@@ -14,6 +14,7 @@ interface AppContextType extends AppState {
   setAlumniVerified: (verified: boolean, email: string | null) => void;
   toggleSaveJob: (jobId: string) => void;
   withdrawApplication: (applicationId: string) => void;
+  declineOffer: (applicationId: string, reason?: string) => void;
   updatePortalConfig: (updates: Partial<PortalConfig>) => void;
   sendInvite: (invite: TalentInvite) => void;
   updateInviteStatus: (inviteId: string, status: TalentInviteStatus) => void;
@@ -1164,6 +1165,104 @@ Design is a first-class citizen at MindInventory. You will work on products that
       answers: { _fullFormData: { personal: { contactNumber: '+91 98765 43210' } } },
       resumeUrl: 'Alex_Patel_Resume.pdf'
     },
+    // ── Offer demo, all 3 release modes (Alex Patel, the default portal user) ──
+    // Offer case 1 of 4 — "Attach Offer Letter" (digital signature), awaiting
+    // the candidate's signature. Portal shows the document + Review & Sign CTA.
+    {
+      id: 'a-offer-sign',
+      candidateId: 'c1',
+      jobId: 'd7', // DevOps Engineer
+      status: 'Offered',
+      appliedAt: new Date(Date.now() - 86400000 * 12).toISOString(),
+      answers: { _fullFormData: { personal: { contactNumber: '+91 98765 43210' } } },
+      resumeUrl: 'Alex_Patel_Resume.pdf',
+      offer: {
+        mode: 'digital_sign' as const,
+        joiningDate: new Date(Date.now() + 86400000 * 30).toISOString(),
+        offeredAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+        offeredByName: 'Gurpreetsingh Dhillon',
+        document: {
+          fileName: 'alex-patel-offer-letter.pdf',
+          fileUrl: '#offer-letter-alex-patel',
+          fileSize: 1258291,
+          uploadedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+        },
+        signature: {
+          status: 'pending' as const,
+          // Same tokenised link that goes out in the offer email. Real shape:
+          // {host}/recruitment/{portal_slug}/markOffer/{offerId}/sign
+          //   ?token={a}:{b}&domain={emailDomain}&portal_slug={tenant}
+          // Must stay ABSOLUTE — a relative path would be swallowed by the
+          // prototype's catch-all route and bounce back to the home page.
+          signUrl:
+            'https://staging-app.collabcrm.com/recruitment/bluewhaletechnosoftpvtltd/markOffer/c98a2d43-1d2e-4f3d-bcd1-db61e948765b/sign' +
+            '?token=4773bcf1d9316bbb36570d0f4f28913f:a06d3a8f5f8da486f91633a709a4bbcda319e5d244ee6c459dc11b779ef0e8dc5d83d4e5bf5f31ad7f84e31c20ce76dc' +
+            '&domain=maildrop.cc&portal_slug=bluewhaletechnosoftpvtltd',
+          signatories: [
+            { name: 'Gurpreetsingh Dhillon', email: 'bluewhaletechnosoft@maildrop.cc', party: 'company' as const, signedAt: new Date(Date.now() - 86400000 * 2).toISOString() },
+            { name: 'Alex Patel', email: 'alex.patel@example.com', party: 'candidate' as const },
+          ],
+        },
+      },
+    },
+    // Offer case 2 of 4 — "Offer Manually" WITH the optional attachment.
+    // Portal shows the document as a plain download, no signing.
+    {
+      id: 'a-offer-manual',
+      candidateId: 'c1',
+      jobId: 'd10', // Data Analyst
+      status: 'Offered',
+      appliedAt: new Date(Date.now() - 86400000 * 16).toISOString(),
+      answers: { _fullFormData: { personal: { contactNumber: '+91 98765 43210' } } },
+      resumeUrl: 'Alex_Patel_Resume.pdf',
+      offer: {
+        mode: 'manual' as const,
+        joiningDate: new Date(Date.now() + 86400000 * 45).toISOString(),
+        offeredAt: new Date(Date.now() - 86400000 * 4).toISOString(),
+        offeredByName: 'Gurpreetsingh Dhillon',
+        document: {
+          fileName: 'Offer_Letter_Alex_Patel.pdf',
+          fileUrl: '#offer-letter-manual-alex-patel',
+          fileSize: 874496,
+          uploadedAt: new Date(Date.now() - 86400000 * 4).toISOString(),
+        },
+      },
+    },
+    // Offer case 3 of 4 — "Offer Manually" with NO attachment. The attachment on
+    // the Send Offer compose screen is optional, so this is an equally valid
+    // manual offer: date only, candidate is pointed to their email.
+    {
+      id: 'a-offer-manual-nodoc',
+      candidateId: 'c1',
+      jobId: 'd12', // Android Developer
+      status: 'Offered',
+      appliedAt: new Date(Date.now() - 86400000 * 18).toISOString(),
+      answers: { _fullFormData: { personal: { contactNumber: '+91 98765 43210' } } },
+      resumeUrl: 'Alex_Patel_Resume.pdf',
+      offer: {
+        mode: 'manual' as const,
+        joiningDate: new Date(Date.now() + 86400000 * 50).toISOString(),
+        offeredAt: new Date(Date.now() - 86400000 * 5).toISOString(),
+        offeredByName: 'Gurpreetsingh Dhillon',
+      },
+    },
+    // Offer case 4 of 4 — "Verbal Offer Shared". Date only, no document.
+    {
+      id: 'a-offer-verbal',
+      candidateId: 'c1',
+      jobId: 'd11', // iOS Developer
+      status: 'Offered',
+      appliedAt: new Date(Date.now() - 86400000 * 20).toISOString(),
+      answers: { _fullFormData: { personal: { contactNumber: '+91 98765 43210' } } },
+      resumeUrl: 'Alex_Patel_Resume.pdf',
+      offer: {
+        mode: 'verbal' as const,
+        joiningDate: new Date(Date.now() + 86400000 * 60).toISOString(),
+        offeredAt: new Date(Date.now() - 86400000 * 6).toISOString(),
+        offeredByName: 'Gurpreetsingh Dhillon',
+        remarks: 'Offer discussed over call on 14 Jul.',
+      },
+    },
     // Riya Desai (c2) — 3 applications, different statuses
     {
       id: 'a6',
@@ -1469,8 +1568,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const existingIdx = mergedApps.findIndex(a => a.id === defaultApp.id);
         if (existingIdx === -1) {
           mergedApps.push(defaultApp); // preserve original candidateId
+        } else if (defaultApp.offer && !mergedApps[existingIdx].offer) {
+          // Backfill newly-seeded offer details onto applications saved before
+          // the offer feature existed. Status is left untouched so a decline
+          // made during a previous session survives the reload.
+          mergedApps[existingIdx] = { ...mergedApps[existingIdx], offer: defaultApp.offer };
+        } else {
+          const stored = mergedApps[existingIdx];
+          const freshUrl = defaultApp.offer?.signature?.signUrl;
+          // The tokenised signing link expires and gets reissued. It's
+          // environment data rather than something the candidate changed, so
+          // always take the newest one — signature status and any decline the
+          // candidate made in a previous session are preserved.
+          if (freshUrl && stored.offer?.signature && stored.offer.signature.signUrl !== freshUrl) {
+            mergedApps[existingIdx] = {
+              ...stored,
+              offer: { ...stored.offer, signature: { ...stored.offer.signature, signUrl: freshUrl } },
+            };
+          }
         }
-        // Don't overwrite existing apps — user may have updated them in session
+        // Otherwise don't overwrite — user may have updated them in session
       });
 
       // Ensure mock candidate is present
@@ -1625,6 +1742,33 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  // Candidate declines an offer from the career portal. Acceptance stays
+  // recruiter-driven (or happens by signing), so this is the one offer action
+  // the candidate can take directly.
+  const declineOffer = (id: string, reason?: string) => {
+    setState(prev => ({
+      ...prev,
+      applications: prev.applications.map(a =>
+        a.id === id
+          ? {
+              ...a,
+              status: 'Offer Declined' as const,
+              offer: a.offer
+                ? {
+                    ...a.offer,
+                    declinedAt: new Date().toISOString(),
+                    declineReason: reason,
+                    signature: a.offer.signature
+                      ? { ...a.offer.signature, status: 'declined' as const }
+                      : undefined,
+                  }
+                : undefined,
+            }
+          : a
+      ),
+    }));
+  };
+
   const updateCurrentUser = (updates: Partial<Candidate>) => {
     if (!state.currentUser) return;
     setState(prev => {
@@ -1702,6 +1846,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setAlumniVerified,
         toggleSaveJob,
         withdrawApplication,
+        declineOffer,
         updatePortalConfig,
         sendInvite,
         updateInviteStatus,

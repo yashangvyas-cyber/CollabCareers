@@ -85,10 +85,20 @@ export default function CandidateProfilePage() {
       jobClosed: j.status === 'Close'
     }));
 
-  // Get user applications
+  // Get user applications. Offer-stage applications are floated to the top as a
+  // single block — they're the ones needing the candidate's attention, and it
+  // keeps the three offer modes side by side instead of scattered by date.
+  // Everything else keeps the existing newest-first order.
+  const OFFER_STAGE = ['Offered', 'Offer Accepted', 'Offer Declined', 'Offer Revoked'];
   const userApps = applications
     .filter(a => a.candidateId === currentUser?.id)
-    .sort((a, b) => new Date(b.appliedAt).getTime() - new Date(a.appliedAt).getTime());
+    .sort((a, b) => {
+      const rank = (s: string) => (OFFER_STAGE.includes(s) ? 0 : 1);
+      return (
+        rank(a.status) - rank(b.status) ||
+        new Date(b.appliedAt).getTime() - new Date(a.appliedAt).getTime()
+      );
+    });
 
   const displayApps = userApps.map(a => {
     const job = jobs.find(j => j.id === a.jobId);

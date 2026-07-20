@@ -13,11 +13,31 @@
       "Bash(git --no-pager diff --stat HEAD)",
       "Bash(git --no-pager diff HEAD src/pages/ApplicationFormPage.tsx)",
       "Read(//home/yashang/.gemini/antigravity-ide/brain/d2c8c06c-b7cf-4be7-8d56-29d495eaaae1/**)",
-      "Bash(cp \"/tmp/claude-1000/-home-yashang--gemini-antigravity-scratch-collab-careers-prototype/1a3e3372-c78f-414b-a94c-526a10ebab0e/scratchpad/status-colors.html\" \"/home/yashang/.gemini/antigravity/scratch/collab-careers-prototype/status-colors.html\" && ls -la \"/home/yashang/.gemini/antigravity/scratch/collab-careers-prototype/status-colors.html\")"
+      "Bash(cp \"/tmp/claude-1000/-home-yashang--gemini-antigravity-scratch-collab-careers-prototype/1a3e3372-c78f-414b-a94c-526a10ebab0e/scratchpad/status-colors.html\" \"/home/yashang/.gemini/antigravity/scratch/collab-careers-prototype/status-colors.html\" && ls -la \"/home/yashang/.gemini/antigravity/scratch/collab-careers-prototype/status-colors.html\")",
+      "Bash(ls ~/web-crawl-kit/ 2>&1 | head -20; echo \"---ENV KEYS---\"; sed 's/=.*/=***/' ~/web-crawl-kit/.env 2>&1 | head -20; echo \"---PORTALS---\"; cat ~/web-crawl-kit/portals.env 2>&1 | head -30)",
+      "Bash(node crawler.js \"/recruitment/bluewhaletechnosoftpvtltd/candidates/fa268d17-302b-426e-8426-d3dc526f620e/interview-rounds\" --login --wait=12000 --out=/tmp/claude-1000/-home-yashang--gemini-antigravity-scratch-collab-careers-prototype/1a3e3372-c78f-414b-a94c-526a10ebab0e/scratchpad/crawl-offer)",
+      "Bash(python3 -c ' *)",
+      "Bash(node /tmp/claude-1000/-home-yashang--gemini-antigravity-scratch-collab-careers-prototype/1a3e3372-c78f-414b-a94c-526a10ebab0e/scratchpad/offer.js)",
+      "Bash(node /tmp/claude-1000/-home-yashang--gemini-antigravity-scratch-collab-careers-prototype/1a3e3372-c78f-414b-a94c-526a10ebab0e/scratchpad/offer2.js)",
+      "Bash(node /tmp/claude-1000/-home-yashang--gemini-antigravity-scratch-collab-careers-prototype/1a3e3372-c78f-414b-a94c-526a10ebab0e/scratchpad/offer3.js)",
+      "Bash(node /tmp/claude-1000/-home-yashang--gemini-antigravity-scratch-collab-careers-prototype/1a3e3372-c78f-414b-a94c-526a10ebab0e/scratchpad/offer4.js)",
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(curl -s -o /dev/null -w \"5173:%{http_code}\\\\n\" http://localhost:5173)",
+      "Bash(curl -s -o /dev/null -w \"5174:%{http_code}\\\\n\" http://localhost:5174)",
+      "Bash(node /tmp/claude-1000/-home-yashang--gemini-antigravity-scratch-collab-careers-prototype/1a3e3372-c78f-414b-a94c-526a10ebab0e/scratchpad/shot_offer.js http://localhost:5173)",
+      "Bash(echo \"TSC_EXIT=$?\")",
+      "Bash(node test_decline.js)",
+      "Bash(curl -s -o /dev/null http://localhost:5173)",
+      "Bash(node test_stale.js)",
+      "Bash(sed -i \"s|.filter\\(e => e.children.length === 0 \\\\&\\\\& /\\\\^OFFERED\\\\$/i.test\\(e.innerText.trim\\(\\)\\)\\).length\\);|.filter\\(e => e.children.length === 0 \\\\&\\\\& /^OFFERED$/i.test\\(\\(e.innerText \\\\|\\\\| ''\\).trim\\(\\)\\)\\).length\\);|\" test_alex.js)",
+      "Bash(node test_alex.js)",
+      "Bash(sed -i \"s|const IDS = \\\\['a-offer-sign', 'a-offer-manual', 'a-offer-verbal'\\\\];|const IDS = ['a-offer-sign', 'a-offer-manual', 'a-offer-manual-nodoc', 'a-offer-verbal'];|\" test_order.js test_alex.js)",
+      "Bash(node test_order.js)"
     ],
     "additionalDirectories": [
       "/home/yashang/Downloads",
-      "/home/yashang/.gemini/antigravity/scratch/collab-careers-prototype"
+      "/home/yashang/.gemini/antigravity/scratch/collab-careers-prototype",
+      "/home/yashang/web-crawl-kit"
     ]
   }
 }
