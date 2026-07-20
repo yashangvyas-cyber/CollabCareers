@@ -1166,7 +1166,7 @@ Design is a first-class citizen at MindInventory. You will work on products that
       resumeUrl: 'Alex_Patel_Resume.pdf'
     },
     // ── Offer demo, all 3 release modes (Alex Patel, the default portal user) ──
-    // Offer case 1 of 4 — "Attach Offer Letter" (digital signature), awaiting
+    // Offer case 1 of 5 — "Attach Offer Letter" (digital signature), awaiting
     // the candidate's signature. Portal shows the document + Review & Sign CTA.
     {
       id: 'a-offer-sign',
@@ -1205,7 +1205,45 @@ Design is a first-class citizen at MindInventory. You will work on products that
         },
       },
     },
-    // Offer case 2 of 4 — "Offer Manually" WITH the optional attachment.
+    // Offer case 2 of 5 — "Attach Offer Letter" AFTER signing. The countersigned
+    // letter is downloadable; status auto-moved to Offer Accepted on signature.
+    {
+      id: 'a-offer-signed',
+      candidateId: 'c1',
+      jobId: 'd13', // 2D Artist
+      status: 'Offer Accepted',
+      appliedAt: new Date(Date.now() - 86400000 * 25).toISOString(),
+      answers: { _fullFormData: { personal: { contactNumber: '+91 98765 43210' } } },
+      resumeUrl: 'Alex_Patel_Resume.pdf',
+      offer: {
+        mode: 'digital_sign' as const,
+        joiningDate: new Date(Date.now() + 86400000 * 21).toISOString(),
+        offeredAt: new Date(Date.now() - 86400000 * 9).toISOString(),
+        offeredByName: 'Gurpreetsingh Dhillon',
+        document: {
+          fileName: 'alex-patel-offer-letter.pdf',
+          fileUrl: '#offer-letter-alex-patel-2d',
+          fileSize: 1136640,
+          uploadedAt: new Date(Date.now() - 86400000 * 9).toISOString(),
+        },
+        signature: {
+          status: 'signed' as const,
+          signUrl: '#already-signed-alex-patel-2d',
+          signedAt: new Date(Date.now() - 86400000 * 7).toISOString(),
+          signedDocument: {
+            fileName: 'alex-patel-offer-letter-signed.pdf',
+            fileUrl: '#offer-letter-alex-patel-2d-signed',
+            fileSize: 1268736,
+            uploadedAt: new Date(Date.now() - 86400000 * 7).toISOString(),
+          },
+          signatories: [
+            { name: 'Gurpreetsingh Dhillon', email: 'bluewhaletechnosoft@maildrop.cc', party: 'company' as const, signedAt: new Date(Date.now() - 86400000 * 9).toISOString() },
+            { name: 'Alex Patel', email: 'alex.patel@example.com', party: 'candidate' as const, signedAt: new Date(Date.now() - 86400000 * 7).toISOString() },
+          ],
+        },
+      },
+    },
+    // Offer case 3 of 5 — "Offer Manually" WITH the optional attachment.
     // Portal shows the document as a plain download, no signing.
     {
       id: 'a-offer-manual',
@@ -1228,7 +1266,7 @@ Design is a first-class citizen at MindInventory. You will work on products that
         },
       },
     },
-    // Offer case 3 of 4 — "Offer Manually" with NO attachment. The attachment on
+    // Offer case 4 of 5 — "Offer Manually" with NO attachment. The attachment on
     // the Send Offer compose screen is optional, so this is an equally valid
     // manual offer: date only, candidate is pointed to their email.
     {
@@ -1246,7 +1284,7 @@ Design is a first-class citizen at MindInventory. You will work on products that
         offeredByName: 'Gurpreetsingh Dhillon',
       },
     },
-    // Offer case 4 of 4 — "Verbal Offer Shared". Date only, no document.
+    // Offer case 5 of 5 — "Verbal Offer Shared". Date only, no document.
     {
       id: 'a-offer-verbal',
       candidateId: 'c1',

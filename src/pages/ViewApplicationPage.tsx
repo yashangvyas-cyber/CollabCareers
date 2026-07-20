@@ -81,7 +81,14 @@ export default function ViewApplicationPage() {
   const offerRevoked = application.status === 'Offer Revoked';
   const offerLive = application.status === 'Offered' && !offerRevoked;
   // Document is hidden once the offer is revoked, whatever the mode.
-  const offerDoc = offerRevoked ? undefined : offer?.document;
+  const sig = offerRevoked ? undefined : offer?.signature;
+  // In the digital-sign flow the candidate downloads only the countersigned
+  // letter, and only after signing — before that the sole route to the document
+  // is "Review & Sign Offer". A manual attachment has no signing step, so it
+  // stays downloadable throughout.
+  const signedDoc = sig?.status === 'signed' ? (sig.signedDocument ?? offer?.document) : undefined;
+  const offerDoc = offerRevoked ? undefined : (sig ? signedDoc ?? offer?.document : offer?.document);
+  const canDownload = !sig || sig.status === 'signed';
   const canDecline = offerLive;
 
   // The submitted snapshot saved by the application form. Every section below
@@ -271,14 +278,16 @@ export default function ViewApplicationPage() {
                     )}
                   </div>
                 </div>
-                {/* Manual mode = plain download. Digital sign gets the primary
-                    CTA below instead, so it only needs a quiet download here. */}
-                <a
-                  href={offerDoc.fileUrl}
-                  className="shrink-0 flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-xs font-black text-[#6B7280] hover:text-primary hover:border-primary/30 transition-all uppercase tracking-widest shadow-sm"
-                >
-                  <Download className="w-3.5 h-3.5" /> Download
-                </a>
+                {/* Manual attachment downloads freely. In the digital-sign flow
+                    there is nothing to download until the letter is signed. */}
+                {canDownload && (
+                  <a
+                    href={offerDoc.fileUrl}
+                    className="shrink-0 flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-xs font-black text-[#6B7280] hover:text-primary hover:border-primary/30 transition-all uppercase tracking-widest shadow-sm"
+                  >
+                    <Download className="w-3.5 h-3.5" /> {sig ? 'Download Signed' : 'Download'}
+                  </a>
+                )}
               </div>
             )}
 

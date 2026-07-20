@@ -132,6 +132,10 @@ export interface OfferSignature {
   /** The same link that goes out in the offer email's "Review & Sign Offer"
    *  button, so the candidate can start signing from the portal too. */
   signUrl: string;
+  /** The countersigned letter, available only once status is 'signed'. This is
+   *  what the candidate downloads — the unsigned original is never downloadable
+   *  in the digital-sign flow. */
+  signedDocument?: OfferDocument;
   signedAt?: string;
   signatories: {
     name: string;

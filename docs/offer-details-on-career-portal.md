@@ -209,11 +209,15 @@ Add one supporting line, since the candidate has no document to look at:
 
 Signature states:
 
-| `signature.status` | Pill | CTA |
-|---|---|---|
-| `pending` | ● Awaiting your signature (amber) | **Review & Sign Offer** (primary, brand colour) |
-| `signed` | ● Signed on 20 Jul, 2026 (green) | **View Signed Offer** (secondary) |
-| `declined` | ● Declined (red) | View Offer (secondary) |
+| `signature.status` | Pill | Download | CTA |
+|---|---|---|---|
+| `pending` | ● Awaiting your signature (amber) | **hidden** | **Review & Sign Offer** |
+| `signed` | ● Signed on {date} (green) | **Download Signed** | **View Signed Offer** |
+| `declined` | ● Declined (red) | hidden | View Offer |
+
+**Download gating — digital sign only.** There is no Download button until the letter is signed. Before signing, the only route to the document is **Review & Sign Offer**, which opens the signing session; the row still shows the file name and the awaiting-signature pill so the candidate knows what's outstanding. Once signed, Download appears and serves the **countersigned** copy — `signature.signedDocument`, a different file from the unsigned `offer.document`, which is never downloadable in this flow.
+
+> This gating applies **only** where `offer.signature` exists. A **manual** attachment has no signing step and stays downloadable throughout — see §4.2-C.
 
 ### 4.3 Label change — required
 
@@ -263,8 +267,9 @@ Seeded on **Alex Patel (`c1`)** — the default portal user — so all four stat
 
 | Application id | Job | Mode | State |
 |---|---|---|---|
-| `a-offer-sign` | DevOps Engineer | `digital_sign` | document + signature `pending` |
-| `a-offer-manual` | Data Analyst | `manual` | **with** attachment |
+| `a-offer-sign` | DevOps Engineer | `digital_sign` | signature `pending` — **no download**, Review & Sign only |
+| `a-offer-signed` | 2D Artist | `digital_sign` | signature `signed`, status `Offer Accepted` — **Download Signed** |
+| `a-offer-manual` | Data Analyst | `manual` | **with** attachment — downloadable |
 | `a-offer-manual-nodoc` | Android Developer | `manual` | **without** attachment |
 | `a-offer-verbal` | iOS Developer | `verbal` | date only |
 
