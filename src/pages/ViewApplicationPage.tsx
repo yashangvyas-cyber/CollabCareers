@@ -59,9 +59,10 @@ export default function ViewApplicationPage() {
       : offer?.document;          // manual attachment: always
   const canDownload = !sig || sig.status === 'signed';
   const canDecline = offerLive;
-  // "Review & Sign / View Signed" is gone once the candidate declines — a declined
-  // offer must not be signable — and while the offer is on hold.
-  const showSignCta = !!offer?.signature && !offerRevoked && application.status !== 'Offer Declined';
+  // "Review & Sign" shows only while the letter is awaiting signature. Once signed
+  // there's no separate "View Signed" button — the signed letter is reachable from
+  // the download icon in the row above. Gone when declined/revoked too.
+  const showSignCta = offerLive && offer?.signature?.status === 'pending';
   // Manual / verbal offers have no signature, so the candidate accepts explicitly.
   // Digital-sign offers are accepted by signing, so they never show a separate
   // Accept — this keeps Decline paired with an action in every live offer.
@@ -265,11 +266,7 @@ export default function ViewApplicationPage() {
                     rel="noreferrer"
                     className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-primary text-white text-xs font-black rounded-2xl hover:opacity-90 transition-all uppercase tracking-widest shadow-lg"
                   >
-                    {offer.signature.status === 'signed' ? (
-                      <><CheckCircle2 className="w-4 h-4" /> View Signed Offer</>
-                    ) : (
-                      <><PenLine className="w-4 h-4" /> Review &amp; Sign Offer</>
-                    )}
+                    <PenLine className="w-4 h-4" /> Review &amp; Sign Offer
                   </a>
                 )}
                 {/* Manual / verbal: explicit accept, so Decline is never alone. */}
