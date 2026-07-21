@@ -18,31 +18,13 @@ const brandStatusStyles: Record<string, string> = {
   'Submitted': 'bg-[#F4F5FA] text-primary border-primary/20',
 };
 
-// Signature-state badge on the document row. The status pill that used to sit in
-// the offer-card header was dropped when it became the collapsible "Offer Summary"
-// section — the page header already carries the application status.
-const signaturePill: Record<string, string> = {
-  pending:  'bg-[#FFF4E5] text-[#D97706] border-[#FFD89A]',
-  signed:   'bg-[#ECFDF3] text-[#059669] border-[#A7F3D0]',
-  declined: 'bg-[#FEF2F2] text-[#DC2626] border-[#FECACA]',
-};
-
-// The Send Offer compose screen accepts DOCX & PDF, so the type is derived from
-// the file name rather than assumed to be PDF.
-const fileKind = (fileName: string) => (fileName.split('.').pop() || 'file').toUpperCase();
-
-const formatFileSize = (bytes: number) => {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-};
-
 export default function ViewApplicationPage() {
   const { slug, applicationId } = useParams();
   const navigate = useNavigate();
-  const { applications, jobs, withdrawApplication, declineOffer } = useApp();
+  const { applications, jobs, withdrawApplication, acceptOffer, declineOffer } = useApp();
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
   const [isDeclineModalOpen, setIsDeclineModalOpen] = useState(false);
+  const [isAcceptModalOpen, setIsAcceptModalOpen] = useState(false);
   const [declineReason, setDeclineReason] = useState('');
   // "Offer Summary" is a collapsible section like the others below; open by default.
   const [offerExpanded, setOfferExpanded] = useState(true);
@@ -80,6 +62,10 @@ export default function ViewApplicationPage() {
   // "Review & Sign / View Signed" is gone once the candidate declines — a declined
   // offer must not be signable — and while the offer is on hold.
   const showSignCta = !!offer?.signature && !offerRevoked && application.status !== 'Offer Declined';
+  // Manual / verbal offers have no signature, so the candidate accepts explicitly.
+  // Digital-sign offers are accepted by signing, so they never show a separate
+  // Accept — this keeps Decline paired with an action in every live offer.
+  const canAccept = offerLive && !offer?.signature;
 
   // The submitted snapshot saved by the application form. Every section below
   // renders from this (no hardcoded candidate data) so each application shows
@@ -202,8 +188,11 @@ export default function ViewApplicationPage() {
             </button>
             {offerExpanded && (
             <div className="border-t border-[#F3F4F6]">
-            {/* Dates — "Tentative Joining Date" internally, "Expected" here */}
-            <div className="px-5 sm:px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {/* Dates + offer letter in one row — "Tentative Joining Date"
+                internally, "Expected" here. The letter is a compact download-icon
+                column, so the card keeps the same shape whether or not a document
+                is attached (the third cell is simply empty when there's none). */}
+            <div className="px-5 sm:px-6 py-5 grid grid-cols-1 sm:grid-cols-3 gap-5">
               <div className="space-y-1.5">
                 <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">Expected Joining Date</p>
                 <p className="text-sm font-semibold text-[#111827] flex items-center gap-2">
@@ -218,6 +207,28 @@ export default function ViewApplicationPage() {
                   {formatDate(offer.offeredAt)}
                 </p>
               </div>
+              {offerDoc && (
+                <div className="space-y-1.5 min-w-0">
+                  <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">
+                    {sig ? 'Signed Offer Letter' : 'Offer Letter'}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-primary shrink-0" />
+                    <p className="text-sm font-semibold text-[#111827] truncate min-w-0">{offerDoc.fileName}</p>
+                    {/* Download icon, not a full button, so the row height is stable. */}
+                    {canDownload && (
+                      <a
+                        href={offerDoc.fileUrl}
+                        title={sig ? 'Download signed offer letter' : 'Download offer letter'}
+                        aria-label="Download offer letter"
+                        className="shrink-0 ml-auto p-2 rounded-lg text-[#6B7280] hover:text-primary hover:bg-primary/5 transition-all"
+                      >
+                        <Download className="w-4 h-4" />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Mode-specific supporting line — shown when there's no document to
@@ -241,45 +252,12 @@ export default function ViewApplicationPage() {
               </div>
             )}
 
-            {/* Document row — digital_sign always, manual when attached */}
-            {offerDoc && (
-              <div className="px-5 sm:px-6 py-4 border-t border-[#F3F4F6] flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-[#F4F5FA] flex items-center justify-center text-primary border border-[#E5E7EB] shrink-0">
-                  <FileText className="w-6 h-6" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-[#111827] truncate">{offerDoc.fileName}</p>
-                  <div className="flex items-center gap-2 mt-1 flex-wrap">
-                    <span className="text-[10px] text-[#9CA3AF] font-medium uppercase tracking-widest">
-                      {fileKind(offerDoc.fileName)} · {formatFileSize(offerDoc.fileSize)}
-                    </span>
-                    {offer.signature && (
-                      <span className={`px-2 py-0.5 text-[10px] font-black rounded-md border uppercase tracking-widest ${signaturePill[offer.signature.status]}`}>
-                        {offer.signature.status === 'pending' && 'Awaiting your signature'}
-                        {offer.signature.status === 'signed' && `Signed ${offer.signature.signedAt ? formatDate(offer.signature.signedAt) : ''}`}
-                        {offer.signature.status === 'declined' && 'Declined'}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                {/* Manual attachment downloads freely. In the digital-sign flow
-                    there is nothing to download until the letter is signed. */}
-                {canDownload && (
-                  <a
-                    href={offerDoc.fileUrl}
-                    className="shrink-0 flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-xs font-black text-[#6B7280] hover:text-primary hover:border-primary/30 transition-all uppercase tracking-widest shadow-sm"
-                  >
-                    <Download className="w-3.5 h-3.5" /> {sig ? 'Download Signed' : 'Download'}
-                  </a>
-                )}
-              </div>
-            )}
-
-            {/* Actions — both buttons share the row equally (flex-1). */}
-            {(showSignCta || canDecline) && (
-              <div className="px-5 sm:px-6 py-4 bg-[#F9FAFB] border-t border-[#E5E7EB] flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                {/* Same link that goes out in the offer email. Hidden once the
-                    candidate declines — a declined offer can't be signed. */}
+            {/* Actions — paired buttons share the row equally (flex-1); a lone
+                Decline keeps that same half width, centered, rather than stretching. */}
+            {(showSignCta || canAccept || canDecline) && (
+              <div className="px-5 sm:px-6 py-4 bg-[#F9FAFB] border-t border-[#E5E7EB] flex flex-col sm:flex-row items-stretch gap-3">
+                {/* Digital-sign: the same link that goes out in the offer email.
+                    Hidden once declined — a declined offer can't be signed. */}
                 {showSignCta && offer.signature && (
                   <a
                     href={offer.signature.signUrl}
@@ -293,6 +271,15 @@ export default function ViewApplicationPage() {
                       <><PenLine className="w-4 h-4" /> Review &amp; Sign Offer</>
                     )}
                   </a>
+                )}
+                {/* Manual / verbal: explicit accept, so Decline is never alone. */}
+                {canAccept && (
+                  <button
+                    onClick={() => setIsAcceptModalOpen(true)}
+                    className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-primary text-white text-xs font-black rounded-2xl hover:opacity-90 transition-all uppercase tracking-widest shadow-lg"
+                  >
+                    <CheckCircle2 className="w-4 h-4" /> Accept Offer
+                  </button>
                 )}
                 {canDecline && (
                   <button
@@ -319,7 +306,7 @@ export default function ViewApplicationPage() {
             {application.status === 'Offer Accepted' && (
               <div className="px-5 sm:px-6 py-4 bg-[#ECFDF3] border-t border-[#A7F3D0]">
                 <p className="text-xs font-bold text-[#059669]">
-                  You have accepted this offer. We look forward to having you on board!
+                  You accepted this offer{offer.acceptedAt ? ` on ${formatDate(offer.acceptedAt)}` : ''}. We look forward to having you on board!
                 </p>
               </div>
             )}
@@ -527,6 +514,43 @@ export default function ViewApplicationPage() {
                   className="flex-1 px-6 py-3.5 bg-red-600 text-white text-xs font-black rounded-2xl hover:bg-red-700 transition-all uppercase tracking-widest shadow-lg"
                 >
                   Yes, Decline
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Accept Offer Modal — manual/verbal offers only */}
+      {isAcceptModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+          <div className="absolute inset-0 bg-[#111827]/60 backdrop-blur-sm" onClick={() => setIsAcceptModalOpen(false)} />
+          <div className="relative bg-white rounded-[32px] shadow-2xl w-full max-w-md overflow-hidden border border-[#E5E7EB] animate-in fade-in zoom-in duration-200">
+            <div className="p-8">
+              <div className="w-14 h-14 rounded-2xl bg-[#ECFDF3] text-[#059669] flex items-center justify-center mb-6">
+                <CheckCircle2 className="w-7 h-7" />
+              </div>
+              <h3 className="text-2xl font-black text-[#111827] tracking-tight mb-2">Accept this offer?</h3>
+              <p className="text-[#6B7280] text-sm font-medium leading-relaxed mb-7">
+                You're about to accept the offer for <span className="font-black text-[#111827]">{job.title}</span>
+                {offer?.joiningDate ? <> with an expected joining date of <span className="font-black text-[#111827]">{formatDate(offer.joiningDate)}</span></> : null}.
+                The recruitment team will be notified.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setIsAcceptModalOpen(false)}
+                  className="flex-1 px-6 py-3.5 bg-[#F9FAFB] text-[#111827] text-xs font-black rounded-2xl hover:bg-[#F3F4F6] transition-all uppercase tracking-widest border border-[#E5E7EB]"
+                >
+                  Not Yet
+                </button>
+                <button
+                  onClick={() => {
+                    acceptOffer(application.id);
+                    setIsAcceptModalOpen(false);
+                  }}
+                  className="flex-1 px-6 py-3.5 bg-[#059669] text-white text-xs font-black rounded-2xl hover:bg-[#047857] transition-all uppercase tracking-widest shadow-lg"
+                >
+                  Yes, Accept
                 </button>
               </div>
             </div>

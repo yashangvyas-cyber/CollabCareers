@@ -14,6 +14,7 @@ interface AppContextType extends AppState {
   setAlumniVerified: (verified: boolean, email: string | null) => void;
   toggleSaveJob: (jobId: string) => void;
   withdrawApplication: (applicationId: string) => void;
+  acceptOffer: (applicationId: string) => void;
   declineOffer: (applicationId: string, reason?: string) => void;
   updatePortalConfig: (updates: Partial<PortalConfig>) => void;
   sendInvite: (invite: TalentInvite) => void;
@@ -1807,6 +1808,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  // Candidate accepts a manual/verbal offer from the career portal. The
+  // digital-sign flow has no separate accept — signing the letter is the
+  // acceptance — so this only applies where there is no signature.
+  const acceptOffer = (id: string) => {
+    setState(prev => ({
+      ...prev,
+      applications: prev.applications.map(a =>
+        a.id === id
+          ? {
+              ...a,
+              status: 'Offer Accepted' as const,
+              offer: a.offer ? { ...a.offer, acceptedAt: new Date().toISOString() } : undefined,
+            }
+          : a
+      ),
+    }));
+  };
+
   const updateCurrentUser = (updates: Partial<Candidate>) => {
     if (!state.currentUser) return;
     setState(prev => {
@@ -1884,6 +1903,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setAlumniVerified,
         toggleSaveJob,
         withdrawApplication,
+        acceptOffer,
         declineOffer,
         updatePortalConfig,
         sendInvite,

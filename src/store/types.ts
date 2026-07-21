@@ -158,6 +158,9 @@ export interface OfferDetail {
   signature?: OfferSignature;
   /** Maps to offer_detail_remarks. */
   remarks?: string;
+  /** Set when the candidate accepts from the career portal (manual/verbal offers,
+   *  where there is no digital signature to serve as the acceptance). */
+  acceptedAt?: string;
   /** Set when the candidate declines from the career portal. */
   declinedAt?: string;
   declineReason?: string;
