@@ -232,10 +232,11 @@ export default function ViewApplicationPage() {
               )}
             </div>
 
-            {/* Mode-specific supporting line — shown when there's no document to
-                look at, so the card never feels empty. Skipped for digital-sign,
-                which instead leads with the prominent "Review & Sign" action. */}
-            {!offerDoc && !offerRevoked && offer.mode !== 'digital_sign' && (
+            {/* Mode-specific delivery line — how the offer reached the candidate.
+                Shown for every manual and verbal offer, attachment or not, so the
+                two manual variants read the same. Skipped for digital-sign, which
+                leads with the prominent "Review & Sign" action instead. */}
+            {!offerRevoked && offer.mode !== 'digital_sign' && (
               <div className="px-5 sm:px-6 pb-5 -mt-1">
                 <p className="text-xs font-medium text-[#6B7280] leading-relaxed">
                   {offer.mode === 'verbal'
