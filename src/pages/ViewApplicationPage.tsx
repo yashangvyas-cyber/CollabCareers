@@ -5,7 +5,7 @@ import { useApp } from '../store/AppContext';
 import {
   Download, Globe, Linkedin, FileText,
   ChevronDown, MapPin, Briefcase, Building2, Clock, X, AlertTriangle,
-  Award, Calendar, PenLine, CheckCircle2, XCircle
+  Calendar, PenLine, CheckCircle2, XCircle
 } from 'lucide-react';
 
 const brandStatusStyles: Record<string, string> = {
@@ -18,29 +18,9 @@ const brandStatusStyles: Record<string, string> = {
   'Submitted': 'bg-[#F4F5FA] text-primary border-primary/20',
 };
 
-// Offer status badges reuse the PM-approved portal palette, so the card matches
-// the badges on My Applications. 'Offer Revoked' surfaces as 'Offer On Hold'.
-const portalOfferStatusLabel: Record<string, string> = {
-  'Offered': 'Offered',
-  'Offer Accepted': 'Offer Accepted',
-  'Offer Declined': 'Offer Declined',
-  'Offer Revoked': 'Offer On Hold',
-};
-
-const offerHeading: Record<string, string> = {
-  'Offered': 'You have an offer',
-  'Offer Accepted': 'Offer accepted',
-  'Offer Declined': 'Offer declined',
-  'Offer Revoked': 'Your offer is on hold',
-};
-
-const offerStatusPill: Record<string, string> = {
-  'Offered':         'bg-[#F3E8FF] text-[#7C3AED] border-[#D8B4FE]',
-  'Offer Accepted':  'bg-[#ECFDF3] text-[#059669] border-[#A7F3D0]',
-  'Offer Declined':  'bg-[#FEF2F2] text-[#DC2626] border-[#FECACA]',
-  'Offer Revoked':   'bg-[#F5F3FF] text-[#6D28D9] border-[#C4B5FD]',
-};
-
+// Signature-state badge on the document row. The status pill that used to sit in
+// the offer-card header was dropped when it became the collapsible "Offer Summary"
+// section — the page header already carries the application status.
 const signaturePill: Record<string, string> = {
   pending:  'bg-[#FFF4E5] text-[#D97706] border-[#FFD89A]',
   signed:   'bg-[#ECFDF3] text-[#059669] border-[#A7F3D0]',
@@ -60,10 +40,12 @@ const formatFileSize = (bytes: number) => {
 export default function ViewApplicationPage() {
   const { slug, applicationId } = useParams();
   const navigate = useNavigate();
-  const { applications, jobs, withdrawApplication, declineOffer, portalConfig } = useApp();
+  const { applications, jobs, withdrawApplication, declineOffer } = useApp();
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
   const [isDeclineModalOpen, setIsDeclineModalOpen] = useState(false);
   const [declineReason, setDeclineReason] = useState('');
+  // "Offer Summary" is a collapsible section like the others below; open by default.
+  const [offerExpanded, setOfferExpanded] = useState(true);
 
   const application = applications.find(a => a.id === applicationId) || applications[0];
   const job = jobs.find(j => j.id === application.jobId) || jobs[0];
@@ -82,14 +64,22 @@ export default function ViewApplicationPage() {
   const offerLive = application.status === 'Offered' && !offerRevoked;
   // Document is hidden once the offer is revoked, whatever the mode.
   const sig = offerRevoked ? undefined : offer?.signature;
-  // In the digital-sign flow the candidate downloads only the countersigned
-  // letter, and only after signing — before that the sole route to the document
-  // is "Review & Sign Offer". A manual attachment has no signing step, so it
-  // stays downloadable throughout.
+  // In the digital-sign flow the candidate can only ever open the countersigned
+  // letter, and only after signing — the sole route before that is "Review & Sign
+  // Offer". So until it's signed there is nothing to show: we hide the document
+  // row entirely rather than display a name the candidate can't view or download.
+  // A manual attachment has no signing step, so it stays downloadable throughout.
   const signedDoc = sig?.status === 'signed' ? (sig.signedDocument ?? offer?.document) : undefined;
-  const offerDoc = offerRevoked ? undefined : (sig ? signedDoc ?? offer?.document : offer?.document);
+  const offerDoc = offerRevoked
+    ? undefined
+    : sig
+      ? signedDoc                 // digital-sign: only once signed
+      : offer?.document;          // manual attachment: always
   const canDownload = !sig || sig.status === 'signed';
   const canDecline = offerLive;
+  // "Review & Sign / View Signed" is gone once the candidate declines — a declined
+  // offer must not be signable — and while the offer is on hold.
+  const showSignCta = !!offer?.signature && !offerRevoked && application.status !== 'Offer Declined';
 
   // The submitted snapshot saved by the application form. Every section below
   // renders from this (no hardcoded candidate data) so each application shows
@@ -195,30 +185,23 @@ export default function ViewApplicationPage() {
           <div className="h-px flex-1 bg-[#F3F4F6]" />
         </div>
 
-        {/* Offer card — the most important thing on the page, so it sits above
-            the accordions and is always expanded. */}
+        {/* Offer Summary — a collapsible section styled like the accordions below,
+            kept at the top of the page as the most important thing to see. */}
         {showOfferCard && offer && (
-          <div className="mb-6 bg-white rounded-2xl border-2 border-primary/20 shadow-sm overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
-            {/* Header */}
-            <div className="px-5 sm:px-6 py-5 bg-primary/5 border-b border-primary/10 flex items-start justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="w-11 h-11 rounded-2xl bg-primary text-white flex items-center justify-center shrink-0 shadow-sm">
-                  <Award className="w-5 h-5" />
-                </div>
-                <div>
-                  <h2 className="text-lg font-black text-[#111827] tracking-tight">
-                    {offerHeading[application.status] || 'You have an offer'}
-                  </h2>
-                  <p className="text-xs font-semibold text-[#6B7280] mt-0.5">
-                    {job.title} · {portalConfig.appearance.portalName}
-                  </p>
-                </div>
+          <div className="mb-6 bg-white rounded-2xl border border-[#E5E7EB] overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 animate-in fade-in slide-in-from-top-2">
+            <button
+              type="button"
+              onClick={() => setOfferExpanded(v => !v)}
+              className="w-full flex items-center justify-between px-4 sm:px-6 py-4 hover:bg-[#F9FAFB] transition-colors text-left"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-0.5 h-4 bg-primary rounded-full" />
+                <span className="text-xs font-black text-[#111827] uppercase tracking-widest">Offer Summary</span>
               </div>
-              <span className={`shrink-0 px-3 py-1 text-[10px] font-black rounded-full border uppercase tracking-widest ${offerStatusPill[application.status] || 'bg-gray-100 text-gray-500 border-gray-200'}`}>
-                {portalOfferStatusLabel[application.status] || application.status}
-              </span>
-            </div>
-
+              <ChevronDown className={`w-4 h-4 text-[#9CA3AF] transition-transform duration-200 ${offerExpanded ? 'rotate-180' : ''}`} />
+            </button>
+            {offerExpanded && (
+            <div className="border-t border-[#F3F4F6]">
             {/* Dates — "Tentative Joining Date" internally, "Expected" here */}
             <div className="px-5 sm:px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div className="space-y-1.5">
@@ -238,8 +221,9 @@ export default function ViewApplicationPage() {
             </div>
 
             {/* Mode-specific supporting line — shown when there's no document to
-                look at, so the card never feels empty. */}
-            {!offerDoc && !offerRevoked && (
+                look at, so the card never feels empty. Skipped for digital-sign,
+                which instead leads with the prominent "Review & Sign" action. */}
+            {!offerDoc && !offerRevoked && offer.mode !== 'digital_sign' && (
               <div className="px-5 sm:px-6 pb-5 -mt-1">
                 <p className="text-xs font-medium text-[#6B7280] leading-relaxed">
                   {offer.mode === 'verbal'
@@ -291,11 +275,12 @@ export default function ViewApplicationPage() {
               </div>
             )}
 
-            {/* Actions */}
-            {(offer.signature || canDecline) && !offerRevoked && (
+            {/* Actions — both buttons share the row equally (flex-1). */}
+            {(showSignCta || canDecline) && (
               <div className="px-5 sm:px-6 py-4 bg-[#F9FAFB] border-t border-[#E5E7EB] flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                {/* Same link that goes out in the offer email */}
-                {offer.signature && (
+                {/* Same link that goes out in the offer email. Hidden once the
+                    candidate declines — a declined offer can't be signed. */}
+                {showSignCta && offer.signature && (
                   <a
                     href={offer.signature.signUrl}
                     target="_blank"
@@ -312,7 +297,7 @@ export default function ViewApplicationPage() {
                 {canDecline && (
                   <button
                     onClick={() => setIsDeclineModalOpen(true)}
-                    className={`${offer.signature ? 'sm:flex-none' : 'flex-1'} flex items-center justify-center gap-2 px-6 py-3.5 bg-white border-2 border-[#E5E7EB] text-[#6B7280] hover:text-red-600 hover:border-red-200 hover:bg-red-50 text-xs font-black rounded-2xl transition-all uppercase tracking-widest`}
+                    className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-white border-2 border-[#E5E7EB] text-[#6B7280] hover:text-red-600 hover:border-red-200 hover:bg-red-50 text-xs font-black rounded-2xl transition-all uppercase tracking-widest"
                   >
                     <XCircle className="w-4 h-4" /> Decline Offer
                   </button>
@@ -337,6 +322,8 @@ export default function ViewApplicationPage() {
                   You have accepted this offer. We look forward to having you on board!
                 </p>
               </div>
+            )}
+            </div>
             )}
           </div>
         )}
