@@ -6,6 +6,7 @@ import {
   Eye, LayoutGrid, ArrowUpDown, ArrowUp, ArrowDown, UserPlus, Search, ChevronUp,
 } from 'lucide-react';
 import { useApp } from '../store/AppContext';
+import ScheduleInterviewDrawer from '../components/ScheduleInterviewDrawer';
 
 // ── Terminal chip colour definitions ──────────────────────────────────────────
 const TERMINAL_CHIPS = [
@@ -116,6 +117,17 @@ export default function JobApplicationsPage() {
   const [candOpen, setCandOpen] = useState(false);
   const [dupError, setDupError] = useState(false);
   const candRef = useRef<HTMLDivElement>(null);
+
+  // ── Schedule Interview Drawer state ──
+  const [schedContext, setSchedContext] = useState<any>(null);
+  const [schedToast, setSchedToast] = useState('');
+
+  const handleScheduled = (msg: string) => {
+    setSchedContext(null);
+    setSchedToast(msg);
+    setTimeout(() => setSchedToast(''), 4000);
+  };
+
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -446,7 +458,7 @@ export default function JobApplicationsPage() {
                       <td className="px-4 py-4 whitespace-nowrap text-center">
                         {c.interviewDate
                           ? <span className="text-sm text-[#374151]">{formatInterviewDate(c.interviewDate)}</span>
-                          : <button className="px-3 py-1.5 bg-[#F4F5FA] text-[#3538CD] text-[12px] font-bold rounded-md hover:bg-[#3538CD]/10 transition-colors">Schedule</button>
+                          : <button onClick={() => setSchedContext(c)} className="px-3 py-1.5 bg-[#F4F5FA] text-[#3538CD] text-[12px] font-bold rounded-md hover:bg-[#3538CD]/10 transition-colors">Schedule</button>
                         }
                       </td>
 
@@ -674,6 +686,27 @@ export default function JobApplicationsPage() {
             </div>
           </div>
         </>
+      )}
+      {/* Schedule Interview Drawer */}
+      <ScheduleInterviewDrawer
+        candidateName={schedContext?.name ?? ''}
+        candidateId={schedContext?.candidateId ?? ''}
+        jobTitle={schedContext?.job?.replace(/\s*\([^)]*\)$/, '') ?? ''}
+        businessUnit={schedContext?.businessUnit ?? 'MindInventory'}
+        evaluationCriteria={[]}
+        resumeUrl={undefined}
+        roundCount={0}
+        open={!!schedContext}
+        onClose={() => setSchedContext(null)}
+        onScheduled={handleScheduled}
+      />
+
+      {/* Toast */}
+      {schedToast && (
+        <div className="fixed bottom-6 right-6 z-50 bg-[#111827] text-white px-5 py-3 rounded-2xl shadow-xl text-sm font-semibold flex items-center gap-3 animate-[slideUp_0.3s_ease-out]">
+          <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+          {schedToast}
+        </div>
       )}
     </CRMLayout>
   );

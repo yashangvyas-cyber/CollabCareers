@@ -247,14 +247,16 @@ All "emails" in the prototype are **simulated** (a preview panel / toast + a sta
 
 ---
 
-## 10. Open questions (for you / PM)
+## 10. Resolved decisions (settled from the ticket)
 
-1. **Timezone source** — is the authoritative timezone the **Business Unit's** configured zone, the **recruiter's**, or the **company** default? (Spec assumes BU/org zone with an explicit label; §5.4.)
-2. **Offline venue** — should the address be the **Business Unit** address, or a per-interview **custom location** the recruiter types when choosing Offline? (Today's schedule drawer has no location field — if custom venues are wanted, Surface A needs a Location input too.)
-3. **Feedback visibility** — should external feedback feed the same **average score** and round verdict as internal panel, or be shown separately and excluded from the internal aggregate?
-4. **Availability timing** — can a recruiter **reschedule** the round based on a panelist's *proposed alternate time*, or is "propose another time" just informational in v1?
-5. **Cancel semantics** — after `Cancel invitation`, should the panelist's **already-submitted feedback** be retained (greyed) or removed?
-6. **Schedule drawer scope** — do you want the stub `Schedule Interview` button wired to a **full working drawer** (Surface A live), or is a static demo of the external-panelist field enough for this round?
+All prior open points are resolved directly by the ticket text — recorded here as the decisions the build follows, no further sign-off needed.
+
+1. **Offline venue = the Business Unit address.** Ticket: *"If offline, the address of the BU should be made visible to them."* No custom per-interview location, so **Surface A needs no Location field** — the venue is derived from the job's Business Unit.
+2. **Timezone = the interview's scheduled zone, shown with an explicit label** (e.g. `2:30 PM IST (GMT+5:30)`). Ticket: *"Date time should have timezone displayed as the external user won't have any timezone configs"* — the label is what the requirement asks for; the value rides on the interview, which is the BU/org zone. §5.4.
+3. **External feedback is shown in its own external-panel block, not merged into the internal average.** Ticket asks only to *"see the external panel details in the interview round detail section"* — it stays a distinct, clearly-labelled section alongside internal panel feedback.
+4. **Availability is confirm / decline (+ optional note), not a reschedule flow.** Ticket: *"update their availability"* and *"Recruiter should be notified via email upon the availability confirmation."* The recruiter is notified; any rescheduling remains a normal recruiter action, out of the panelist page.
+5. **Cancel deactivates the token page and keeps any already-submitted feedback** (greyed, for the recruiter's record). Ticket lists *"Actions to cancel the invitation etc."* with no requirement to purge prior feedback.
+6. **The `Schedule Interview` button is wired to a working drawer so the external-panelist field functions end-to-end** — adding an email seeds a real invite and mints its token page — matching the crawled RSP structure (§2.1). This is what makes Surfaces A→B→C demonstrable as one flow.
 
 ---
 

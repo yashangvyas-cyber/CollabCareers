@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import CRMLayout from '../components/CRMLayout';
-import { Mail, Phone, Copy, Eye, MoreVertical, ExternalLink, UserCheck, EyeOff, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown } from 'lucide-react';
+import { Mail, Phone, Copy, Eye, MoreVertical, ExternalLink, UserCheck, EyeOff, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, UserPlus, RefreshCw, Ban } from 'lucide-react';
 import { useApp } from '../store/AppContext';
+import ScheduleInterviewDrawer from '../components/ScheduleInterviewDrawer';
 
 function DetailField({ label, value, isLink }: { label: string; value?: string | null; isLink?: boolean }) {
   return (
@@ -77,8 +78,8 @@ const CANDIDATE_STATUS_STYLE: Record<string, { bg: string; text: string; border:
 };
 
 type MockRound = {
-  no: number; name: string; mode: 'Offline' | 'Online'; datetime: string;
-  status: 'Completed' | 'Scheduled' | 'Cancelled'; panelSuggestion: 'Should Hire' | 'On Hold' | 'Reject';
+  id: string; no: number; name: string; mode: 'Offline' | 'Online'; datetime: string;
+  status: 'Completed' | 'Scheduled' | 'Cancelled'; panelSuggestion: 'Next Round' | 'No Show/Cancel' | 'Not Sure' | 'Should Hire' | 'Should Reject';
   panel: string[]; scheduledBy: string; scheduledAt: string; duration: string;
   additionalInfo: string; feedbackScore: number; feedbackBy: string;
 };
@@ -88,20 +89,21 @@ const mockInterviewMap: Record<string, MockInterviewDetails> = {
   '1': {
     offerStatus: 'Offer Accepted', department: 'Engineering', joiningOn: '01/Jan/2027', remarks: '-',
     rounds: [
-      { no: 1, name: 'Aptitude Test', mode: 'Offline', datetime: '28/Nov/2025, 08:06 PM', status: 'Completed', panelSuggestion: 'Should Hire', panel: ['Super User'], scheduledBy: 'Super User', scheduledAt: '28/Nov/2025, 11:36 PM', duration: '60 Minutes', additionalInfo: '-', feedbackScore: 9, feedbackBy: 'Super User' },
-      { no: 2, name: 'Technical Round', mode: 'Online', datetime: '01/Dec/2025, 11:00 AM', status: 'Completed', panelSuggestion: 'Should Hire', panel: ['Super User', 'Rajan Mehta'], scheduledBy: 'Super User', scheduledAt: '30/Nov/2025, 09:00 AM', duration: '90 Minutes', additionalInfo: 'React and TypeScript deep dive.', feedbackScore: 8, feedbackBy: 'Rajan Mehta' },
+      { id: 'r1-1', no: 1, name: 'Aptitude Test', mode: 'Offline', datetime: '28/Nov/2025, 08:06 PM', status: 'Completed', panelSuggestion: 'Should Hire', panel: ['Super User'], scheduledBy: 'Super User', scheduledAt: '28/Nov/2025, 11:36 PM', duration: '60 Minutes', additionalInfo: '-', feedbackScore: 9, feedbackBy: 'Super User' },
+      { id: 'r1-2', no: 2, name: 'Technical Round', mode: 'Online', datetime: '01/Dec/2025, 11:00 AM', status: 'Completed', panelSuggestion: 'Should Hire', panel: ['Super User', 'Rajan Mehta'], scheduledBy: 'Super User', scheduledAt: '30/Nov/2025, 09:00 AM', duration: '90 Minutes', additionalInfo: 'React and TypeScript deep dive.', feedbackScore: 8, feedbackBy: 'Rajan Mehta' },
     ],
   },
   '2': {
     offerStatus: 'Interview in Progress', department: 'Design', joiningOn: '-', remarks: '-',
     rounds: [
-      { no: 1, name: 'Portfolio Review', mode: 'Online', datetime: '22/Apr/2026, 03:00 PM', status: 'Completed', panelSuggestion: 'Should Hire', panel: ['Super User'], scheduledBy: 'Super User', scheduledAt: '21/Apr/2026, 05:00 PM', duration: '45 Minutes', additionalInfo: '-', feedbackScore: 8, feedbackBy: 'Super User' },
+      { id: 'r2-1', no: 1, name: 'Portfolio Review', mode: 'Online', datetime: '22/Apr/2026, 03:00 PM', status: 'Completed', panelSuggestion: 'Should Hire', panel: ['Super User'], scheduledBy: 'Super User', scheduledAt: '21/Apr/2026, 05:00 PM', duration: '45 Minutes', additionalInfo: '-', feedbackScore: 8, feedbackBy: 'Super User' },
     ],
   },
   '3': {
     offerStatus: 'Shortlisted', department: 'Mobile', joiningOn: '-', remarks: '-',
     rounds: [
-      { no: 1, name: 'HR Screening', mode: 'Online', datetime: '25/Apr/2026, 10:00 AM', status: 'Scheduled', panelSuggestion: 'Should Hire', panel: ['Super User'], scheduledBy: 'Super User', scheduledAt: '24/Apr/2026, 06:00 PM', duration: '30 Minutes', additionalInfo: '-', feedbackScore: 0, feedbackBy: 'Super User' },
+      { id: 'r3-online', no: 1, name: 'Technical Round', mode: 'Online', datetime: '25/Jul/2026, 10:00 AM', status: 'Scheduled', panelSuggestion: 'Should Hire', panel: ['Super User'], scheduledBy: 'Super User', scheduledAt: '22/Jul/2026, 06:00 PM', duration: '60 Minutes', additionalInfo: 'Google Meet link: https://meet.google.com/abc-defg-hij', feedbackScore: 0, feedbackBy: 'Super User' },
+      { id: 'r3-offline', no: 2, name: 'Onsite Culture Fit', mode: 'Offline', datetime: '28/Jul/2026, 02:30 PM', status: 'Scheduled', panelSuggestion: 'Should Hire', panel: ['Super User'], scheduledBy: 'Super User', scheduledAt: '22/Jul/2026, 06:00 PM', duration: '45 Minutes', additionalInfo: 'In-person at MindInventory office.', feedbackScore: 0, feedbackBy: 'Super User' },
     ],
   },
 };
@@ -112,9 +114,11 @@ const ROUND_STATUS_STYLE: Record<string, { bg: string; border: string; text: str
   'Cancelled': { bg: 'rgb(254,242,242)', border: 'rgb(254,202,202)', text: 'rgb(185,28,28)' },
 };
 const SUGGESTION_STYLE: Record<string, { bg: string; border: string; text: string }> = {
-  'Should Hire': { bg: 'rgb(240,253,244)', border: 'rgb(187,247,208)', text: 'rgb(22,101,52)'  },
-  'On Hold':     { bg: 'rgb(255,251,235)', border: 'rgb(253,230,138)', text: 'rgb(146,64,14)'  },
-  'Reject':      { bg: 'rgb(254,242,242)', border: 'rgb(254,202,202)', text: 'rgb(185,28,28)'  },
+  'Should Hire':    { bg: 'rgb(240,253,244)', border: 'rgb(187,247,208)', text: 'rgb(22,101,52)'  },
+  'Next Round':     { bg: 'rgb(239,246,255)', border: 'rgb(191,219,254)', text: 'rgb(30,64,175)'  },
+  'Not Sure':       { bg: 'rgb(255,251,235)', border: 'rgb(253,230,138)', text: 'rgb(146,64,14)'  },
+  'No Show/Cancel': { bg: 'rgb(249,250,251)', border: 'rgb(209,213,219)', text: 'rgb(107,114,128)'},
+  'Should Reject':  { bg: 'rgb(254,242,242)', border: 'rgb(254,202,202)', text: 'rgb(185,28,28)'  },
 };
 
 function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' | null }) {
@@ -155,7 +159,7 @@ const STATUS_PIPELINE_MAP: Record<string, PipelineStateInfo> = {
 
 export default function CandidateDetailPage() {
   const { candidateId } = useParams();
-  const { candidates, applications, jobs } = useApp();
+  const { candidates, applications, jobs, externalInvites, cancelExternalInvite, resendExternalInvite } = useApp();
 
   const candidate = candidates.find(c => c.id === candidateId);
 
@@ -185,11 +189,6 @@ export default function CandidateDetailPage() {
   const appliedJob = latestApp ? jobs.find(j => j.id === latestApp.jobId) : null;
   const totalApplicationCount = candidateApplications.length;
 
-  // This page is application-context only — redirect to talent pool if no applications
-  if (candidateApplications.length === 0 && candidateId) {
-    return <Navigate to={`/crm/talent-pool/${candidateId}`} replace />;
-  }
-
   const candidateStatus: string = candidate?.candidateStatus ?? 'Active';
 
   const tabs = ['Applicant Details', 'Interview Details', 'Applied Jobs', 'Notes'];
@@ -203,12 +202,30 @@ export default function CandidateDetailPage() {
   const [notes, setNotes] = useState<Note[]>(() => mockNotesMap[candidateId ?? ''] ?? []);
   const [noteInput, setNoteInput] = useState('');
 
+  // ── Schedule Interview Drawer state ──
+  const [scheduleDrawerOpen, setScheduleDrawerOpen] = useState(false);
+  const [schedToast, setSchedToast] = useState('');
+
+  const handleScheduled = (msg: string) => {
+    setScheduleDrawerOpen(false);
+    setSchedToast(msg);
+    setTimeout(() => setSchedToast(''), 4000);
+  };
+
+  // External invites for this candidate
+  const candidateExtInvites = (externalInvites ?? []).filter(inv => inv.candidateId === candidateId);
+
   // Interview Details uses mock data keyed by candidateId
   const interviewData: MockInterviewDetails | null = candidateId ? (mockInterviewMap[candidateId] ?? null) : null;
   const avgScore = interviewData?.rounds.length
     ? Math.round(interviewData.rounds.reduce((s, r) => s + r.feedbackScore, 0) / interviewData.rounds.length)
     : 0;
   const offerStyle = interviewData ? (APP_STATUS_STYLE[interviewData.offerStatus] ?? APP_STATUS_STYLE['Applied']) : null;
+
+  // ── Early-return AFTER all hooks (Rules of Hooks) ──
+  if (candidateApplications.length === 0 && candidateId) {
+    return <Navigate to={`/crm/talent-pool/${candidateId}`} replace />;
+  }
 
   const toggleAppliedSort = () => setAppliedSortDir(d => d === 'asc' ? 'desc' : 'asc');
 
@@ -395,7 +412,7 @@ export default function CandidateDetailPage() {
               })}
             </div>
             <div className="flex items-center gap-3 pr-2">
-              <button className="bg-[#3538CD] text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-[#3538CD] transition-all shadow-lg shadow-[#3538CD]/20">
+              <button onClick={() => setScheduleDrawerOpen(true)} className="bg-[#3538CD] text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-[#2d30b0] transition-all shadow-lg shadow-[#3538CD]/20">
                 Schedule Interview
               </button>
               <div className="relative">
@@ -1003,6 +1020,70 @@ export default function CandidateDetailPage() {
                                   </div>
                                 )}
                               </div>
+
+                              {/* External Panel for this round */}
+                              {(() => {
+                                const roundExtInvites = candidateExtInvites.filter(inv => inv.roundId === round.id);
+                                if (roundExtInvites.length === 0) return null;
+                                const EXT_STATUS_STYLE: Record<string, { bg: string; text: string; border: string }> = {
+                                  'Invited':                { bg: '#EEF4FF', text: '#3538CD', border: '#C7D2FE' },
+                                  'Availability Confirmed': { bg: '#F0FDF4', text: '#15803D', border: '#BBF7D0' },
+                                  'Availability Declined':  { bg: '#FFF7ED', text: '#9A3412', border: '#FED7AA' },
+                                  'Feedback Submitted':     { bg: '#F5F3FF', text: '#6D28D9', border: '#DDD6FE' },
+                                  'Cancelled':              { bg: '#F9FAFB', text: '#6B7280', border: '#D1D5DB' },
+                                };
+                                return (
+                                  <div className="border border-[#E5E7EB] rounded-lg overflow-hidden">
+                                    <div className="px-3 py-2 bg-[#FAFAFA] border-b border-[#E5E7EB] flex items-center gap-2">
+                                      <UserPlus className="w-3.5 h-3.5 text-[#6B7280]" />
+                                      <span className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">External Panel</span>
+                                      <span className="text-[9px] font-bold bg-[#EEF4FF] text-[#3538CD] border border-[#C7D2FE] px-1.5 py-0.5 rounded-md">{roundExtInvites.length}</span>
+                                    </div>
+                                    <div className="divide-y divide-[#F3F4F6]">
+                                      {roundExtInvites.map(inv => {
+                                        const sty = EXT_STATUS_STYLE[inv.status] ?? EXT_STATUS_STYLE['Invited'];
+                                        return (
+                                          <div key={inv.id} className="px-4 py-3 flex items-center gap-3">
+                                            <div className="w-7 h-7 rounded-full bg-[#3538CD]/10 text-[#3538CD] text-[9px] font-black flex items-center justify-center shrink-0">
+                                              {(inv.name || inv.email).split(/[\s@]/).map(n => n[0]).join('').slice(0,2).toUpperCase()}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                              <p className="text-xs font-semibold text-[#111827] truncate">{inv.name || inv.email}</p>
+                                              <p className="text-[10px] text-[#9CA3AF] truncate">{inv.email}</p>
+                                            </div>
+                                            <span className="px-2 py-0.5 text-[9px] font-bold rounded-full border whitespace-nowrap"
+                                              style={{ backgroundColor: sty.bg, color: sty.text, borderColor: sty.border }}>
+                                              {inv.status}
+                                            </span>
+                                            {inv.availability && (
+                                              <span className="text-[10px] text-[#6B7280] max-w-[120px] truncate" title={inv.availability.note}>
+                                                {inv.availability.available ? '✓ Available' : '✕ Unavailable'}
+                                              </span>
+                                            )}
+                                            {inv.feedback && (
+                                              <span className="text-[10px] text-[#6D28D9] font-semibold">
+                                                Suggestion: {inv.feedback.suggestion}
+                                              </span>
+                                            )}
+                                            <div className="flex items-center gap-1 shrink-0">
+                                              {inv.status !== 'Cancelled' && (
+                                                <button onClick={() => cancelExternalInvite(inv.id)} title="Cancel invitation"
+                                                  className="p-1.5 rounded-lg border border-[#E5E7EB] hover:bg-red-50 hover:border-red-200 transition-colors">
+                                                  <Ban className="w-3 h-3 text-[#6B7280] hover:text-red-500" />
+                                                </button>
+                                              )}
+                                              <button onClick={() => { resendExternalInvite(inv.id); setSchedToast(`Invite resent to ${inv.email}`); setTimeout(() => setSchedToast(''), 3000); }} title="Resend invite"
+                                                className="p-1.5 rounded-lg border border-[#E5E7EB] hover:bg-blue-50 hover:border-blue-200 transition-colors">
+                                                <RefreshCw className="w-3 h-3 text-[#6B7280]" />
+                                              </button>
+                                            </div>
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                );
+                              })()}
                             </div>
                           );
                         })}
@@ -1015,6 +1096,28 @@ export default function CandidateDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Schedule Interview Drawer */}
+      <ScheduleInterviewDrawer
+        candidateName={`${firstName} ${lastName}`}
+        candidateId={candidateId ?? ''}
+        jobTitle={appliedJob?.title ?? 'Unknown'}
+        businessUnit={appliedJob?.businessUnit ?? 'MindInventory'}
+        evaluationCriteria={appliedJob?.evaluationCriteria ?? []}
+        resumeUrl={candidate?.resumeUrl}
+        roundCount={interviewData?.rounds.length ?? 0}
+        open={scheduleDrawerOpen}
+        onClose={() => setScheduleDrawerOpen(false)}
+        onScheduled={handleScheduled}
+      />
+
+      {/* Toast */}
+      {schedToast && (
+        <div className="fixed bottom-6 right-6 z-50 bg-[#111827] text-white px-5 py-3 rounded-2xl shadow-xl text-sm font-semibold flex items-center gap-3 animate-[slideUp_0.3s_ease-out]">
+          <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+          {schedToast}
+        </div>
+      )}
     </CRMLayout>
   );
 }

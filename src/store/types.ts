@@ -203,11 +203,84 @@ export interface PortalConfig {
   appearance: PortalAppearance;
 }
 
+// ── External Interview Panelist types ──────────────────────────────────
+
+export type PanelSuggestion = 'Next Round' | 'No Show/Cancel' | 'Not Sure' | 'Should Hire' | 'Should Reject';
+
+export type ExternalInviteStatus =
+  | 'Invited'
+  | 'Availability Confirmed'
+  | 'Availability Declined'
+  | 'Feedback Submitted'
+  | 'Cancelled';
+
+export interface ExternalAvailability {
+  available: boolean;
+  note?: string;
+}
+
+export interface ExternalFeedback {
+  suggestion: PanelSuggestion;
+  overallRemarks: string;
+  criteriaRatings: Record<string, { score: number; remark: string }>;
+}
+
+/** Snapshot of interview context — denormalized so the token page is self-contained. */
+export interface ExternalInviteContext {
+  candidateName: string;
+  cvUrl?: string;
+  jobTitle: string;
+  businessUnit: string;
+  roundName: string;
+  mode: 'Online' | 'Offline';
+  meetingType?: string;
+  meetingLink?: string;
+  venueAddress?: string;
+  interviewDate: string;
+  interviewTime: string;
+  durationMinutes: number;
+  timezoneLabel: string;
+  evaluationCriteria: string[];
+  // ── Candidate info panel (mirrors the internal panelist detail sidebar) ──
+  candidateEmail?: string;
+  candidatePhone?: string;
+  candidateLinkedIn?: string;
+  totalExperience?: string;
+  skills?: string[];
+  noticePeriodDays?: number | string;
+  currentOrganization?: string;
+  // ── Round detail (mirrors the internal round header + metadata block) ──
+  interviewPanel?: string[];
+  scheduledByName?: string;
+  scheduledAt?: string;
+  additionalInfo?: string;
+  interviewStatus?: string;
+  panelSuggestion?: string;
+}
+
+export interface ExternalInvite {
+  id: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  name?: string;
+  accessToken: string;
+  status: ExternalInviteStatus;
+  availability?: ExternalAvailability;
+  feedback?: ExternalFeedback;
+  candidateId: string;
+  roundId: string;
+  roundNo: number;
+  context: ExternalInviteContext;
+  createdAt: string;
+}
+
 export interface AppState {
   jobs: Job[];
   candidates: Candidate[];
   applications: Application[];
   invites: TalentInvite[];
+  externalInvites: ExternalInvite[];
   currentUser: Candidate | null;
   alumniVerified: {
     verified: boolean;

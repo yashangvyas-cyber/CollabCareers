@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Monitor, Globe, ChevronRight, Smartphone } from 'lucide-react';
+import { ArrowRight, Monitor, Globe, ChevronRight, Smartphone, UserPlus } from 'lucide-react';
 
 const flows = [
   {
@@ -31,6 +31,20 @@ const flows = [
     ],
     icon: <Globe className="w-6 h-6" />,
     gradient: 'from-[#1e1b4b] to-[#3538CD]',
+  },
+  {
+    title: 'External Panelist',
+    subtitle: 'Token-gated interview view',
+    description: 'Login-free interview pages for external panelists — view details, confirm availability, and submit feedback.',
+    screens: [
+      { label: 'Invite — Availability Pending', path: '/panel/ext-invited', badge: 'Invited' },
+      { label: 'Availability Confirmed', path: '/panel/ext-confirmed', badge: 'Confirmed' },
+      { label: 'Feedback Submitted', path: '/panel/ext-feedback', badge: 'Read-only' },
+      { label: 'Cancelled Invitation', path: '/panel/ext-cancelled', badge: 'Revoked' },
+      { label: 'Offline Round (BU Venue)', path: '/panel/ext-offline', badge: 'Offline' },
+    ],
+    icon: <UserPlus className="w-6 h-6" />,
+    gradient: 'from-[#059669] to-[#064E3B]',
   },
 ];
 
@@ -91,7 +105,7 @@ export default function PrototypeHome() {
       </div>
 
       {/* Main Grid */}
-      <div className="max-w-5xl mx-auto px-6 pb-24 grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="max-w-7xl mx-auto px-6 pb-24 grid grid-cols-1 md:grid-cols-3 gap-8">
         {flows.map((flow) => (
           <div key={flow.title} className="flex flex-col">
             <div className="flex items-center gap-4 mb-6 px-2">

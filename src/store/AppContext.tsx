@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { AppState, Job, Candidate, Application, PortalConfig, TalentInvite, TalentInviteStatus, TalentAvailabilityStatus } from './types';
+import { AppState, Job, Candidate, Application, PortalConfig, TalentInvite, TalentInviteStatus, TalentAvailabilityStatus, ExternalInvite, ExternalInviteContext, ExternalInviteStatus, ExternalAvailability, ExternalFeedback } from './types';
 import { DEFAULT_APPEARANCE } from '../lib/theme';
+import { BUSINESS_UNITS } from '../lib/businessUnits';
 
 interface AppContextType extends AppState {
   addJob: (job: Job) => void;
@@ -22,9 +23,53 @@ interface AppContextType extends AppState {
   updateCandidateAvailability: (candidateId: string, status: TalentAvailabilityStatus) => void;
   blacklistCandidate: (candidateId: string, reason: string) => void;
   discardCandidate: (candidateId: string, reason: string) => void;
+  addExternalPanelists: (invites: ExternalInvite[]) => void;
+  submitExternalAvailability: (token: string, availability: ExternalAvailability) => void;
+  submitExternalFeedback: (token: string, feedback: ExternalFeedback) => void;
+  cancelExternalInvite: (id: string) => void;
+  resendExternalInvite: (id: string) => void;
 }
 
-const STORAGE_KEY = 'collab_careers_state_v20';
+const STORAGE_KEY = 'collab_careers_state_v22';
+
+// Shared candidate-info panel for the seeded external invites (candidate '3', Arjun Mehta).
+const EXT_ARJUN_SIDEBAR = {
+  candidateEmail: 'arjun@gmail.com',
+  candidatePhone: '+91 96543 21098',
+  candidateLinkedIn: 'https://linkedin.com/in/arjun-mehta',
+  totalExperience: '2Y 0M',
+  skills: ['Flutter', 'Dart', 'Firebase', 'REST APIs'],
+  noticePeriodDays: 'Immediate',
+  currentOrganization: 'Zignuts Technolabs',
+};
+
+const EXT_ONLINE_CTX: ExternalInviteContext = {
+  candidateName: 'Arjun Mehta', cvUrl: 'Arjun_Mehta_Resume.pdf',
+  jobTitle: 'Flutter Developer', businessUnit: 'MindInventory',
+  roundName: 'Technical Round', mode: 'Online',
+  meetingType: 'Google Meet', meetingLink: 'https://meet.google.com/abc-defg-hij',
+  interviewDate: 'Fri, 25 Jul 2026', interviewTime: '10:00 AM',
+  durationMinutes: 60, timezoneLabel: 'IST (GMT+5:30)',
+  evaluationCriteria: ['Flutter expertise', 'State management', 'App store delivery experience', 'Code quality'],
+  interviewPanel: ['Sarah Chen', 'Rajan Mehta'], scheduledByName: 'Sarah Chen',
+  scheduledAt: 'Tue, 22 Jul 2026, 05:00 PM', additionalInfo: '-',
+  interviewStatus: 'Scheduled', panelSuggestion: 'Pending',
+  ...EXT_ARJUN_SIDEBAR,
+};
+
+const EXT_OFFLINE_CTX: ExternalInviteContext = {
+  candidateName: 'Arjun Mehta', cvUrl: 'Arjun_Mehta_Resume.pdf',
+  jobTitle: 'Flutter Developer', businessUnit: 'MindInventory',
+  roundName: 'Onsite Culture Fit', mode: 'Offline',
+  venueAddress: BUSINESS_UNITS['MindInventory'].address,
+  interviewDate: 'Mon, 28 Jul 2026', interviewTime: '02:30 PM',
+  durationMinutes: 45, timezoneLabel: 'IST (GMT+5:30)',
+  evaluationCriteria: ['Communication skills', 'Cultural alignment', 'Team collaboration'],
+  interviewPanel: ['Michael Park'], scheduledByName: 'Michael Park',
+  scheduledAt: 'Wed, 23 Jul 2026, 11:00 AM', additionalInfo: 'Please arrive 10 minutes early for reception check-in.',
+  interviewStatus: 'Scheduled', panelSuggestion: 'Pending',
+  ...EXT_ARJUN_SIDEBAR,
+};
 
 const initialState: AppState = {
   jobs: [
@@ -1566,6 +1611,49 @@ Design is a first-class citizen at MindInventory. You will work on products that
       emailMode: 'custom' as const,
     },
   ],
+  externalInvites: [
+    // ── Seeded external invites on candidate '3' (Arjun Mehta, Flutter Developer, MindInventory) ──
+    // Round 1 — Online (Google Meet) — 4 panelists in different states
+    {
+      id: 'ext-inv-1', email: 'alice.johnson@external.com', name: 'Alice Johnson',
+      accessToken: 'ext-invited', status: 'Invited' as const,
+      candidateId: '3', roundId: 'r3-online', roundNo: 1,
+      context: { ...EXT_ONLINE_CTX },
+      createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
+    },
+    {
+      id: 'ext-inv-2', email: 'bob.williams@external.com', name: 'Bob Williams',
+      accessToken: 'ext-confirmed', status: 'Availability Confirmed' as const,
+      availability: { available: true, note: 'Happy to join. Looking forward to it.' },
+      candidateId: '3', roundId: 'r3-online', roundNo: 1,
+      context: { ...EXT_ONLINE_CTX },
+      createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
+    },
+    {
+      id: 'ext-inv-3', email: 'carol.davis@external.com', name: 'Carol Davis',
+      accessToken: 'ext-feedback', status: 'Feedback Submitted' as const,
+      availability: { available: true },
+      feedback: { suggestion: 'Should Hire' as const, overallRemarks: 'Strong Flutter fundamentals. Excellent understanding of state management patterns. Would be a great addition to the mobile team.', criteriaRatings: { 'Flutter expertise': { score: 9, remark: 'Deep Dart knowledge' }, 'State management': { score: 8, remark: 'Good Bloc/Riverpod understanding' }, 'App store delivery experience': { score: 7, remark: 'Published 2 apps' }, 'Code quality': { score: 8, remark: 'Clean architecture' } } },
+      candidateId: '3', roundId: 'r3-online', roundNo: 1,
+      context: { ...EXT_ONLINE_CTX },
+      createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
+    },
+    {
+      id: 'ext-inv-4', email: 'dan.brown@external.com', name: 'Dan Brown',
+      accessToken: 'ext-cancelled', status: 'Cancelled' as const,
+      candidateId: '3', roundId: 'r3-online', roundNo: 1,
+      context: { ...EXT_ONLINE_CTX },
+      createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
+    },
+    // Round 2 — Offline (BU venue) — 1 panelist (Invited)
+    {
+      id: 'ext-inv-5', email: 'eve.wilson@external.com', name: 'Eve Wilson',
+      accessToken: 'ext-offline', status: 'Invited' as const,
+      candidateId: '3', roundId: 'r3-offline', roundNo: 2,
+      context: { ...EXT_OFFLINE_CTX },
+      createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+    },
+  ],
   currentUser: null,
   alumniVerified: {
     verified: false,
@@ -1650,12 +1738,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
       });
 
+      // Ensure mock external invites are present (v21+)
+      const currentExtInvites: ExternalInvite[] = parsed.externalInvites || [];
+      const mergedExtInvites = [...currentExtInvites];
+      initialState.externalInvites.forEach(defaultExtInv => {
+        if (!mergedExtInvites.find(i => i.id === defaultExtInv.id)) {
+          mergedExtInvites.push(defaultExtInv);
+        }
+      });
+
       return {
         ...parsed,
         jobs: mergedJobs,
         applications: mergedApps,
         candidates: mergedCandidates,
         invites: mergedInvites,
+        externalInvites: mergedExtInvites,
         portalConfig: {
           ...initialState.portalConfig,
           ...(parsed.portalConfig ?? {}),
@@ -1888,6 +1986,57 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  const addExternalPanelists = (newInvites: ExternalInvite[]) => {
+    setState(prev => ({
+      ...prev,
+      externalInvites: [...prev.externalInvites, ...newInvites],
+    }));
+  };
+
+  const submitExternalAvailability = (token: string, availability: ExternalAvailability) => {
+    setState(prev => ({
+      ...prev,
+      externalInvites: prev.externalInvites.map(inv =>
+        inv.accessToken === token
+          ? {
+              ...inv,
+              status: (availability.available ? 'Availability Confirmed' : 'Availability Declined') as ExternalInviteStatus,
+              availability,
+            }
+          : inv
+      ),
+    }));
+  };
+
+  const submitExternalFeedback = (token: string, feedback: ExternalFeedback) => {
+    setState(prev => ({
+      ...prev,
+      externalInvites: prev.externalInvites.map(inv =>
+        inv.accessToken === token
+          ? { ...inv, status: 'Feedback Submitted' as ExternalInviteStatus, feedback }
+          : inv
+      ),
+    }));
+  };
+
+  const cancelExternalInvite = (id: string) => {
+    setState(prev => ({
+      ...prev,
+      externalInvites: prev.externalInvites.map(inv =>
+        inv.id === id ? { ...inv, status: 'Cancelled' as ExternalInviteStatus } : inv
+      ),
+    }));
+  };
+
+  const resendExternalInvite = (id: string) => {
+    setState(prev => ({
+      ...prev,
+      externalInvites: prev.externalInvites.map(inv =>
+        inv.id === id ? { ...inv, status: 'Invited' as ExternalInviteStatus } : inv
+      ),
+    }));
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -1911,6 +2060,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         updateCandidateAvailability,
         blacklistCandidate,
         discardCandidate,
+        addExternalPanelists,
+        submitExternalAvailability,
+        submitExternalFeedback,
+        cancelExternalInvite,
+        resendExternalInvite,
       }}
     >
       {children}

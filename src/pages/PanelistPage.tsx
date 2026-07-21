@@ -1,0 +1,612 @@
+import { useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { FileText, CheckCircle, AlertTriangle, ExternalLink, XCircle, Mail, Phone, Linkedin, Copy, MapPin, ChevronDown, Info, Lock, CalendarClock } from 'lucide-react';
+import { useApp } from '../store/AppContext';
+import { BUSINESS_UNITS } from '../lib/businessUnits';
+import { readableTextColor } from '../lib/theme';
+import type { PanelSuggestion } from '../store/types';
+
+// The interview-detail body uses the standard CollabCRM neutral / indigo palette,
+// exactly like the internal panelist screen. Brand colour is confined to the header.
+const INDIGO = '#3538CD';
+
+const SUGGESTION_STYLE: Record<string, { bg: string; border: string; text: string }> = {
+  'Should Hire':    { bg: 'rgb(240,253,244)', border: 'rgb(187,247,208)', text: 'rgb(22,101,52)'  },
+  'Next Round':     { bg: 'rgb(239,246,255)', border: 'rgb(191,219,254)', text: 'rgb(30,64,175)'  },
+  'Not Sure':       { bg: 'rgb(249,250,251)', border: 'rgb(209,213,219)', text: 'rgb(75,85,99)'   },
+  'No Show/Cancel': { bg: 'rgb(255,251,235)', border: 'rgb(253,230,138)', text: 'rgb(146,64,14)'  },
+  'Should Reject':  { bg: 'rgb(254,242,242)', border: 'rgb(254,202,202)', text: 'rgb(185,28,28)'  },
+};
+
+const SUGGESTIONS: PanelSuggestion[] = ['Next Round', 'No Show/Cancel', 'Not Sure', 'Should Hire', 'Should Reject'];
+
+// Uppercase tiny gray label — matches the internal screen's `.label`
+const RLabel = ({ children }: { children: React.ReactNode }) => (
+  <p className="text-[10px] font-semibold text-[#98A2B3] uppercase tracking-wide">{children}</p>
+);
+
+export default function PanelistPage() {
+  const { token } = useParams();
+  const { externalInvites, submitExternalAvailability, submitExternalFeedback } = useApp();
+
+  const invite = externalInvites.find(inv => inv.accessToken === token);
+
+  // `committed` = the availability the panelist has actually saved & communicated to the
+  // recruiter (null = not decided yet). `availAvailable` is the live toggle in edit mode.
+  const [committed, setCommitted] = useState<boolean | null>(
+    invite?.status === 'Availability Confirmed' || invite?.status === 'Feedback Submitted' ? true
+      : invite?.status === 'Availability Declined' ? false
+      : null
+  );
+  const [availAvailable, setAvailAvailable] = useState(true);
+  const [availNote, setAvailNote] = useState('');
+  const [editingAvail, setEditingAvail] = useState(false);
+  const [showAvailModal, setShowAvailModal] = useState(false);
+  const [toast, setToast] = useState('');
+
+  const [fbOpen, setFbOpen] = useState(false);
+  const [fbSuggestion, setFbSuggestion] = useState<PanelSuggestion>('Next Round');
+  const [fbOverallRemarks, setFbOverallRemarks] = useState('');
+  const [fbCriteriaRatings, setFbCriteriaRatings] = useState<Record<string, { score: number; remark: string }>>({});
+  const [fbSubmitted, setFbSubmitted] = useState(false);
+
+  // ── Invalid / unknown token ──
+  if (!invite) {
+    return (
+      <div className="min-h-screen bg-[#F4F5FA] flex items-center justify-center p-6">
+        <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-xl p-12 text-center max-w-md">
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center mb-6">
+            <AlertTriangle className="w-8 h-8 text-red-500" />
+          </div>
+          <h1 className="text-2xl font-black text-[#111827] tracking-tight mb-2">Invalid Link</h1>
+          <p className="text-sm text-[#6B7280] leading-relaxed">This interview invitation link is invalid or has expired. Please contact the recruiter for a new link.</p>
+          <Link to="/" className="inline-block mt-6 px-6 py-2.5 bg-[#3538CD] text-white text-xs font-black uppercase tracking-widest rounded-xl hover:bg-[#2d30b0] transition-colors">
+            Go Home
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const ctx = invite.context;
+  const buInfo = BUSINESS_UNITS[ctx.businessUnit];
+  const brandColor = buInfo?.brandColor ?? INDIGO;
+  const brandText = readableTextColor(brandColor);
+  const buName = buInfo?.name ?? ctx.businessUnit;
+
+  // ── Cancelled / revoked ──
+  if (invite.status === 'Cancelled') {
+    return (
+      <div className="min-h-screen bg-[#F4F5FA] flex items-center justify-center p-6">
+        <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-xl p-12 text-center max-w-md">
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-gray-100 border border-gray-200 flex items-center justify-center mb-6">
+            <XCircle className="w-8 h-8 text-[#6B7280]" />
+          </div>
+          <h1 className="text-2xl font-black text-[#111827] tracking-tight mb-2">Invitation Revoked</h1>
+          <p className="text-sm text-[#6B7280] leading-relaxed mb-4">This interview invitation has been cancelled by the recruiter. You no longer have access to interview details.</p>
+          {invite.feedback && (
+            <div className="bg-[#F9FAFB] rounded-xl p-4 text-left border border-[#E5E7EB]">
+              <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest mb-2">Your Previously Submitted Feedback</p>
+              <p className="text-xs text-[#9CA3AF]">Suggestion: {invite.feedback.suggestion}</p>
+              <p className="text-xs text-[#9CA3AF] mt-1 italic">{invite.feedback.overallRemarks}</p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 4000); };
+
+  // Persist the chosen availability, notify the recruiter (simulated), and — when going
+  // unavailable — discard any drafted feedback (it's about to be hidden).
+  const commitAvailability = () => {
+    if (!token) return;
+    submitExternalAvailability(token, { available: availAvailable, note: availNote.trim() || undefined });
+    setCommitted(availAvailable);
+    setEditingAvail(false);
+    setShowAvailModal(false);
+    if (!availAvailable) {
+      setFbOpen(false);
+      setFbCriteriaRatings({});
+      setFbOverallRemarks('');
+      setFbSuggestion('Next Round');
+    }
+    showToast(`Response submitted — ${availAvailable ? 'Accepted' : 'Declined'}. The recruiter has been notified via email.`);
+  };
+
+  const handleAvailPrimary = () => {
+    // First-time decision: nothing has been communicated yet → save directly (no modal).
+    if (committed === null) { commitAvailability(); return; }
+    // No actual change → just close edit mode, no email.
+    if (availAvailable === committed) { setEditingAvail(false); return; }
+    // Reversing a communicated decision → confirm first (may warn about discarding feedback).
+    setShowAvailModal(true);
+  };
+
+  const startEditing = () => { setAvailAvailable(committed ?? true); setEditingAvail(true); };
+
+  const handleFbSubmit = () => {
+    if (!token) return;
+    submitExternalFeedback(token, {
+      suggestion: fbSuggestion,
+      overallRemarks: fbOverallRemarks.trim(),
+      criteriaRatings: Object.keys(fbCriteriaRatings).length > 0 ? fbCriteriaRatings : {},
+    });
+    setFbSubmitted(true);
+    showToast('Feedback submitted. The recruiter has been notified via email.');
+  };
+
+  const isReadOnly = invite.status === 'Feedback Submitted';
+
+  // Availability state derives entirely from the committed decision.
+  const declined = committed === false;
+  const confirmed = committed === true;
+  // Feedback is locked until the panelist confirms they're available for the interview.
+  const feedbackUnlocked = confirmed;
+  // Has the panelist typed anything into the feedback form yet? (used to warn on discard)
+  const hasDraftedFeedback =
+    fbOverallRemarks.trim() !== '' ||
+    Object.values(fbCriteriaRatings).some(c => c.score > 0 || c.remark.trim() !== '');
+
+  const getCriterion = (c: string) => fbCriteriaRatings[c] ?? { score: 0, remark: '' };
+  const updateCriterionScore = (c: string, score: number) =>
+    setFbCriteriaRatings(prev => ({ ...prev, [c]: { ...(prev[c] ?? { remark: '' }), score } }));
+  const updateCriterionRemark = (c: string, remark: string) =>
+    setFbCriteriaRatings(prev => ({ ...prev, [c]: { ...(prev[c] ?? { score: 0 }), remark } }));
+
+  const modeLabel = ctx.mode === 'Online'
+    ? `Online${ctx.meetingType ? ` (${ctx.meetingType})` : ''}`
+    : 'Offline';
+
+  const SideRow = ({ label, value, isLink, href }: { label: string; value?: string; isLink?: boolean; href?: string }) => (
+    <div className="px-4 py-3 border-b border-[#F1F1F4]">
+      <p className="text-[11px] text-[#9CA3AF]">{label}</p>
+      {isLink && (href || value) ? (
+        <a href={href || value} target="_blank" rel="noreferrer" className="text-xs font-semibold mt-1 inline-flex items-center gap-1 text-[#3538CD] hover:underline">
+          {label} Link <ExternalLink className="w-3 h-3" />
+        </a>
+      ) : (
+        <p className="text-sm font-semibold text-[#374151] mt-1">{value || '-'}</p>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-[#F4F5FA] flex flex-col">
+      {/* Header — business-unit branding, powered by CollabCRM */}
+      <header className="bg-white border-b border-[#E5E7EB] sticky top-0 z-30">
+        <div className="px-6 py-3 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black shrink-0" style={{ backgroundColor: brandColor, color: brandText }}>
+            {buInfo?.initials ?? 'CC'}
+          </div>
+          <div>
+            <p className="text-base font-bold text-[#111827] leading-tight">{buName}</p>
+            <p className="text-[10px] text-[#9CA3AF] font-medium">Powered by CollabCRM</p>
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-1 p-4">
+        {/* ── Availability — sticky bar above the details, unlocks feedback ── */}
+        {!isReadOnly && (
+          <div className="sticky top-[64px] z-20 mb-4 bg-white rounded-lg border border-[#E5E7EB] shadow-sm">
+            {(committed === null || editingAvail) ? (
+              /* Interview Panel Invitation — Accept / Decline response form */
+              <div className="p-4">
+                <div className="flex items-start gap-2.5 mb-3">
+                  <CalendarClock className="w-5 h-5 text-[#3538CD] shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-bold text-[#111827]">Interview Panel Invitation</p>
+                    <p className="text-xs text-[#6B7280]">Please let the recruitment team know if you can join this interview.</p>
+                  </div>
+                </div>
+
+                {/* Accept / Decline segmented toggle */}
+                <div className="inline-flex rounded-lg border border-[#E5E7EB] overflow-hidden mb-3">
+                  {[
+                    { val: true, label: 'Accept' },
+                    { val: false, label: 'Decline' },
+                  ].map(opt => (
+                    <button key={String(opt.val)} onClick={() => setAvailAvailable(opt.val)}
+                      className={`px-10 py-2 text-sm font-semibold transition-colors ${
+                        availAvailable === opt.val
+                          ? opt.val ? 'bg-green-600 text-white' : 'bg-red-500 text-white'
+                          : 'bg-white text-[#374151] hover:bg-[#F9FAFB]'
+                      }`}>
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Note to recruiter */}
+                <div className="mb-3">
+                  <label className="block text-[12px] font-semibold text-[#6B7280] mb-1.5">
+                    Note to the recruiter <span className="font-normal text-[#9CA3AF]">(Optional)</span>
+                  </label>
+                  <textarea value={availNote} onChange={e => setAvailNote(e.target.value)} rows={2}
+                    placeholder="Propose an alternate time or leave a message…"
+                    className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm text-[#111827] placeholder:text-[#9CA3AF] resize-none focus:outline-none focus:ring-2 focus:ring-[#3538CD]/20 focus:border-[#3538CD]" />
+                </div>
+
+                {/* Helper (left) + actions (right) */}
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-1.5">
+                    <Mail className="w-3 h-3 text-[#9CA3AF] shrink-0" />
+                    <p className="text-[11px] text-[#9CA3AF]">An automated email will be sent to update the recruiter.</p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0 ml-auto">
+                    {editingAvail && committed !== null && (
+                      <button onClick={() => { setEditingAvail(false); setAvailAvailable(committed); }}
+                        className="px-4 py-2 text-xs font-semibold text-[#6B7280] rounded-lg border border-[#E5E7EB] hover:bg-[#F9FAFB] transition-colors">
+                        Cancel
+                      </button>
+                    )}
+                    <button onClick={handleAvailPrimary}
+                      className="px-5 py-2 bg-[#3538CD] text-white text-xs font-semibold rounded-lg hover:bg-[#2d30b0] transition-colors">
+                      {committed === null ? 'Submit Response' : 'Update & Send Email'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* Committed — show response summary with a Change action */
+              <div className="px-4 py-3 flex flex-wrap items-center gap-x-6 gap-y-3 justify-between">
+                <div className="flex items-center gap-2.5">
+                  {confirmed
+                    ? <CheckCircle className="w-5 h-5 text-green-600 shrink-0" />
+                    : <XCircle className="w-5 h-5 text-red-500 shrink-0" />}
+                  <div>
+                    <p className="text-sm font-bold text-[#111827]">
+                      {confirmed ? "You've accepted this interview invitation" : "You've declined this interview invitation"}
+                    </p>
+                    <p className="text-xs text-[#6B7280]">
+                      {confirmed
+                        ? 'The recruiter has been notified. You can add your feedback below.'
+                        : 'The recruiter has been notified of your response.'}
+                      {availNote.trim() && <span className="italic"> · “{availNote.trim()}”</span>}
+                    </p>
+                  </div>
+                </div>
+                <button onClick={startEditing}
+                  className="px-4 py-2 text-xs font-semibold text-[#3538CD] rounded-lg border border-[#C7D2FE] bg-[#EEF2FF] hover:bg-[#E0E7FF] transition-colors">
+                  Change response
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Interview Details — full-width, two-pane (mirrors internal panelist screen) ── */}
+        <div className="bg-white w-full rounded-lg border border-[#E5E7EB] shadow-sm">
+          <div className="w-full px-4 py-3 border-b border-[#E5E7EB]">
+            <span className="text-base font-semibold text-[#111827]">Interview Details</span>
+          </div>
+
+          <div className="w-full flex flex-col lg:flex-row">
+            {/* Candidate info sidebar */}
+            <aside className="lg:w-[300px] lg:border-r border-b lg:border-b-0 border-[#E5E7EB] shrink-0">
+              <div className="p-4 border-b border-[#F1F1F4]">
+                <p className="text-lg font-bold text-[#111827] leading-tight">{ctx.candidateName}</p>
+                <p className="text-sm font-semibold text-[#3538CD] mt-0.5">{ctx.jobTitle}</p>
+              </div>
+              {ctx.cvUrl && (
+                <div className="p-4 border-b border-[#F1F1F4]">
+                  <a href={ctx.cvUrl} target="_blank" rel="noreferrer"
+                    className="w-full inline-flex items-center justify-center gap-2 border border-[#E5E7EB] rounded-lg py-2.5 text-xs font-semibold text-[#374151] hover:bg-[#F9FAFB] transition-colors">
+                    <FileText className="w-4 h-4 text-[#3538CD]" /> View Resume
+                  </a>
+                </div>
+              )}
+              {ctx.candidateEmail && (
+                <div className="px-4 py-3 border-b border-[#F1F1F4] bg-[#FCFCFD] flex items-center gap-2 justify-between">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Mail className="w-4 h-4 text-[#9CA3AF] shrink-0" />
+                    <span className="text-sm text-[#374151] truncate">{ctx.candidateEmail}</span>
+                  </div>
+                  <button onClick={() => navigator.clipboard?.writeText(ctx.candidateEmail!)} title="Copy email" className="shrink-0">
+                    <Copy className="w-3.5 h-3.5 text-[#9CA3AF] hover:text-[#374151]" />
+                  </button>
+                </div>
+              )}
+              {ctx.candidatePhone && (
+                <div className="px-4 py-3 border-b border-[#F1F1F4] flex items-center gap-2">
+                  <Phone className="w-4 h-4 text-[#9CA3AF] shrink-0" />
+                  <span className="text-sm text-[#374151]">{ctx.candidatePhone}</span>
+                </div>
+              )}
+              {ctx.candidateLinkedIn && (
+                <div className="px-4 py-3 border-b border-[#F1F1F4] flex items-center gap-2">
+                  <Linkedin className="w-4 h-4 text-[#9CA3AF] shrink-0" />
+                  <a href={ctx.candidateLinkedIn} target="_blank" rel="noreferrer" className="text-sm font-semibold text-[#3538CD] hover:underline inline-flex items-center gap-1">
+                    Linkedin Profile Link <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+              )}
+              <SideRow label="Total Experience" value={ctx.totalExperience} />
+              <div className="px-4 py-3 border-b border-[#F1F1F4]">
+                <p className="text-[11px] text-[#9CA3AF]">Skills</p>
+                <div className="flex flex-wrap gap-1.5 mt-1.5">
+                  {(ctx.skills?.length ? ctx.skills : ['—']).map(s => (
+                    <span key={s} className="inline-flex items-center rounded-md bg-[#EEF4FF] text-[#3538CD] px-2 py-0.5 text-[11px] font-medium">{s}</span>
+                  ))}
+                </div>
+              </div>
+              <SideRow label="Notice Period (Days)" value={ctx.noticePeriodDays != null ? String(ctx.noticePeriodDays) : '-'} />
+              <SideRow label="Current Organization" value={ctx.currentOrganization} />
+            </aside>
+
+            {/* Round detail */}
+            <div className="flex-1 min-w-0 px-4 py-4">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-base font-semibold text-[#111827]">Interview Rounds</span>
+                <span className="border border-[#3538CD] rounded-lg py-0.5 px-2 bg-[#EEF4FF] text-[#3538CD] text-xs font-medium">
+                  {String(invite.roundNo).padStart(2, '0')}
+                </span>
+              </div>
+              <div className="border border-[#E5E7EB] rounded-lg p-4 space-y-4">
+                {/* Round header row */}
+                <div className="flex flex-wrap items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] flex items-center justify-center text-sm font-semibold text-[#374151] shrink-0">
+                    {String(invite.roundNo).padStart(2, '0')}
+                  </div>
+                  <div className="flex-1 min-w-[180px]">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-base font-semibold text-[#111827]">{ctx.roundName}</span>
+                      <span className="inline-flex items-center border border-[#E5E7EB] bg-[#F9FAFB] text-[#374151] rounded-full text-xs font-medium py-0.5 px-2.5 capitalize">
+                        {modeLabel}
+                      </span>
+                    </div>
+                    <p className="text-xs font-medium text-[#6B7280] mt-1">
+                      {ctx.interviewDate} · {ctx.interviewTime} <span className="font-semibold">{ctx.timezoneLabel}</span>
+                    </p>
+                  </div>
+                  <div className="flex gap-8 shrink-0">
+                    <div>
+                      <RLabel>Interview Status</RLabel>
+                      <span className="inline-flex items-center rounded-2xl border font-medium text-xs py-0.5 px-2.5 mt-2 bg-[#EFF6FF] border-[#BFDBFE] text-[#1D4ED8]">
+                        {ctx.interviewStatus ?? 'Scheduled'}
+                      </span>
+                    </div>
+                    <div>
+                      <RLabel>Panel Suggestion</RLabel>
+                      <span className="inline-flex items-center rounded-2xl border font-medium text-xs py-0.5 px-2.5 mt-2 bg-[#FFFBEB] border-[#FDE68A] text-[#92400E]">
+                        {ctx.panelSuggestion ?? 'Pending'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Metadata block */}
+                <div className="border border-[#E5E7EB] rounded-lg bg-[#FAFAFB] p-4 flex flex-wrap">
+                  <div className="w-full sm:w-[42%] px-2 mb-4">
+                    <RLabel>Interview Panel</RLabel>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {(ctx.interviewPanel?.length ? ctx.interviewPanel : ['—']).map(name => (
+                        <span key={name} className="inline-flex items-center border border-[#E5E7EB] rounded-lg bg-white py-1 px-2 text-xs font-medium text-[#374151] gap-1.5">
+                          <span className="w-5 h-5 rounded-full bg-[#3538CD]/10 text-[#3538CD] text-[9px] font-black flex items-center justify-center shrink-0">
+                            {name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                          </span>
+                          {name}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="w-1/2 sm:w-[30%] px-2 mb-4">
+                    <RLabel>Scheduled By</RLabel>
+                    <p className="text-xs font-medium text-[#374151] mt-2">{ctx.scheduledByName ?? '-'}</p>
+                    {ctx.scheduledAt && <p className="text-[11px] text-[#9CA3AF] mt-0.5">{ctx.scheduledAt}</p>}
+                  </div>
+                  <div className="w-1/2 sm:w-[28%] px-2 mb-4">
+                    <RLabel>Interview Duration</RLabel>
+                    <p className="text-xs font-medium text-[#374151] mt-2">{ctx.durationMinutes} Minutes</p>
+                  </div>
+                  <div className="w-full px-2 mb-4">
+                    <RLabel>{ctx.mode === 'Online' ? 'Join Link' : 'Venue Address'}</RLabel>
+                    <div className="mt-2">
+                      {ctx.mode === 'Online' && ctx.meetingLink ? (
+                        <a href={ctx.meetingLink} target="_blank" rel="noreferrer" className="text-xs font-semibold text-[#3538CD] inline-flex items-center gap-1.5 hover:underline">
+                          Join {ctx.meetingType ?? 'Meeting'} <ExternalLink className="w-3 h-3" />
+                        </a>
+                      ) : (
+                        <p className="text-xs font-medium text-[#374151] flex items-start gap-1.5">
+                          <MapPin className="w-3.5 h-3.5 mt-0.5 shrink-0 text-[#3538CD]" /> {ctx.venueAddress ?? 'TBD'}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="w-full px-2">
+                    <RLabel>Additional Information</RLabel>
+                    <p className="text-xs text-[#6B7280] mt-2">{ctx.additionalInfo ?? '-'}</p>
+                  </div>
+                </div>
+
+                {/* Interview Panel Feedback — collapsed, locked until availability confirmed */}
+                {!isReadOnly && !declined && (
+                  <div>
+                    <button
+                      onClick={() => { if (feedbackUnlocked) setFbOpen(o => !o); }}
+                      disabled={!feedbackUnlocked}
+                      className={`w-full flex items-center justify-between border border-[#E5E7EB] bg-[#F9FAFB] p-3 text-sm font-medium transition-colors ${fbOpen ? 'rounded-t-lg' : 'rounded-lg'} ${feedbackUnlocked ? 'text-[#374151] hover:bg-[#F3F4F6] cursor-pointer' : 'text-[#9CA3AF] cursor-not-allowed'}`}>
+                      <span className="flex items-center gap-1.5">
+                        {!feedbackUnlocked && <Lock className="w-3.5 h-3.5 text-[#9CA3AF]" />}
+                        Interview Panel Feedback
+                        <span className="text-[#9CA3AF] font-normal">
+                          {feedbackUnlocked ? '(Tap to add feedback)' : '(Accept the invitation first)'}
+                        </span>
+                        <Info className="w-3.5 h-3.5 text-[#9CA3AF]" />
+                      </span>
+                      {feedbackUnlocked && <ChevronDown className={`w-4 h-4 text-[#9CA3AF] transition-transform duration-200 ${fbOpen ? 'rotate-180' : ''}`} />}
+                    </button>
+                    {feedbackUnlocked && fbOpen && (
+                      <div className="border border-t-0 border-[#E5E7EB] rounded-b-lg p-4 space-y-6 bg-white">
+                        {/* Suggestion */}
+                        <div>
+                          <p className="text-xs font-medium text-[#374151] mb-2">Interview Panel Suggestion <span className="text-red-500">*</span></p>
+                          <div className="flex flex-wrap gap-2">
+                            {SUGGESTIONS.map(s => {
+                              const sty = SUGGESTION_STYLE[s];
+                              const isSelected = fbSuggestion === s;
+                              return (
+                                <button key={s} onClick={() => setFbSuggestion(s)}
+                                  className="px-4 py-2 rounded-lg text-xs font-bold border transition-all"
+                                  style={isSelected
+                                    ? { backgroundColor: sty.bg, borderColor: sty.text, color: sty.text }
+                                    : { backgroundColor: sty.bg, borderColor: sty.border, color: sty.text, opacity: 0.7 }}>
+                                  {s}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Per-criterion ratings */}
+                        {ctx.evaluationCriteria.map(c => {
+                          const crit = getCriterion(c);
+                          return (
+                            <div key={c} className="border-t border-[#F1F1F4] pt-4">
+                              <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
+                                <span className="text-sm font-semibold text-[#111827]">{c} <span className="text-red-500">*</span></span>
+                                <div className="flex items-center gap-3 shrink-0">
+                                  <div className="flex gap-0.5">
+                                    {Array.from({ length: 10 }, (_, i) => (
+                                      <button key={i} onClick={() => updateCriterionScore(c, i + 1)}
+                                        className="text-xl transition-transform hover:scale-110"
+                                        style={{ color: i < crit.score ? '#F4B400' : '#E5E7EB' }}>★</button>
+                                    ))}
+                                  </div>
+                                  <span className="text-xs font-medium text-[#6B7280] w-16 text-right">{crit.score} out of 10</span>
+                                </div>
+                              </div>
+                              <textarea value={crit.remark} onChange={e => updateCriterionRemark(c, e.target.value)} rows={2}
+                                placeholder={`Remark for ${c}...`}
+                                className="w-full border border-[#D1D5DB] rounded-lg px-3 py-2 text-sm text-[#111827] placeholder:text-[#9CA3AF] resize-none focus:outline-none focus:ring-2 focus:ring-[#3538CD]/30 focus:border-[#3538CD] bg-white" />
+                            </div>
+                          );
+                        })}
+
+                        {/* Overall Remarks */}
+                        <div className="border-t border-[#F1F1F4] pt-4">
+                          <p className="text-xs font-medium text-[#374151] mb-2">Overall Remarks <span className="text-red-500">*</span></p>
+                          <textarea value={fbOverallRemarks} onChange={e => setFbOverallRemarks(e.target.value)} rows={4}
+                            placeholder="Overall summary of the candidate's performance..."
+                            className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2.5 text-sm text-[#111827] placeholder:text-[#9CA3AF] resize-none focus:outline-none focus:ring-2 focus:ring-[#3538CD]/30 focus:border-[#3538CD]" />
+                        </div>
+
+                        <button onClick={handleFbSubmit}
+                          className="px-6 py-2.5 bg-[#3538CD] text-white text-xs font-black uppercase tracking-widest rounded-lg hover:bg-[#2d30b0] transition-colors">
+                          {fbSubmitted ? '✓ Submitted' : 'Submit Feedback'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Read-only feedback summary */}
+              {isReadOnly && invite.feedback && (
+                <div className="mt-4 border border-[#E5E7EB] rounded-lg p-4 space-y-5">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                    <span className="text-sm font-semibold text-[#111827]">Your Feedback (Submitted)</span>
+                  </div>
+                  <div>
+                    <RLabel>Interview Panel Suggestion</RLabel>
+                    <span className="text-sm font-bold px-3 py-1.5 rounded-full border inline-block mt-2"
+                      style={{
+                        backgroundColor: SUGGESTION_STYLE[invite.feedback.suggestion]?.bg,
+                        borderColor: SUGGESTION_STYLE[invite.feedback.suggestion]?.border,
+                        color: SUGGESTION_STYLE[invite.feedback.suggestion]?.text,
+                      }}>
+                      {invite.feedback.suggestion}
+                    </span>
+                  </div>
+                  {invite.feedback.criteriaRatings && Object.keys(invite.feedback.criteriaRatings).length > 0 && (
+                    <div className="space-y-4">
+                      {Object.entries(invite.feedback.criteriaRatings).map(([k, v]) => (
+                        <div key={k} className="border-t border-[#F1F1F4] pt-4">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-sm font-semibold text-[#374151] truncate pr-4">{k}</span>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <div className="flex gap-0.5">
+                                {Array.from({ length: 10 }, (_, i) => (
+                                  <span key={i} className="text-lg" style={{ color: i < v.score ? '#F4B400' : '#E5E7EB' }}>★</span>
+                                ))}
+                              </div>
+                              <span className="text-xs font-medium text-[#6B7280] w-16 text-right">{v.score} out of 10</span>
+                            </div>
+                          </div>
+                          {v.remark && <p className="text-xs text-[#6B7280] italic">{v.remark}</p>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {invite.feedback.overallRemarks && (
+                    <div>
+                      <RLabel>Overall Remarks</RLabel>
+                      <p className="text-sm text-[#374151] leading-relaxed p-4 bg-[#FAFAFA] rounded-lg border border-[#E5E7EB] mt-2">{invite.feedback.overallRemarks}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* ── Change-availability confirmation (reversing a communicated decision) ── */}
+      {showAvailModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl border border-[#E5E7EB] w-full max-w-md p-6">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-5 h-5 text-amber-500" />
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-[#111827]">Update your response?</h2>
+                <p className="text-sm text-[#6B7280] mt-1">
+                  You are changing your response from{' '}
+                  <span className="font-semibold text-[#111827]">{committed ? 'Accepted' : 'Declined'}</span> to{' '}
+                  <span className="font-semibold text-[#111827]">{availAvailable ? 'Accepted' : 'Declined'}</span>.
+                </p>
+              </div>
+            </div>
+            {!availAvailable && hasDraftedFeedback && (
+              <div className="flex items-start gap-2 rounded-lg bg-[#FEF2F2] border border-[#FECACA] p-3 mb-4">
+                <AlertTriangle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                <p className="text-xs text-[#B91C1C] leading-relaxed">
+                  This will hide the feedback section and <span className="font-semibold">discard the feedback you've drafted</span>. This can't be undone.
+                </p>
+              </div>
+            )}
+            <p className="text-xs text-[#6B7280] leading-relaxed mb-5">
+              Proceeding will trigger an email to notify the recruiter of this schedule change.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setShowAvailModal(false)}
+                className="px-4 py-2 text-xs font-semibold text-[#374151] rounded-lg border border-[#E5E7EB] hover:bg-[#F9FAFB] transition-colors">
+                Cancel
+              </button>
+              <button onClick={commitAvailability}
+                className="px-4 py-2 text-xs font-semibold text-white rounded-lg bg-[#3538CD] hover:bg-[#2d30b0] transition-colors">
+                Update &amp; Send Email
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Toast — confirms the save + simulated recruiter notification ── */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-[60] bg-[#111827] text-white px-5 py-3 rounded-2xl shadow-xl text-sm font-semibold flex items-center gap-3 max-w-sm">
+          <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse shrink-0" />
+          {toast}
+        </div>
+      )}
+
+      <footer className="text-center py-6">
+        <p className="text-[10px] font-medium text-[#9CA3AF]">Powered by CollabCRM · {buName}</p>
+      </footer>
+    </div>
+  );
+}
