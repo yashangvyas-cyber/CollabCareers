@@ -54,6 +54,7 @@ export default function ScheduleInterviewDrawer({
   const [extEmail, setExtEmail] = useState('');
   const [extPanelists, setExtPanelists] = useState<{ firstName: string; lastName: string; email: string }[]>([]);
   const [extError, setExtError] = useState('');
+  const [extEnabled, setExtEnabled] = useState(false);
 
   const handleAddExtPanelist = () => {
     const firstName = extFirst.trim();
@@ -81,7 +82,7 @@ export default function ScheduleInterviewDrawer({
     setSchedDate(''); setSchedTime(''); setSchedMeetingType('Google Meet');
     setSchedDuration('60'); setSchedCustomDuration(''); setSchedAdditionalInfo('');
     setSendEmailCandidate(true); setSendEmailPanel(true);
-    setExtFirst(''); setExtLast(''); setExtEmail(''); setExtPanelists([]); setExtError('');
+    setExtFirst(''); setExtLast(''); setExtEmail(''); setExtPanelists([]); setExtError(''); setExtEnabled(false);
   };
 
   const handleSubmit = () => {
@@ -216,39 +217,54 @@ export default function ScheduleInterviewDrawer({
                 </span>
               </span>
             </div>
-            {/* Structured mini-form — captures first name, last name & email per panelist */}
-            <div className="border border-[#E5E7EB] rounded-lg p-2.5 space-y-2 bg-[#FAFAFB]">
-              <div className="grid grid-cols-2 gap-2">
-                <input value={extFirst} onChange={e => { setExtFirst(e.target.value); setExtError(''); }}
-                  onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddExtPanelist(); } }}
-                  placeholder="First name"
-                  className="w-full border border-[#E5E7EB] rounded-lg px-2.5 py-2 text-sm text-[#111827] placeholder:text-[#9CA3AF] bg-white focus:outline-none focus:ring-2 focus:ring-[#3538CD]/20 focus:border-[#3538CD]" />
-                <input value={extLast} onChange={e => { setExtLast(e.target.value); setExtError(''); }}
-                  onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddExtPanelist(); } }}
-                  placeholder="Last name"
-                  className="w-full border border-[#E5E7EB] rounded-lg px-2.5 py-2 text-sm text-[#111827] placeholder:text-[#9CA3AF] bg-white focus:outline-none focus:ring-2 focus:ring-[#3538CD]/20 focus:border-[#3538CD]" />
-              </div>
-              <div className="flex gap-2">
-                <input type="email" value={extEmail} onChange={e => { setExtEmail(e.target.value); setExtError(''); }}
-                  onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddExtPanelist(); } }}
-                  placeholder="Email address"
-                  className="flex-1 min-w-0 border border-[#E5E7EB] rounded-lg px-2.5 py-2 text-sm text-[#111827] placeholder:text-[#9CA3AF] bg-white focus:outline-none focus:ring-2 focus:ring-[#3538CD]/20 focus:border-[#3538CD]" />
-                <button type="button" onClick={handleAddExtPanelist}
-                  className="shrink-0 inline-flex items-center gap-1 px-3.5 py-2 bg-[#3538CD] text-white text-xs font-semibold rounded-lg hover:bg-[#2d30b0] transition-colors">
-                  <Plus className="w-3.5 h-3.5" /> Add
-                </button>
-              </div>
-            </div>
-            {extError && <p className="text-[11px] text-red-500 font-medium mt-1">{extError}</p>}
-            {extPanelists.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mt-2">
-                {extPanelists.map(p => (
-                  <span key={p.email} className="inline-flex items-center gap-1.5 bg-[#EEF4FF] text-[#3538CD] border border-[#C7D2FE] rounded-md pl-2 pr-1 py-1 text-xs font-semibold">
-                    {p.firstName} {p.lastName}
-                    <span className="font-normal text-[#6366F1]">({p.email})</span>
-                    <button onClick={() => setExtPanelists(prev => prev.filter(x => x.email !== p.email))} className="text-[#6366F1] hover:text-red-500"><X className="w-3 h-3" /></button>
-                  </span>
-                ))}
+            {/* Checkbox gate — reveals the name/email fields only when the recruiter opts in */}
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked={extEnabled}
+                onChange={e => {
+                  setExtEnabled(e.target.checked);
+                  if (!e.target.checked) { setExtFirst(''); setExtLast(''); setExtEmail(''); setExtPanelists([]); setExtError(''); }
+                }}
+                className="w-4 h-4 rounded border-[#D1D5DB] text-[#3538CD] focus:ring-[#3538CD]" />
+              <span className="text-sm text-[#374151]">Invite external panelists to this interview</span>
+            </label>
+
+            {extEnabled && (
+              <div className="mt-2.5">
+                {/* Structured mini-form — captures first name, last name & email per panelist */}
+                <div className="border border-[#E5E7EB] rounded-lg p-2.5 space-y-2 bg-[#FAFAFB]">
+                  <div className="grid grid-cols-2 gap-2">
+                    <input value={extFirst} onChange={e => { setExtFirst(e.target.value); setExtError(''); }}
+                      onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddExtPanelist(); } }}
+                      placeholder="First name"
+                      className="w-full border border-[#E5E7EB] rounded-lg px-2.5 py-2 text-sm text-[#111827] placeholder:text-[#9CA3AF] bg-white focus:outline-none focus:ring-2 focus:ring-[#3538CD]/20 focus:border-[#3538CD]" />
+                    <input value={extLast} onChange={e => { setExtLast(e.target.value); setExtError(''); }}
+                      onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddExtPanelist(); } }}
+                      placeholder="Last name"
+                      className="w-full border border-[#E5E7EB] rounded-lg px-2.5 py-2 text-sm text-[#111827] placeholder:text-[#9CA3AF] bg-white focus:outline-none focus:ring-2 focus:ring-[#3538CD]/20 focus:border-[#3538CD]" />
+                  </div>
+                  <div className="flex gap-2">
+                    <input type="email" value={extEmail} onChange={e => { setExtEmail(e.target.value); setExtError(''); }}
+                      onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddExtPanelist(); } }}
+                      placeholder="Email address"
+                      className="flex-1 min-w-0 border border-[#E5E7EB] rounded-lg px-2.5 py-2 text-sm text-[#111827] placeholder:text-[#9CA3AF] bg-white focus:outline-none focus:ring-2 focus:ring-[#3538CD]/20 focus:border-[#3538CD]" />
+                    <button type="button" onClick={handleAddExtPanelist}
+                      className="shrink-0 inline-flex items-center gap-1 px-3.5 py-2 bg-[#3538CD] text-white text-xs font-semibold rounded-lg hover:bg-[#2d30b0] transition-colors">
+                      <Plus className="w-3.5 h-3.5" /> Add
+                    </button>
+                  </div>
+                </div>
+                {extError && <p className="text-[11px] text-red-500 font-medium mt-1">{extError}</p>}
+                {extPanelists.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {extPanelists.map(p => (
+                      <span key={p.email} className="inline-flex items-center gap-1.5 bg-[#EEF4FF] text-[#3538CD] border border-[#C7D2FE] rounded-md pl-2 pr-1 py-1 text-xs font-semibold">
+                        {p.firstName} {p.lastName}
+                        <span className="font-normal text-[#6366F1]">({p.email})</span>
+                        <button onClick={() => setExtPanelists(prev => prev.filter(x => x.email !== p.email))} className="text-[#6366F1] hover:text-red-500"><X className="w-3 h-3" /></button>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
