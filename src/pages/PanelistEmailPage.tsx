@@ -131,17 +131,35 @@ export default function PanelistEmailPage() {
             ))}
           </div>
 
-          {/* Action Required */}
-          <p className="text-xs font-bold text-[#111827] mt-4">Action Required:</p>
-          <p className="text-sm text-[#374151] leading-relaxed mt-1">
-            Please let us know if this time works for you. If you are unavailable, you can leave a note for the recruiter to help reschedule.
-          </p>
+          {isFeedbackEmail ? (
+            <>
+              {/* Feedback receipt — suggestion + remarks the panelist submitted */}
+              <p className="text-xs font-bold text-[#111827] mt-4">Your Submission:</p>
+              <div className="border border-[#E5E7EB] rounded-lg bg-[#F0FDF4] px-4 py-3 mt-1.5">
+                <p className="text-xs text-[#374151]">
+                  <span className="font-semibold text-[#9CA3AF]">Suggestion:</span>{' '}
+                  <span className="font-bold text-[#059669]">{invite.feedback!.suggestion}</span>
+                </p>
+                {invite.feedback!.overallRemarks && (
+                  <p className="text-xs text-[#374151] leading-relaxed mt-1.5 italic">“{invite.feedback!.overallRemarks}”</p>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Action Required */}
+              <p className="text-xs font-bold text-[#111827] mt-4">Action Required:</p>
+              <p className="text-sm text-[#374151] leading-relaxed mt-1">
+                Please let us know if this time works for you. If you are unavailable, you can leave a note for the recruiter to help reschedule.
+              </p>
+            </>
+          )}
 
           {/* Magic-link CTA — tokenised URL, no login required */}
           <div className="text-center mt-6">
             <Link to={`/panel/${token}`}
               className="inline-block px-8 py-3 rounded-xl bg-[#3538CD] text-white text-sm font-bold shadow-sm hover:bg-[#2d30b0] transition-colors">
-              Confirm Availability
+              {isFeedbackEmail ? 'View Your Feedback' : 'Confirm Availability'}
             </Link>
             <p className="text-[11px] text-[#9CA3AF] mt-3">This secure link is personal to you — no login required.</p>
           </div>
