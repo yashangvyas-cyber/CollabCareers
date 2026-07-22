@@ -66,7 +66,7 @@ export default function PanelistEmailPage() {
         {/* Client meta header */}
         <div className="px-6 py-4 border-b border-[#E5E7EB] bg-[#FCFCFD]">
           <p className="text-xs text-[#6B7280]">From: <span className="font-semibold text-[#374151]">{buName} Talent Acquisition</span> &lt;no-reply@collabcrm.com&gt;</p>
-          <p className="text-sm font-bold text-[#111827] mt-1">Action Required: Interview Panel Invitation for {ctx.candidateName}</p>
+          <p className="text-sm font-bold text-[#111827] mt-1">Interview Invitation: {ctx.candidateName} – {ctx.jobTitle} · {ctx.interviewDate}</p>
         </div>
 
         {/* Brand banner */}

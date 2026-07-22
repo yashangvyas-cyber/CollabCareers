@@ -208,25 +208,27 @@ export default function ScheduleInterviewDrawer({
 
           {/* External Panelists — the new feature field */}
           <div>
-            <div className="flex items-center gap-1.5 mb-1.5">
-              <label className="text-[12px] font-semibold text-[#6B7280]">External Panelists</label>
-              <span className="group relative inline-flex">
-                <Info className="w-3.5 h-3.5 text-[#9CA3AF] cursor-help" />
-                <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-1.5 w-48 rounded-lg bg-[#111827] text-white text-[11px] leading-relaxed px-2.5 py-1.5 text-center opacity-0 group-hover:opacity-100 transition-opacity z-10 shadow-lg">
-                  Bring in outside experts to help interview this candidate.
+            {/* Heading row — checkbox gate sits inline, right of the label */}
+            <div className="flex items-center justify-between mb-1.5">
+              <div className="flex items-center gap-1.5">
+                <label className="text-[12px] font-semibold text-[#6B7280]">External Panelists</label>
+                <span className="group relative inline-flex">
+                  <Info className="w-3.5 h-3.5 text-[#9CA3AF] cursor-help" />
+                  <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-1.5 w-48 rounded-lg bg-[#111827] text-white text-[11px] leading-relaxed px-2.5 py-1.5 text-center opacity-0 group-hover:opacity-100 transition-opacity z-10 shadow-lg">
+                    Bring in outside experts to help interview this candidate.
+                  </span>
                 </span>
-              </span>
+              </div>
+              <label className="flex items-center gap-1.5 cursor-pointer">
+                <input type="checkbox" checked={extEnabled}
+                  onChange={e => {
+                    setExtEnabled(e.target.checked);
+                    if (!e.target.checked) { setExtFirst(''); setExtLast(''); setExtEmail(''); setExtPanelists([]); setExtError(''); }
+                  }}
+                  className="w-4 h-4 rounded border-[#D1D5DB] text-[#3538CD] focus:ring-[#3538CD]" />
+                <span className="text-xs font-medium text-[#374151]">Invite external panelists</span>
+              </label>
             </div>
-            {/* Checkbox gate — reveals the name/email fields only when the recruiter opts in */}
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={extEnabled}
-                onChange={e => {
-                  setExtEnabled(e.target.checked);
-                  if (!e.target.checked) { setExtFirst(''); setExtLast(''); setExtEmail(''); setExtPanelists([]); setExtError(''); }
-                }}
-                className="w-4 h-4 rounded border-[#D1D5DB] text-[#3538CD] focus:ring-[#3538CD]" />
-              <span className="text-sm text-[#374151]">Invite external panelists to this interview</span>
-            </label>
 
             {extEnabled && (
               <div className="mt-2.5">
@@ -255,14 +257,17 @@ export default function ScheduleInterviewDrawer({
                 </div>
                 {extError && <p className="text-[11px] text-red-500 font-medium mt-1">{extError}</p>}
                 {extPanelists.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mt-2">
-                    {extPanelists.map(p => (
-                      <span key={p.email} className="inline-flex items-center gap-1.5 bg-[#EEF4FF] text-[#3538CD] border border-[#C7D2FE] rounded-md pl-2 pr-1 py-1 text-xs font-semibold">
-                        {p.firstName} {p.lastName}
-                        <span className="font-normal text-[#6366F1]">({p.email})</span>
-                        <button onClick={() => setExtPanelists(prev => prev.filter(x => x.email !== p.email))} className="text-[#6366F1] hover:text-red-500"><X className="w-3 h-3" /></button>
-                      </span>
-                    ))}
+                  <div className="mt-2">
+                    <p className="text-[11px] font-semibold text-[#6B7280] mb-1">{extPanelists.length} panelist{extPanelists.length > 1 ? 's' : ''} added</p>
+                    {/* Capped height + own scrollbar — a long list never stretches the drawer */}
+                    <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto pr-1">
+                      {extPanelists.map(p => (
+                        <span key={p.email} className="inline-flex items-center gap-1.5 max-w-full bg-[#EEF4FF] text-[#3538CD] border border-[#C7D2FE] rounded-md pl-2 pr-1 py-1 text-xs font-semibold">
+                          <span className="truncate">{p.firstName} {p.lastName} <span className="font-normal text-[#6366F1]">({p.email})</span></span>
+                          <button onClick={() => setExtPanelists(prev => prev.filter(x => x.email !== p.email))} className="shrink-0 text-[#6366F1] hover:text-red-500"><X className="w-3 h-3" /></button>
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
