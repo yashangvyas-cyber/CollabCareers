@@ -109,6 +109,135 @@ manage the external panel without re-scheduling the whole round.
 
 ---
 
+## Story 4 — Panelist views the interview details & responds with availability (secure link)
+
+**Story:**
+As an external panelist, I want my secure email link to open a page with everything about the
+interview — the candidate, their CV, the job, the round, the date & time with a clear timezone,
+and where to join — and to accept or decline the invitation right there with an optional note,
+so that I can prepare and respond without creating any account or logging in.
+
+**Pre-condition:**
+1. The panelist received the invitation email (Story 1) and clicks its button.
+2. The invitation has not been cancelled by the recruiter.
+
+**Acceptance Criteria:**
+
+*Viewing the interview details:*
+1. The email button opens a **secure link** (`/panel/<token>`) — **no login, no signup, no OTP**. The link works only for that one panelist and that one interview.
+2. The page is branded with the platform + the job's **business unit** (logo and brand color).
+   *Example: Arjun Mehta's round shows the MindInventory logo and its pink-red accent.*
+3. **Candidate panel** shows: name, job title, email, phone, LinkedIn profile link, **View Resume** (opens the CV), Total Experience, Skills, Notice Period (Days), Current Organization.
+   *Example: Arjun Mehta · Flutter Developer · 2Y 5M · Dart, Firebase, Flutter · FlutterApps.*
+4. **Round block** shows: round number & name, mode with meeting type, **date & time with the timezone spelled out** — external panelists have no timezone settings of their own, so the zone is always explicit.
+   *Example: `25/Jul/2026 · 10:00 AM IST (GMT+5:30)` — never a bare `25/Jul/2026, 10:00`.*
+5. Where to join depends on the mode:
+   - **Online** → a **Join Link** row with a "Join Google Meet" button.
+   - **Offline** → a **Location** row with the business unit's office address.
+   *Example (offline): 4th Floor, Shivalik Shilp, Iscon Cross Rd, Ahmedabad, Gujarat 380015.*
+6. A wrong or expired link shows an **"Invalid Link"** screen; a cancelled invitation shows a **"cancelled"** screen — never someone else's data, never an error dump.
+
+*Responding with availability:*
+7. A bar titled **"Interview Panel Invitation"** sits at the top (it stays visible while scrolling): *"Can you join this interview? The recruiter is notified by email."* with **Accept** and **Decline** buttons.
+8. Responding is **mis-click safe (two steps)**: picking Accept or Decline only highlights the choice and reveals an **optional note box** + a **Confirm Accept / Confirm Decline** button. Cancel resets the choice. Nothing is sent until Confirm.
+9. The note box hints at what to write — accepting: *"Add a note for the recruiter… (optional)"*; declining: *"Propose an alternate time or leave a message… (optional)"*.
+   *Example: Emma Clarke declines with "I am travelling that week — happy to help any day after the 28th."*
+10. On Confirm, a toast confirms: *"Response submitted — Accepted. The recruiter has been notified via email."* and the bar changes to a status line: **"You've accepted / declined this interview invitation."**
+11. The panelist can **change their response later** (Change response) — until they submit feedback. The latest response always wins.
+12. The **feedback form stays locked until the panelist accepts** — someone who declined (or hasn't answered) cannot rate the candidate.
+
+*What the recruiter sees after:*
+13. In Interview Details the panelist's chip dot changes — green for accepted, orange for declined — and the hover card shows *"✓ Available"* or *"✕ Not available"* plus the note (Story 2).
+14. The recruiter receives notification **Email 1 (accepted)** or **Email 2 (declined)** — formats below.
+
+**Field Values:**
+| Field | Type | Mandatory | Notes |
+|---|---|---|---|
+| Accept / Decline | Choice (one of two) | Yes | Two-step: choice + Confirm |
+| Note | Free text, max 500 characters | No | Sent to the recruiter along with the response |
+
+**Validations:**
+1. A response cannot be sent without explicitly pressing **Confirm** — a single stray click never submits.
+2. The note is optional — Confirm works with it empty.
+3. A cancelled or invalid link can never submit a response.
+
+**Post-condition:**
+1. Panelist status changes: Invited → **Availability Confirmed** (accepted) or **Availability Declined** (declined).
+2. The recruiter's view and email are updated immediately (AC 13–14).
+3. Accepting unlocks the feedback form; declining keeps it locked.
+
+**Impact:**
+1. New public page at `/panel/<token>` — outside the login wall; must expose nothing beyond this one interview.
+2. Interview Details view (Story 2 — chip status + hover card).
+3. Recruiter notification emails 1 and 2 (below).
+
+---
+
+## Story 5 — Panelist submits interview feedback & receives a receipt email
+
+**Story:**
+As an external panelist, I want to rate the candidate on each skill, give my hiring suggestion
+and overall remarks on the same secure page — and then receive a receipt email that lets me
+re-open and see exactly what I submitted — so that my evaluation reaches the recruiter
+instantly and I keep a copy for my own reference.
+
+**Pre-condition:**
+1. The panelist has **accepted** the invitation (Story 4) — feedback stays locked before that. The collapsed bar reads *"Interview Panel Feedback (Accept the invitation first)"* until then.
+2. The invitation has not been cancelled.
+
+**Acceptance Criteria:**
+
+*Submitting feedback:*
+1. On the secure page, the panelist opens **"Interview Panel Feedback (Tap to add feedback)"** — a collapsible section under the interview details.
+2. The form has three parts:
+   - **Interview Panel Suggestion** * — five choice pills: **Next Round · No Show/Cancel · Not Sure · Should Hire · Should Reject** (one must be selected).
+   - **One rating row per skill** defined on the job — a **0–10 star rating** with a live *"N out of 10"* readout, plus an optional remark box (*"Remark for Flutter expertise…"*).
+     *Example: the Flutter Developer job rates Flutter expertise, State management, App store delivery experience, Code quality.*
+   - **Overall Remarks** * — free-text summary.
+3. On **Submit Feedback**: a toast confirms *"Feedback submitted. The recruiter has been notified via email."* and the section becomes a read-only **"Your Feedback (Submitted)"** summary.
+4. Feedback can be submitted **once** — after submitting, the whole page turns read-only (ratings, suggestion and remarks stay visible but locked, and the availability bar disappears).
+   *Example: Carol Davis submitted 8/10 with "Should Hire" — reopening her link shows her submission, not an empty form.*
+
+*The receipt email:*
+5. Right after submitting, the panelist receives a **different email from the invitation** — a receipt, not a request:
+   - **Subject:** `Feedback Received: Arjun Mehta – Flutter Developer` *(the invitation email's subject carried the interview date; this one leads with "Feedback Received")*.
+   - **Body:** *"Thank you for taking the time to interview **Arjun Mehta** for the **Flutter Developer** position. We've shared your feedback with the recruitment team — here's a copy for your records."*
+   - **Details:** Candidate, Role, Interview Round, Interview Date (with timezone).
+   - **Your Submission:** the chosen suggestion (e.g. **Should Hire**) and the overall remarks, quoted.
+   - **Button:** **"View Your Feedback"** — reopens the same secure link in its read-only state.
+6. There is **no "action required" language** anywhere in the receipt — nothing is asked of the panelist anymore.
+
+*What the recruiter sees after:*
+7. The panelist's chip dot turns **purple (Feedback Submitted)** and a **"Interview Panel Feedback (Provided by Carol Davis) `External`"** row appears under the round — expanding shows per-skill stars, remarks, Average Rating, Overall Remarks and the suggestion (Story 2, AC 5).
+8. The recruiter receives notification **Email 3 (feedback submitted)** — format below.
+
+**Field Values:**
+| Field | Type | Mandatory | Notes |
+|---|---|---|---|
+| Interview Panel Suggestion | One of 5 pills | Yes | Next Round / No Show/Cancel / Not Sure / Should Hire / Should Reject |
+| Skill rating (per skill) | 0–10 stars | Yes | One row per evaluation skill on the job |
+| Remark (per skill) | Free text | No | Shown next to that skill's rating |
+| Overall Remarks | Free text, max 1000 characters | Yes | The written summary the recruiter reads first |
+
+**Validations:**
+1. Submit is blocked until a suggestion is selected and Overall Remarks is filled.
+2. Per-skill remarks are optional — ratings alone are enough.
+3. Feedback cannot be opened, filled or submitted before the invitation is accepted (Story 4, AC 12).
+4. A second submission is impossible — the form never reappears after submitting.
+
+**Post-condition:**
+1. Panelist status: Availability Confirmed → **Feedback Submitted**; their page and link stay read-only permanently.
+2. The receipt email is delivered to the panelist; the recruiter gets Email 3.
+3. The feedback appears in Interview Details **separately** from internal feedback and is excluded from the internal Feedback Score average (Story 2, AC 6).
+
+**Impact:**
+1. Secure panelist page (`/panel/<token>`) — form, read-only state.
+2. Panelist emails — a second template (receipt) alongside the invitation.
+3. Candidate → Interview Details (external feedback row, chip status).
+4. Recruiter notification Email 3 (below).
+
+---
+
 ## Recruiter Notification Emails
 
 Three system emails to the **recruiter who scheduled the round**, sent when an external
@@ -125,7 +254,7 @@ one button). Subjects front-load the useful facts — who, what, which interview
 
 > Hi **Gurpreetsingh**,
 >
-> **Bob Williams** (bob.williams@external.com) has confirmed availability for the interview below.
+> Good news — **Bob Williams** (bob.williams@external.com) has confirmed they're available for the interview below.
 >
 > | | |
 > |---|---|
@@ -138,6 +267,11 @@ one button). Subjects front-load the useful facts — who, what, which interview
 > No action is needed — this is a confirmation for your records.
 >
 > **[ View Interview Details ]**
+>
+> Thank you,
+> **CollabCRM Recruitment**
+>
+> *Powered by CollabCRM · This is an automated notification — please do not reply.*
 
 *The "Panelist's note" row appears only when the panelist wrote one.*
 
@@ -151,7 +285,7 @@ one button). Subjects front-load the useful facts — who, what, which interview
 
 > Hi **Gurpreetsingh**,
 >
-> **Bob Williams** (bob.williams@external.com) is **not available** for the interview below.
+> Heads up — **Bob Williams** (bob.williams@external.com) can't make the interview below.
 >
 > | | |
 > |---|---|
@@ -164,6 +298,11 @@ one button). Subjects front-load the useful facts — who, what, which interview
 > You may want to **invite another panelist** or **reschedule the round**.
 >
 > **[ View Interview Details ]**
+>
+> Thank you,
+> **CollabCRM Recruitment**
+>
+> *Powered by CollabCRM · This is an automated notification — please do not reply.*
 
 ---
 
@@ -175,7 +314,7 @@ one button). Subjects front-load the useful facts — who, what, which interview
 
 > Hi **Gurpreetsingh**,
 >
-> **Carol Davis** (carol.davis@external.com) has submitted interview feedback.
+> **Carol Davis** (carol.davis@external.com) has shared their interview feedback.
 >
 > | | |
 > |---|---|
@@ -188,6 +327,11 @@ one button). Subjects front-load the useful facts — who, what, which interview
 > The full feedback — per-skill ratings and remarks — is available on the interview details page.
 >
 > **[ View Feedback ]**
+>
+> Thank you,
+> **CollabCRM Recruitment**
+>
+> *Powered by CollabCRM · This is an automated notification — please do not reply.*
 
 ---
 
@@ -198,3 +342,159 @@ one button). Subjects front-load the useful facts — who, what, which interview
 3. The button opens the candidate's Interview Details with the round in view.
 4. If a panelist changes their availability later (allowed until feedback is submitted), the recruiter gets a fresh Email 1 or Email 2 — the latest response always wins.
 5. No notification is sent for a **Cancelled** panelist's link activity (the link is dead).
+
+---
+
+## Panelist Emails
+
+Three emails go **to the external panelist**. All come from the business unit's sender name
+(*"MindInventory Talent Acquisition" &lt;no-reply@collabcrm.com&gt;*), carry the BU logo, and
+end with the same secure button link plus the line
+*"This secure link is personal to you — no login required."*
+
+---
+
+### Email A — Interview invitation (sent on invite AND on every resend)
+
+**Subject:** `Interview Invitation: Arjun Mehta – Flutter Developer · 25/Jul/2026`
+*(candidate, role and date up front — no "Action Required" prefix in the subject)*
+
+**Body:**
+
+> Hi **Carol**,
+>
+> We'd love to have you on the interview panel for the **Flutter Developer** position.
+>
+> Here are the proposed details — please have a look and let us know if you can make it.
+>
+> **Interview Details:**
+>
+> | | |
+> |---|---|
+> | Candidate | Arjun Mehta |
+> | Role | Flutter Developer |
+> | Interview Round | Round 1 — Technical Round |
+> | Proposed Date | 25/Jul/2026 |
+> | Proposed Time | 10:00 AM IST (GMT+5:30) |
+> | Mode | Online (Google Meet) |
+>
+> **Can you make it?**
+> If the time works for you, just confirm below. If not, no problem — leave a note and the recruiter will find a better slot.
+>
+> **[ Confirm Availability ]**
+>
+> *This secure link is personal to you — no login required.*
+>
+> Thank you,
+> **The Talent Acquisition Team**
+>
+> *Powered by CollabCRM*
+
+**Variations:**
+
+1. **Offline round** → an extra **Location** row with the business unit's office address replaces the meeting link context (*4th Floor, Shivalik Shilp, Iscon Cross Rd, Ahmedabad, Gujarat 380015*), and Mode shows `Offline`.
+2. **Resend** (Story 3) → the **same secure link**, but the wording adapts to what the panelist already answered — the email never asks a question that's already been answered:
+   - **Already confirmed** → *"You've confirmed you're available — here are the details for your reference."* · ask block: **"You're confirmed"** — *"Keep this link handy — you can view the interview details or update your response anytime."* · button: **[ View Interview Details ]**
+   - **Already declined** → *"You let us know you can't make it — the details are below in case anything changes."* · ask block: **"Change of plans?"** — *"If your schedule frees up, you can update your response using the link below."* · button: **[ Update Availability ]**
+   - **No response yet** → the standard body above, button **[ Confirm Availability ]**.
+
+---
+
+### Email B — Feedback receipt (sent right after the panelist submits feedback)
+
+**Subject:** `Feedback Received: Arjun Mehta – Flutter Developer`
+*(no date needed — the interview is done; nothing more is asked)*
+
+**Variation:** if the panelist's suggestion was **No Show/Cancel**, the opening line becomes
+*"Thank you for making time for the **Flutter Developer** interview."* — we never thank someone
+"for interviewing" a candidate who didn't show up.
+
+**Body:**
+
+> Hi **Carol**,
+>
+> Thank you for taking the time to interview **Arjun Mehta** for the **Flutter Developer** position.
+>
+> We've shared your feedback with the recruitment team — here's a copy for your records.
+>
+> **Interview Details:**
+>
+> | | |
+> |---|---|
+> | Candidate | Arjun Mehta |
+> | Role | Flutter Developer |
+> | Interview Round | Round 1 — Technical Round |
+> | Interview Date | 25/Jul/2026 · 10:00 AM IST (GMT+5:30) |
+>
+> **Your Submission:**
+> Suggestion: **Should Hire**
+> *"Strong Flutter fundamentals and a very structured approach to state management. Would move forward."*
+>
+> **[ View Your Feedback ]**
+>
+> *This secure link is personal to you — no login required.*
+>
+> Thank you,
+> **The Talent Acquisition Team**
+>
+> *Powered by CollabCRM*
+
+---
+
+### Email C — Cancellation notice (sent when the panelist or the interview is cancelled)
+
+**When it is sent:**
+
+1. The recruiter **cancels that panelist's invitation** (Story 3), or
+2. The **whole interview round is cancelled** — every active external panelist on the round gets it (already-cancelled panelists are not emailed twice).
+
+**Subject:** `Interview Cancelled: Arjun Mehta – Flutter Developer · 25/Jul/2026`
+
+**Body:**
+
+> Hi **Dan**,
+>
+> We're sorry for the change of plans — the interview below has been **cancelled**, so you won't need to join this one.
+>
+> We truly appreciate you making the time for us, and we'd love to have you on a future interview panel.
+
+**Variation:** the second line depends on what the panelist had done — only thank them for
+"making the time" if they actually committed time:
+
+- **Had confirmed availability (or submitted feedback)** → *"We truly appreciate you making the time for us, and we'd love to have you on a future interview panel."*
+- **Never responded, or had declined** → *"Thank you for considering it — we'd love to have you on a future interview panel."*
+>
+> **Interview Details:**
+>
+> | | |
+> |---|---|
+> | Candidate | Arjun Mehta |
+> | Role | Flutter Developer |
+> | Interview Round | Round 1 — Technical Round |
+> | Interview Date | 25/Jul/2026 · 10:00 AM IST (GMT+5:30) |
+>
+> No action is needed on your side — your secure link has been deactivated.
+>
+> **[ Open Secure Link ]** *(muted, secondary style — not a call to action)*
+>
+> *This link has been deactivated — it will only show that the invitation was cancelled.*
+>
+> Thank you,
+> **The Talent Acquisition Team**
+>
+> *Powered by CollabCRM*
+
+**Rules:**
+
+1. No accept/decline or feedback is possible after this email — the link only shows the "invitation cancelled" screen.
+2. If the panelist had already submitted feedback, the recruiter keeps it (Story 3, AC 5) — but the panelist's page stays on the cancelled screen.
+3. If the recruiter later **resends** (re-activates) the invitation, the panelist receives a fresh **Email A** and the link works again.
+
+---
+
+### Rules common to all panelist emails
+
+1. All buttons open the **same secure link** — the page just shows a different state (form, read-only submission, or cancelled screen).
+2. The receipt (Email B) and cancellation (Email C) contain **no "action required" language** — they ask nothing of the panelist.
+3. The timezone is always spelled out next to the time (`IST (GMT+5:30)`), since external panelists have no timezone settings.
+4. Exactly one email per event: invited/resent → Email A, feedback submitted → Email B, cancelled → Email C.

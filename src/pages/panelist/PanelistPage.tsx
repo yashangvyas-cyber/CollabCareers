@@ -73,7 +73,7 @@ function PanelistView({ token }: { token?: string }) {
             <XCircle className="w-8 h-8 text-[#6B7280]" />
           </div>
           <h1 className="text-2xl font-black text-[#111827] tracking-tight mb-2">Invitation Revoked</h1>
-          <p className="text-sm text-[#6B7280] leading-relaxed mb-4">This interview invitation has been cancelled by the recruiter. You no longer have access to interview details.</p>
+          <p className="text-sm text-[#6B7280] leading-relaxed mb-4">We're sorry for the change of plans — this interview invitation has been cancelled. If you believe this is a mistake, please reach out to the recruiter who invited you.</p>
           {invite.feedback && (
             <div className="bg-[#F9FAFB] rounded-xl p-4 text-left border border-[#E5E7EB]">
               <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest mb-2">Your Previously Submitted Feedback</p>

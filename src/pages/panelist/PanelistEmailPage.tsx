@@ -28,9 +28,14 @@ export default function PanelistEmailPage() {
 
   // Feedback Submitted gets its own follow-up email — a receipt, not another invitation.
   const isFeedbackEmail = invite.status === 'Feedback Submitted' && !!invite.feedback;
+  // Cancelled gets a cancellation notice — takes precedence over every other variant.
+  const isCancelledEmail = invite.status === 'Cancelled';
+  // The invitation email adapts to what the panelist already answered.
+  const isConfirmedState = invite.status === 'Availability Confirmed';
+  const isDeclinedState = invite.status === 'Availability Declined';
 
   // Candidate + role lead the list — busy panelists need the "who" before the "when".
-  const detailRows: [string, string][] = isFeedbackEmail
+  const detailRows: [string, string][] = (isFeedbackEmail || isCancelledEmail)
     ? [
         ['Candidate', ctx.candidateName],
         ['Role', ctx.jobTitle],
@@ -61,9 +66,11 @@ export default function PanelistEmailPage() {
         <div className="px-6 py-4 border-b border-[#E5E7EB] bg-[#FCFCFD]">
           <p className="text-xs text-[#6B7280]">From: <span className="font-semibold text-[#374151]">{brand.name} Talent Acquisition</span> &lt;no-reply@collabcrm.com&gt;</p>
           <p className="text-sm font-bold text-[#111827] mt-1">
-            {isFeedbackEmail
-              ? `Feedback Received: ${ctx.candidateName} – ${ctx.jobTitle}`
-              : `Interview Invitation: ${ctx.candidateName} – ${ctx.jobTitle} · ${ctx.interviewDate}`}
+            {isCancelledEmail
+              ? `Interview Cancelled: ${ctx.candidateName} – ${ctx.jobTitle} · ${ctx.interviewDate}`
+              : isFeedbackEmail
+                ? `Feedback Received: ${ctx.candidateName} – ${ctx.jobTitle}`
+                : `Interview Invitation: ${ctx.candidateName} – ${ctx.jobTitle} · ${ctx.interviewDate}`}
           </p>
         </div>
 
@@ -75,22 +82,41 @@ export default function PanelistEmailPage() {
         {/* Body */}
         <div className="px-6 py-5">
           <p className="text-sm text-[#374151]">Hi {firstName},</p>
-          {isFeedbackEmail ? (
+          {isCancelledEmail ? (
             <>
               <p className="text-sm text-[#374151] leading-relaxed mt-3">
-                Thank you for interviewing <span className="font-semibold text-[#111827]">{ctx.candidateName}</span> for the <span className="font-semibold text-[#111827]">{ctx.jobTitle}</span> position.
+                We're sorry for the change of plans — the interview below has been <span className="font-semibold text-[#111827]">cancelled</span>, so you won't need to join this one.
               </p>
               <p className="text-sm text-[#374151] leading-relaxed mt-2">
-                Your feedback has been recorded and shared with the recruitment team.
+                {/* Only thank them for "making time" if they actually committed time */}
+                {invite.availability?.available === true || invite.feedback
+                  ? "We truly appreciate you making the time for us, and we'd love to have you on a future interview panel."
+                  : "Thank you for considering it — we'd love to have you on a future interview panel."}
+              </p>
+            </>
+          ) : isFeedbackEmail ? (
+            <>
+              <p className="text-sm text-[#374151] leading-relaxed mt-3">
+                {invite.feedback!.suggestion === 'No Show/Cancel'
+                  // The candidate never showed — don't thank them "for interviewing" someone who wasn't there.
+                  ? <>Thank you for making time for the <span className="font-semibold text-[#111827]">{ctx.jobTitle}</span> interview.</>
+                  : <>Thank you for taking the time to interview <span className="font-semibold text-[#111827]">{ctx.candidateName}</span> for the <span className="font-semibold text-[#111827]">{ctx.jobTitle}</span> position.</>}
+              </p>
+              <p className="text-sm text-[#374151] leading-relaxed mt-2">
+                We've shared your feedback with the recruitment team — here's a copy for your records.
               </p>
             </>
           ) : (
             <>
               <p className="text-sm text-[#374151] leading-relaxed mt-3">
-                You are invited to interview candidates for the <span className="font-semibold text-[#111827]">{ctx.jobTitle}</span> position.
+                We'd love to have you on the interview panel for the <span className="font-semibold text-[#111827]">{ctx.jobTitle}</span> position.
               </p>
               <p className="text-sm text-[#374151] leading-relaxed mt-2">
-                Please review the proposed interview details below and confirm whether you are available to attend.
+                {isConfirmedState
+                  ? "You've confirmed you're available — here are the details for your reference."
+                  : isDeclinedState
+                    ? "You let us know you can't make it — the details are below in case anything changes."
+                    : 'Here are the proposed details — please have a look and let us know if you can make it.'}
               </p>
             </>
           )}
@@ -106,7 +132,12 @@ export default function PanelistEmailPage() {
             ))}
           </div>
 
-          {isFeedbackEmail ? (
+          {isCancelledEmail ? (
+            /* Cancellation — nothing is asked of the panelist */
+            <p className="text-sm text-[#374151] leading-relaxed mt-4">
+              No action is needed on your side — your secure link has been deactivated.
+            </p>
+          ) : isFeedbackEmail ? (
             <>
               {/* Feedback receipt — suggestion + remarks the panelist submitted */}
               <p className="text-xs font-bold text-[#111827] mt-4">Your Submission:</p>
@@ -122,21 +153,45 @@ export default function PanelistEmailPage() {
             </>
           ) : (
             <>
-              {/* Action Required */}
-              <p className="text-xs font-bold text-[#111827] mt-4">Action Required:</p>
+              {/* Gentle ask — adapts to the panelist's answer; never asks what's already answered */}
+              <p className="text-xs font-bold text-[#111827] mt-4">
+                {isConfirmedState ? "You're confirmed" : isDeclinedState ? 'Change of plans?' : 'Can you make it?'}
+              </p>
               <p className="text-sm text-[#374151] leading-relaxed mt-1">
-                Please let us know if this time works for you. If you are unavailable, you can leave a note for the recruiter to help reschedule.
+                {isConfirmedState
+                  ? 'Keep this link handy — you can view the interview details or update your response anytime.'
+                  : isDeclinedState
+                    ? 'If your schedule frees up, you can update your response using the link below.'
+                    : 'If the time works for you, just confirm below. If not, no problem — leave a note and the recruiter will find a better slot.'}
               </p>
             </>
           )}
 
-          {/* Magic-link CTA — tokenised URL, no login required */}
+          {/* Magic-link CTA — tokenised URL, no login required. Cancelled → muted link only. */}
           <div className="text-center mt-6">
-            <Link to={`/panel/${token}`}
-              className="inline-block px-8 py-3 rounded-xl bg-[#3538CD] text-white text-sm font-bold shadow-sm hover:bg-[#2d30b0] transition-colors">
-              {isFeedbackEmail ? 'View Your Feedback' : 'Confirm Availability'}
-            </Link>
-            <p className="text-[11px] text-[#9CA3AF] mt-3">This secure link is personal to you — no login required.</p>
+            {isCancelledEmail ? (
+              <>
+                <Link to={`/panel/${token}`}
+                  className="inline-block px-8 py-3 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] text-[#6B7280] text-sm font-bold hover:bg-[#F3F4F6] transition-colors">
+                  Open Secure Link
+                </Link>
+                <p className="text-[11px] text-[#9CA3AF] mt-3">This link has been deactivated — it will only show that the invitation was cancelled.</p>
+              </>
+            ) : (
+              <>
+                <Link to={`/panel/${token}`}
+                  className="inline-block px-8 py-3 rounded-xl bg-[#3538CD] text-white text-sm font-bold shadow-sm hover:bg-[#2d30b0] transition-colors">
+                  {isFeedbackEmail
+                    ? 'View Your Feedback'
+                    : isConfirmedState
+                      ? 'View Interview Details'
+                      : isDeclinedState
+                        ? 'Update Availability'
+                        : 'Confirm Availability'}
+                </Link>
+                <p className="text-[11px] text-[#9CA3AF] mt-3">This secure link is personal to you — no login required.</p>
+              </>
+            )}
           </div>
 
           {/* Sign-off */}
