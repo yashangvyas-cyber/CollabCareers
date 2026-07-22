@@ -1,8 +1,8 @@
 import { useParams, Link } from 'react-router-dom';
-import { AlertTriangle } from 'lucide-react';
-import { useApp } from '../store/AppContext';
-import { BUSINESS_UNITS } from '../lib/businessUnits';
-import { readableTextColor } from '../lib/theme';
+import { useApp } from '../../store/AppContext';
+import { resolveBranding } from '../../lib/businessUnits';
+import BuLogo from '../../components/panelist/BuLogo';
+import InvalidLinkScreen from '../../components/panelist/InvalidLinkScreen';
 
 /**
  * Simulated invite email — the external panelist's real entry point.
@@ -16,27 +16,11 @@ export default function PanelistEmailPage() {
   const invite = externalInvites.find(inv => inv.accessToken === token);
 
   if (!invite) {
-    return (
-      <div className="min-h-screen bg-[#F4F5FA] flex items-center justify-center p-6">
-        <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-xl p-12 text-center max-w-md">
-          <div className="w-16 h-16 mx-auto rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center mb-6">
-            <AlertTriangle className="w-8 h-8 text-red-500" />
-          </div>
-          <h1 className="text-2xl font-black text-[#111827] tracking-tight mb-2">Invalid Link</h1>
-          <p className="text-sm text-[#6B7280] leading-relaxed">This invitation link is invalid or has expired.</p>
-          <Link to="/" className="inline-block mt-6 px-6 py-2.5 bg-[#3538CD] text-white text-xs font-black uppercase tracking-widest rounded-xl hover:bg-[#2d30b0] transition-colors">
-            Go Home
-          </Link>
-        </div>
-      </div>
-    );
+    return <InvalidLinkScreen message="This invitation link is invalid or has expired." />;
   }
 
   const ctx = invite.context;
-  const buInfo = BUSINESS_UNITS[ctx.businessUnit];
-  const brandColor = buInfo?.brandColor ?? '#3538CD';
-  const brandText = readableTextColor(brandColor);
-  const buName = buInfo?.name ?? ctx.businessUnit;
+  const brand = resolveBranding(ctx.businessUnit);
   const firstName = invite.firstName || invite.name?.split(' ')[0] || 'there';
   const modeLabel = ctx.mode === 'Online'
     ? `Online – ${ctx.meetingType ?? 'Meeting'}`
@@ -75,7 +59,7 @@ export default function PanelistEmailPage() {
       <div className="max-w-xl mx-auto bg-white rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden">
         {/* Client meta header */}
         <div className="px-6 py-4 border-b border-[#E5E7EB] bg-[#FCFCFD]">
-          <p className="text-xs text-[#6B7280]">From: <span className="font-semibold text-[#374151]">{buName} Talent Acquisition</span> &lt;no-reply@collabcrm.com&gt;</p>
+          <p className="text-xs text-[#6B7280]">From: <span className="font-semibold text-[#374151]">{brand.name} Talent Acquisition</span> &lt;no-reply@collabcrm.com&gt;</p>
           <p className="text-sm font-bold text-[#111827] mt-1">
             {isFeedbackEmail
               ? `Feedback Received: ${ctx.candidateName} – ${ctx.jobTitle}`
@@ -85,16 +69,7 @@ export default function PanelistEmailPage() {
 
         {/* Brand banner */}
         <div className="px-6 py-4 flex items-center border-b border-[#F1F1F4]">
-          {buInfo?.logoUrl ? (
-            <img src={buInfo.logoUrl} alt={buName} className="h-10" />
-          ) : (
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black shrink-0" style={{ backgroundColor: brandColor, color: brandText }}>
-                {buInfo?.initials ?? 'CC'}
-              </div>
-              <p className="text-base font-bold text-[#111827] leading-tight">{buName}</p>
-            </div>
-          )}
+          <BuLogo brand={brand} />
         </div>
 
         {/* Body */}

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import CRMLayout from '../components/CRMLayout';
+import CRMLayout from '../../components/CRMLayout';
 import { ChevronRight, ChevronUp, X } from 'lucide-react';
 
 const moduleItems = [

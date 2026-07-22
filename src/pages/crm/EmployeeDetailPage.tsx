@@ -4,7 +4,7 @@ import {
   Mail, User, CheckCircle, ChevronRight, Briefcase,
   ChevronLeft, ArrowRight,
 } from 'lucide-react';
-import CRMLayout from '../components/CRMLayout';
+import CRMLayout from '../../components/CRMLayout';
 
 type EmployeeMock = {
   name: string;

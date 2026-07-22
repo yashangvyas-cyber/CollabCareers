@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import CRMLayout from '../components/CRMLayout';
+import CRMLayout from '../../components/CRMLayout';
 import {
   ChevronDown, Plus, X, MoreHorizontal,
   Eye, LayoutGrid, ArrowUpDown, ArrowUp, ArrowDown, UserPlus, Search, ChevronUp,
 } from 'lucide-react';
-import { useApp } from '../store/AppContext';
-import ScheduleInterviewDrawer from '../components/ScheduleInterviewDrawer';
+import { useApp } from '../../store/AppContext';
+import ScheduleInterviewDrawer from '../../components/ScheduleInterviewDrawer';
 
 // ── Terminal chip colour definitions ──────────────────────────────────────────
 const TERMINAL_CHIPS = [

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import CRMLayout from '../components/CRMLayout';
+import CRMLayout from '../../components/CRMLayout';
 import {
   Mail, Phone, Copy, FileText, ExternalLink,
   Check, X, Link2, Archive,
@@ -8,9 +8,9 @@ import {
   Pencil, Ban, Info, Eye, Clock,
   ArrowUpDown, ArrowUp, ArrowDown,
 } from 'lucide-react';
-import { useApp } from '../store/AppContext';
-import InviteEmailCompose from '../components/InviteEmailCompose';
-import type { TalentInviteStatus } from '../store/types';
+import { useApp } from '../../store/AppContext';
+import InviteEmailCompose from '../../components/InviteEmailCompose';
+import type { TalentInviteStatus } from '../../store/types';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 

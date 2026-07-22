@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
-import PortalLayout from '../components/PortalLayout';
+import PortalLayout from '../../components/PortalLayout';
 import { Briefcase, Mail, Phone, MapPin, FileText, ExternalLink, Linkedin, ArrowRight, Clock, Pencil, Bookmark } from 'lucide-react';
-import { useApp } from '../store/AppContext';
+import { useApp } from '../../store/AppContext';
 
 const portalStatusLabel: Record<string, string> = {
   'Applied': 'Applied',

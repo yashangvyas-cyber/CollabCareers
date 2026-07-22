@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import CRMLayout from '../components/CRMLayout';
+import CRMLayout from '../../components/CRMLayout';
 import { Upload, X, Check, ChevronDown, ChevronUp, Trash2, Plus, CheckCircle, Loader2, Wand2, Pencil } from 'lucide-react';
-import { useApp } from '../store/AppContext';
+import { useApp } from '../../store/AppContext';
 
 const SOURCES = ['LinkedIn', 'Referral', 'Job Fair', 'Direct Approach', 'Naukri', 'Internshala', 'Other'];
 const CTC_TYPES = ['Annual', 'Monthly'];

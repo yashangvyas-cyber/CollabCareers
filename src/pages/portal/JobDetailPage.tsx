@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import PortalLayout from '../components/PortalLayout';
-import AuthModal from '../components/AuthModal';
+import PortalLayout from '../../components/PortalLayout';
+import AuthModal from '../../components/AuthModal';
 import {
   MapPin, Briefcase, Building2, Clock, Tags, Wallet,
   ArrowRight, Bookmark, ChevronRight, ArrowLeft, Copy, CheckCheck, X, CheckCircle
 } from 'lucide-react';
-import { useApp } from '../store/AppContext';
+import { useApp } from '../../store/AppContext';
 
 const formatPostedDate = (dateStr?: string): string => {
   if (!dateStr) return 'Posted Recently';

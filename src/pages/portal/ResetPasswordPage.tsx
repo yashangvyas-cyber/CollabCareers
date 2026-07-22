@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { 
   KeyRound, Eye, EyeOff, ArrowRight, CheckCircle2, ArrowLeft
 } from 'lucide-react';
-import PortalLayout from '../components/PortalLayout';
+import PortalLayout from '../../components/PortalLayout';
 
 export default function ResetPasswordPage() {
   const { slug } = useParams();

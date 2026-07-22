@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
-import CRMLayout from '../components/CRMLayout';
+import CRMLayout from '../../components/CRMLayout';
 import { Mail, Phone, Copy, Eye, MoreVertical, ExternalLink, UserCheck, EyeOff, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, UserPlus, RefreshCw, Ban } from 'lucide-react';
-import { useApp } from '../store/AppContext';
-import ScheduleInterviewDrawer from '../components/ScheduleInterviewDrawer';
+import { useApp } from '../../store/AppContext';
+import ScheduleInterviewDrawer from '../../components/ScheduleInterviewDrawer';
 
 function DetailField({ label, value, isLink }: { label: string; value?: string | null; isLink?: boolean }) {
   return (

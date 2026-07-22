@@ -1,9 +1,9 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import PortalLayout from '../components/PortalLayout';
+import PortalLayout from '../../components/PortalLayout';
 import { Search, MapPin, Briefcase, Clock, ChevronDown, X, Building2, Bookmark, LayoutGrid, List, ArrowRight, Tags, SlidersHorizontal } from 'lucide-react';
-import AuthModal from '../components/AuthModal';
-import { useApp } from '../store/AppContext';
+import AuthModal from '../../components/AuthModal';
+import { useApp } from '../../store/AppContext';
 
 function Chip({ children, variant = 'default' }: { children: React.ReactNode; variant?: 'default' | 'skill' | 'active' }) {
   const styles = {

@@ -1,16 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import CRMLayout from '../components/CRMLayout';
+import CRMLayout from '../../components/CRMLayout';
 import {
   ChevronDown, X, Eye, Check, Briefcase, Users, UserCheck,
   GraduationCap, UserPlus, Search, Tag, Activity, ChevronLeft, Pencil, EyeOff,
   Clock, MapPin, Building2, TrendingUp, Plus, ArrowUpDown, ArrowUp, ArrowDown, Send,
 } from 'lucide-react';
-import { useApp } from '../store/AppContext';
-import type { Candidate, TalentAvailabilityStatus } from '../store/types';
+import { useApp } from '../../store/AppContext';
+import type { Candidate, TalentAvailabilityStatus } from '../../store/types';
 
 type CandidateStatus = 'Active' | 'Blacklisted' | 'Discarded' | 'Joined';
-import InviteEmailCompose from '../components/InviteEmailCompose';
+import InviteEmailCompose from '../../components/InviteEmailCompose';
 
 // ── Sort types ────────────────────────────────────────────────────────────────
 

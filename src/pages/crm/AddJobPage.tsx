@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import CRMLayout from '../components/CRMLayout';
+import CRMLayout from '../../components/CRMLayout';
 import { GripVertical, Trash2, Plus, ChevronDown, Info, X, AlertCircle, Copy, CheckCheck } from 'lucide-react';
-import { useApp } from '../store/AppContext';
-import { CustomField, FieldType, Job } from '../store/types';
+import { useApp } from '../../store/AppContext';
+import { CustomField, FieldType, Job } from '../../store/types';
 
 // Reusable form section wrapper
 function FormSection({

@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import PortalLayout from '../components/PortalLayout';
+import PortalLayout from '../../components/PortalLayout';
 import { 
   ChevronDown, CheckCircle, Upload, Zap, Sparkles, 
   Lock, ArrowRight, Download, X, FileText,
   Plus, ExternalLink, ArrowUp, ArrowDown, Trash2, Info
 } from 'lucide-react';
-import { useApp } from '../store/AppContext';
-import { Job, CustomField } from '../store/types';
-import SkillsMultiSelect from '../components/SkillsMultiSelect';
+import { useApp } from '../../store/AppContext';
+import { Job, CustomField } from '../../store/types';
+import SkillsMultiSelect from '../../components/SkillsMultiSelect';
 
 const formatDateForBanner = (dateString: string) => {
   if (!dateString) return '18 Mar 2026';

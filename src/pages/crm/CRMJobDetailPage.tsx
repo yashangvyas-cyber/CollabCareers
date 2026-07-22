@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import CRMLayout from '../components/CRMLayout';
-import { useApp } from '../store/AppContext';
+import CRMLayout from '../../components/CRMLayout';
+import { useApp } from '../../store/AppContext';
 import {
   Globe, Info, Eye, Pencil, Copy, ExternalLink, Plus,
   Search, Calendar, ChevronDown, ArrowUpDown, Filter as FilterIcon,

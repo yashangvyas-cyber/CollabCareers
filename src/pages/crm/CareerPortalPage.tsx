@@ -1,15 +1,15 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import CRMLayout from '../components/CRMLayout';
-import { useApp } from '../store/AppContext';
+import CRMLayout from '../../components/CRMLayout';
+import { useApp } from '../../store/AppContext';
 import {
   Code2, Copy, CheckCheck, ExternalLink,
   ChevronDown, ChevronUp, ChevronRight,
   SlidersHorizontal, Search, MapPin, Briefcase, TrendingUp, Wifi, Link2,
   AlertTriangle, ShieldCheck, Palette, Upload, Trash2,
 } from 'lucide-react';
-import { BRAND_PRESETS, isLowContrastOnWhite, DEFAULT_APPEARANCE } from '../lib/theme';
-import type { PortalConfig } from '../store/types';
+import { BRAND_PRESETS, isLowContrastOnWhite, DEFAULT_APPEARANCE } from '../../lib/theme';
+import type { PortalConfig } from '../../store/types';
 
 const moduleItems = [
   { name: 'Job Templates', count: 5 },

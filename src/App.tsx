@@ -1,30 +1,33 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import AddJobPage from './pages/AddJobPage';
-import JobsListingPage from './pages/JobsListingPage';
-import CRMJobDetailPage from './pages/CRMJobDetailPage';
-import CandidateDetailPage from './pages/CandidateDetailPage';
-import CareerPage from './pages/CareerPage';
-import JobDetailPage from './pages/JobDetailPage';
-// import RegisterPage from './pages/RegisterPage';
-import ApplicationFormPage from './pages/ApplicationFormPage';
-import ConfirmationPage from './pages/ConfirmationPage';
-import CandidateProfilePage from './pages/CandidateProfilePage';
-import EditProfilePage from './pages/EditProfilePage';
-import AlumniApplicationPage from './pages/AlumniApplicationPage';
-import JobApplicationsPage from './pages/JobApplicationsPage';
+// Prototype 1 — Internal side system (CRM / Recruitment)
+import AddJobPage from './pages/crm/AddJobPage';
+import JobsListingPage from './pages/crm/JobsListingPage';
+import CRMJobDetailPage from './pages/crm/CRMJobDetailPage';
+import CandidateDetailPage from './pages/crm/CandidateDetailPage';
+import JobApplicationsPage from './pages/crm/JobApplicationsPage';
+import OperationalConfigPage from './pages/crm/OperationalConfigPage';
+import CareerPortalPage from './pages/crm/CareerPortalPage';
+import TalentPoolPage from './pages/crm/TalentPoolPage';
+import TalentPoolDetailsPage from './pages/crm/TalentPoolDetailsPage';
+import AddTalentPage from './pages/crm/AddTalentPage';
+import EmployeeDetailPage from './pages/crm/EmployeeDetailPage';
+// Prototype 2 — Career Portal (candidate-facing)
+import CareerPage from './pages/portal/CareerPage';
+import JobDetailPage from './pages/portal/JobDetailPage';
+import ApplicationFormPage from './pages/portal/ApplicationFormPage';
+import ConfirmationPage from './pages/portal/ConfirmationPage';
+import CandidateProfilePage from './pages/portal/CandidateProfilePage';
+import EditProfilePage from './pages/portal/EditProfilePage';
+import AlumniApplicationPage from './pages/portal/AlumniApplicationPage';
+import ViewApplicationPage from './pages/portal/ViewApplicationPage';
+import ResetPasswordPage from './pages/portal/ResetPasswordPage';
+// Prototype 3 — External Panelist (token-gated, login-free)
+import PanelistPage from './pages/panelist/PanelistPage';
+import PanelistEmailPage from './pages/panelist/PanelistEmailPage';
+// Shared / meta
 import FlowMapPage from './pages/FlowMapPage';
 import HandoffPage from './pages/HandoffPage';
 import PrototypeHome from './pages/PrototypeHome';
-import ViewApplicationPage from './pages/ViewApplicationPage';
-import OperationalConfigPage from './pages/OperationalConfigPage';
-import ResetPasswordPage from './pages/ResetPasswordPage';
-import CareerPortalPage from './pages/CareerPortalPage';
-import TalentPoolPage from './pages/TalentPoolPage';
-import TalentPoolDetailsPage from './pages/TalentPoolDetailsPage';
-import AddTalentPage from './pages/AddTalentPage';
-import EmployeeDetailPage from './pages/EmployeeDetailPage';
-import PanelistPage from './pages/PanelistPage';
-import PanelistEmailPage from './pages/PanelistEmailPage';
 import DeviceSimulator from './components/DeviceSimulator';
 
 /** Wraps all Career Portal routes with the device simulator */

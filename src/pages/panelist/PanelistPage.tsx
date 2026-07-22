@@ -1,14 +1,11 @@
 import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { FileText, CheckCircle, AlertTriangle, ExternalLink, XCircle, Mail, Phone, Linkedin, Copy, MapPin, ChevronDown, Info, Lock, CalendarClock } from 'lucide-react';
-import { useApp } from '../store/AppContext';
-import { BUSINESS_UNITS } from '../lib/businessUnits';
-import { readableTextColor } from '../lib/theme';
-import type { PanelSuggestion } from '../store/types';
-
-// The interview-detail body uses the standard CollabCRM neutral / indigo palette,
-// exactly like the internal panelist screen. Brand colour is confined to the header.
-const INDIGO = '#3538CD';
+import { useApp } from '../../store/AppContext';
+import { resolveBranding } from '../../lib/businessUnits';
+import BuLogo from '../../components/panelist/BuLogo';
+import InvalidLinkScreen from '../../components/panelist/InvalidLinkScreen';
+import type { PanelSuggestion } from '../../store/types';
 
 const SUGGESTION_STYLE: Record<string, { bg: string; border: string; text: string }> = {
   'Should Hire':    { bg: 'rgb(240,253,244)', border: 'rgb(187,247,208)', text: 'rgb(22,101,52)'  },
@@ -61,27 +58,11 @@ function PanelistView({ token }: { token?: string }) {
 
   // ── Invalid / unknown token ──
   if (!invite) {
-    return (
-      <div className="min-h-screen bg-[#F4F5FA] flex items-center justify-center p-6">
-        <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-xl p-12 text-center max-w-md">
-          <div className="w-16 h-16 mx-auto rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center mb-6">
-            <AlertTriangle className="w-8 h-8 text-red-500" />
-          </div>
-          <h1 className="text-2xl font-black text-[#111827] tracking-tight mb-2">Invalid Link</h1>
-          <p className="text-sm text-[#6B7280] leading-relaxed">This interview invitation link is invalid or has expired. Please contact the recruiter for a new link.</p>
-          <Link to="/" className="inline-block mt-6 px-6 py-2.5 bg-[#3538CD] text-white text-xs font-black uppercase tracking-widest rounded-xl hover:bg-[#2d30b0] transition-colors">
-            Go Home
-          </Link>
-        </div>
-      </div>
-    );
+    return <InvalidLinkScreen message="This interview invitation link is invalid or has expired. Please contact the recruiter for a new link." />;
   }
 
   const ctx = invite.context;
-  const buInfo = BUSINESS_UNITS[ctx.businessUnit];
-  const brandColor = buInfo?.brandColor ?? INDIGO;
-  const brandText = readableTextColor(brandColor);
-  const buName = buInfo?.name ?? ctx.businessUnit;
+  const brand = resolveBranding(ctx.businessUnit);
 
   // ── Cancelled / revoked ──
   if (invite.status === 'Cancelled') {
@@ -179,16 +160,7 @@ function PanelistView({ token }: { token?: string }) {
       {/* Header — business-unit branding only ("Powered by CollabCRM" lives in the footer) */}
       <header className="bg-white border-b border-[#E5E7EB] sticky top-0 z-30">
         <div className="px-6 py-3 flex items-center">
-          {buInfo?.logoUrl ? (
-            <img src={buInfo.logoUrl} alt={buName} className="h-10" />
-          ) : (
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black shrink-0" style={{ backgroundColor: brandColor, color: brandText }}>
-                {buInfo?.initials ?? 'CC'}
-              </div>
-              <p className="text-base font-bold text-[#111827] leading-tight">{buName}</p>
-            </div>
-          )}
+          <BuLogo brand={brand} />
         </div>
       </header>
 

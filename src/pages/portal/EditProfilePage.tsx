@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import PortalLayout from '../components/PortalLayout';
+import PortalLayout from '../../components/PortalLayout';
 import {
   ChevronDown, CheckCircle, Lock, Check,
   Plus, ArrowUp, ArrowDown, Trash2, FileText, Upload,
   Eye, EyeOff, ArrowLeft, Sparkles, ChevronRight,
 } from 'lucide-react';
-import { useApp } from '../store/AppContext';
-import SkillsMultiSelect from '../components/SkillsMultiSelect';
+import { useApp } from '../../store/AppContext';
+import SkillsMultiSelect from '../../components/SkillsMultiSelect';
 
 // Country → states, for the dependent Country/State dropdowns in the address section
 const COUNTRY_STATES: Record<string, string[]> = {

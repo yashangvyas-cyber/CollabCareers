@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
-import PortalLayout from '../components/PortalLayout';
+import PortalLayout from '../../components/PortalLayout';
 import { Eye, EyeOff, Zap, ArrowRight } from 'lucide-react';
-import { useApp } from '../store/AppContext';
-import CollabCRMIcon from '../components/CollabCRMIcon';
+import { useApp } from '../../store/AppContext';
+import CollabCRMIcon from '../../components/CollabCRMIcon';
 
 export default function RegisterPage() {
   const { registerCandidate, loginCandidate } = useApp();

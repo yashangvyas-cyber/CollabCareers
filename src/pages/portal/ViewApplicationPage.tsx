@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import PortalLayout from '../components/PortalLayout';
-import { useApp } from '../store/AppContext';
+import PortalLayout from '../../components/PortalLayout';
+import { useApp } from '../../store/AppContext';
 import {
   Download, Globe, Linkedin, FileText,
   ChevronDown, MapPin, Briefcase, Building2, Clock, X, AlertTriangle,

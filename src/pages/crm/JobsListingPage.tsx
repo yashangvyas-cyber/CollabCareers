@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import CRMLayout from '../components/CRMLayout';
-import { useApp } from '../store/AppContext';
+import CRMLayout from '../../components/CRMLayout';
+import { useApp } from '../../store/AppContext';
 import { Eye, Pencil, Globe, MoreVertical, Maximize2, Plus, X, Filter as FilterIcon } from 'lucide-react';
 
 function StatCard({

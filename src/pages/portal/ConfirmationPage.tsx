@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import PortalLayout from '../components/PortalLayout';
+import PortalLayout from '../../components/PortalLayout';
 import { Check, Briefcase, List } from 'lucide-react';
 
 export default function ConfirmationPage() {
