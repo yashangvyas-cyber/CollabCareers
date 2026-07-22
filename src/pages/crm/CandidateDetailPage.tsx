@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import CRMLayout from '../../components/CRMLayout';
-import { Mail, Phone, Copy, Eye, MoreVertical, ExternalLink, UserCheck, EyeOff, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, UserPlus, RefreshCw, Ban } from 'lucide-react';
+import { Mail, Phone, Copy, Eye, MoreVertical, ExternalLink, UserCheck, EyeOff, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, UserPlus, RefreshCw, Ban, X, Pencil, MessageSquarePlus, Info } from 'lucide-react';
 import { useApp } from '../../store/AppContext';
 import ScheduleInterviewDrawer from '../../components/ScheduleInterviewDrawer';
 
@@ -79,9 +79,11 @@ const CANDIDATE_STATUS_STYLE: Record<string, { bg: string; text: string; border:
 
 type MockRound = {
   id: string; no: number; name: string; mode: 'Offline' | 'Online'; datetime: string;
-  status: 'Completed' | 'Scheduled' | 'Cancelled'; panelSuggestion: 'Next Round' | 'No Show/Cancel' | 'Not Sure' | 'Should Hire' | 'Should Reject';
+  status: 'Completed' | 'Scheduled' | 'Pending' | 'Cancelled'; panelSuggestion: 'Next Round' | 'No Show/Cancel' | 'Not Sure' | 'Should Hire' | 'Should Reject' | 'Pending';
   panel: string[]; scheduledBy: string; scheduledAt: string; duration: string;
   additionalInfo: string; feedbackScore: number; feedbackBy: string;
+  /** Staging shows "(Provided by X on <datetime>)" in the feedback accordion header. */
+  feedbackAt?: string; overallRemarks?: string;
 };
 type MockInterviewDetails = { offerStatus: string; department: string; joiningOn: string; remarks: string; rounds: MockRound[]; };
 
@@ -106,19 +108,58 @@ const mockInterviewMap: Record<string, MockInterviewDetails> = {
       { id: 'r3-offline', no: 2, name: 'Onsite Culture Fit', mode: 'Offline', datetime: '28/Jul/2026, 02:30 PM', status: 'Scheduled', panelSuggestion: 'Should Hire', panel: ['Super User'], scheduledBy: 'Super User', scheduledAt: '22/Jul/2026, 06:00 PM', duration: '45 Minutes', additionalInfo: 'In-person at MindInventory office.', feedbackScore: 0, feedbackBy: 'Super User' },
     ],
   },
+  // ── Copied from staging: Jason Doe — pending HR Round, no offer yet ──
+  'jason': {
+    offerStatus: '', department: '', joiningOn: '-', remarks: '-',
+    rounds: [
+      { id: 'jd-1', no: 1, name: 'HR Round', mode: 'Offline', datetime: '21/Jul/2026, 09:11 PM', status: 'Pending', panelSuggestion: 'Pending', panel: ['Gurpreetsingh Dhillon'], scheduledBy: 'Gurpreetsingh Dhillon', scheduledAt: '21/Jul/2026, 05:11 PM', duration: '60 Minutes', additionalInfo: 'This is additional information', feedbackScore: 0, feedbackBy: '' },
+    ],
+  },
+  // ── Copied from staging: Arjun Patel — completed HR Round, feedback 9, Offered ──
+  'arjunp': {
+    offerStatus: 'Offered', department: 'Business', joiningOn: '-', remarks: '-',
+    rounds: [
+      { id: 'ap-1', no: 1, name: 'HR Round', mode: 'Offline', datetime: '30/Jun/2026, 10:10 AM', status: 'Completed', panelSuggestion: 'Should Hire', panel: ['Gurpreetsingh Dhillon'], scheduledBy: 'Gurpreetsingh Dhillon', scheduledAt: '01/Jul/2026, 11:15 AM', duration: '60 Minutes', additionalInfo: '-', feedbackScore: 9, feedbackBy: 'Gurpreetsingh Dhillon', feedbackAt: '20-Jul-2026, 03:25 PM', overallRemarks: 'Candidate Selected.' },
+    ],
+  },
 };
 
+// Untitled-UI palette hexes copied from the staging interview-rounds DOM
+// (success-50/200/300, warning-50/200/700, error-50/200/700, gray tokens)
 const ROUND_STATUS_STYLE: Record<string, { bg: string; border: string; text: string }> = {
-  'Completed': { bg: 'rgb(240,253,244)', border: 'rgb(187,247,208)', text: 'rgb(21,128,61)' },
-  'Scheduled': { bg: 'rgb(239,246,255)', border: 'rgb(191,219,254)', text: 'rgb(29,78,216)' },
-  'Cancelled': { bg: 'rgb(254,242,242)', border: 'rgb(254,202,202)', text: 'rgb(185,28,28)' },
+  'Completed': { bg: '#ECFDF3', border: '#ABEFC6', text: '#067647' },
+  'Scheduled': { bg: '#EEF4FF', border: '#C7D2FE', text: '#3538CD' },
+  'Pending':   { bg: '#FFFAEB', border: '#FEDF89', text: '#B54708' },
+  'Cancelled': { bg: '#FEF3F2', border: '#FECDCA', text: '#B42318' },
 };
 const SUGGESTION_STYLE: Record<string, { bg: string; border: string; text: string }> = {
-  'Should Hire':    { bg: 'rgb(240,253,244)', border: 'rgb(187,247,208)', text: 'rgb(22,101,52)'  },
-  'Next Round':     { bg: 'rgb(239,246,255)', border: 'rgb(191,219,254)', text: 'rgb(30,64,175)'  },
-  'Not Sure':       { bg: 'rgb(255,251,235)', border: 'rgb(253,230,138)', text: 'rgb(146,64,14)'  },
-  'No Show/Cancel': { bg: 'rgb(249,250,251)', border: 'rgb(209,213,219)', text: 'rgb(107,114,128)'},
-  'Should Reject':  { bg: 'rgb(254,242,242)', border: 'rgb(254,202,202)', text: 'rgb(185,28,28)'  },
+  'Should Hire':    { bg: '#ECFDF3', border: '#ABEFC6', text: '#079455' },
+  'Next Round':     { bg: '#EEF4FF', border: '#C7D2FE', text: '#3538CD' },
+  'Not Sure':       { bg: '#FFFAEB', border: '#FEDF89', text: '#B54708' },
+  'Pending':        { bg: '#FFFAEB', border: '#FEDF89', text: '#B54708' },
+  'No Show/Cancel': { bg: '#F9FAFB', border: '#D0D5DD', text: '#667085' },
+  'Should Reject':  { bg: '#FEF3F2', border: '#FECDCA', text: '#B42318' },
+};
+
+/** Staging's react-stars readout: score number + 10 stars (#F4B400 filled / #EAECF0 empty). */
+function StarRow({ value }: { value: number }) {
+  return (
+    <div className="flex items-center">
+      <span className="text-center mt-0.5 text-xs font-normal text-[#101828]">{value}</span>
+      <div className="flex leading-none mx-1">
+        {Array.from({ length: 10 }, (_, i) => (
+          <span key={i} className="text-xl" style={{ color: i < value ? '#F4B400' : '#EAECF0' }}>★</span>
+        ))}
+      </div>
+    </div>
+  );
+}
+const EXT_STATUS_STYLE: Record<string, { bg: string; border: string; text: string }> = {
+  'Invited':                { bg: '#EEF4FF', border: '#C7D2FE', text: '#3538CD' },
+  'Availability Confirmed': { bg: '#F0FDF4', border: '#BBF7D0', text: '#15803D' },
+  'Availability Declined':  { bg: '#FFF7ED', border: '#FED7AA', text: '#9A3412' },
+  'Feedback Submitted':     { bg: '#F5F3FF', border: '#DDD6FE', text: '#6D28D9' },
+  'Cancelled':              { bg: '#F9FAFB', border: '#D1D5DB', text: '#6B7280' },
 };
 
 function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' | null }) {
@@ -195,6 +236,8 @@ export default function CandidateDetailPage() {
   const [activeTab, setActiveTab] = useState('Applicant Details');
   const [appliedSortDir, setAppliedSortDir] = useState<'asc' | 'desc' | null>(null);
   const [feedbackOpen, setFeedbackOpen] = useState<boolean[]>([]);
+  const [extFbOpen, setExtFbOpen] = useState<Record<string, boolean>>({});
+  const [roundMenuOpen, setRoundMenuOpen] = useState<number | null>(null);
   const [kebabOpen, setKebabOpen] = useState(false);
   const [archiveModalOpen, setArchiveModalOpen] = useState(false);
   const [archiveRemark, setArchiveRemark] = useState('');
@@ -857,7 +900,8 @@ export default function CandidateDetailPage() {
                   </div>
                 ) : (
                   <>
-                    {/* Offer / Status card */}
+                    {/* Offer / Status card — hidden when no offer state yet (staging: Jason Doe) */}
+                    {interviewData.offerStatus && (
                     <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm overflow-hidden">
                       <div className="p-4 flex items-center justify-between">
                         <div className="flex items-center gap-4">
@@ -897,193 +941,305 @@ export default function CandidateDetailPage() {
                         <p className="text-xs text-[#6B7280] mt-1">{interviewData.remarks}</p>
                       </div>
                     </div>
+                    )}
 
-                    {/* Interview Rounds */}
-                    <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm overflow-hidden">
-                      <div className="px-5 py-4 flex items-center justify-between border-b border-[#E5E7EB]">
-                        <div className="flex items-center gap-2">
-                          <span className="text-base font-semibold text-[#111827]">Interview Rounds</span>
-                          <span className="border border-[#3538CD] rounded-xl py-0.5 px-2 bg-[#EEF4FF] text-[#3538CD] text-xs font-medium">
+                    {/* Interview Rounds — structure copied from staging interview-rounds screen */}
+                    <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm px-5 pb-5">
+                      <div className="flex justify-between items-center">
+                        <div className="text-base font-semibold text-[#101828] my-3 flex items-center">
+                          <span>Interview Rounds</span>
+                          <span className="border rounded-xl py-0 px-2 ml-2 bg-[#EEF4FF] border-[#6172F3] text-[#6172F3] text-xs flex items-center justify-center">
                             {String(interviewData.rounds.length).padStart(2, '0')}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-[#6B7280] font-medium">Feedback Score:</span>
-                          <span className="text-lg font-semibold text-[#111827]">{avgScore}</span>
-                          <div className="flex leading-none">
-                            {Array.from({ length: 10 }, (_, i) => (
-                              <span key={i} className="text-xl" style={{ color: i < avgScore ? '#F4B400' : '#E5E7EB' }}>★</span>
-                            ))}
+                        <div className="flex items-center gap-x-3">
+                          <span className="text-xs text-[#475467] font-medium">Feedback Score:</span>
+                          <div className="flex items-center gap-1">
+                            <span className="text-[#101828] text-lg font-semibold mt-0.5">{avgScore}</span>
+                            <div className="flex leading-none mx-1">
+                              {Array.from({ length: 10 }, (_, i) => (
+                                <span key={i} className="text-xl" style={{ color: i < avgScore ? '#F4B400' : '#EAECF0' }}>★</span>
+                              ))}
+                            </div>
                           </div>
                         </div>
                       </div>
 
-                      <div className="p-5 space-y-5">
+                      <div className="space-y-5">
                         {interviewData.rounds.map((round, idx) => {
                           const isFbOpen = feedbackOpen[idx] ?? false;
                           const statusStyle = ROUND_STATUS_STYLE[round.status] ?? ROUND_STATUS_STYLE['Completed'];
                           const suggStyle = SUGGESTION_STYLE[round.panelSuggestion] ?? SUGGESTION_STYLE['Should Hire'];
+                          const roundExtInvites = candidateExtInvites.filter(inv => inv.roundId === round.id);
                           return (
-                            <div key={round.no} className="border border-[#D1D5DB] rounded-xl p-4 space-y-4">
-                              {/* Round header row */}
-                              <div className="flex items-start gap-4">
-                                <div className="w-10 h-10 rounded-xl border border-green-300 bg-green-50 flex items-center justify-center text-sm font-semibold text-green-700 shrink-0">
-                                  {round.no}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex flex-wrap items-center gap-2">
-                                    <span className="text-base font-semibold text-[#111827]">{round.name}</span>
-                                    <span className="inline-flex items-center border border-[#E5E7EB] bg-[#F9FAFB] text-[#374151] rounded-full text-xs font-medium py-0.5 px-2 capitalize">
-                                      {round.mode.toLowerCase()}
-                                    </span>
+                            <div key={round.no} className="rounded-lg border border-[#D0D5DD] p-4">
+                              {/* Round header — staging: tile · name+mode+datetime (60%) · status (20%) · suggestion (20%) · kebab */}
+                              <div className="flex justify-between items-start gap-4">
+                                <div className="flex items-start gap-4 w-full">
+                                  <div className={`border rounded-lg w-10 h-10 flex shrink-0 justify-center items-center font-medium text-sm text-[#101828] ${round.status === 'Completed' ? 'bg-[#ECFDF3] border-[#75E0A7]' : 'bg-[#F9FAFB] border-[#EAECF0]'}`}>
+                                    {round.no}
                                   </div>
-                                  <p className="text-xs font-medium text-[#6B7280] mt-1">{round.datetime}</p>
-                                </div>
-                                <div className="flex gap-6 shrink-0">
-                                  <div>
-                                    <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest mb-1.5">Interview Status</p>
-                                    <span className="inline-flex items-center rounded-full border font-medium text-xs py-0.5 px-2.5"
-                                      style={{ backgroundColor: statusStyle.bg, borderColor: statusStyle.border, color: statusStyle.text }}>
-                                      {round.status}
-                                    </span>
+                                  <div className="flex flex-col w-[60%]">
+                                    <div className="text-base font-semibold text-[#101828] flex flex-wrap items-center gap-2">
+                                      {round.name}
+                                      <div className="border flex w-max items-center border-[#EAECF0] bg-[#F9FAFB] text-[#344054] rounded-full font-medium capitalize min-w-max py-0.5 px-2 text-xs">
+                                        <span>{round.mode.toLowerCase()}</span>
+                                      </div>
+                                    </div>
+                                    <div className="font-medium text-[#344054] mt-1 text-xs">{round.datetime.replace(/\//g, '-')}</div>
                                   </div>
-                                  <div>
-                                    <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest mb-1.5">Panel Suggestion</p>
-                                    <span className="inline-flex items-center rounded-full border font-medium text-xs py-0.5 px-2.5"
-                                      style={{ backgroundColor: suggStyle.bg, borderColor: suggStyle.border, color: suggStyle.text }}>
-                                      {round.panelSuggestion}
-                                    </span>
+                                  <div className="flex flex-col w-[20%]">
+                                    <div>
+                                      <p className="text-xs text-[#667085] mb-2">Interview Status</p>
+                                      <div className="flex w-max items-center rounded-2xl border font-medium capitalize py-0.5 px-2.5 text-xs"
+                                        style={{ backgroundColor: statusStyle.bg, borderColor: statusStyle.border, color: statusStyle.text }}>
+                                        <span>{round.status}</span>
+                                      </div>
+                                    </div>
                                   </div>
-                                </div>
-                              </div>
-
-                              {/* Metadata grid */}
-                              <div className="border border-[#E5E7EB] rounded-lg bg-[#F9FAFB] p-3 flex flex-wrap">
-                                <div className="w-1/2 px-2 mb-4">
-                                  <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Interview Panel</p>
-                                  <div className="flex flex-wrap gap-1.5 mt-2">
-                                    {round.panel.map(name => (
-                                      <span key={name} className="inline-flex items-center border border-[#E5E7EB] rounded-lg bg-white py-1 px-2 text-xs font-medium text-[#374151] gap-1.5">
-                                        <span className="w-5 h-5 rounded-full bg-[#3538CD]/10 text-[#3538CD] text-[9px] font-black flex items-center justify-center shrink-0">
-                                          {name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                                        </span>
-                                        {name}
-                                      </span>
-                                    ))}
+                                  <div className="flex flex-col w-[20%]">
+                                    <div>
+                                      <p className="text-xs text-[#667085] mb-2">Panel Suggestion</p>
+                                      <div className="flex w-max items-center rounded-2xl border font-medium capitalize py-0.5 px-2.5 text-xs"
+                                        style={{ backgroundColor: suggStyle.bg, borderColor: suggStyle.border, color: suggStyle.text }}>
+                                        <span>{round.panelSuggestion}</span>
+                                      </div>
+                                    </div>
                                   </div>
                                 </div>
-                                <div className="w-1/4 px-2 mb-4">
-                                  <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Scheduled By</p>
-                                  <p className="text-xs font-semibold text-[#374151] mt-2">{round.scheduledBy}</p>
-                                  <p className="text-[10px] text-[#9CA3AF] mt-0.5">{round.scheduledAt}</p>
-                                </div>
-                                <div className="w-1/4 px-2 mb-4">
-                                  <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Interview Duration</p>
-                                  <p className="text-xs font-semibold text-[#374151] mt-2">{round.duration}</p>
-                                </div>
-                                <div className="w-full px-2">
-                                  <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Additional Information</p>
-                                  <p className="text-xs text-[#6B7280] mt-2">{round.additionalInfo}</p>
-                                </div>
-                              </div>
-
-                              {/* Collapsible feedback */}
-                              <div>
-                                <button
-                                  onClick={() => setFeedbackOpen(prev => {
-                                    const next = [...prev];
-                                    next[idx] = !isFbOpen;
-                                    return next;
-                                  })}
-                                  className={`w-full flex items-center justify-between border border-[#E5E7EB] bg-green-50 p-3 text-sm font-medium text-[#374151] transition-colors hover:bg-green-100 ${isFbOpen ? 'rounded-t-lg' : 'rounded-lg'}`}
-                                >
-                                  <div className="flex items-center gap-1 flex-wrap text-xs">
-                                    <span>Interview Panel Feedback</span>
-                                    <span className="text-[#9CA3AF]">(Provided by</span>
-                                    <span className="text-[#3538CD] font-semibold">{round.feedbackBy}</span>
-                                    <span className="text-[#9CA3AF]">)</span>
-                                  </div>
-                                  <ChevronDown className={`w-4 h-4 text-[#9CA3AF] transition-transform duration-200 shrink-0 ${isFbOpen ? 'rotate-180' : ''}`} />
-                                </button>
-                                {isFbOpen && (
-                                  <div className="border border-t-0 border-[#E5E7EB] rounded-b-lg p-4 space-y-2">
-                                    <div className="flex items-center gap-2">
-                                      <span className="text-xs text-[#6B7280] font-medium">Score:</span>
-                                      <span className="text-sm font-bold text-[#111827]">{round.feedbackScore}</span>
-                                      <div className="flex leading-none">
-                                        {Array.from({ length: 10 }, (_, i) => (
-                                          <span key={i} style={{ color: i < round.feedbackScore ? '#F4B400' : '#E5E7EB' }}>★</span>
+                                {/* Round actions kebab — staging popover: Edit / Cancel / Add Feedback */}
+                                <div className="relative">
+                                  <button
+                                    onClick={() => setRoundMenuOpen(roundMenuOpen === idx ? null : idx)}
+                                    className={`cursor-pointer flex items-center justify-center w-9 h-9 duration-300 outline-none rounded-lg border ${roundMenuOpen === idx ? 'bg-[#EEF4FF] border-[#C7D2FE]' : 'border-[#D0D5DD] hover:bg-[#F9FAFB]'}`}>
+                                    {roundMenuOpen === idx
+                                      ? <X className="w-4 h-4 text-[#3538CD]" />
+                                      : <MoreVertical className="w-4 h-4 text-[#344054]" />}
+                                  </button>
+                                  {roundMenuOpen === idx && (
+                                    <div className="z-[51] drop-shadow-xl absolute bg-white shadow-md border border-[#EAECF0] top-full right-0 rounded-md mt-3 px-3 py-0 min-w-[300px]">
+                                      <div className="my-1">
+                                        {([
+                                          { label: 'Edit', Icon: Pencil },
+                                          { label: 'Cancel', Icon: X },
+                                          { label: 'Add Feedback', Icon: MessageSquarePlus },
+                                        ] as const).map(({ label, Icon }) => (
+                                          <div key={label} className="mb-1">
+                                            <div
+                                              onClick={() => { setRoundMenuOpen(null); setSchedToast(`"${label}" is not wired in this prototype`); setTimeout(() => setSchedToast(''), 2500); }}
+                                              className="py-2 -mx-2 group hover:bg-gray-50 cursor-pointer rounded-md px-2">
+                                              <div className="flex items-center gap-2">
+                                                <Icon className="w-4 h-4 text-[#667085] group-hover:text-[#344054]" />
+                                                <p className="text-xs font-normal text-[#101828]">{label}</p>
+                                              </div>
+                                            </div>
+                                          </div>
                                         ))}
                                       </div>
                                     </div>
-                                    <p className="text-xs text-[#9CA3AF] italic">No written feedback provided.</p>
-                                  </div>
-                                )}
+                                  )}
+                                </div>
                               </div>
 
-                              {/* External Panel for this round */}
-                              {(() => {
-                                const roundExtInvites = candidateExtInvites.filter(inv => inv.roundId === round.id);
-                                if (roundExtInvites.length === 0) return null;
-                                const EXT_STATUS_STYLE: Record<string, { bg: string; text: string; border: string }> = {
-                                  'Invited':                { bg: '#EEF4FF', text: '#3538CD', border: '#C7D2FE' },
-                                  'Availability Confirmed': { bg: '#F0FDF4', text: '#15803D', border: '#BBF7D0' },
-                                  'Availability Declined':  { bg: '#FFF7ED', text: '#9A3412', border: '#FED7AA' },
-                                  'Feedback Submitted':     { bg: '#F5F3FF', text: '#6D28D9', border: '#DDD6FE' },
-                                  'Cancelled':              { bg: '#F9FAFB', text: '#6B7280', border: '#D1D5DB' },
-                                };
-                                return (
-                                  <div className="border border-[#E5E7EB] rounded-lg overflow-hidden">
-                                    <div className="px-3 py-2 bg-[#FAFAFA] border-b border-[#E5E7EB] flex items-center gap-2">
-                                      <UserPlus className="w-3.5 h-3.5 text-[#6B7280]" />
-                                      <span className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">External Panel</span>
-                                      <span className="text-[9px] font-bold bg-[#EEF4FF] text-[#3538CD] border border-[#C7D2FE] px-1.5 py-0.5 rounded-md">{roundExtInvites.length}</span>
-                                    </div>
-                                    <div className="divide-y divide-[#F3F4F6]">
-                                      {roundExtInvites.map(inv => {
-                                        const sty = EXT_STATUS_STYLE[inv.status] ?? EXT_STATUS_STYLE['Invited'];
-                                        return (
-                                          <div key={inv.id} className="px-4 py-3 flex items-center gap-3">
-                                            <div className="w-7 h-7 rounded-full bg-[#3538CD]/10 text-[#3538CD] text-[9px] font-black flex items-center justify-center shrink-0">
-                                              {(inv.name || inv.email).split(/[\s@]/).map(n => n[0]).join('').slice(0,2).toUpperCase()}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                              <p className="text-xs font-semibold text-[#111827] truncate">{inv.name || inv.email}</p>
-                                              <p className="text-[10px] text-[#9CA3AF] truncate">{inv.email}</p>
-                                            </div>
-                                            <span className="px-2 py-0.5 text-[9px] font-bold rounded-full border whitespace-nowrap"
-                                              style={{ backgroundColor: sty.bg, color: sty.text, borderColor: sty.border }}>
-                                              {inv.status}
-                                            </span>
-                                            {inv.availability && (
-                                              <span className="text-[10px] text-[#6B7280] max-w-[120px] truncate" title={inv.availability.note}>
-                                                {inv.availability.available ? '✓ Available' : '✕ Unavailable'}
+                              {/* Metadata grid — staging: gray panel, normal-case labels, 2/4 · 1/4 · 1/4 · full cells */}
+                              {/* NOTE: staging has overflow-x-auto here; dropped so the external-chip hover card isn't clipped */}
+                              <div className="border border-[#EAECF0] rounded-lg bg-[#F9FAFB] py-3 px-2 mt-3 mb-3 flex flex-wrap">
+                                <div className="w-full sm:w-1/2 lg:w-2/4 px-2 mb-4">
+                                  <p className="text-xs text-[#667085]">Interview Panel</p>
+                                  <div className="flex flex-wrap gap-2 mt-1">
+                                    {round.panel.map(name => (
+                                      <span key={name} className="inline-flex items-center border border-[#D0D5DD] rounded-lg bg-white py-1 px-2 text-xs font-medium text-[#475467]">
+                                        <span className="w-5 h-5 rounded-full bg-[#3538CD]/10 text-[#3538CD] text-[9px] font-black flex items-center justify-center shrink-0">
+                                          {name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                                        </span>
+                                        <span className="text-xs capitalize ml-1">{name}</span>
+                                      </span>
+                                    ))}
+                                    {/* External panelists — same chip idiom; email/status/actions in the hover card */}
+                                    {roundExtInvites.map(inv => {
+                                      const sty = EXT_STATUS_STYLE[inv.status] ?? EXT_STATUS_STYLE['Invited'];
+                                      const displayName = inv.name || `${inv.firstName ?? ''} ${inv.lastName ?? ''}`.trim() || inv.email;
+                                      const cancelled = inv.status === 'Cancelled';
+                                      return (
+                                        <span key={inv.id} className={`relative group inline-flex items-center border rounded-lg py-1 px-2 text-xs font-medium gap-1.5 cursor-default ${cancelled ? 'border-dashed border-[#D1D5DB] bg-[#F9FAFB] text-[#9CA3AF]' : 'border-[#E5E7EB] bg-white text-[#374151]'}`}>
+                                          <span className="w-5 h-5 rounded-full text-[9px] font-black flex items-center justify-center shrink-0"
+                                            style={{ backgroundColor: sty.bg, color: sty.text }}>
+                                            {displayName.split(/[\s@]/).filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                                          </span>
+                                          <span className={cancelled ? 'line-through' : ''}>{displayName}</span>
+                                          <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: sty.text }} />
+                                          {/* Hover card */}
+                                          <span className="absolute top-full left-0 z-20 pt-1.5 hidden group-hover:block">
+                                            <span className="block w-60 bg-white border border-[#E5E7EB] rounded-xl shadow-xl p-3 text-left">
+                                              <span className="flex items-center gap-1.5">
+                                                <UserPlus className="w-3 h-3 text-[#6B7280]" />
+                                                <span className="text-[9px] font-bold text-[#6B7280] uppercase tracking-widest">External Panelist</span>
                                               </span>
-                                            )}
-                                            {inv.feedback && (
-                                              <span className="text-[10px] text-[#6D28D9] font-semibold">
-                                                Suggestion: {inv.feedback.suggestion}
+                                              <span className="block text-xs font-semibold text-[#111827] mt-1.5">{displayName}</span>
+                                              <span className="block text-[11px] text-[#6B7280] truncate">{inv.email}</span>
+                                              <span className="inline-flex mt-2 px-2 py-0.5 text-[9px] font-bold rounded-full border"
+                                                style={{ backgroundColor: sty.bg, color: sty.text, borderColor: sty.border }}>
+                                                {inv.status}
                                               </span>
-                                            )}
-                                            <div className="flex items-center gap-1 shrink-0">
-                                              {inv.status !== 'Cancelled' && (
-                                                <button onClick={() => cancelExternalInvite(inv.id)} title="Cancel invitation"
-                                                  className="p-1.5 rounded-lg border border-[#E5E7EB] hover:bg-red-50 hover:border-red-200 transition-colors">
-                                                  <Ban className="w-3 h-3 text-[#6B7280] hover:text-red-500" />
-                                                </button>
+                                              {inv.availability && (
+                                                <span className={`block text-[11px] mt-1.5 font-medium ${inv.availability.available ? 'text-green-700' : 'text-orange-700'}`}>
+                                                  {inv.availability.available ? '✓ Available' : '✕ Not available'}
+                                                  {inv.availability.note && <span className="block font-normal italic text-[#9CA3AF]">"{inv.availability.note}"</span>}
+                                                </span>
                                               )}
-                                              <button onClick={() => { resendExternalInvite(inv.id); setSchedToast(`Invite resent to ${inv.email}`); setTimeout(() => setSchedToast(''), 3000); }} title="Resend invite"
-                                                className="p-1.5 rounded-lg border border-[#E5E7EB] hover:bg-blue-50 hover:border-blue-200 transition-colors">
-                                                <RefreshCw className="w-3 h-3 text-[#6B7280]" />
-                                              </button>
+                                              <span className="flex items-center gap-1.5 mt-2.5 pt-2 border-t border-[#F3F4F6]">
+                                                {!cancelled && (
+                                                  <button onClick={() => cancelExternalInvite(inv.id)}
+                                                    className="flex-1 inline-flex items-center justify-center gap-1 py-1 rounded-lg border border-[#E5E7EB] text-[10px] font-semibold text-[#6B7280] hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-colors">
+                                                    <Ban className="w-3 h-3" /> Cancel
+                                                  </button>
+                                                )}
+                                                <button onClick={() => { resendExternalInvite(inv.id); setSchedToast(`Invite resent to ${inv.email}`); setTimeout(() => setSchedToast(''), 3000); }}
+                                                  className="flex-1 inline-flex items-center justify-center gap-1 py-1 rounded-lg border border-[#E5E7EB] text-[10px] font-semibold text-[#6B7280] hover:bg-blue-50 hover:border-blue-200 hover:text-[#3538CD] transition-colors">
+                                                  <RefreshCw className="w-3 h-3" /> Resend
+                                                </button>
+                                              </span>
+                                            </span>
+                                          </span>
+                                        </span>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                                <div className="w-full sm:w-1/2 lg:w-1/4 px-2 mb-4">
+                                  <p className="text-xs text-[#667085]">Scheduled by</p>
+                                  <p className="text-xs font-normal text-[#101828] mt-1 first-letter:uppercase">{round.scheduledBy}</p>
+                                  <p className="text-xs text-[#101828]">{round.scheduledAt.replace(/\//g, '-')}</p>
+                                </div>
+                                <div className="w-full sm:w-1/2 lg:w-1/4 px-2 mb-4">
+                                  <p className="text-xs text-[#667085]">Interview Duration</p>
+                                  <p className="text-xs font-normal text-[#101828] mt-1">{round.duration}</p>
+                                </div>
+                                <div className="w-full px-2">
+                                  <p className="text-xs text-[#667085]">Additional Information</p>
+                                  <p className="text-xs font-normal text-[#101828] mt-1 break-words">{round.additionalInfo}</p>
+                                </div>
+                              </div>
+
+                              {/* Panel feedback accordion — staging: disabled gray when none, green + criteria rows when provided */}
+                              {round.feedbackScore === 0 ? (
+                                <div className="mt-3">
+                                  <button className="w-full justify-between border-[#EAECF0] bg-[#F9FAFB] flex items-center p-3 text-sm text-[#344054] font-medium border rounded-lg cursor-not-allowed">
+                                    <span className="text-xs">Interview Panel Feedback</span>
+                                    <ChevronDown className="w-4 h-4 text-[#667085]" />
+                                  </button>
+                                </div>
+                              ) : (
+                                <div className="mt-3">
+                                  <button
+                                    onClick={() => setFeedbackOpen(prev => {
+                                      const next = [...prev];
+                                      next[idx] = !isFbOpen;
+                                      return next;
+                                    })}
+                                    className={`w-full justify-between border-[#EAECF0] bg-[#ECFDF3] flex items-center p-3 text-sm text-[#344054] font-medium border ${isFbOpen ? 'rounded-t-lg' : 'rounded-lg'}`}
+                                  >
+                                    <div className="flex items-center gap-1 flex-wrap text-xs">
+                                      <span>Interview Panel Feedback</span>
+                                      <span>(Provided by</span>
+                                      <span className="text-[#3538CD]">{round.feedbackBy}</span>
+                                      {round.feedbackAt && <span>on {round.feedbackAt}</span>}
+                                      <span>)</span>
+                                      <Info className="w-3.5 h-3.5 text-[#344054] cursor-pointer" />
+                                    </div>
+                                    <ChevronDown className={`w-4 h-4 text-[#667085] transition-transform duration-200 shrink-0 ${isFbOpen ? 'rotate-180' : ''}`} />
+                                  </button>
+                                  {isFbOpen && (
+                                    <div className="p-4 border border-[#EAECF0] border-t-0 rounded-br-lg rounded-bl-lg">
+                                      {(appliedJob?.evaluationCriteria ?? []).map((crit, ci) => (
+                                        <div key={crit}>
+                                          {ci > 0 && <hr className="border-[#EAECF0] mb-4" />}
+                                          <div className="flex flex-wrap -mx-2">
+                                            <div className="w-full sm:w-1/4 px-2 mb-4">
+                                              <p className="text-xs text-[#667085]">{crit}</p>
+                                              <div className="mt-1"><StarRow value={round.feedbackScore} /></div>
+                                            </div>
+                                            <div className="w-full sm:w-3/4 px-2 mb-4 text-[#101828]">
+                                              <p className="text-xs text-[#667085]">Remarks</p>
+                                              <p className="text-xs font-normal mt-1">-</p>
                                             </div>
                                           </div>
-                                        );
-                                      })}
+                                        </div>
+                                      ))}
+                                      <div className="border border-[#EAECF0] rounded-lg bg-[#F9FAFB] p-5 flex flex-wrap">
+                                        <div className="w-full sm:w-1/4">
+                                          <p className="text-xs text-[#667085]">Average Rating</p>
+                                          <div className="mt-1"><StarRow value={round.feedbackScore} /></div>
+                                        </div>
+                                        <div className="w-full sm:w-3/4 text-[#101828]">
+                                          <p className="text-xs text-[#667085]">Overall Remarks</p>
+                                          <p className="text-xs font-normal mt-1 break-words">{round.overallRemarks ?? '-'}</p>
+                                        </div>
+                                      </div>
                                     </div>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* External panel feedback — same accordion idiom, one row per submission */}
+                              {roundExtInvites.filter(inv => inv.feedback).map(inv => {
+                                const isOpen = extFbOpen[inv.id] ?? false;
+                                const fb = inv.feedback!;
+                                const ratings = Object.entries(fb.criteriaRatings);
+                                const avg = ratings.length ? Math.round(ratings.reduce((s, [, r]) => s + r.score, 0) / ratings.length) : 0;
+                                const sugg = SUGGESTION_STYLE[fb.suggestion] ?? SUGGESTION_STYLE['Not Sure'];
+                                const displayName = inv.name || `${inv.firstName ?? ''} ${inv.lastName ?? ''}`.trim() || inv.email;
+                                return (
+                                  <div key={inv.id} className="mt-3">
+                                    <button
+                                      onClick={() => setExtFbOpen(prev => ({ ...prev, [inv.id]: !isOpen }))}
+                                      className={`w-full justify-between border-[#EAECF0] bg-[#ECFDF3] flex items-center p-3 text-sm text-[#344054] font-medium border ${isOpen ? 'rounded-t-lg' : 'rounded-lg'}`}
+                                    >
+                                      <div className="flex items-center gap-1 flex-wrap text-xs">
+                                        <span>Interview Panel Feedback</span>
+                                        <span>(Provided by</span>
+                                        <span className="text-[#3538CD]">{displayName}</span>
+                                        <span>)</span>
+                                        <span className="ml-1 px-1.5 py-0.5 text-[9px] font-bold rounded-md bg-[#EEF4FF] text-[#3538CD] border border-[#C7D2FE]">External</span>
+                                      </div>
+                                      <ChevronDown className={`w-4 h-4 text-[#667085] transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
+                                    </button>
+                                    {isOpen && (
+                                      <div className="p-4 border border-[#EAECF0] border-t-0 rounded-br-lg rounded-bl-lg">
+                                        {ratings.map(([crit, r], ri) => (
+                                          <div key={crit}>
+                                            {ri > 0 && <hr className="border-[#EAECF0] mb-4" />}
+                                            <div className="flex flex-wrap -mx-2">
+                                              <div className="w-full sm:w-1/4 px-2 mb-4">
+                                                <p className="text-xs text-[#667085]">{crit}</p>
+                                                <div className="mt-1"><StarRow value={r.score} /></div>
+                                              </div>
+                                              <div className="w-full sm:w-3/4 px-2 mb-4 text-[#101828]">
+                                                <p className="text-xs text-[#667085]">Remarks</p>
+                                                <p className="text-xs font-normal mt-1 first-letter:uppercase">{r.remark || '-'}</p>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        ))}
+                                        <div className="border border-[#EAECF0] rounded-lg bg-[#F9FAFB] p-5 flex flex-wrap">
+                                          <div className="w-full sm:w-1/4">
+                                            <p className="text-xs text-[#667085]">Average Rating</p>
+                                            <div className="mt-1"><StarRow value={avg} /></div>
+                                            <div className="flex w-max items-center rounded-2xl border font-medium capitalize py-0.5 px-2.5 text-xs mt-2"
+                                              style={{ backgroundColor: sugg.bg, borderColor: sugg.border, color: sugg.text }}>
+                                              <span>{fb.suggestion}</span>
+                                            </div>
+                                          </div>
+                                          <div className="w-full sm:w-3/4 text-[#101828]">
+                                            <p className="text-xs text-[#667085]">Overall Remarks</p>
+                                            <p className="text-xs font-normal mt-1 break-words first-letter:uppercase">{fb.overallRemarks}</p>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )}
                                   </div>
                                 );
-                              })()}
+                              })}
                             </div>
                           );
                         })}

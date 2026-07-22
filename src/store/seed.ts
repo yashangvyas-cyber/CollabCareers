@@ -376,6 +376,27 @@ Design is a first-class citizen at MindInventory. You will work on products that
       evaluationCriteria: ['Android architecture components knowledge'],
       createdAt: new Date(Date.now() - 86400000 * 9).toISOString(),
       description: 'Build robust native Android apps.'
+    },
+    // ── Copied from staging interview-rounds demo (Jason Doe / Arjun Patel) ──
+    {
+      id: 'd-ba',
+      category: 'Business',
+      title: 'Business Analyst',
+      businessUnit: 'CollabCRM',
+      recruiter: 'Gurpreetsingh Dhillon',
+      location: 'Ahmedabad',
+      experience: '3+ Years Experience',
+      employmentType: 'Full-time',
+      jobType: 'On-site',
+      skills: ['Requirement Gathering', 'BRD/FRD', 'Process Mapping', 'Stakeholder Management'],
+      salaryRange: { min: '900000', max: '1500000', currency: '₹', type: 'Annual' },
+      status: 'Open',
+      publishOnCollabCareers: false,
+      customFields: [],
+      // Staging's BA feedback criteria — drives the feedback accordion rows
+      evaluationCriteria: ['Requirement Clarity', 'Documentation Quality', 'Domain Knowledge', 'Process Mapping'],
+      createdAt: new Date(Date.now() - 86400000 * 30).toISOString(),
+      description: 'Analyze business requirements and bridge stakeholders with the engineering team.'
     }
   ],
   candidates: [
@@ -1011,8 +1032,13 @@ Design is a first-class citizen at MindInventory. You will work on products that
     { id: 'ps6', firstName: 'Priyanka', lastName: 'Rao',    email: 'priyanka.rao@example.com',   phone: '+91 99100 66666', isAlumni: false, candidateStatus: 'Active' as const, currentDesignation: 'QA Engineer',          currentOrg: 'Accenture',        noticePeriod: '30 days', source: 'Naukri',    addedByRecruiter: true, addedAt: new Date(Date.now() - 86400000 * 10).toISOString() },
     { id: 'ps7', firstName: 'Deepak',   lastName: 'Singh',  email: 'deepak.singh@example.com',   phone: '+91 99100 77777', isAlumni: false, candidateStatus: 'Active' as const, currentDesignation: 'Data Analyst',         currentOrg: 'Capgemini',        noticePeriod: '45 days', source: 'LinkedIn',  addedByRecruiter: true, addedAt: new Date(Date.now() - 86400000 * 8).toISOString() },
     { id: 'ps8', firstName: 'Rekha',    lastName: 'Sharma', email: 'rekha.sharma@example.com',   phone: '+91 98765 00001', isAlumni: false, candidateStatus: 'Active' as const, currentDesignation: 'HR Executive',         currentOrg: 'Mindtree',         noticePeriod: '30 days', source: 'Naukri',    addedByRecruiter: true, addedAt: new Date(Date.now() - 86400000 * 50).toISOString(), skills: ['Recruitment', 'HRMS', 'Excel'], totalExperienceYears: 2 },
+    // ── Copied from staging interview-rounds demo candidates ──
+    { id: 'jason', firstName: 'Jason', lastName: 'Doe', email: 'jason1551@yopmail.com', phone: '+91 1234567890', isAlumni: false, candidateStatus: 'Active' as const, currentDesignation: 'Business Analyst', currentOrg: '-', noticePeriod: '30 days', source: 'Naukri', businessUnit: 'CollabCRM', recordOwner: 'Gurpreetsingh Dhillon', createdBy: 'Gurpreetsingh Dhillon', addedByRecruiter: true, addedAt: '2026-07-21T16:51:00.000Z' },
+    { id: 'arjunp', firstName: 'Arjun', lastName: 'Patel', email: 'arjun@yopmail.com', phone: '+91 1234567890', isAlumni: false, candidateStatus: 'Active' as const, currentDesignation: 'Business Analyst', currentOrg: '-', noticePeriod: '30 days', source: 'LinkedIn', businessUnit: 'CollabCRM', recordOwner: 'Gurpreetsingh Dhillon', createdBy: 'Gurpreetsingh Dhillon', modifiedBy: 'Gurpreetsingh Dhillon', addedByRecruiter: true, addedAt: '2026-06-30T18:26:00.000Z' },
   ],
   applications: [
+    { id: 'm-jd', candidateId: 'jason', jobId: 'd-ba', status: 'Interview in Progress', appliedAt: '2026-07-18T00:00:00.000Z', answers: {}, resumeUrl: 'Jason_Doe_Resume.pdf' },
+    { id: 'm-ap', candidateId: 'arjunp', jobId: 'd-ba', status: 'Offered', appliedAt: '2026-06-25T00:00:00.000Z', answers: {}, resumeUrl: 'Arjun_Patel_Resume.pdf' },
     {
       id: 'a1',
       candidateId: 'c1',
