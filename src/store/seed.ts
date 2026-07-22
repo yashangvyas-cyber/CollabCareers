@@ -1631,6 +1631,14 @@ Design is a first-class citizen at MindInventory. You will work on products that
       createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
     },
     {
+      id: 'ext-inv-declined', email: 'emma.clarke@external.com', name: 'Emma Clarke',
+      accessToken: 'ext-declined', status: 'Availability Declined' as const,
+      availability: { available: false, note: 'I am travelling that week — happy to help any day after the 28th.' },
+      candidateId: '3', roundId: 'r3-online', roundNo: 1,
+      context: { ...EXT_ONLINE_CTX },
+      createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+    },
+    {
       id: 'ext-inv-3', email: 'carol.davis@external.com', name: 'Carol Davis',
       accessToken: 'ext-feedback', status: 'Feedback Submitted' as const,
       availability: { available: true },

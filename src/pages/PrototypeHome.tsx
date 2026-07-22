@@ -39,6 +39,7 @@ const flows = [
     screens: [
       { label: 'Invite — Availability Pending', path: '/panel-email/ext-invited', badge: 'Invited' },
       { label: 'Availability Confirmed', path: '/panel-email/ext-confirmed', badge: 'Confirmed' },
+      { label: 'Availability Declined', path: '/panel-email/ext-declined', badge: 'Declined' },
       { label: 'Feedback Submitted', path: '/panel-email/ext-feedback', badge: 'Read-only' },
       { label: 'Cancelled Invitation', path: '/panel-email/ext-cancelled', badge: 'Revoked' },
       { label: 'Offline Round (BU Venue)', path: '/panel-email/ext-offline', badge: 'Offline' },

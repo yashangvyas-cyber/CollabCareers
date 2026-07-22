@@ -398,7 +398,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setState(prev => ({
       ...prev,
       externalInvites: prev.externalInvites.map(inv =>
-        inv.id === id ? { ...inv, status: 'Invited' as ExternalInviteStatus } : inv
+        inv.id === id
+          // Re-sending only re-activates a cancelled invite; an active panelist's
+          // progress (Availability Confirmed / Feedback Submitted) is never reset.
+          ? { ...inv, status: (inv.status === 'Cancelled' ? 'Invited' : inv.status) as ExternalInviteStatus }
+          : inv
       ),
     }));
   };

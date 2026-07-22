@@ -238,6 +238,7 @@ export default function CandidateDetailPage() {
   const [feedbackOpen, setFeedbackOpen] = useState<boolean[]>([]);
   const [extFbOpen, setExtFbOpen] = useState<Record<string, boolean>>({});
   const [roundMenuOpen, setRoundMenuOpen] = useState<number | null>(null);
+  const [confirmCancelId, setConfirmCancelId] = useState<string | null>(null);
   const [kebabOpen, setKebabOpen] = useState(false);
   const [archiveModalOpen, setArchiveModalOpen] = useState(false);
   const [archiveRemark, setArchiveRemark] = useState('');
@@ -1061,7 +1062,7 @@ export default function CandidateDetailPage() {
                                       const displayName = inv.name || `${inv.firstName ?? ''} ${inv.lastName ?? ''}`.trim() || inv.email;
                                       const cancelled = inv.status === 'Cancelled';
                                       return (
-                                        <span key={inv.id} className={`relative group inline-flex items-center border rounded-lg py-1 px-2 text-xs font-medium gap-1.5 cursor-default ${cancelled ? 'border-dashed border-[#D1D5DB] bg-[#F9FAFB] text-[#9CA3AF]' : 'border-[#E5E7EB] bg-white text-[#374151]'}`}>
+                                        <span key={inv.id} onMouseLeave={() => { if (confirmCancelId === inv.id) setConfirmCancelId(null); }} className={`relative group inline-flex items-center border rounded-lg py-1 px-2 text-xs font-medium gap-1.5 cursor-default ${cancelled ? 'border-dashed border-[#D1D5DB] bg-[#F9FAFB] text-[#9CA3AF]' : 'border-[#E5E7EB] bg-white text-[#374151]'}`}>
                                           <span className="w-5 h-5 rounded-full text-[9px] font-black flex items-center justify-center shrink-0"
                                             style={{ backgroundColor: sty.bg, color: sty.text }}>
                                             {displayName.split(/[\s@]/).filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase()}
@@ -1089,9 +1090,19 @@ export default function CandidateDetailPage() {
                                               )}
                                               <span className="flex items-center gap-1.5 mt-2.5 pt-2 border-t border-[#F3F4F6]">
                                                 {!cancelled && (
-                                                  <button onClick={() => cancelExternalInvite(inv.id)}
-                                                    className="flex-1 inline-flex items-center justify-center gap-1 py-1 rounded-lg border border-[#E5E7EB] text-[10px] font-semibold text-[#6B7280] hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-colors">
-                                                    <Ban className="w-3 h-3" /> Cancel
+                                                  <button
+                                                    onClick={() => {
+                                                      if (confirmCancelId === inv.id) {
+                                                        cancelExternalInvite(inv.id);
+                                                        setConfirmCancelId(null);
+                                                        setSchedToast(`Invitation cancelled for ${inv.email}`);
+                                                        setTimeout(() => setSchedToast(''), 3000);
+                                                      } else {
+                                                        setConfirmCancelId(inv.id); // two-step confirm — moving away resets
+                                                      }
+                                                    }}
+                                                    className={`flex-1 inline-flex items-center justify-center gap-1 py-1 rounded-lg border text-[10px] font-semibold transition-colors ${confirmCancelId === inv.id ? 'bg-red-50 border-red-200 text-red-600' : 'border-[#E5E7EB] text-[#6B7280] hover:bg-red-50 hover:border-red-200 hover:text-red-600'}`}>
+                                                    <Ban className="w-3 h-3" /> {confirmCancelId === inv.id ? 'Confirm cancel?' : 'Cancel'}
                                                   </button>
                                                 )}
                                                 <button onClick={() => { resendExternalInvite(inv.id); setSchedToast(`Invite resent to ${inv.email}`); setTimeout(() => setSchedToast(''), 3000); }}
