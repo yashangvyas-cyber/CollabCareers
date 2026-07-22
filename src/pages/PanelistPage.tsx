@@ -27,6 +27,12 @@ const RLabel = ({ children }: { children: React.ReactNode }) => (
 
 export default function PanelistPage() {
   const { token } = useParams();
+  // Key by token: switching between invite links fully re-initialises the page state,
+  // so one token's session state can never leak into another's.
+  return <PanelistView key={token} token={token} />;
+}
+
+function PanelistView({ token }: { token?: string }) {
   const { externalInvites, submitExternalAvailability, submitExternalFeedback } = useApp();
 
   const invite = externalInvites.find(inv => inv.accessToken === token);
@@ -38,9 +44,12 @@ export default function PanelistPage() {
       : invite?.status === 'Availability Declined' ? false
       : null
   );
-  const [availAvailable, setAvailAvailable] = useState(true);
+  // Live toggle starts on the committed response so "change pending" is only
+  // ever true when the panelist actually flips to the other option.
+  const [availAvailable, setAvailAvailable] = useState(invite?.status !== 'Availability Declined');
   const [availNote, setAvailNote] = useState('');
-  const [editingAvail, setEditingAvail] = useState(false);
+  const [pendingChoice, setPendingChoice] = useState<boolean | null>(null);
+  const [changeMenuOpen, setChangeMenuOpen] = useState(false);
   const [showAvailModal, setShowAvailModal] = useState(false);
   const [toast, setToast] = useState('');
 
@@ -100,32 +109,21 @@ export default function PanelistPage() {
 
   // Persist the chosen availability, notify the recruiter (simulated), and — when going
   // unavailable — discard any drafted feedback (it's about to be hidden).
-  const commitAvailability = () => {
+  const commitAvailability = (available: boolean) => {
     if (!token) return;
-    submitExternalAvailability(token, { available: availAvailable, note: availNote.trim() || undefined });
-    setCommitted(availAvailable);
-    setEditingAvail(false);
+    submitExternalAvailability(token, { available, note: availNote.trim() || undefined });
+    setAvailAvailable(available);
+    setCommitted(available);
     setShowAvailModal(false);
-    if (!availAvailable) {
+    setPendingChoice(null);
+    if (!available) {
       setFbOpen(false);
       setFbCriteriaRatings({});
       setFbOverallRemarks('');
       setFbSuggestion('Next Round');
     }
-    showToast(`Response submitted — ${availAvailable ? 'Accepted' : 'Declined'}. The recruiter has been notified via email.`);
+    showToast(`Response submitted — ${available ? 'Accepted' : 'Declined'}. The recruiter has been notified via email.`);
   };
-
-  const handleAvailPrimary = () => {
-    // First-time decision: nothing has been communicated yet → save directly (no modal).
-    if (committed === null) { commitAvailability(); return; }
-    // No actual change → just close edit mode, no email.
-    if (availAvailable === committed) { setEditingAvail(false); return; }
-    // Reversing a communicated decision → confirm first (may warn about discarding feedback).
-    setShowAvailModal(true);
-  };
-
-  const startEditing = () => { setAvailAvailable(committed ?? true); setEditingAvail(true); };
-
   const handleFbSubmit = () => {
     if (!token) return;
     submitExternalFeedback(token, {
@@ -159,6 +157,10 @@ export default function PanelistPage() {
     ? `Online${ctx.meetingType ? ` (${ctx.meetingType})` : ''}`
     : 'Offline';
 
+  // External panelists invited to this round (cancelled invites excluded) —
+  // this is the panel as the external viewer should see it.
+  const roundPanel = externalInvites.filter(i => i.roundId === invite.roundId && i.status !== 'Cancelled');
+
   const SideRow = ({ label, value, isLink, href }: { label: string; value?: string; isLink?: boolean; href?: string }) => (
     <div className="px-4 py-3 border-b border-[#F1F1F4]">
       <p className="text-[11px] text-[#9CA3AF]">{label}</p>
@@ -174,16 +176,19 @@ export default function PanelistPage() {
 
   return (
     <div className="min-h-screen bg-[#F4F5FA] flex flex-col">
-      {/* Header — business-unit branding, powered by CollabCRM */}
+      {/* Header — business-unit branding only ("Powered by CollabCRM" lives in the footer) */}
       <header className="bg-white border-b border-[#E5E7EB] sticky top-0 z-30">
-        <div className="px-6 py-3 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black shrink-0" style={{ backgroundColor: brandColor, color: brandText }}>
-            {buInfo?.initials ?? 'CC'}
-          </div>
-          <div>
-            <p className="text-base font-bold text-[#111827] leading-tight">{buName}</p>
-            <p className="text-[10px] text-[#9CA3AF] font-medium">Powered by CollabCRM</p>
-          </div>
+        <div className="px-6 py-3 flex items-center">
+          {buInfo?.logoUrl ? (
+            <img src={buInfo.logoUrl} alt={buName} className="h-10" />
+          ) : (
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black shrink-0" style={{ backgroundColor: brandColor, color: brandText }}>
+                {buInfo?.initials ?? 'CC'}
+              </div>
+              <p className="text-base font-bold text-[#111827] leading-tight">{buName}</p>
+            </div>
+          )}
         </div>
       </header>
 
@@ -191,88 +196,110 @@ export default function PanelistPage() {
         {/* ── Availability — sticky bar above the details, unlocks feedback ── */}
         {!isReadOnly && (
           <div className="sticky top-[64px] z-20 mb-4 bg-white rounded-lg border border-[#E5E7EB] shadow-sm">
-            {(committed === null || editingAvail) ? (
-              /* Interview Panel Invitation — Accept / Decline response form */
-              <div className="p-4">
-                <div className="flex items-start gap-2.5 mb-3">
-                  <CalendarClock className="w-5 h-5 text-[#3538CD] shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-bold text-[#111827]">Interview Panel Invitation</p>
-                    <p className="text-xs text-[#6B7280]">Please let the recruitment team know if you can join this interview.</p>
+            {committed === null ? (
+              /* First response — pick Accept/Decline (nothing is sent yet), then an
+                 inline note + Confirm row appears. Mis-click safe. */
+              <>
+                <div className="px-4 py-2.5 flex flex-wrap items-center gap-x-4 gap-y-2">
+                  <div className="flex items-center gap-2.5 flex-1 min-w-[220px]">
+                    <CalendarClock className="w-5 h-5 text-[#3538CD] shrink-0" />
+                    <div>
+                      <p className="text-sm font-bold text-[#111827] leading-tight">Interview Panel Invitation</p>
+                      <p className="text-[11px] text-[#6B7280]">
+                        {pendingChoice === null
+                          ? 'Can you join this interview? The recruiter is notified by email.'
+                          : `You're ${pendingChoice ? 'accepting' : 'declining'} this invitation — confirm to notify the recruiter.`}
+                      </p>
+                    </div>
                   </div>
-                </div>
-
-                {/* Accept / Decline segmented toggle */}
-                <div className="inline-flex rounded-lg border border-[#E5E7EB] overflow-hidden mb-3">
-                  {[
-                    { val: true, label: 'Accept' },
-                    { val: false, label: 'Decline' },
-                  ].map(opt => (
-                    <button key={String(opt.val)} onClick={() => setAvailAvailable(opt.val)}
-                      className={`px-10 py-2 text-sm font-semibold transition-colors ${
-                        availAvailable === opt.val
-                          ? opt.val ? 'bg-green-600 text-white' : 'bg-red-500 text-white'
-                          : 'bg-white text-[#374151] hover:bg-[#F9FAFB]'
+                  <div className="flex items-center gap-2 ml-auto">
+                    <button onClick={() => setPendingChoice(true)}
+                      className={`px-6 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
+                        pendingChoice === true
+                          ? 'bg-green-600 text-white'
+                          : 'text-green-700 border border-green-200 hover:bg-green-50'
                       }`}>
-                      {opt.label}
+                      Accept
                     </button>
-                  ))}
-                </div>
-
-                {/* Note to recruiter */}
-                <div className="mb-3">
-                  <label className="block text-[12px] font-semibold text-[#6B7280] mb-1.5">
-                    Note to the recruiter <span className="font-normal text-[#9CA3AF]">(Optional)</span>
-                  </label>
-                  <textarea value={availNote} onChange={e => setAvailNote(e.target.value)} rows={2}
-                    placeholder="Propose an alternate time or leave a message…"
-                    className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm text-[#111827] placeholder:text-[#9CA3AF] resize-none focus:outline-none focus:ring-2 focus:ring-[#3538CD]/20 focus:border-[#3538CD]" />
-                </div>
-
-                {/* Helper (left) + actions (right) */}
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex items-center gap-1.5">
-                    <Mail className="w-3 h-3 text-[#9CA3AF] shrink-0" />
-                    <p className="text-[11px] text-[#9CA3AF]">An automated email will be sent to update the recruiter.</p>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0 ml-auto">
-                    {editingAvail && committed !== null && (
-                      <button onClick={() => { setEditingAvail(false); setAvailAvailable(committed); }}
-                        className="px-4 py-2 text-xs font-semibold text-[#6B7280] rounded-lg border border-[#E5E7EB] hover:bg-[#F9FAFB] transition-colors">
-                        Cancel
-                      </button>
-                    )}
-                    <button onClick={handleAvailPrimary}
-                      className="px-5 py-2 bg-[#3538CD] text-white text-xs font-semibold rounded-lg hover:bg-[#2d30b0] transition-colors">
-                      {committed === null ? 'Submit Response' : 'Update & Send Email'}
+                    <button onClick={() => setPendingChoice(false)}
+                      className={`px-6 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
+                        pendingChoice === false
+                          ? 'bg-red-500 text-white'
+                          : 'text-red-600 border border-red-200 hover:bg-red-50'
+                      }`}>
+                      Decline
                     </button>
                   </div>
                 </div>
-              </div>
+                {pendingChoice !== null && (
+                  <div className="px-4 pb-2.5 flex flex-wrap items-center gap-2">
+                    <input value={availNote} onChange={e => setAvailNote(e.target.value)} autoFocus
+                      placeholder={pendingChoice ? 'Add a note for the recruiter… (optional)' : 'Propose an alternate time or leave a message… (optional)'}
+                      className="flex-1 min-w-[240px] border border-[#E5E7EB] rounded-lg px-3 py-1.5 text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#3538CD]/20 focus:border-[#3538CD]" />
+                    <button onClick={() => setPendingChoice(null)}
+                      className="px-3 py-1.5 text-xs font-semibold text-[#6B7280] rounded-lg border border-[#E5E7EB] hover:bg-[#F9FAFB] transition-colors">
+                      Cancel
+                    </button>
+                    <button onClick={() => commitAvailability(pendingChoice)}
+                      className={`px-4 py-1.5 text-white text-xs font-semibold rounded-lg transition-colors ${
+                        pendingChoice ? 'bg-green-600 hover:bg-green-700' : 'bg-red-500 hover:bg-red-600'
+                      }`}>
+                      {pendingChoice ? 'Confirm Accept' : 'Confirm Decline'}
+                    </button>
+                  </div>
+                )}
+              </>
             ) : (
-              /* Committed — show response summary with a Change action */
-              <div className="px-4 py-3 flex flex-wrap items-center gap-x-6 gap-y-3 justify-between">
-                <div className="flex items-center gap-2.5">
+              /* Responded — clear status line; actions: note + Change response menu */
+              <>
+              <div className="px-4 py-2.5 flex flex-wrap items-center gap-x-4 gap-y-2">
+                <div className="flex items-center gap-2.5 flex-1 min-w-[220px]">
                   {confirmed
                     ? <CheckCircle className="w-5 h-5 text-green-600 shrink-0" />
                     : <XCircle className="w-5 h-5 text-red-500 shrink-0" />}
                   <div>
-                    <p className="text-sm font-bold text-[#111827]">
+                    <p className="text-sm font-bold text-[#111827] leading-tight">
                       {confirmed ? "You've accepted this interview invitation" : "You've declined this interview invitation"}
                     </p>
-                    <p className="text-xs text-[#6B7280]">
-                      {confirmed
-                        ? 'The recruiter has been notified. You can add your feedback below.'
-                        : 'The recruiter has been notified of your response.'}
+                    <p className="text-[11px] text-[#6B7280]">
+                      The recruiter has been notified.
                       {availNote.trim() && <span className="italic"> · “{availNote.trim()}”</span>}
                     </p>
                   </div>
                 </div>
-                <button onClick={startEditing}
-                  className="px-4 py-2 text-xs font-semibold text-[#3538CD] rounded-lg border border-[#C7D2FE] bg-[#EEF2FF] hover:bg-[#E0E7FF] transition-colors">
-                  Change response
-                </button>
+                <div className="flex items-center gap-2 ml-auto">
+                {/* Outlook/Calendar-style response menu — current choice check-marked,
+                    picking the other option opens the confirmation flow */}
+                <div className="relative">
+                  <button onClick={() => setChangeMenuOpen(o => !o)}
+                    className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold text-[#374151] rounded-lg border border-[#E5E7EB] hover:bg-[#F9FAFB] transition-colors">
+                    Change response
+                    <ChevronDown className={`w-3.5 h-3.5 text-[#9CA3AF] transition-transform duration-150 ${changeMenuOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  {changeMenuOpen && (
+                    <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-[#E5E7EB] rounded-lg shadow-lg z-30 py-1">
+                      {[
+                        { val: true, label: 'Accept' },
+                        { val: false, label: 'Decline' },
+                      ].map(opt => {
+                        const isCurrent = committed === opt.val;
+                        return (
+                          <button key={opt.label} disabled={isCurrent}
+                            onClick={() => { setChangeMenuOpen(false); setAvailAvailable(opt.val); setShowAvailModal(true); }}
+                            className={`w-full flex items-center justify-between px-3 py-2 text-xs text-left transition-colors ${
+                              isCurrent ? 'text-[#9CA3AF] cursor-default' : 'text-[#374151] font-semibold hover:bg-[#F9FAFB]'
+                            }`}>
+                            {opt.label}
+                            {isCurrent && <CheckCircle className="w-3.5 h-3.5 text-green-600" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+                </div>
               </div>
+              </>
             )}
           </div>
         )}
@@ -382,14 +409,22 @@ export default function PanelistPage() {
                   <div className="w-full sm:w-[42%] px-2 mb-4">
                     <RLabel>Interview Panel</RLabel>
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {(ctx.interviewPanel?.length ? ctx.interviewPanel : ['—']).map(name => (
-                        <span key={name} className="inline-flex items-center border border-[#E5E7EB] rounded-lg bg-white py-1 px-2 text-xs font-medium text-[#374151] gap-1.5">
-                          <span className="w-5 h-5 rounded-full bg-[#3538CD]/10 text-[#3538CD] text-[9px] font-black flex items-center justify-center shrink-0">
-                            {name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                      {roundPanel.map(p => {
+                        const display = p.name || p.email;
+                        return (
+                          <span key={p.id} className="group relative inline-flex items-center border border-[#E5E7EB] rounded-lg bg-white py-1 px-2 text-xs font-medium text-[#374151] gap-1.5 cursor-default">
+                            <span className="w-5 h-5 rounded-full bg-[#3538CD]/10 text-[#3538CD] text-[9px] font-black flex items-center justify-center shrink-0">
+                              {display.split(/[\s@.]/).filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                            </span>
+                            {display}
+                            {p.accessToken === token && <span className="text-[10px] font-semibold text-[#3538CD]">(You)</span>}
+                            {/* Email tooltip on hover */}
+                            <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-1.5 whitespace-nowrap rounded-lg bg-[#111827] text-white text-[11px] px-2.5 py-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-10 shadow-lg">
+                              {p.email}
+                            </span>
                           </span>
-                          {name}
-                        </span>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                   <div className="w-1/2 sm:w-[30%] px-2 mb-4">
@@ -402,7 +437,7 @@ export default function PanelistPage() {
                     <p className="text-xs font-medium text-[#374151] mt-2">{ctx.durationMinutes} Minutes</p>
                   </div>
                   <div className="w-full px-2 mb-4">
-                    <RLabel>{ctx.mode === 'Online' ? 'Join Link' : 'Venue Address'}</RLabel>
+                    <RLabel>{ctx.mode === 'Online' ? 'Join Link' : 'Location'}</RLabel>
                     <div className="mt-2">
                       {ctx.mode === 'Online' && ctx.meetingLink ? (
                         <a href={ctx.meetingLink} target="_blank" rel="noreferrer" className="text-xs font-semibold text-[#3538CD] inline-flex items-center gap-1.5 hover:underline">
@@ -579,17 +614,20 @@ export default function PanelistPage() {
                 </p>
               </div>
             )}
+            <input value={availNote} onChange={e => setAvailNote(e.target.value)}
+              placeholder="Add a note for the recruiter (optional)…"
+              className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm text-[#111827] placeholder:text-[#9CA3AF] mb-4 focus:outline-none focus:ring-2 focus:ring-[#3538CD]/20 focus:border-[#3538CD]" />
             <p className="text-xs text-[#6B7280] leading-relaxed mb-5">
               Proceeding will trigger an email to notify the recruiter of this schedule change.
             </p>
             <div className="flex justify-end gap-2">
-              <button onClick={() => setShowAvailModal(false)}
+              <button onClick={() => { setShowAvailModal(false); setAvailAvailable(committed ?? true); }}
                 className="px-4 py-2 text-xs font-semibold text-[#374151] rounded-lg border border-[#E5E7EB] hover:bg-[#F9FAFB] transition-colors">
                 Cancel
               </button>
-              <button onClick={commitAvailability}
+              <button onClick={() => commitAvailability(availAvailable)}
                 className="px-4 py-2 text-xs font-semibold text-white rounded-lg bg-[#3538CD] hover:bg-[#2d30b0] transition-colors">
-                Update &amp; Send Email
+                Confirm Update
               </button>
             </div>
           </div>
@@ -604,8 +642,8 @@ export default function PanelistPage() {
         </div>
       )}
 
-      <footer className="text-center py-6">
-        <p className="text-[10px] font-medium text-[#9CA3AF]">Powered by CollabCRM · {buName}</p>
+      <footer className="bg-white border-t border-[#E5E7EB] py-4 text-center">
+        <p className="text-[10px] font-medium text-[#9CA3AF]">Powered by CollabCRM</p>
       </footer>
     </div>
   );

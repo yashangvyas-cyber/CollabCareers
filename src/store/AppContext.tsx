@@ -1738,14 +1738,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
       });
 
-      // Ensure mock external invites are present (v21+)
-      const currentExtInvites: ExternalInvite[] = parsed.externalInvites || [];
-      const mergedExtInvites = [...currentExtInvites];
-      initialState.externalInvites.forEach(defaultExtInv => {
-        if (!mergedExtInvites.find(i => i.id === defaultExtInv.id)) {
-          mergedExtInvites.push(defaultExtInv);
-        }
-      });
+      // Demo tokens must always open in their labelled state: seeded invites are
+      // reset to their canonical seed values on every load (interactions during a
+      // session still work — they just don't pollute the demo permanently).
+      // Invites created via the Schedule drawer are kept as stored.
+      const seededExtIds = new Set(initialState.externalInvites.map(i => i.id));
+      const userExtInvites: ExternalInvite[] = (parsed.externalInvites || []).filter(
+        (i: ExternalInvite) => !seededExtIds.has(i.id)
+      );
+      const mergedExtInvites = [...initialState.externalInvites, ...userExtInvites];
 
       return {
         ...parsed,

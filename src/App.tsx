@@ -24,6 +24,7 @@ import TalentPoolDetailsPage from './pages/TalentPoolDetailsPage';
 import AddTalentPage from './pages/AddTalentPage';
 import EmployeeDetailPage from './pages/EmployeeDetailPage';
 import PanelistPage from './pages/PanelistPage';
+import PanelistEmailPage from './pages/PanelistEmailPage';
 import DeviceSimulator from './components/DeviceSimulator';
 
 /** Wraps all Career Portal routes with the device simulator */
@@ -54,6 +55,7 @@ function App() {
         <Route path="/crm/career-portal" element={<CareerPortalPage />} />
         {/* External Panelist — public, no auth, no simulator */}
         <Route path="/panel/:token" element={<PanelistPage />} />
+        <Route path="/panel-email/:token" element={<PanelistEmailPage />} />
         {/* Unified Career Portal (Flows 2+3+4) — with device simulator */}
         <Route element={<PortalShell />}>
           <Route path="/portal/:slug" element={<CareerPage />} />

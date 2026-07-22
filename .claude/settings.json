@@ -39,7 +39,10 @@
       "Bash(sed -n \"/export interface ExternalFeedback/,/^}/p\" src/store/types.ts)",
       "Bash(curl -s -o /dev/null -w \"devserver=%{http_code}\\\\n\" http://localhost:5173)",
       "Bash(node /tmp/claude-1000/-home-yashang--gemini-antigravity-scratch-collab-careers-prototype/1a3e3372-c78f-414b-a94c-526a10ebab0e/scratchpad/shot_panel.js)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/)"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/)",
+      "Bash(cp \"/home/yashang/Downloads/mindinventory-logo-for-light-bg \\(1\\).svg\" public/mindinventory-logo.svg && ls public/ | head)",
+      "Bash(node /tmp/claude-1000/-home-yashang--gemini-antigravity-scratch-collab-careers-prototype/1a3e3372-c78f-414b-a94c-526a10ebab0e/scratchpad/verify_states.js)",
+      "Bash(node -e ' *)"
     ],
     "additionalDirectories": [
       "/home/yashang/Downloads",

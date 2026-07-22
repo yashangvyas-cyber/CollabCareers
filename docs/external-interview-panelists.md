@@ -1,7 +1,7 @@
 # External Interview Panelists — Functional Specification
 
 **Module:** Recruitment (CRM) → Schedule Interview + Interview Round Detail + a new **token-gated External Panelist page**
-**Screens:** Candidates › *Schedule Interview* (RSP) · Candidate › *Interview Details* › Round detail · **new** External Panelist view
+**Screens:** Candidates › *Schedule Interview* (RSP) · Candidate › *Interview Details* › Round detail · **new** External Panelist owview
 **Status:** Draft for review — no development started
 **Prepared from:** live crawl of CollabCRM staging (`bluewhaletechnosoftpvtltd`) — candidate `Ricky Mehta`, interview `4fec95b5-c8de-480d-be62-d63972c903d2`, round `a190fe55-b09b-467a-9416-ae64b9730962`
 
@@ -235,12 +235,14 @@ All "emails" in the prototype are **simulated** (a preview panel / toast + a sta
 ## 9. Scope summary
 
 **In scope**
+
 - Schedule drawer gains an **External Panelists** email-chip field (Surface A).
 - New **`/panel/:token`** branded, login-free page: view details, timezone-aware datetime, online/offline handling, **availability** + **feedback** submission (Surface B).
 - Round detail shows **external panel** with status + **cancel / resend** actions (Surface C).
 - Simulated invite + recruiter-notification flows.
 
 **Out of scope (v1)**
+
 - Real email delivery, real Google/MS Teams link generation, real token signing/expiry.
 - Editing an external panelist's email after invite (cancel + re-add instead).
 - Multi-round bulk invite; external panelist accounts/history.

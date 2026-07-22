@@ -4,6 +4,8 @@ export interface BusinessUnitInfo {
   brandColor: string;
   address: string;
   initials: string;
+  /** Full wordmark SVG (served from public/) — rendered instead of the initials tile when present. */
+  logoUrl?: string;
 }
 
 export const BUSINESS_UNITS: Record<string, BusinessUnitInfo> = {
@@ -12,6 +14,7 @@ export const BUSINESS_UNITS: Record<string, BusinessUnitInfo> = {
     brandColor: '#ED184F',
     address: '4th Floor, Shivalik Shilp, Iscon Cross Rd, Ahmedabad, Gujarat 380015, India',
     initials: 'MI',
+    logoUrl: '/mindinventory-logo.svg',
   },
   '300Mind': {
     name: '300Mind',
