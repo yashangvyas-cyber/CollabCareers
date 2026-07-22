@@ -42,16 +42,26 @@ export default function PanelistEmailPage() {
     ? `Online – ${ctx.meetingType ?? 'Meeting'}`
     : 'Offline';
 
+  // Feedback Submitted gets its own follow-up email — a receipt, not another invitation.
+  const isFeedbackEmail = invite.status === 'Feedback Submitted' && !!invite.feedback;
+
   // Candidate + role lead the list — busy panelists need the "who" before the "when".
-  const detailRows: [string, string][] = [
-    ['Candidate', ctx.candidateName],
-    ['Role', ctx.jobTitle],
-    ['Interview Round', ctx.roundName],
-    ['Proposed Date', ctx.interviewDate],
-    ['Proposed Time', `${ctx.interviewTime} ${ctx.timezoneLabel}`],
-    ['Mode', modeLabel],
-    ...(ctx.mode === 'Offline' ? [['Location', ctx.venueAddress ?? 'To be shared'] as [string, string]] : []),
-  ];
+  const detailRows: [string, string][] = isFeedbackEmail
+    ? [
+        ['Candidate', ctx.candidateName],
+        ['Role', ctx.jobTitle],
+        ['Interview Round', ctx.roundName],
+        ['Interview Date', `${ctx.interviewDate} · ${ctx.interviewTime} ${ctx.timezoneLabel}`],
+      ]
+    : [
+        ['Candidate', ctx.candidateName],
+        ['Role', ctx.jobTitle],
+        ['Interview Round', ctx.roundName],
+        ['Proposed Date', ctx.interviewDate],
+        ['Proposed Time', `${ctx.interviewTime} ${ctx.timezoneLabel}`],
+        ['Mode', modeLabel],
+        ...(ctx.mode === 'Offline' ? [['Location', ctx.venueAddress ?? 'To be shared'] as [string, string]] : []),
+      ];
 
   return (
     <div className="min-h-screen bg-[#F4F5FA] py-10 px-4">
@@ -66,7 +76,11 @@ export default function PanelistEmailPage() {
         {/* Client meta header */}
         <div className="px-6 py-4 border-b border-[#E5E7EB] bg-[#FCFCFD]">
           <p className="text-xs text-[#6B7280]">From: <span className="font-semibold text-[#374151]">{buName} Talent Acquisition</span> &lt;no-reply@collabcrm.com&gt;</p>
-          <p className="text-sm font-bold text-[#111827] mt-1">Interview Invitation: {ctx.candidateName} – {ctx.jobTitle} · {ctx.interviewDate}</p>
+          <p className="text-sm font-bold text-[#111827] mt-1">
+            {isFeedbackEmail
+              ? `Feedback Received: ${ctx.candidateName} – ${ctx.jobTitle}`
+              : `Interview Invitation: ${ctx.candidateName} – ${ctx.jobTitle} · ${ctx.interviewDate}`}
+          </p>
         </div>
 
         {/* Brand banner */}
@@ -86,12 +100,25 @@ export default function PanelistEmailPage() {
         {/* Body */}
         <div className="px-6 py-5">
           <p className="text-sm text-[#374151]">Hi {firstName},</p>
-          <p className="text-sm text-[#374151] leading-relaxed mt-3">
-            You are invited to interview candidates for the <span className="font-semibold text-[#111827]">{ctx.jobTitle}</span> position.
-          </p>
-          <p className="text-sm text-[#374151] leading-relaxed mt-2">
-            Please review the proposed interview details below and confirm whether you are available to attend.
-          </p>
+          {isFeedbackEmail ? (
+            <>
+              <p className="text-sm text-[#374151] leading-relaxed mt-3">
+                Thank you for interviewing <span className="font-semibold text-[#111827]">{ctx.candidateName}</span> for the <span className="font-semibold text-[#111827]">{ctx.jobTitle}</span> position.
+              </p>
+              <p className="text-sm text-[#374151] leading-relaxed mt-2">
+                Your feedback has been recorded and shared with the recruitment team.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-[#374151] leading-relaxed mt-3">
+                You are invited to interview candidates for the <span className="font-semibold text-[#111827]">{ctx.jobTitle}</span> position.
+              </p>
+              <p className="text-sm text-[#374151] leading-relaxed mt-2">
+                Please review the proposed interview details below and confirm whether you are available to attend.
+              </p>
+            </>
+          )}
 
           {/* Interview Details */}
           <p className="text-xs font-bold text-[#111827] mt-4 mb-1.5">Interview Details:</p>
