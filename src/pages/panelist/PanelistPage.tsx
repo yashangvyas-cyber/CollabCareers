@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { FileText, CheckCircle, AlertTriangle, ExternalLink, XCircle, Mail, Phone, Linkedin, Copy, MapPin, ChevronDown, Info, Lock, CalendarClock } from 'lucide-react';
+import { FileText, CheckCircle, AlertTriangle, ExternalLink, XCircle, Mail, Phone, Linkedin, Copy, MapPin, ChevronDown, Info, Lock, CalendarClock, Check, X } from 'lucide-react';
 import { useApp } from '../../store/AppContext';
 import { resolveBranding } from '../../lib/businessUnits';
 import BuLogo from '../../components/panelist/BuLogo';
@@ -189,36 +189,47 @@ function PanelistView({ token }: { token?: string }) {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 ml-auto">
-                    <button onClick={() => setPendingChoice(true)}
-                      className={`px-6 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
-                        pendingChoice === true
-                          ? 'bg-green-600 text-white'
-                          : 'text-green-700 border border-green-200 hover:bg-green-50'
+                    {/* RSVP in the Outlook idiom: filled Accept + outlined Decline (8px radius).
+                        Once a choice is picked, the pair is REPLACED by one soft tinted status
+                        chip — the Cancel/Confirm row below owns the actions, so no dimmed or
+                        duplicate buttons ever appear. */}
+                    {pendingChoice === null ? (
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => setPendingChoice(true)}
+                          className="flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold border bg-[#059669] border-[#059669] text-white hover:bg-[#047857] transition-colors duration-150">
+                          <Check className="w-3.5 h-3.5" /> Accept
+                        </button>
+                        <button onClick={() => setPendingChoice(false)}
+                          className="flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold border bg-white border-[#D1D5DB] text-[#374151] hover:bg-[#F9FAFB] transition-colors duration-150">
+                          <X className="w-3.5 h-3.5" /> Decline
+                        </button>
+                      </div>
+                    ) : (
+                      <span className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold border ${
+                        pendingChoice
+                          ? 'bg-[#ECFDF5] border-[#A7F3D0] text-[#047857]'
+                          : 'bg-[#F1F5F9] border-[#CBD5E1] text-[#334155]'
                       }`}>
-                      Accept
-                    </button>
-                    <button onClick={() => setPendingChoice(false)}
-                      className={`px-6 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
-                        pendingChoice === false
-                          ? 'bg-red-500 text-white'
-                          : 'text-red-600 border border-red-200 hover:bg-red-50'
-                      }`}>
-                      Decline
-                    </button>
+                        {pendingChoice ? <Check className="w-3.5 h-3.5" /> : <X className="w-3.5 h-3.5" />}
+                        {pendingChoice ? 'Accepting' : 'Declining'}
+                      </span>
+                    )}
                   </div>
                 </div>
                 {pendingChoice !== null && (
                   <div className="px-4 pb-2.5 flex flex-wrap items-center gap-2">
                     <input value={availNote} onChange={e => setAvailNote(e.target.value)} autoFocus
                       placeholder={pendingChoice ? 'Add a note for the recruiter… (optional)' : 'Propose an alternate time or leave a message… (optional)'}
-                      className="flex-1 min-w-[240px] border border-[#E5E7EB] rounded-lg px-3 py-1.5 text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#3538CD]/20 focus:border-[#3538CD]" />
+                      className="flex-1 min-w-[240px] border border-[#E5E7EB] rounded-lg px-3.5 py-2 text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#3538CD]/20 focus:border-[#3538CD]" />
                     <button onClick={() => setPendingChoice(null)}
-                      className="px-3 py-1.5 text-xs font-semibold text-[#6B7280] rounded-lg border border-[#E5E7EB] hover:bg-[#F9FAFB] transition-colors">
+                      className="px-4 py-2 text-xs font-semibold text-[#6B7280] rounded-lg hover:bg-[#F3F4F6] transition-colors">
                       Cancel
                     </button>
                     <button onClick={() => commitAvailability(pendingChoice)}
-                      className={`px-4 py-1.5 text-white text-xs font-semibold rounded-lg transition-colors ${
-                        pendingChoice ? 'bg-green-600 hover:bg-green-700' : 'bg-red-500 hover:bg-red-600'
+                      className={`px-4 py-2 text-white text-xs font-semibold rounded-lg transition-colors duration-150 ${
+                        pendingChoice
+                          ? 'bg-[#059669] hover:bg-[#047857]'
+                          : 'bg-[#334155] hover:bg-[#1E293B]'
                       }`}>
                       {pendingChoice ? 'Confirm Accept' : 'Confirm Decline'}
                     </button>
@@ -231,8 +242,8 @@ function PanelistView({ token }: { token?: string }) {
               <div className="px-4 py-2.5 flex flex-wrap items-center gap-x-4 gap-y-2">
                 <div className="flex items-center gap-2.5 flex-1 min-w-[220px]">
                   {confirmed
-                    ? <CheckCircle className="w-5 h-5 text-green-600 shrink-0" />
-                    : <XCircle className="w-5 h-5 text-red-500 shrink-0" />}
+                    ? <CheckCircle className="w-5 h-5 text-[#10B981] shrink-0" />
+                    : <XCircle className="w-5 h-5 text-[#6B7280] shrink-0" />}
                   <div>
                     <p className="text-sm font-bold text-[#111827] leading-tight">
                       {confirmed ? "You've accepted this interview invitation" : "You've declined this interview invitation"}
