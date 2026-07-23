@@ -1092,6 +1092,14 @@ export default function CandidateDetailPage() {
                                                   {inv.availability.note && <span className="block font-normal italic text-[#9CA3AF]">"{inv.availability.note}"</span>}
                                                 </span>
                                               )}
+                                              {inv.status === 'Invited' && (() => {
+                                                const days = Math.max(0, Math.floor((Date.now() - new Date(inv.createdAt).getTime()) / 86400000));
+                                                return (
+                                                  <span className="block text-[11px] mt-1.5 font-medium text-[#B54708]">
+                                                    No response yet · invited {days === 0 ? 'today' : `${days} day${days === 1 ? '' : 's'} ago`}
+                                                  </span>
+                                                );
+                                              })()}
                                               <span className="flex items-center gap-1.5 mt-2.5 pt-2 border-t border-[#F3F4F6]">
                                                 {!cancelled && (
                                                   <button

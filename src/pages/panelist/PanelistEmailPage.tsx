@@ -38,6 +38,8 @@ export default function PanelistEmailPage() {
   const emailType = searchParams.get('type');
   const isReminderEmail = emailType === 'reminder' && isConfirmedState;
   const isNudgeEmail = emailType === 'nudge' && isConfirmedState && !invite.feedback;
+  // Chases a panelist who never answered — sent once, 48h after the invite.
+  const isResponseReminder = emailType === 'response-reminder' && invite.status === 'Invited';
 
   // Candidate + role lead the list — busy panelists need the "who" before the "when".
   const detailRows: [string, string][] = (isFeedbackEmail || isCancelledEmail || isReminderEmail || isNudgeEmail)
@@ -71,7 +73,9 @@ export default function PanelistEmailPage() {
         <div className="px-6 py-4 border-b border-[#E5E7EB] bg-[#FCFCFD]">
           <p className="text-xs text-[#6B7280]">From: <span className="font-semibold text-[#374151]">{brand.name} Talent Acquisition</span> &lt;no-reply@collabcrm.com&gt;</p>
           <p className="text-sm font-bold text-[#111827] mt-1">
-            {isReminderEmail
+            {isResponseReminder
+              ? `Still able to join? ${ctx.candidateName} interview – ${ctx.interviewDate}`
+              : isReminderEmail
               ? `Reminder: ${ctx.candidateName} interview – ${ctx.interviewDate}, ${ctx.interviewTime} ${ctx.timezoneLabel}`
               : isNudgeEmail
                 ? `How did it go? Share your feedback – ${ctx.candidateName}`
@@ -91,7 +95,16 @@ export default function PanelistEmailPage() {
         {/* Body */}
         <div className="px-6 py-5">
           <p className="text-sm text-[#374151]">Hi {firstName},</p>
-          {isReminderEmail ? (
+          {isResponseReminder ? (
+            <>
+              <p className="text-sm text-[#374151] leading-relaxed mt-3">
+                Just checking in — we haven't heard from you about the interview below, and the recruiter is finalising the panel.
+              </p>
+              <p className="text-sm text-[#374151] leading-relaxed mt-2">
+                It only takes a moment to respond — and if the time doesn't work, a quick decline with a note helps just as much.
+              </p>
+            </>
+          ) : isReminderEmail ? (
             <>
               <p className="text-sm text-[#374151] leading-relaxed mt-3">
                 A quick reminder — your interview panel session for the <span className="font-semibold text-[#111827]">{ctx.jobTitle}</span> position is coming up.

@@ -293,9 +293,58 @@ invitation sent **Wed, 23 Jul** → panelist accepts **Thu, 24 Jul** → intervi
 
 ---
 
+## Story 7 — Unresponsive panelist: invited, but no decision
+
+**Story:**
+As a recruiter, when an external panelist has not answered the invitation, I want the system to
+chase them once and warn me before it is too late, so that the panel is never silently
+incomplete on interview day.
+
+**The example timeline:** invitation sent **Wed, 23 Jul** → no response → interview is **Sat, 1 Aug, 10:00 AM IST**.
+
+**Pre-condition:**
+1. The panelist's status is still **Invited** and the interview date is in the future.
+
+**Acceptance Criteria:**
+
+*Automatic chasing (system):*
+1. **48 hours after the invitation** with no response (25 Jul) → the panelist receives the one-time **response reminder — Email F** below. Never repeated.
+2. **24 hours before the interview** (31 Jul), still no response → the **recruiter** receives the **no-response alert — Email 4** below, in time to act.
+
+*Recruiter side:*
+3. The chip stays **Invited** (indigo dot); the hover card shows a warning line: **"No response yet · invited 2 days ago"** — the recruiter sees at a glance who is silent and for how long.
+4. All existing actions stay available: **Resend** the invite (Story 3), **Cancel** it, or invite a replacement panelist (Story 1).
+
+*Panelist side:*
+5. The secure link keeps working the whole time — a late response (even on interview day) follows the normal flow (Story 4) and notifies the recruiter as usual.
+6. If they never respond, **nothing is cancelled automatically** — the record simply stays Invited, and the feedback form stays locked forever (they never accepted — Story 6, AC 3).
+
+**Field Values:**
+| Event | When | Trigger |
+|---|---|---|
+| Response reminder (Email F) | 48 hours after the invite | Status still Invited; sent once |
+| No-response alert (Email 4) | 24 hours before interview start | Status still Invited |
+| Auto-cancel | Never | — (the recruiter decides, not the system) |
+
+**Validations:**
+1. Email F goes only to panelists whose status is **Invited** — never after a response or a cancellation, and never more than once.
+2. Email 4 is sent only if the status is **still Invited** at the 24-hours-before mark.
+3. A resend by the recruiter does not reset or repeat the automatic chase — one Email F per invitation, full stop.
+
+**Post-condition:**
+1. Either the panelist responds (normal flow resumes), or the recruiter is warned a day ahead with time to resend, reach out directly, or invite someone else.
+
+**Impact:**
+1. Two new time-triggered emails (F — panelist chase, 4 — recruiter alert).
+2. Interview Details hover card (the "No response yet · invited N days ago" line).
+3. No change to statuses or tokens — Invited simply persists.
+
+---
+
 ## Recruiter Notification Emails
 
-Three system emails to the **recruiter who scheduled the round**, sent when an external
+Four system emails to the **recruiter who scheduled the round** — three sent when an external
+panelist responds, plus one time-based alert (Email 4) — sent when an external
 panelist responds. Same visual template as the panelist emails (brand header, detail rows,
 one button). Subjects front-load the useful facts — who, what, which interview.
 
@@ -390,7 +439,38 @@ one button). Subjects front-load the useful facts — who, what, which interview
 
 ---
 
-### Rules common to all three notification emails
+### Email 4 — No response from a panelist (sent 24 hours before the interview)
+
+Sent only if the panelist's status is **still Invited** at the 24-hours-before mark (Story 7, AC 2).
+
+**Subject:** `No response from Alice Johnson — Arjun Mehta · Technical Round (25-Jul-2026)`
+
+**Body:**
+
+> Hi **Gurpreetsingh**,
+>
+> Heads up — **Alice Johnson** (alice.johnson@external.com) hasn't responded to the interview invitation, and the interview is in 24 hours.
+>
+> | | |
+> |---|---|
+> | Candidate | Arjun Mehta |
+> | Role | Flutter Developer |
+> | Interview Round | Round 1 — Technical Round |
+> | Interview Date | 25-Jul-2026 · 10:00 AM IST (GMT+5:30) |
+> | Invited on | 23-Jul-2026 |
+>
+> You may want to **resend the invite**, **reach out directly**, or **invite another panelist**.
+>
+> **[ View Interview Details ]**
+>
+> Thank you,
+> **CollabCRM Recruitment**
+>
+> *Powered by CollabCRM · This is an automated notification — please do not reply.*
+
+---
+
+### Rules common to all recruiter notification emails
 
 1. Sent **only to the recruiter who scheduled the round** (the "Scheduled by" user).
 2. Sent **immediately** when the panelist submits their response.
@@ -402,7 +482,7 @@ one button). Subjects front-load the useful facts — who, what, which interview
 
 ## Panelist Emails
 
-Five emails go **to the external panelist**. All come from the business unit's sender name
+Six emails go **to the external panelist**. All come from the business unit's sender name
 (*"MindInventory Talent Acquisition" &lt;no-reply@collabcrm.com&gt;*), carry the BU logo, and
 end with the same secure button link plus the line
 *"This secure link is personal to you — no login required."*
@@ -616,9 +696,49 @@ Skipped if feedback was already submitted or the invitation was cancelled. **Sen
 
 ---
 
+### Email F — Response reminder (sent once, 48 hours after the invite, if no answer)
+
+Sent **only** while the status is still **Invited** (Story 7, AC 1). Never repeated, and a manual
+resend by the recruiter does not trigger it again.
+
+**Subject:** `Still able to join? Arjun Mehta interview – 25/Jul/2026`
+
+**Body:**
+
+> Hi **Alice**,
+>
+> Just checking in — we haven't heard from you about the interview below, and the recruiter is finalising the panel.
+>
+> It only takes a moment to respond — and if the time doesn't work, a quick decline with a note helps just as much.
+>
+> **Interview Details:**
+>
+> | | |
+> |---|---|
+> | Candidate | Arjun Mehta |
+> | Role | Flutter Developer |
+> | Interview Round | Round 1 — Technical Round |
+> | Proposed Date | 25/Jul/2026 |
+> | Proposed Time | 10:00 AM IST (GMT+5:30) |
+> | Mode | Online (Google Meet) |
+>
+> **Can you make it?**
+> If the time works for you, just confirm below. If not, no problem — leave a note and the recruiter will find a better slot.
+>
+> **[ Confirm Availability ]**
+>
+> *This secure link is personal to you — no login required.*
+>
+> Thank you,
+> **The Talent Acquisition Team**
+>
+> *Powered by CollabCRM*
+
+---
+
 ### Rules common to all panelist emails
 
 1. Emails A and B open the **same secure link** — the page just shows a different state (form or read-only submission). Email C has **no button at all** — the link is dead, so nothing is offered.
 2. The receipt (Email B) and cancellation (Email C) contain **no "action required" language** — they ask nothing of the panelist.
 3. The timezone is always spelled out next to the time (`IST (GMT+5:30)`), since external panelists have no timezone settings.
-4. Exactly one email per event: invited/resent → Email A, feedback submitted → Email B, cancelled → Email C, 24h before the interview → Email D, ~24h after with no feedback → Email E (once only).
+4. Exactly one email per event: invited/resent → Email A, feedback submitted → Email B, cancelled → Email C, 24h before the interview (confirmed) → Email D, ~24h after with no feedback → Email E (once only), 48h with no answer → Email F (once only).
