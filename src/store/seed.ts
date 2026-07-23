@@ -1631,6 +1631,15 @@ Design is a first-class citizen at MindInventory. You will work on products that
       createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
     },
     {
+      // Interview date already past → the feedback form is OPEN on the token page.
+      id: 'ext-inv-ready', email: 'rahul.krishnan@external.com', name: 'Rahul Krishnan',
+      accessToken: 'ext-ready', status: 'Availability Confirmed' as const,
+      availability: { available: true, note: 'Done — happy to share my feedback.' },
+      candidateId: '3', roundId: 'r3-online', roundNo: 1,
+      context: { ...EXT_ONLINE_CTX, interviewDate: 'Mon, 20 Jul 2026', interviewTime: '03:00 PM' },
+      createdAt: new Date(Date.now() - 86400000 * 6).toISOString(),
+    },
+    {
       id: 'ext-inv-declined', email: 'emma.clarke@external.com', name: 'Emma Clarke',
       accessToken: 'ext-declined', status: 'Availability Declined' as const,
       availability: { available: false, note: 'I am travelling that week — happy to help any day after the 28th.' },

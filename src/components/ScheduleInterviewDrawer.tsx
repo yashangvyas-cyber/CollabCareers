@@ -50,6 +50,23 @@ export default function ScheduleInterviewDrawer({
   const [sendEmailCandidate, setSendEmailCandidate] = useState(true);
   const [sendEmailPanel, setSendEmailPanel] = useState(true);
   const [extFirst, setExtFirst] = useState('');
+
+  // Demo helper — one click fills the three fields with a fresh fake panelist.
+  const DEMO_PANELISTS = [
+    { f: 'Priya', l: 'Raghavan' }, { f: 'Marcus', l: 'Webb' }, { f: 'Sofia', l: 'Lindqvist' },
+    { f: 'Kenji', l: 'Watanabe' }, { f: 'Fatima', l: 'Rashid' }, { f: 'Diego', l: 'Moreno' },
+    { f: 'Anika', l: 'Bose' }, { f: 'Tomas', l: 'Novak' }, { f: 'Leila', l: 'Haddad' }, { f: 'Owen', l: 'Fletcher' },
+  ];
+  const fillDemoPanelist = () => {
+    const taken = new Set(extPanelists.map(p => p.email.toLowerCase()));
+    const pool = DEMO_PANELISTS.filter(p => !taken.has(`${p.f}.${p.l}@external.com`.toLowerCase()));
+    const from = pool.length ? pool : DEMO_PANELISTS;
+    const pick = from[Math.floor(Math.random() * from.length)];
+    setExtFirst(pick.f);
+    setExtLast(pick.l);
+    setExtEmail(`${pick.f}.${pick.l}@external.com`.toLowerCase());
+    setExtError('');
+  };
   const [extLast, setExtLast] = useState('');
   const [extEmail, setExtEmail] = useState('');
   const [extPanelists, setExtPanelists] = useState<{ firstName: string; lastName: string; email: string }[]>([]);
@@ -254,6 +271,11 @@ export default function ScheduleInterviewDrawer({
                       <Plus className="w-3.5 h-3.5" /> Add
                     </button>
                   </div>
+                  {/* Demo shortcut — fills the three fields with a fresh fake panelist */}
+                  <button type="button" onClick={fillDemoPanelist}
+                    className="block mt-1.5 text-[11px] font-semibold text-[#3538CD] hover:text-[#2d30b0] transition-colors">
+                    ✨ Fill demo data
+                  </button>
                 </div>
                 {extError && <p className="text-[11px] text-red-500 font-medium mt-1">{extError}</p>}
                 {extPanelists.length > 0 && (

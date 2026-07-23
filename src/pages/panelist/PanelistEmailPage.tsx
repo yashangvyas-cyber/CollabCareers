@@ -1,4 +1,4 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useApp } from '../../store/AppContext';
 import { resolveBranding } from '../../lib/businessUnits';
 import BuLogo from '../../components/panelist/BuLogo';
@@ -11,6 +11,7 @@ import InvalidLinkScreen from '../../components/panelist/InvalidLinkScreen';
  */
 export default function PanelistEmailPage() {
   const { token } = useParams();
+  const [searchParams] = useSearchParams();
   const { externalInvites } = useApp();
 
   const invite = externalInvites.find(inv => inv.accessToken === token);
@@ -33,9 +34,13 @@ export default function PanelistEmailPage() {
   // The invitation email adapts to what the panelist already answered.
   const isConfirmedState = invite.status === 'Availability Confirmed';
   const isDeclinedState = invite.status === 'Availability Declined';
+  // Time-driven follow-ups (demoed via ?type=): day-before reminder, post-interview nudge.
+  const emailType = searchParams.get('type');
+  const isReminderEmail = emailType === 'reminder' && isConfirmedState;
+  const isNudgeEmail = emailType === 'nudge' && isConfirmedState && !invite.feedback;
 
   // Candidate + role lead the list — busy panelists need the "who" before the "when".
-  const detailRows: [string, string][] = (isFeedbackEmail || isCancelledEmail)
+  const detailRows: [string, string][] = (isFeedbackEmail || isCancelledEmail || isReminderEmail || isNudgeEmail)
     ? [
         ['Candidate', ctx.candidateName],
         ['Role', ctx.jobTitle],
@@ -66,11 +71,15 @@ export default function PanelistEmailPage() {
         <div className="px-6 py-4 border-b border-[#E5E7EB] bg-[#FCFCFD]">
           <p className="text-xs text-[#6B7280]">From: <span className="font-semibold text-[#374151]">{brand.name} Talent Acquisition</span> &lt;no-reply@collabcrm.com&gt;</p>
           <p className="text-sm font-bold text-[#111827] mt-1">
-            {isCancelledEmail
-              ? `Interview Cancelled: ${ctx.candidateName} – ${ctx.jobTitle} · ${ctx.interviewDate}`
-              : isFeedbackEmail
-                ? `Feedback Received: ${ctx.candidateName} – ${ctx.jobTitle}`
-                : `Interview Invitation: ${ctx.candidateName} – ${ctx.jobTitle} · ${ctx.interviewDate}`}
+            {isReminderEmail
+              ? `Reminder: ${ctx.candidateName} interview – ${ctx.interviewDate}, ${ctx.interviewTime} ${ctx.timezoneLabel}`
+              : isNudgeEmail
+                ? `How did it go? Share your feedback – ${ctx.candidateName}`
+                : isCancelledEmail
+                  ? `Interview Cancelled: ${ctx.candidateName} – ${ctx.jobTitle} · ${ctx.interviewDate}`
+                  : isFeedbackEmail
+                    ? `Feedback Received: ${ctx.candidateName} – ${ctx.jobTitle}`
+                    : `Interview Invitation: ${ctx.candidateName} – ${ctx.jobTitle} · ${ctx.interviewDate}`}
           </p>
         </div>
 
@@ -82,7 +91,25 @@ export default function PanelistEmailPage() {
         {/* Body */}
         <div className="px-6 py-5">
           <p className="text-sm text-[#374151]">Hi {firstName},</p>
-          {isCancelledEmail ? (
+          {isReminderEmail ? (
+            <>
+              <p className="text-sm text-[#374151] leading-relaxed mt-3">
+                A quick reminder — your interview panel session for the <span className="font-semibold text-[#111827]">{ctx.jobTitle}</span> position is coming up.
+              </p>
+              <p className="text-sm text-[#374151] leading-relaxed mt-2">
+                Everything you need — the details{ctx.mode === 'Online' ? ' and the meeting link' : ' and the venue address'} — is on your secure page below.
+              </p>
+            </>
+          ) : isNudgeEmail ? (
+            <>
+              <p className="text-sm text-[#374151] leading-relaxed mt-3">
+                Thanks again for joining the interview for the <span className="font-semibold text-[#111827]">{ctx.jobTitle}</span> position.
+              </p>
+              <p className="text-sm text-[#374151] leading-relaxed mt-2">
+                When you have a few minutes, please share your feedback — it helps the team decide quickly.
+              </p>
+            </>
+          ) : isCancelledEmail ? (
             <>
               <p className="text-sm text-[#374151] leading-relaxed mt-3">
                 We're sorry for the change of plans — the interview below has been <span className="font-semibold text-[#111827]">cancelled</span>, so you won't need to join this one.
@@ -132,7 +159,15 @@ export default function PanelistEmailPage() {
             ))}
           </div>
 
-          {isCancelledEmail ? (
+          {isReminderEmail ? (
+            /* Reminder — gentle escape hatch, never a demand */
+            <>
+              <p className="text-xs font-bold text-[#111827] mt-4">See you there?</p>
+              <p className="text-sm text-[#374151] leading-relaxed mt-1">
+                If anything has changed and you can't make it anymore, please update your response — the recruiter will be notified right away.
+              </p>
+            </>
+          ) : isNudgeEmail ? null : isCancelledEmail ? (
             /* Cancellation — nothing is asked of the panelist */
             <p className="text-sm text-[#374151] leading-relaxed mt-4">
               No action is needed on your side — your secure link has been deactivated.
@@ -167,32 +202,24 @@ export default function PanelistEmailPage() {
             </>
           )}
 
-          {/* Magic-link CTA — tokenised URL, no login required. Cancelled → muted link only. */}
-          <div className="text-center mt-6">
-            {isCancelledEmail ? (
-              <>
-                <Link to={`/panel/${token}`}
-                  className="inline-block px-8 py-3 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] text-[#6B7280] text-sm font-bold hover:bg-[#F3F4F6] transition-colors">
-                  Open Secure Link
-                </Link>
-                <p className="text-[11px] text-[#9CA3AF] mt-3">This link has been deactivated — it will only show that the invitation was cancelled.</p>
-              </>
-            ) : (
-              <>
-                <Link to={`/panel/${token}`}
-                  className="inline-block px-8 py-3 rounded-xl bg-[#3538CD] text-white text-sm font-bold shadow-sm hover:bg-[#2d30b0] transition-colors">
-                  {isFeedbackEmail
+          {/* Magic-link CTA — tokenised URL, no login required. Cancelled → no button at all. */}
+          {!isCancelledEmail && (
+            <div className="text-center mt-6">
+              <Link to={`/panel/${token}`}
+                className="inline-block px-8 py-3 rounded-xl bg-[#3538CD] text-white text-sm font-bold shadow-sm hover:bg-[#2d30b0] transition-colors">
+                {isNudgeEmail
+                  ? 'Share Your Feedback'
+                  : isFeedbackEmail
                     ? 'View Your Feedback'
                     : isConfirmedState
                       ? 'View Interview Details'
                       : isDeclinedState
                         ? 'Update Availability'
                         : 'Confirm Availability'}
-                </Link>
-                <p className="text-[11px] text-[#9CA3AF] mt-3">This secure link is personal to you — no login required.</p>
-              </>
-            )}
-          </div>
+              </Link>
+              <p className="text-[11px] text-[#9CA3AF] mt-3">This secure link is personal to you — no login required.</p>
+            </div>
+          )}
 
           {/* Sign-off */}
           <p className="text-sm text-[#374151] leading-relaxed mt-6">

@@ -22,7 +22,7 @@ through emails.
 
 **Acceptance Criteria:**
 1. Path: Job Applications → open candidate → **Interview Details** tab → round card → **Interview Panel** section.
-2. External panelists appear as **chips in the same row as internal panel members** — initials avatar + full name + a small colored **status dot**.
+2. External panelists appear as **chips in the same row as internal panel members** — initials avatar + full name + a small **`External`** tag + a small colored **status dot** — so outside panelists are identifiable at a glance, without hovering.
    *Example: the round shows `SU Super User` (internal) and then `AJ Alice Johnson ●`, `BW Bob Williams ●`, `CD Carol Davis ●`, `DB ~~Dan Brown~~ ●`.*
 3. Status dot color tells the status at a glance:
    | Status | Dot color | Chip look |
@@ -183,7 +183,8 @@ instantly and I keep a copy for my own reference.
 
 **Pre-condition:**
 1. The panelist has **accepted** the invitation (Story 4) — feedback stays locked before that. The collapsed bar reads *"Interview Panel Feedback (Accept the invitation first)"* until then.
-2. The invitation has not been cancelled.
+2. The **interview start time has passed** — before that the bar reads *"(Opens after the interview starts — …)"* even for accepted panelists (Story 6, AC 3).
+3. The invitation has not been cancelled.
 
 **Acceptance Criteria:**
 
@@ -235,6 +236,60 @@ instantly and I keep a copy for my own reference.
 2. Panelist emails — a second template (receipt) alongside the invitation.
 3. Candidate → Interview Details (external feedback row, chip status).
 4. Recruiter notification Email 3 (below).
+
+---
+
+## Story 6 — The waiting period: accepted early, interview later
+
+**Story:**
+As an external panelist who accepted an invitation days before the interview, I want the system
+to guide me correctly through the wait — remind me at the right time, let me change my response
+if plans change, and open the feedback form only once the interview actually starts — so I am
+never asked to do something at the wrong moment.
+
+**The example timeline used throughout** *(mirrors a real case)*:
+invitation sent **Wed, 23 Jul** → panelist accepts **Thu, 24 Jul** → interview is **Sat, 1 Aug, 10:00 AM IST**.
+
+**Pre-condition:**
+1. The panelist accepted the invitation (Story 4) and the interview date is still in the future.
+
+**Acceptance Criteria:**
+
+*Panelist side (24 Jul → 1 Aug):*
+1. Accepting early works exactly like Story 4 — the recruiter is notified the same day (Email 1), not on interview day.
+2. During the wait the secure link stays fully usable: view the details, re-read the join link/venue, **change the response** (Story 4, AC 11), or update the note. Every change re-notifies the recruiter — latest response wins.
+3. **The feedback form is locked until the interview starts.** The collapsed bar reads:
+   *"Interview Panel Feedback (Opens after the interview starts — 01/Aug/2026, 10:00 AM IST)"*.
+   Accepting does NOT open it — a panelist must never be able to rate a candidate they haven't met yet.
+   *(Before accepting, the bar still reads "(Accept the invitation first)" — two different lock reasons, two different messages.)*
+4. **The day before the interview (31 Jul)** the panelist receives the reminder — **Email D** below.
+5. **From 10:00 AM on 1 Aug** the feedback form unlocks automatically — Story 5 takes over from here.
+6. If no feedback arrives within ~24 hours after the interview, one gentle nudge — **Email E** below — is sent. One nudge only, never a chain.
+
+*Recruiter side during the wait:*
+7. The chip shows green **Availability Confirmed** the whole time — no extra notifications during the quiet period.
+8. The recruiter can still cancel or resend at any point (Story 3); cancelling stops the reminder from being sent.
+9. When feedback arrives, the normal flow resumes: chip turns purple, Email 3 to the recruiter.
+
+**Field Values:**
+| Event | When | Trigger |
+|---|---|---|
+| Reminder (Email D) | 24 hours before interview start | Only for status Availability Confirmed |
+| Feedback unlock | At interview start time (interview's timezone) | Automatic, no email |
+| Nudge (Email E) | ~24 hours after interview start, if no feedback | Once only |
+
+**Validations:**
+1. Feedback submission is impossible before the interview start time — even with the accepted link.
+2. The reminder goes **only** to panelists who are Availability Confirmed — never to declined, unanswered, or cancelled invitations.
+3. The nudge is skipped if feedback was already submitted or the invitation was cancelled.
+
+**Post-condition:**
+1. The panelist reaches interview day informed and on time; feedback flows in right after the interview, not before, not never.
+
+**Impact:**
+1. Secure panelist page (time-based feedback lock + lock message).
+2. Two new scheduled emails (D — reminder, E — nudge) with time-based triggers.
+3. No recruiter-side UI change — statuses and notifications already cover it.
 
 ---
 
@@ -347,7 +402,7 @@ one button). Subjects front-load the useful facts — who, what, which interview
 
 ## Panelist Emails
 
-Three emails go **to the external panelist**. All come from the business unit's sender name
+Five emails go **to the external panelist**. All come from the business unit's sender name
 (*"MindInventory Talent Acquisition" &lt;no-reply@collabcrm.com&gt;*), carry the BU logo, and
 end with the same secure button link plus the line
 *"This secure link is personal to you — no login required."*
@@ -475,10 +530,6 @@ end with the same secure button link plus the line
 >
 > No action is needed on your side — your secure link has been deactivated.
 >
-> **[ Open Secure Link ]** *(muted, secondary style — not a call to action)*
->
-> *This link has been deactivated — it will only show that the invitation was cancelled.*
->
 > Thank you,
 > **The Talent Acquisition Team**
 >
@@ -492,9 +543,82 @@ end with the same secure button link plus the line
 
 ---
 
+### Email D — Interview reminder (sent 24 hours before the interview)
+
+Sent **only** to panelists whose status is **Availability Confirmed** (Story 6, AC 4).
+
+**Subject:** `Reminder: Arjun Mehta interview – 01/Aug/2026, 10:00 AM IST (GMT+5:30)`
+
+**Body:**
+
+> Hi **Bob**,
+>
+> A quick reminder — your interview panel session for the **Flutter Developer** position is coming up.
+>
+> Everything you need — the details and the meeting link — is on your secure page below.
+>
+> **Interview Details:**
+>
+> | | |
+> |---|---|
+> | Candidate | Arjun Mehta |
+> | Role | Flutter Developer |
+> | Interview Round | Round 1 — Technical Round |
+> | Interview Date | 01/Aug/2026 · 10:00 AM IST (GMT+5:30) |
+>
+> **See you there?**
+> If anything has changed and you can't make it anymore, please update your response — the recruiter will be notified right away.
+>
+> **[ View Interview Details ]**
+>
+> *This secure link is personal to you — no login required.*
+>
+> Thank you,
+> **The Talent Acquisition Team**
+>
+> *Powered by CollabCRM*
+
+*Variation: offline rounds say "the details and the venue address" instead of "the meeting link".*
+
+---
+
+### Email E — Feedback nudge (sent ~24 hours after the interview, only if no feedback yet)
+
+Skipped if feedback was already submitted or the invitation was cancelled. **Sent once, never repeated.**
+
+**Subject:** `How did it go? Share your feedback – Arjun Mehta`
+
+**Body:**
+
+> Hi **Rahul**,
+>
+> Thanks again for joining the interview for the **Flutter Developer** position.
+>
+> When you have a few minutes, please share your feedback — it helps the team decide quickly.
+>
+> **Interview Details:**
+>
+> | | |
+> |---|---|
+> | Candidate | Arjun Mehta |
+> | Role | Flutter Developer |
+> | Interview Round | Round 1 — Technical Round |
+> | Interview Date | 20/Jul/2026 · 03:00 PM IST (GMT+5:30) |
+>
+> **[ Share Your Feedback ]**
+>
+> *This secure link is personal to you — no login required.*
+>
+> Thank you,
+> **The Talent Acquisition Team**
+>
+> *Powered by CollabCRM*
+
+---
+
 ### Rules common to all panelist emails
 
-1. All buttons open the **same secure link** — the page just shows a different state (form, read-only submission, or cancelled screen).
+1. Emails A and B open the **same secure link** — the page just shows a different state (form or read-only submission). Email C has **no button at all** — the link is dead, so nothing is offered.
 2. The receipt (Email B) and cancellation (Email C) contain **no "action required" language** — they ask nothing of the panelist.
 3. The timezone is always spelled out next to the time (`IST (GMT+5:30)`), since external panelists have no timezone settings.
-4. Exactly one email per event: invited/resent → Email A, feedback submitted → Email B, cancelled → Email C.
+4. Exactly one email per event: invited/resent → Email A, feedback submitted → Email B, cancelled → Email C, 24h before the interview → Email D, ~24h after with no feedback → Email E (once only).

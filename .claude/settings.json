@@ -51,7 +51,9 @@
       "Bash(python3 /tmp/claude-1000/-home-yashang--gemini-antigravity-scratch-collab-careers-prototype/1a3e3372-c78f-414b-a94c-526a10ebab0e/scratchpad/tree.py arjun_rounds.html \"Interview Panel Feedback\")",
       "Bash(cp redesign_kebab2.png kebab_crop.png)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/crm/candidates/3)",
-      "Bash(grep -n \"^  \\\\],$\" src/store/seed.ts)"
+      "Bash(grep -n \"^  \\\\],$\" src/store/seed.ts)",
+      "Bash(sed -i 's|http://localhost:5173|http://localhost:5174|g' /tmp/claude-1000/-home-yashang--gemini-antigravity-scratch-collab-careers-prototype/1a3e3372-c78f-414b-a94c-526a10ebab0e/scratchpad/verify_final3.js)",
+      "Bash(node /tmp/claude-1000/-home-yashang--gemini-antigravity-scratch-collab-careers-prototype/1a3e3372-c78f-414b-a94c-526a10ebab0e/scratchpad/verify_final3.js)"
     ],
     "additionalDirectories": [
       "/home/yashang/Downloads",

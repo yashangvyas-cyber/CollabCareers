@@ -1068,6 +1068,10 @@ export default function CandidateDetailPage() {
                                             {displayName.split(/[\s@]/).filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                                           </span>
                                           <span className={cancelled ? 'line-through' : ''}>{displayName}</span>
+                                          {/* Visible at a glance — no hover needed to spot externals */}
+                                          <span className={`text-[9px] font-bold rounded px-1 py-px border shrink-0 ${cancelled ? 'text-[#9CA3AF] bg-[#F9FAFB] border-[#D1D5DB]' : 'text-[#3538CD] bg-[#EEF4FF] border-[#C7D2FE]'}`}>
+                                            External
+                                          </span>
                                           <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: sty.text }} />
                                           {/* Hover card */}
                                           <span className="absolute top-full left-0 z-20 pt-1.5 hidden group-hover:block">

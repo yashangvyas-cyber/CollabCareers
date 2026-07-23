@@ -122,7 +122,11 @@ function PanelistView({ token }: { token?: string }) {
   const declined = committed === false;
   const confirmed = committed === true;
   // Feedback is locked until the panelist confirms they're available for the interview.
-  const feedbackUnlocked = confirmed;
+  // Feedback opens only once the interview has started — accepting a week early
+  // must not let a panelist rate a candidate before the interview happens.
+  const interviewStart = new Date(`${ctx.interviewDate.replace(/\//g, ' ')} ${ctx.interviewTime}`);
+  const interviewStarted = isNaN(interviewStart.getTime()) || Date.now() >= interviewStart.getTime();
+  const feedbackUnlocked = confirmed && interviewStarted;
   // Has the panelist typed anything into the feedback form yet? (used to warn on discard)
   const hasDraftedFeedback =
     fbOverallRemarks.trim() !== '' ||
@@ -439,7 +443,11 @@ function PanelistView({ token }: { token?: string }) {
                         {!feedbackUnlocked && <Lock className="w-3.5 h-3.5 text-[#9CA3AF]" />}
                         Interview Panel Feedback
                         <span className="text-[#9CA3AF] font-normal">
-                          {feedbackUnlocked ? '(Tap to add feedback)' : '(Accept the invitation first)'}
+                          {feedbackUnlocked
+                            ? '(Tap to add feedback)'
+                            : !confirmed
+                              ? '(Accept the invitation first)'
+                              : `(Opens after the interview starts — ${ctx.interviewDate}, ${ctx.interviewTime} ${ctx.timezoneLabel})`}
                         </span>
                         <Info className="w-3.5 h-3.5 text-[#9CA3AF]" />
                       </span>
