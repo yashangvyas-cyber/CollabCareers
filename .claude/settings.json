@@ -54,7 +54,8 @@
       "Bash(grep -n \"^  \\\\],$\" src/store/seed.ts)",
       "Bash(sed -i 's|http://localhost:5173|http://localhost:5174|g' /tmp/claude-1000/-home-yashang--gemini-antigravity-scratch-collab-careers-prototype/1a3e3372-c78f-414b-a94c-526a10ebab0e/scratchpad/verify_final3.js)",
       "Bash(node /tmp/claude-1000/-home-yashang--gemini-antigravity-scratch-collab-careers-prototype/1a3e3372-c78f-414b-a94c-526a10ebab0e/scratchpad/verify_final3.js)",
-      "Bash(node /tmp/claude-1000/-home-yashang--gemini-antigravity-scratch-collab-careers-prototype/1a3e3372-c78f-414b-a94c-526a10ebab0e/scratchpad/shot_pill.js)"
+      "Bash(node /tmp/claude-1000/-home-yashang--gemini-antigravity-scratch-collab-careers-prototype/1a3e3372-c78f-414b-a94c-526a10ebab0e/scratchpad/shot_pill.js)",
+      "WebSearch"
     ],
     "additionalDirectories": [
       "/home/yashang/Downloads",

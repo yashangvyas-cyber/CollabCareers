@@ -139,10 +139,10 @@ so that I can prepare and respond without creating any account or logging in.
 
 *Responding with availability:*
 7. A bar titled **"Interview Panel Invitation"** sits at the top (it stays visible while scrolling): *"Can you join this interview? The recruiter is notified by email."* with **Accept** and **Decline** buttons.
-8. Responding is **mis-click safe (two steps)**: picking Accept or Decline only highlights the choice and reveals an **optional note box** + a **Confirm Accept / Confirm Decline** button. Cancel resets the choice. Nothing is sent until Confirm.
+8. Responding is **double-confirm**: clicking **Accept** or **Decline** opens a compact confirmation dialog — title *"Accept this invitation?"* / *"Decline this invitation?"*, the **optional note** box, the line *"The recruiter will be notified by email."*, and **Go back / Yes, accept invitation** (or *Yes, decline invitation*) buttons. Nothing is sent until the "Yes" button. The dialog does **not** repeat the interview details — they are fully visible on the page behind it.
 9. The note box hints at what to write — accepting: *"Add a note for the recruiter… (optional)"*; declining: *"Propose an alternate time or leave a message… (optional)"*.
    *Example: Emma Clarke declines with "I am travelling that week — happy to help any day after the 28th."*
-10. On Confirm, a toast confirms: *"Response submitted — Accepted. The recruiter has been notified via email."* and the bar changes to a status line: **"You've accepted / declined this interview invitation."**
+10. On confirming in the dialog, a toast confirms: *"Response submitted — Accepted. The recruiter has been notified via email."* and the bar changes to a status line: **"You've accepted / declined this interview invitation."**
 11. The panelist can **change their response later** (Change response) — until they submit feedback. The latest response always wins.
 12. The **feedback form stays locked until the panelist accepts** — someone who declined (or hasn't answered) cannot rate the candidate.
 
@@ -157,7 +157,7 @@ so that I can prepare and respond without creating any account or logging in.
 | Note | Free text, max 500 characters | No | Sent to the recruiter along with the response |
 
 **Validations:**
-1. A response cannot be sent without explicitly pressing **Confirm** — a single stray click never submits.
+1. A response is never sent by a single click — the confirmation dialog must be explicitly confirmed ("Yes, accept/decline invitation"). Go back closes it with nothing sent.
 2. The note is optional — Confirm works with it empty.
 3. A cancelled or invalid link can never submit a response.
 

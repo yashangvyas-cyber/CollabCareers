@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { FileText, CheckCircle, AlertTriangle, ExternalLink, XCircle, Mail, Phone, Linkedin, Copy, MapPin, ChevronDown, Info, Lock, CalendarClock, Check, X } from 'lucide-react';
+import { FileText, CheckCircle, AlertTriangle, ExternalLink, XCircle, Mail, Phone, Linkedin, Copy, MapPin, ChevronDown, Info, Lock, CalendarClock, Check, X, CalendarCheck, CalendarX } from 'lucide-react';
 import { useApp } from '../../store/AppContext';
 import { resolveBranding } from '../../lib/businessUnits';
 import BuLogo from '../../components/panelist/BuLogo';
@@ -45,7 +45,8 @@ function PanelistView({ token }: { token?: string }) {
   // ever true when the panelist actually flips to the other option.
   const [availAvailable, setAvailAvailable] = useState(invite?.status !== 'Availability Declined');
   const [availNote, setAvailNote] = useState('');
-  const [pendingChoice, setPendingChoice] = useState<boolean | null>(null);
+  // Which response is awaiting the confirm dialog (null = none) — the double-confirm step.
+  const [confirmChoice, setConfirmChoice] = useState<boolean | null>(null);
   const [changeMenuOpen, setChangeMenuOpen] = useState(false);
   const [showAvailModal, setShowAvailModal] = useState(false);
   const [toast, setToast] = useState('');
@@ -91,12 +92,12 @@ function PanelistView({ token }: { token?: string }) {
   // Persist the chosen availability, notify the recruiter (simulated), and — when going
   // unavailable — discard any drafted feedback (it's about to be hidden).
   const commitAvailability = (available: boolean) => {
+    setConfirmChoice(null);
     if (!token) return;
     submitExternalAvailability(token, { available, note: availNote.trim() || undefined });
     setAvailAvailable(available);
     setCommitted(available);
     setShowAvailModal(false);
-    setPendingChoice(null);
     if (!available) {
       setFbOpen(false);
       setFbCriteriaRatings({});
@@ -173,69 +174,27 @@ function PanelistView({ token }: { token?: string }) {
         {!isReadOnly && (
           <div className="sticky top-[64px] z-20 mb-4 bg-white rounded-lg border border-[#E5E7EB] shadow-sm">
             {committed === null ? (
-              /* First response — pick Accept/Decline (nothing is sent yet), then an
-                 inline note + Confirm row appears. Mis-click safe. */
-              <>
-                <div className="px-4 py-2.5 flex flex-wrap items-center gap-x-4 gap-y-2">
-                  <div className="flex items-center gap-2.5 flex-1 min-w-[220px]">
-                    <CalendarClock className="w-5 h-5 text-[#3538CD] shrink-0" />
-                    <div>
-                      <p className="text-sm font-bold text-[#111827] leading-tight">Interview Panel Invitation</p>
-                      <p className="text-[11px] text-[#6B7280]">
-                        {pendingChoice === null
-                          ? 'Can you join this interview? The recruiter is notified by email.'
-                          : `You're ${pendingChoice ? 'accepting' : 'declining'} this invitation — confirm to notify the recruiter.`}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 ml-auto">
-                    {/* RSVP in the Outlook idiom: filled Accept + outlined Decline (8px radius).
-                        Once a choice is picked, the pair is REPLACED by one soft tinted status
-                        chip — the Cancel/Confirm row below owns the actions, so no dimmed or
-                        duplicate buttons ever appear. */}
-                    {pendingChoice === null ? (
-                      <div className="flex items-center gap-2">
-                        <button onClick={() => setPendingChoice(true)}
-                          className="flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold border bg-[#059669] border-[#059669] text-white hover:bg-[#047857] transition-colors duration-150">
-                          <Check className="w-3.5 h-3.5" /> Accept
-                        </button>
-                        <button onClick={() => setPendingChoice(false)}
-                          className="flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold border bg-white border-[#D1D5DB] text-[#374151] hover:bg-[#F9FAFB] transition-colors duration-150">
-                          <X className="w-3.5 h-3.5" /> Decline
-                        </button>
-                      </div>
-                    ) : (
-                      <span className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold border ${
-                        pendingChoice
-                          ? 'bg-[#ECFDF5] border-[#A7F3D0] text-[#047857]'
-                          : 'bg-[#F1F5F9] border-[#CBD5E1] text-[#334155]'
-                      }`}>
-                        {pendingChoice ? <Check className="w-3.5 h-3.5" /> : <X className="w-3.5 h-3.5" />}
-                        {pendingChoice ? 'Accepting' : 'Declining'}
-                      </span>
-                    )}
+              /* First response — two plain, stable buttons. Clicking opens the
+                 confirmation dialog (double-confirm); the bar itself never changes. */
+              <div className="px-4 py-2.5 flex flex-wrap items-center gap-x-4 gap-y-2">
+                <div className="flex items-center gap-2.5 flex-1 min-w-[220px]">
+                  <CalendarClock className="w-5 h-5 text-[#3538CD] shrink-0" />
+                  <div>
+                    <p className="text-sm font-bold text-[#111827] leading-tight">Interview Panel Invitation</p>
+                    <p className="text-[11px] text-[#6B7280]">Can you join this interview? The recruiter is notified by email.</p>
                   </div>
                 </div>
-                {pendingChoice !== null && (
-                  <div className="px-4 pb-2.5 flex flex-wrap items-center gap-2">
-                    <input value={availNote} onChange={e => setAvailNote(e.target.value)} autoFocus
-                      placeholder={pendingChoice ? 'Add a note for the recruiter… (optional)' : 'Propose an alternate time or leave a message… (optional)'}
-                      className="flex-1 min-w-[240px] border border-[#E5E7EB] rounded-lg px-3.5 py-2 text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#3538CD]/20 focus:border-[#3538CD]" />
-                    <button onClick={() => setPendingChoice(null)}
-                      className="px-4 py-2 text-xs font-semibold text-[#6B7280] rounded-lg hover:bg-[#F3F4F6] transition-colors">
-                      Cancel
-                    </button>
-                    <button onClick={() => commitAvailability(pendingChoice)}
-                      className={`px-4 py-2 text-white text-xs font-semibold rounded-lg transition-colors duration-150 ${
-                        pendingChoice
-                          ? 'bg-[#059669] hover:bg-[#047857]'
-                          : 'bg-[#334155] hover:bg-[#1E293B]'
-                      }`}>
-                      {pendingChoice ? 'Confirm Accept' : 'Confirm Decline'}
-                    </button>
-                  </div>
-                )}
-              </>
+                <div className="flex items-center gap-2 ml-auto">
+                  <button onClick={() => setConfirmChoice(true)}
+                    className="flex items-center gap-1.5 rounded-lg px-5 py-2 text-xs font-semibold bg-[#059669] text-white hover:bg-[#047857] transition-colors duration-150">
+                    <Check className="w-3.5 h-3.5" /> Accept
+                  </button>
+                  <button onClick={() => setConfirmChoice(false)}
+                    className="flex items-center gap-1.5 rounded-lg px-5 py-2 text-xs font-semibold border border-[#D1D5DB] bg-white text-[#374151] hover:bg-[#F9FAFB] transition-colors duration-150">
+                    <X className="w-3.5 h-3.5" /> Decline
+                  </button>
+                </div>
+              </div>
             ) : (
               /* Responded — clear status line; actions: note + Change response menu */
               <>
@@ -581,6 +540,50 @@ function PanelistView({ token }: { token?: string }) {
       </main>
 
       {/* ── Change-availability confirmation (reversing a communicated decision) ── */}
+      {/* ── Double-confirm dialog for the first response — choice-tinted, with the
+             interview "ticket" so the panelist sees exactly what they're answering ── */}
+      {confirmChoice !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl border border-[#E5E7EB] w-full max-w-md overflow-hidden">
+            {/* Choice-tinted top strip */}
+            <div className={`h-1.5 ${confirmChoice ? 'bg-[#059669]' : 'bg-[#334155]'}`} />
+            <div className="p-6">
+              <div className="flex items-start gap-3 mb-4">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${confirmChoice ? 'bg-[#ECFDF5] border-[#A7F3D0]' : 'bg-[#F1F5F9] border-[#CBD5E1]'}`}>
+                  {confirmChoice
+                    ? <CalendarCheck className="w-5 h-5 text-[#059669]" />
+                    : <CalendarX className="w-5 h-5 text-[#334155]" />}
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-[#111827]">
+                    {confirmChoice ? 'Accept this invitation?' : 'Decline this invitation?'}
+                  </h2>
+                  <p className="text-sm text-[#6B7280] mt-1">
+                    {confirmChoice
+                      ? "You'll join the interview panel for this session."
+                      : "You'll be marked unavailable for this session."}
+                  </p>
+                </div>
+              </div>
+              <input value={availNote} onChange={e => setAvailNote(e.target.value)}
+                placeholder={confirmChoice ? 'Add a note for the recruiter (optional)…' : 'Propose an alternate time or leave a message (optional)…'}
+                className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm text-[#111827] placeholder:text-[#9CA3AF] mb-4 focus:outline-none focus:ring-2 focus:ring-[#3538CD]/20 focus:border-[#3538CD]" />
+              <p className="text-xs text-[#6B7280] leading-relaxed mb-5">The recruiter will be notified by email.</p>
+              <div className="flex justify-end gap-2">
+                <button onClick={() => setConfirmChoice(null)}
+                  className="px-4 py-2 text-xs font-semibold text-[#374151] rounded-lg border border-[#E5E7EB] hover:bg-[#F9FAFB] transition-colors">
+                  Go back
+                </button>
+                <button onClick={() => commitAvailability(confirmChoice)}
+                  className={`px-4 py-2 text-xs font-semibold text-white rounded-lg transition-colors ${confirmChoice ? 'bg-[#059669] hover:bg-[#047857]' : 'bg-[#334155] hover:bg-[#1E293B]'}`}>
+                  {confirmChoice ? 'Yes, accept invitation' : 'Yes, decline invitation'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showAvailModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div className="bg-white rounded-2xl shadow-2xl border border-[#E5E7EB] w-full max-w-md p-6">
@@ -609,7 +612,7 @@ function PanelistView({ token }: { token?: string }) {
               placeholder="Add a note for the recruiter (optional)…"
               className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm text-[#111827] placeholder:text-[#9CA3AF] mb-4 focus:outline-none focus:ring-2 focus:ring-[#3538CD]/20 focus:border-[#3538CD]" />
             <p className="text-xs text-[#6B7280] leading-relaxed mb-5">
-              Proceeding will trigger an email to notify the recruiter of this schedule change.
+              The recruiter will be notified of your updated availability by email.
             </p>
             <div className="flex justify-end gap-2">
               <button onClick={() => { setShowAvailModal(false); setAvailAvailable(committed ?? true); }}
