@@ -164,6 +164,10 @@ export interface OfferDetail {
   /** Set when the candidate declines from the career portal. */
   declinedAt?: string;
   declineReason?: string;
+  /** Set when the RECRUITER withdraws the offer (status "Offer Revoked").
+   *  Distinct from a candidate decline — the company pulled it back. */
+  revokedAt?: string;
+  revokeReason?: string;
 }
 
 export interface Application {
@@ -182,6 +186,9 @@ export interface Application {
   answers: Record<string, any>;
   resumeUrl: string;
   offer?: OfferDetail;
+  /** Superseded offers (declined/revoked), newest-first. The live offer lives in
+   *  `offer`; these render as read-only cards under it in the Offer History. */
+  offerHistory?: OfferDetail[];
 }
 
 export interface PortalAppearance {

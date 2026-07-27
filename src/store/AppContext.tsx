@@ -29,7 +29,7 @@ interface AppContextType extends AppState {
   resendExternalInvite: (id: string) => void;
 }
 
-const STORAGE_KEY = 'collab_careers_state_v23';
+const STORAGE_KEY = 'collab_careers_state_v26';
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
@@ -278,15 +278,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const acceptOffer = (id: string) => {
     setState(prev => ({
       ...prev,
-      applications: prev.applications.map(a =>
-        a.id === id
+      applications: prev.applications.map(a => {
+        if (a.id !== id || !a.offer) return a;
+        const now = new Date().toISOString();
+        const offer = a.offer;
+        // Digital-sign acceptance IS the signing step: flip the signature to
+        // signed, stamp the candidate signatory, and surface the countersigned
+        // letter so the accepted state has a downloadable document.
+        const signature = offer.signature
           ? {
-              ...a,
-              status: 'Offer Accepted' as const,
-              offer: a.offer ? { ...a.offer, acceptedAt: new Date().toISOString() } : undefined,
+              ...offer.signature,
+              status: 'signed' as const,
+              signedAt: now,
+              signedDocument: offer.signature.signedDocument ?? offer.document,
+              signatories: offer.signature.signatories.map(s =>
+                s.party === 'candidate' && !s.signedAt ? { ...s, signedAt: now } : s
+              ),
             }
-          : a
-      ),
+          : offer.signature;
+        return { ...a, status: 'Offer Accepted' as const, offer: { ...offer, acceptedAt: now, signature } };
+      }),
     }));
   };
 

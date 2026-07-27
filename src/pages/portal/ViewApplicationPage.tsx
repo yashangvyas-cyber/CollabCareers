@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import PortalLayout from '../../components/PortalLayout';
 import { useApp } from '../../store/AppContext';
+import type { OfferDetail } from '../../store/types';
 import {
   Download, Globe, Linkedin, FileText,
   ChevronDown, MapPin, Briefcase, Building2, Clock, X, AlertTriangle,
@@ -42,6 +43,10 @@ export default function ViewApplicationPage() {
   const offer = application.offer;
   const offerStatuses = ['Offered', 'Offer Accepted', 'Offer Declined', 'Offer Revoked'];
   const showOfferCard = !!offer && offerStatuses.includes(application.status);
+  // Superseded offers, newest-first. When present, the live offer becomes the top
+  // card in an "Offer History" stack and these render read-only beneath it.
+  const previousOffers = application.offerHistory ?? [];
+  const hasOfferHistory = previousOffers.length > 0;
   const offerRevoked = application.status === 'Offer Revoked';
   const offerLive = application.status === 'Offered' && !offerRevoked;
   // Document is hidden once the offer is revoked, whatever the mode.
@@ -51,12 +56,14 @@ export default function ViewApplicationPage() {
   // Offer". So until it's signed there is nothing to show: we hide the document
   // row entirely rather than display a name the candidate can't view or download.
   // A manual attachment has no signing step, so it stays downloadable throughout.
+  const offerDeclined = application.status === 'Offer Declined';
   const signedDoc = sig?.status === 'signed' ? (sig.signedDocument ?? offer?.document) : undefined;
-  const offerDoc = offerRevoked
+  // A declined or revoked offer is void → no downloadable letter, whatever the mode.
+  const offerDoc = (offerRevoked || offerDeclined)
     ? undefined
     : sig
       ? signedDoc                 // digital-sign: only once signed
-      : offer?.document;          // manual attachment: always
+      : offer?.document;          // manual attachment: always (until declined)
   const canDownload = !sig || sig.status === 'signed';
   const canDecline = offerLive;
   // "Review & Sign" shows only while the letter is awaiting signature. Once signed
@@ -172,8 +179,8 @@ export default function ViewApplicationPage() {
           <div className="h-px flex-1 bg-[#F3F4F6]" />
         </div>
 
-        {/* Offer Summary — a collapsible section styled like the accordions below,
-            kept at the top of the page as the most important thing to see. */}
+        {/* Offer Summary — the live offer, with any superseded offers nested
+            read-only beneath it under a "Previous Offers" sub-section. */}
         {showOfferCard && offer && (
           <div className="mb-6 bg-white rounded-2xl border border-[#E5E7EB] overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 animate-in fade-in slide-in-from-top-2">
             <button
@@ -261,14 +268,13 @@ export default function ViewApplicationPage() {
                 {/* Digital-sign: the same link that goes out in the offer email.
                     Hidden once declined — a declined offer can't be signed. */}
                 {showSignCta && offer.signature && (
-                  <a
-                    href={offer.signature.signUrl}
-                    target="_blank"
-                    rel="noreferrer"
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/portal/${slug}/sign/${application.id}`)}
                     className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-primary text-white text-xs font-black rounded-2xl hover:opacity-90 transition-all uppercase tracking-widest shadow-lg"
                   >
                     <PenLine className="w-4 h-4" /> Review &amp; Sign Offer
-                  </a>
+                  </button>
                 )}
                 {/* Manual / verbal: explicit accept, so Decline is never alone. */}
                 {canAccept && (
@@ -306,6 +312,20 @@ export default function ViewApplicationPage() {
                 <p className="text-xs font-bold text-[#059669]">
                   You accepted this offer{offer.acceptedAt ? ` on ${formatDate(offer.acceptedAt)}` : ''}. We look forward to having you on board!
                 </p>
+              </div>
+            )}
+
+            {/* Previous Offers — superseded, read-only, nested inside this section */}
+            {hasOfferHistory && (
+              <div className="border-t border-[#E5E7EB] bg-[#F9FAFB] px-4 sm:px-5 py-4">
+                <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-3 px-1">
+                  Previous Offers ({previousOffers.length})
+                </p>
+                <div className="space-y-2">
+                  {previousOffers.map((po, i) => (
+                    <PreviousOfferCard key={i} offer={po} />
+                  ))}
+                </div>
               </div>
             )}
             </div>
@@ -627,6 +647,99 @@ function InfoItem({ label, value }: { label: string; value: string }) {
       <div className="text-sm font-semibold text-[#111827] leading-relaxed">
         {value || <span className="text-[#D1D5DB] font-normal">Not provided</span>}
       </div>
+    </div>
+  );
+}
+
+/** A superseded offer — read-only, collapsed by default. No action buttons: a
+ *  past offer can never be re-actioned; it's a record with its final outcome. */
+function PreviousOfferCard({ offer }: { offer: OfferDetail }) {
+  const [open, setOpen] = useState(false);
+  const fmt = (d: string) => new Date(d).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+  const isDeclined = !!(offer.declinedAt || offer.declineReason);
+  const isRevoked = !isDeclined && !!(offer.revokedAt || offer.revokeReason);
+  const statusLabel = isDeclined ? 'Declined' : isRevoked ? 'Revoked' : 'Superseded';
+  const badge = isDeclined
+    ? 'bg-[#FEF2F2] text-[#DC2626] border-[#FECACA]'          // candidate said no — red
+    : isRevoked
+      ? 'bg-[#FFFBEB] text-[#B45309] border-[#FDE68A]'         // company withdrew — amber
+      : 'bg-[#F9FAFB] text-[#6B7280] border-[#E5E7EB]';
+  // A declined or revoked offer is void — its letter is never downloadable. Only a
+  // signed/accepted offer exposes the (countersigned) letter. Since history entries
+  // are always declined or revoked, no letter is shown here.
+  const doc = (isDeclined || isRevoked)
+    ? undefined
+    : offer.signature
+      ? (offer.signature.status === 'signed' ? (offer.signature.signedDocument ?? offer.document) : undefined)
+      : offer.document;
+
+  return (
+    <div className="bg-white rounded-2xl border border-[#E5E7EB] overflow-hidden shadow-sm">
+      <button
+        type="button"
+        onClick={() => setOpen(v => !v)}
+        className="w-full flex items-center justify-between px-4 sm:px-6 py-3.5 hover:bg-[#F9FAFB] transition-colors text-left"
+      >
+        <div className="flex items-center gap-3 min-w-0">
+          <span className="text-[11px] font-bold text-[#6B7280]">Offer · {fmt(offer.offeredAt)}</span>
+          <span className={`px-2.5 py-0.5 text-[9px] font-black rounded-full border uppercase tracking-widest ${badge}`}>{statusLabel}</span>
+        </div>
+        <ChevronDown className={`w-4 h-4 text-[#9CA3AF] transition-transform duration-200 shrink-0 ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div className="border-t border-[#F3F4F6]">
+          <div className="px-5 sm:px-6 py-5 grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <div className="space-y-1.5">
+              <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">Expected Joining Date</p>
+              <p className="text-sm font-semibold text-[#111827] flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-[#9CA3AF]" />{fmt(offer.joiningDate)}
+              </p>
+            </div>
+            <div className="space-y-1.5">
+              <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">Offer Received On</p>
+              <p className="text-sm font-semibold text-[#111827] flex items-center gap-2">
+                <Clock className="w-4 h-4 text-[#9CA3AF]" />{fmt(offer.offeredAt)}
+              </p>
+            </div>
+            {doc && (
+              <div className="space-y-1.5 min-w-0">
+                <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">Offer Letter</p>
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-primary shrink-0" />
+                  <p className="text-sm font-semibold text-[#111827] truncate min-w-0">{doc.fileName}</p>
+                  <a href={doc.fileUrl} title="Download offer letter" aria-label="Download offer letter"
+                    className="shrink-0 ml-auto p-2 rounded-lg text-[#6B7280] hover:text-primary hover:bg-primary/5 transition-all">
+                    <Download className="w-4 h-4" />
+                  </a>
+                </div>
+              </div>
+            )}
+          </div>
+          {isDeclined ? (
+            <div className="px-5 sm:px-6 py-4 bg-[#FEF2F2] border-t border-[#FECACA]">
+              <p className="text-xs font-bold text-[#DC2626]">
+                You declined this offer{offer.declinedAt ? ` on ${fmt(offer.declinedAt)}` : ''}.
+              </p>
+              {offer.declineReason && (
+                <p className="text-xs font-medium text-[#B91C1C] mt-1">Reason: {offer.declineReason}</p>
+              )}
+            </div>
+          ) : isRevoked ? (
+            <div className="px-5 sm:px-6 py-4 bg-[#FFFBEB] border-t border-[#FDE68A]">
+              <p className="text-xs font-bold text-[#B45309]">
+                This offer was withdrawn by the recruitment team{offer.revokedAt ? ` on ${fmt(offer.revokedAt)}` : ''}.
+              </p>
+              {offer.revokeReason && (
+                <p className="text-xs font-medium text-[#92400E] mt-1">Reason: {offer.revokeReason}</p>
+              )}
+            </div>
+          ) : (
+            <div className="px-5 sm:px-6 py-4 bg-[#F9FAFB] border-t border-[#E5E7EB]">
+              <p className="text-xs font-medium text-[#6B7280]">This offer was replaced by a newer one.</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

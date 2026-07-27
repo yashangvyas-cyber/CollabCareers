@@ -20,6 +20,7 @@ import CandidateProfilePage from './pages/portal/CandidateProfilePage';
 import EditProfilePage from './pages/portal/EditProfilePage';
 import AlumniApplicationPage from './pages/portal/AlumniApplicationPage';
 import ViewApplicationPage from './pages/portal/ViewApplicationPage';
+import SignOfferPage from './pages/portal/SignOfferPage';
 import ResetPasswordPage from './pages/portal/ResetPasswordPage';
 // Prototype 3 — External Panelist (token-gated, login-free)
 import PanelistPage from './pages/panelist/PanelistPage';
@@ -69,6 +70,7 @@ function App() {
           <Route path="/portal/:slug/profile" element={<CandidateProfilePage />} />
           <Route path="/portal/:slug/profile/edit" element={<EditProfilePage />} />
           <Route path="/portal/:slug/application/:applicationId" element={<ViewApplicationPage />} />
+          <Route path="/portal/:slug/sign/:applicationId" element={<SignOfferPage />} />
           <Route path="/portal/:slug/alumni-verify" element={<CareerPage openAlumni={true} />} />
           <Route path="/portal/:slug/alumni/apply/:jobId" element={<AlumniApplicationPage />} />
           <Route path="/portal/:slug/reset-password/:token" element={<ResetPasswordPage />} />

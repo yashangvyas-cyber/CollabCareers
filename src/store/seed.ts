@@ -1251,6 +1251,18 @@ Design is a first-class citizen at MindInventory. You will work on products that
           ],
         },
       },
+      // Superseded offer: an earlier manual offer the candidate declined.
+      offerHistory: [
+        {
+          mode: 'manual' as const,
+          joiningDate: new Date(Date.now() + 86400000 * 40).toISOString(),
+          offeredAt: new Date(Date.now() - 86400000 * 20).toISOString(),
+          offeredByName: 'Gurpreetsingh Dhillon',
+          document: { fileName: 'Offer_Letter_DevOps_v1.pdf', fileUrl: '#devops-offer-v1', fileSize: 802816, uploadedAt: new Date(Date.now() - 86400000 * 20).toISOString() },
+          declinedAt: new Date(Date.now() - 86400000 * 16).toISOString(),
+          declineReason: 'The proposed compensation was below my current package.',
+        },
+      ],
     },
     // Offer case 2 of 5 — "Attach Offer Letter" AFTER signing. The countersigned
     // letter is downloadable; status auto-moved to Offer Accepted on signature.
@@ -1289,6 +1301,18 @@ Design is a first-class citizen at MindInventory. You will work on products that
           ],
         },
       },
+      // Superseded offer: an earlier verbal offer the candidate declined.
+      offerHistory: [
+        {
+          mode: 'verbal' as const,
+          joiningDate: new Date(Date.now() + 86400000 * 30).toISOString(),
+          offeredAt: new Date(Date.now() - 86400000 * 20).toISOString(),
+          offeredByName: 'Gurpreetsingh Dhillon',
+          remarks: 'Initial verbal offer discussed over call.',
+          revokedAt: new Date(Date.now() - 86400000 * 15).toISOString(),
+          revokeReason: 'The role was briefly put on hold and re-opened with updated terms.',
+        },
+      ],
     },
     // Offer case 3 of 5 — "Offer Manually" WITH the optional attachment.
     // Portal shows the document as a plain download, no signing.
@@ -1312,6 +1336,26 @@ Design is a first-class citizen at MindInventory. You will work on products that
           uploadedAt: new Date(Date.now() - 86400000 * 4).toISOString(),
         },
       },
+      // Superseded offer: an earlier digital-sign offer, never signed, declined.
+      offerHistory: [
+        {
+          mode: 'digital_sign' as const,
+          joiningDate: new Date(Date.now() + 86400000 * 35).toISOString(),
+          offeredAt: new Date(Date.now() - 86400000 * 14).toISOString(),
+          offeredByName: 'Gurpreetsingh Dhillon',
+          document: { fileName: 'data-analyst-offer-v1.pdf', fileUrl: '#da-offer-v1', fileSize: 1102000, uploadedAt: new Date(Date.now() - 86400000 * 14).toISOString() },
+          signature: {
+            status: 'declined' as const,
+            signUrl: '#da-offer-v1-declined',
+            signatories: [
+              { name: 'Gurpreetsingh Dhillon', email: 'bluewhaletechnosoft@maildrop.cc', party: 'company' as const },
+              { name: 'Alex Patel', email: 'alex.patel@example.com', party: 'candidate' as const },
+            ],
+          },
+          declinedAt: new Date(Date.now() - 86400000 * 10).toISOString(),
+          declineReason: 'The role was on-site; I needed a hybrid arrangement.',
+        },
+      ],
     },
     // Offer case 4 of 5 — "Offer Manually" with NO attachment. The attachment on
     // the Send Offer compose screen is optional, so this is an equally valid
@@ -1330,6 +1374,18 @@ Design is a first-class citizen at MindInventory. You will work on products that
         offeredAt: new Date(Date.now() - 86400000 * 5).toISOString(),
         offeredByName: 'Gurpreetsingh Dhillon',
       },
+      // Superseded offer: an earlier manual offer (with letter) the candidate declined.
+      offerHistory: [
+        {
+          mode: 'manual' as const,
+          joiningDate: new Date(Date.now() + 86400000 * 45).toISOString(),
+          offeredAt: new Date(Date.now() - 86400000 * 15).toISOString(),
+          offeredByName: 'Gurpreetsingh Dhillon',
+          document: { fileName: 'Offer_Letter_Android_v1.pdf', fileUrl: '#android-offer-v1', fileSize: 845000, uploadedAt: new Date(Date.now() - 86400000 * 15).toISOString() },
+          revokedAt: new Date(Date.now() - 86400000 * 11).toISOString(),
+          revokeReason: 'Headcount was revised; the offer was reissued with a new joining date.',
+        },
+      ],
     },
     // Offer case 5 of 5 — "Verbal Offer Shared". Date only, no document.
     {
@@ -1347,6 +1403,53 @@ Design is a first-class citizen at MindInventory. You will work on products that
         offeredByName: 'Gurpreetsingh Dhillon',
         remarks: 'Offer discussed over call on 14 Jul.',
       },
+      // Four superseded offers — shows a deeper history stacking newest-first.
+      offerHistory: [
+        {
+          mode: 'manual' as const,
+          joiningDate: new Date(Date.now() + 86400000 * 55).toISOString(),
+          offeredAt: new Date(Date.now() - 86400000 * 12).toISOString(),
+          offeredByName: 'Gurpreetsingh Dhillon',
+          document: { fileName: 'Offer_Letter_iOS_v2.pdf', fileUrl: '#ios-offer-v2', fileSize: 861000, uploadedAt: new Date(Date.now() - 86400000 * 12).toISOString() },
+          declinedAt: new Date(Date.now() - 86400000 * 9).toISOString(),
+          declineReason: 'Wanted the ESOP component clarified in writing.',
+        },
+        {
+          mode: 'verbal' as const,
+          joiningDate: new Date(Date.now() + 86400000 * 50).toISOString(),
+          offeredAt: new Date(Date.now() - 86400000 * 22).toISOString(),
+          offeredByName: 'Gurpreetsingh Dhillon',
+          remarks: 'First verbal offer over call.',
+          revokedAt: new Date(Date.now() - 86400000 * 18).toISOString(),
+          revokeReason: 'Compensation band was revised before the offer was finalised.',
+        },
+        {
+          mode: 'digital_sign' as const,
+          joiningDate: new Date(Date.now() + 86400000 * 48).toISOString(),
+          offeredAt: new Date(Date.now() - 86400000 * 30).toISOString(),
+          offeredByName: 'Gurpreetsingh Dhillon',
+          document: { fileName: 'ios-offer-v1.pdf', fileUrl: '#ios-offer-v1', fileSize: 1044000, uploadedAt: new Date(Date.now() - 86400000 * 30).toISOString() },
+          signature: {
+            status: 'declined' as const,
+            signUrl: '#ios-offer-v1-declined',
+            signatories: [
+              { name: 'Gurpreetsingh Dhillon', email: 'bluewhaletechnosoft@maildrop.cc', party: 'company' as const },
+              { name: 'Alex Patel', email: 'alex.patel@example.com', party: 'candidate' as const },
+            ],
+          },
+          declinedAt: new Date(Date.now() - 86400000 * 27).toISOString(),
+          declineReason: 'Needed a remote-first arrangement, not hybrid.',
+        },
+        {
+          mode: 'manual' as const,
+          joiningDate: new Date(Date.now() + 86400000 * 42).toISOString(),
+          offeredAt: new Date(Date.now() - 86400000 * 40).toISOString(),
+          offeredByName: 'Gurpreetsingh Dhillon',
+          document: { fileName: 'Offer_Letter_iOS_v0.pdf', fileUrl: '#ios-offer-v0', fileSize: 812000, uploadedAt: new Date(Date.now() - 86400000 * 40).toISOString() },
+          revokedAt: new Date(Date.now() - 86400000 * 36).toISOString(),
+          revokeReason: 'Position was briefly frozen during a budget review.',
+        },
+      ],
     },
     // Riya Desai (c2) — 3 applications, different statuses
     {
