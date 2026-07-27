@@ -3,47 +3,7 @@ import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import PortalLayout from '../../components/PortalLayout';
 import { Briefcase, Mail, Phone, MapPin, FileText, ExternalLink, Linkedin, ArrowRight, Clock, Pencil, Bookmark } from 'lucide-react';
 import { useApp } from '../../store/AppContext';
-
-const portalStatusLabel: Record<string, string> = {
-  'Applied': 'Applied',
-  'Under Review': 'Under Review',
-  'Shortlisted': 'Under Review',
-  'Interview in Progress': 'Interview In Progress',
-  'Offered': 'Offered',
-  'Offer Accepted': 'Offer Accepted',
-  'Offer Declined': 'Offer Declined',
-  'Offer Revoked': 'Offer On Hold',
-  'Withdrawn': 'Application Withdrawn',
-  'On Hold': 'Under Review',
-  'Rejected': 'Not Selected',
-  'Selected': 'Under Review',
-  'Joined': 'Joined',
-  'Not Joined': 'Application Closed',
-  'Archived': 'Application Closed',
-  'Cancelled': 'Application Closed',
-  'No Show': 'Application Closed',
-  'Future': 'Under Review',
-  'Active': 'Under Review',
-};
-
-// Portal application status colors — palette finalized by PM. Exact hex values
-// so each rendered badge matches the approved swatches; every text-on-bg pair
-// clears WCAG AA. Brand pink (#ED184F) stays out of the status set.
-const portalStatusColor: Record<string, string> = {
-  'Draft':                 'bg-[#F1F5F9] text-[#475569] border-[#CBD5E1]',
-  'Applied':               'bg-[#EEF4FF] text-[#2563EB] border-[#B9D4FF]',
-  'Under Review':          'bg-[#FFF4E5] text-[#D97706] border-[#FFD89A]',
-  'Interview In Progress': 'bg-[#FFF7E6] text-[#B45309] border-[#F7C65F]',
-  'Offered':               'bg-[#F3E8FF] text-[#7C3AED] border-[#D8B4FE]',
-  'Offer Accepted':        'bg-[#ECFDF3] text-[#059669] border-[#A7F3D0]',
-  'Offer Declined':        'bg-[#FEF2F2] text-[#DC2626] border-[#FECACA]',
-  'Offer On Hold':         'bg-[#F5F3FF] text-[#6D28D9] border-[#C4B5FD]',
-  'Application Withdrawn': 'bg-[#F3F4F6] text-[#6B7280] border-[#D1D5DB]',
-  'Not Selected':          'bg-[#FEF2F2] text-[#DC2626] border-[#FECACA]',
-  'Joined':                'bg-[#ECFDF3] text-[#15803D] border-[#86EFAC]',
-  'Application Closed':    'bg-[#F3F4F6] text-[#6B7280] border-[#D1D5DB]',
-};
-
+import { portalStatus } from '../../lib/portalStatus';
 
 const formatDate = (dateString: string) => {
   const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
@@ -302,8 +262,7 @@ export default function CandidateProfilePage() {
                 {activeTab === 'applications' ? (
                   (!forceEmptyApps ? displayApps : []).map((app: any) => {
                     const isDraft = app.status === 'Draft';
-                    const displayLabel = isDraft ? 'Draft' : (portalStatusLabel[app.status] || app.status);
-                    const displayColor = portalStatusColor[displayLabel] || 'bg-gray-100 text-gray-500 border-gray-200';
+                    const { label: displayLabel, className: displayColor } = portalStatus(app.status, { isDraft });
                     return (
                     <div key={app.id} className="bg-white rounded-2xl border border-[#E5E7EB] p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 relative group">
                       <div className="absolute top-0 left-0 w-1 h-full bg-primary/5 group-hover:bg-primary/20 transition-all" />

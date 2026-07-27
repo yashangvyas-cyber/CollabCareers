@@ -3,21 +3,12 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import PortalLayout from '../../components/PortalLayout';
 import { useApp } from '../../store/AppContext';
 import type { OfferDetail } from '../../store/types';
+import { portalStatus } from '../../lib/portalStatus';
 import {
   Download, Globe, Linkedin, FileText,
   ChevronDown, MapPin, Briefcase, Building2, Clock, X, AlertTriangle,
   Calendar, PenLine, CheckCircle2, XCircle
 } from 'lucide-react';
-
-const brandStatusStyles: Record<string, string> = {
-  'Under Review': 'bg-[#F4F5FA] text-primary border-primary/20',
-  'Interview in Progress': 'bg-[#F4F5FA] text-primary border-primary/20',
-  'Decision Made': 'bg-[#F9FAFB] text-[#6B7280] border-[#E5E7EB]',
-  'Offer Made': 'bg-primary text-white border-primary',
-  'Rejected': 'bg-gray-100 text-gray-400 border-gray-200',
-  'Draft': 'bg-[#F4F5FA] text-primary border border-primary/20',
-  'Submitted': 'bg-[#F4F5FA] text-primary border-primary/20',
-};
 
 export default function ViewApplicationPage() {
   const { slug, applicationId } = useParams();
@@ -133,9 +124,15 @@ export default function ViewApplicationPage() {
             <ChevronDown className="rotate-90 w-3.5 h-3.5" />
             My Applications
           </Link>
-          <span className={`px-3 py-1 text-[10px] font-black rounded-full border uppercase tracking-widest ${brandStatusStyles[appData.status] || 'bg-gray-100'}`}>
-            {appData.status}
-          </span>
+          {(() => {
+            // Shared candidate-portal palette + label (e.g. Offer Revoked → Offer On Hold).
+            const { label, className } = portalStatus(appData.status);
+            return (
+              <span className={`px-3 py-1 text-[10px] font-black rounded-full border uppercase tracking-widest ${className}`}>
+                {label}
+              </span>
+            );
+          })()}
         </div>
       </div>
 
@@ -657,8 +654,9 @@ function PreviousOfferCard({ offer }: { offer: OfferDetail }) {
   const [open, setOpen] = useState(false);
   const fmt = (d: string) => new Date(d).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
   const isDeclined = !!(offer.declinedAt || offer.declineReason);
+  // A recruiter-revoked offer is shown to the candidate as "On Hold", never "Revoked".
   const isRevoked = !isDeclined && !!(offer.revokedAt || offer.revokeReason);
-  const statusLabel = isDeclined ? 'Declined' : isRevoked ? 'Revoked' : 'Superseded';
+  const statusLabel = isDeclined ? 'Declined' : isRevoked ? 'On Hold' : 'Superseded';
   const badge = isDeclined
     ? 'bg-[#FEF2F2] text-[#DC2626] border-[#FECACA]'          // candidate said no — red
     : isRevoked
@@ -726,12 +724,10 @@ function PreviousOfferCard({ offer }: { offer: OfferDetail }) {
             </div>
           ) : isRevoked ? (
             <div className="px-5 sm:px-6 py-4 bg-[#FFFBEB] border-t border-[#FDE68A]">
+              {/* On-hold is a company-side status — the internal reason is not shown to the candidate. */}
               <p className="text-xs font-bold text-[#B45309]">
-                This offer was withdrawn by the recruitment team{offer.revokedAt ? ` on ${fmt(offer.revokedAt)}` : ''}.
+                This offer was put on hold by the recruitment team{offer.revokedAt ? ` on ${fmt(offer.revokedAt)}` : ''}.
               </p>
-              {offer.revokeReason && (
-                <p className="text-xs font-medium text-[#92400E] mt-1">Reason: {offer.revokeReason}</p>
-              )}
             </div>
           ) : (
             <div className="px-5 sm:px-6 py-4 bg-[#F9FAFB] border-t border-[#E5E7EB]">
