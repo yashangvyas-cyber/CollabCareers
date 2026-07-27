@@ -176,7 +176,7 @@ export default function ViewApplicationPage() {
           <div className="h-px flex-1 bg-[#F3F4F6]" />
         </div>
 
-        {/* Offer Summary — the live offer, with any superseded offers nested
+        {/* Offer History — the live offer, with any superseded offers nested
             read-only beneath it under a "Previous Offers" sub-section. */}
         {showOfferCard && offer && (
           <div className="mb-6 bg-white rounded-2xl border border-[#E5E7EB] overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 animate-in fade-in slide-in-from-top-2">
@@ -187,7 +187,7 @@ export default function ViewApplicationPage() {
             >
               <div className="flex items-center gap-3">
                 <div className="w-0.5 h-4 bg-primary rounded-full" />
-                <span className="text-xs font-black text-[#111827] uppercase tracking-widest">Offer Summary</span>
+                <span className="text-xs font-black text-[#111827] uppercase tracking-widest">Offer History</span>
               </div>
               <ChevronDown className={`w-4 h-4 text-[#9CA3AF] transition-transform duration-200 ${offerExpanded ? 'rotate-180' : ''}`} />
             </button>
