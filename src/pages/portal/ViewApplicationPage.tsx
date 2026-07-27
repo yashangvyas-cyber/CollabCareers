@@ -3,7 +3,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import PortalLayout from '../../components/PortalLayout';
 import { useApp } from '../../store/AppContext';
 import type { OfferDetail } from '../../store/types';
-import { portalStatus } from '../../lib/portalStatus';
+import { portalStatus, portalStatusColor } from '../../lib/portalStatus';
 import {
   Download, Globe, Linkedin, FileText,
   ChevronDown, MapPin, Briefcase, Building2, Clock, X, AlertTriangle,
@@ -657,10 +657,12 @@ function PreviousOfferCard({ offer }: { offer: OfferDetail }) {
   // A recruiter-revoked offer is shown to the candidate as "On Hold", never "Revoked".
   const isRevoked = !isDeclined && !!(offer.revokedAt || offer.revokeReason);
   const statusLabel = isDeclined ? 'Declined' : isRevoked ? 'On Hold' : 'Superseded';
+  // Badge colours come from the shared candidate palette, so history matches the
+  // status pill exactly: Declined = red, On Hold = violet (never amber).
   const badge = isDeclined
-    ? 'bg-[#FEF2F2] text-[#DC2626] border-[#FECACA]'          // candidate said no — red
+    ? portalStatusColor['Offer Declined']
     : isRevoked
-      ? 'bg-[#FFFBEB] text-[#B45309] border-[#FDE68A]'         // company withdrew — amber
+      ? portalStatusColor['Offer On Hold']
       : 'bg-[#F9FAFB] text-[#6B7280] border-[#E5E7EB]';
   // A declined or revoked offer is void — its letter is never downloadable. Only a
   // signed/accepted offer exposes the (countersigned) letter. Since history entries
@@ -723,9 +725,9 @@ function PreviousOfferCard({ offer }: { offer: OfferDetail }) {
               )}
             </div>
           ) : isRevoked ? (
-            <div className="px-5 sm:px-6 py-4 bg-[#FFFBEB] border-t border-[#FDE68A]">
-              {/* On-hold is a company-side status — the internal reason is not shown to the candidate. */}
-              <p className="text-xs font-bold text-[#B45309]">
+            <div className="px-5 sm:px-6 py-4 bg-[#F5F3FF] border-t border-[#C4B5FD]">
+              {/* On-hold = violet (candidate palette). Internal reason not shown to the candidate. */}
+              <p className="text-xs font-bold text-[#6D28D9]">
                 This offer was put on hold by the recruitment team{offer.revokedAt ? ` on ${fmt(offer.revokedAt)}` : ''}.
               </p>
             </div>

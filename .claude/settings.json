@@ -55,7 +55,9 @@
       "Bash(sed -i 's|http://localhost:5173|http://localhost:5174|g' /tmp/claude-1000/-home-yashang--gemini-antigravity-scratch-collab-careers-prototype/1a3e3372-c78f-414b-a94c-526a10ebab0e/scratchpad/verify_final3.js)",
       "Bash(node /tmp/claude-1000/-home-yashang--gemini-antigravity-scratch-collab-careers-prototype/1a3e3372-c78f-414b-a94c-526a10ebab0e/scratchpad/verify_final3.js)",
       "Bash(node /tmp/claude-1000/-home-yashang--gemini-antigravity-scratch-collab-careers-prototype/1a3e3372-c78f-414b-a94c-526a10ebab0e/scratchpad/shot_pill.js)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" --max-time 3 http://localhost:5174/)",
+      "Bash(echo '5174: __CMDSUB_OUTPUT__')"
     ],
     "additionalDirectories": [
       "/home/yashang/Downloads",
