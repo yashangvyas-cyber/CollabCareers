@@ -23,6 +23,9 @@ export default function PanelistEmailPage() {
   const ctx = invite.context;
   const brand = resolveBranding(ctx.businessUnit);
   const firstName = invite.firstName || invite.name?.split(' ')[0] || 'there';
+  // The email shows the zone abbreviation only (e.g. "IST"), not the GMT offset —
+  // the panelist page keeps the full explicit label for the login-free external view.
+  const tz = ctx.timezoneLabel.replace(/\s*\([^)]*\)\s*/, '').trim();
   const modeLabel = ctx.mode === 'Online'
     ? `Online – ${ctx.meetingType ?? 'Meeting'}`
     : 'Offline';
@@ -47,14 +50,14 @@ export default function PanelistEmailPage() {
         ['Candidate', ctx.candidateName],
         ['Role', ctx.jobTitle],
         ['Interview Round', ctx.roundName],
-        ['Interview Date', `${ctx.interviewDate} · ${ctx.interviewTime} ${ctx.timezoneLabel}`],
+        ['Interview Date', `${ctx.interviewDate} · ${ctx.interviewTime} ${tz}`],
       ]
     : [
         ['Candidate', ctx.candidateName],
         ['Role', ctx.jobTitle],
         ['Interview Round', ctx.roundName],
         ['Proposed Date', ctx.interviewDate],
-        ['Proposed Time', `${ctx.interviewTime} ${ctx.timezoneLabel}`],
+        ['Proposed Time', `${ctx.interviewTime} ${tz}`],
         ['Mode', modeLabel],
         ...(ctx.mode === 'Offline' ? [['Location', ctx.venueAddress ?? 'To be shared'] as [string, string]] : []),
       ];
@@ -76,7 +79,7 @@ export default function PanelistEmailPage() {
             {isResponseReminder
               ? `Still able to join? ${ctx.candidateName} interview – ${ctx.interviewDate}`
               : isReminderEmail
-              ? `Reminder: ${ctx.candidateName} interview – ${ctx.interviewDate}, ${ctx.interviewTime} ${ctx.timezoneLabel}`
+              ? `Reminder: ${ctx.candidateName} interview – ${ctx.interviewDate}, ${ctx.interviewTime} ${tz}`
               : isNudgeEmail
                 ? `How did it go? Share your feedback – ${ctx.candidateName}`
                 : isCancelledEmail
@@ -234,11 +237,13 @@ export default function PanelistEmailPage() {
             </div>
           )}
 
-          {/* Sign-off */}
-          <p className="text-sm text-[#374151] leading-relaxed mt-6">
-            Thank you,<br />
-            <span className="font-semibold">The Talent Acquisition Team</span>
-          </p>
+          {/* Sign-off — the recruiter who scheduled the interview: name · designation · business unit */}
+          <div className="text-sm text-[#374151] leading-relaxed mt-6">
+            <p>Thank you,</p>
+            <p className="font-semibold text-[#111827] mt-1">{ctx.scheduledByName ?? 'The Talent Acquisition Team'}</p>
+            {ctx.scheduledByRole && <p className="text-[#6B7280]">{ctx.scheduledByRole}</p>}
+            <p className="text-[#6B7280]">{brand.name}</p>
+          </div>
         </div>
 
         {/* Footer */}

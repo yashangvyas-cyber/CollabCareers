@@ -127,6 +127,7 @@ export default function ScheduleInterviewDrawer({
       evaluationCriteria: criteria,
       interviewPanel: schedPanel,
       scheduledByName: 'Sarah Chen',
+      scheduledByRole: 'Talent Acquisition Specialist',
       scheduledAt: new Date().toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' }),
       additionalInfo: schedAdditionalInfo || '-',
       interviewStatus: 'Scheduled',

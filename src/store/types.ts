@@ -259,6 +259,7 @@ export interface ExternalInviteContext {
   // ── Round detail (mirrors the internal round header + metadata block) ──
   interviewPanel?: string[];
   scheduledByName?: string;
+  scheduledByRole?: string;   // recruiter designation, for the email sign-off
   scheduledAt?: string;
   additionalInfo?: string;
   interviewStatus?: string;

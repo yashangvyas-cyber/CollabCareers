@@ -57,7 +57,8 @@
       "Bash(node /tmp/claude-1000/-home-yashang--gemini-antigravity-scratch-collab-careers-prototype/1a3e3372-c78f-414b-a94c-526a10ebab0e/scratchpad/shot_pill.js)",
       "WebSearch",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" --max-time 3 http://localhost:5174/)",
-      "Bash(echo '5174: __CMDSUB_OUTPUT__')"
+      "Bash(echo '5174: __CMDSUB_OUTPUT__')",
+      "Bash(curl -s localhost:5174/)"
     ],
     "additionalDirectories": [
       "/home/yashang/Downloads",

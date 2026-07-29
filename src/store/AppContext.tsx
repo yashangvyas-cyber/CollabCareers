@@ -29,7 +29,7 @@ interface AppContextType extends AppState {
   resendExternalInvite: (id: string) => void;
 }
 
-const STORAGE_KEY = 'collab_careers_state_v26';
+const STORAGE_KEY = 'collab_careers_state_v27';
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
