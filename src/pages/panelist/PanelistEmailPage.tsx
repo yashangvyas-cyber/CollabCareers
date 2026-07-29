@@ -37,15 +37,14 @@ export default function PanelistEmailPage() {
   // The invitation email adapts to what the panelist already answered.
   const isConfirmedState = invite.status === 'Availability Confirmed';
   const isDeclinedState = invite.status === 'Availability Declined';
-  // Time-driven follow-ups (demoed via ?type=): day-before reminder, post-interview nudge.
+  // Time-driven follow-up (demoed via ?type=): post-interview feedback nudge.
   const emailType = searchParams.get('type');
-  const isReminderEmail = emailType === 'reminder' && isConfirmedState;
   const isNudgeEmail = emailType === 'nudge' && isConfirmedState && !invite.feedback;
   // Chases a panelist who never answered — sent once, 48h after the invite.
   const isResponseReminder = emailType === 'response-reminder' && invite.status === 'Invited';
 
   // Candidate + role lead the list — busy panelists need the "who" before the "when".
-  const detailRows: [string, string][] = (isFeedbackEmail || isCancelledEmail || isReminderEmail || isNudgeEmail)
+  const detailRows: [string, string][] = (isFeedbackEmail || isCancelledEmail || isNudgeEmail)
     ? [
         ['Candidate', ctx.candidateName],
         ['Role', ctx.jobTitle],
@@ -78,8 +77,6 @@ export default function PanelistEmailPage() {
           <p className="text-sm font-bold text-[#111827] mt-1">
             {isResponseReminder
               ? `Still able to join? ${ctx.candidateName} interview – ${ctx.interviewDate}`
-              : isReminderEmail
-              ? `Reminder: ${ctx.candidateName} interview – ${ctx.interviewDate}, ${ctx.interviewTime} ${tz}`
               : isNudgeEmail
                 ? `How did it go? Share your feedback – ${ctx.candidateName}`
                 : isCancelledEmail
@@ -105,15 +102,6 @@ export default function PanelistEmailPage() {
               </p>
               <p className="text-sm text-[#374151] leading-relaxed mt-2">
                 It only takes a moment to respond — and if the time doesn't work, a quick decline with a note helps just as much.
-              </p>
-            </>
-          ) : isReminderEmail ? (
-            <>
-              <p className="text-sm text-[#374151] leading-relaxed mt-3">
-                A quick reminder — your interview panel session for the <span className="font-semibold text-[#111827]">{ctx.jobTitle}</span> position is coming up.
-              </p>
-              <p className="text-sm text-[#374151] leading-relaxed mt-2">
-                Everything you need — the details{ctx.mode === 'Online' ? ' and the meeting link' : ' and the venue address'} — is on your secure page below.
               </p>
             </>
           ) : isNudgeEmail ? (
@@ -175,15 +163,7 @@ export default function PanelistEmailPage() {
             ))}
           </div>
 
-          {isReminderEmail ? (
-            /* Reminder — gentle escape hatch, never a demand */
-            <>
-              <p className="text-xs font-bold text-[#111827] mt-4">See you there?</p>
-              <p className="text-sm text-[#374151] leading-relaxed mt-1">
-                If anything has changed and you can't make it anymore, please update your response — the recruiter will be notified right away.
-              </p>
-            </>
-          ) : isNudgeEmail ? null : isCancelledEmail ? (
+          {isNudgeEmail ? null : isCancelledEmail ? (
             /* Cancellation — nothing is asked of the panelist */
             <p className="text-sm text-[#374151] leading-relaxed mt-4">
               No action is needed on your side — your secure link has been deactivated.

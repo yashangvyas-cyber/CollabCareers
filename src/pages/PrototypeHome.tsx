@@ -40,7 +40,6 @@ const flows = [
       { label: 'Invite — Availability Pending', path: '/panel-email/ext-invited', badge: 'Invited' },
       { label: 'Response Reminder (No Answer)', path: '/panel-email/ext-invited?type=response-reminder', badge: 'Chase' },
       { label: 'Availability Confirmed', path: '/panel-email/ext-confirmed', badge: 'Confirmed' },
-      { label: 'Reminder — Day Before', path: '/panel-email/ext-confirmed?type=reminder', badge: 'Reminder' },
       { label: 'Availability Declined', path: '/panel-email/ext-declined', badge: 'Declined' },
       { label: 'Feedback Open (Post-interview)', path: '/panel-email/ext-ready?type=nudge', badge: 'Nudge' },
       { label: 'Feedback Submitted', path: '/panel-email/ext-feedback', badge: 'Read-only' },
