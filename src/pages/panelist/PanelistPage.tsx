@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { FileText, CheckCircle, AlertTriangle, ExternalLink, XCircle, Mail, Phone, Linkedin, Copy, MapPin, ChevronDown, Info, Lock, CalendarClock, Check, X, CalendarCheck, CalendarX } from 'lucide-react';
+import { FileText, CheckCircle, AlertTriangle, ExternalLink, XCircle, Mail, Phone, Linkedin, Copy, MapPin, ChevronDown, Info, Lock, CalendarClock, Check, X, CalendarCheck, CalendarX, FlaskConical } from 'lucide-react';
 import { useApp } from '../../store/AppContext';
 import { resolveBranding } from '../../lib/businessUnits';
 import BuLogo from '../../components/panelist/BuLogo';
@@ -27,6 +27,20 @@ export default function PanelistPage() {
   // Key by token: switching between invite links fully re-initialises the page state,
   // so one token's session state can never leak into another's.
   return <PanelistView key={token} token={token} />;
+}
+
+/** "23-Jun-2026, 07:18 PM" — matches the internal panel-feedback attribution format. */
+function formatProvidedAt(iso?: string): string {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  const day = String(d.getDate()).padStart(2, '0');
+  const mon = d.toLocaleString('en-US', { month: 'short' });
+  let h = d.getHours();
+  const min = String(d.getMinutes()).padStart(2, '0');
+  const ap = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  return `${day}-${mon}-${d.getFullYear()}, ${String(h).padStart(2, '0')}:${min} ${ap}`;
 }
 
 function PanelistView({ token }: { token?: string }) {
@@ -56,6 +70,9 @@ function PanelistView({ token }: { token?: string }) {
   const [fbOverallRemarks, setFbOverallRemarks] = useState('');
   const [fbCriteriaRatings, setFbCriteriaRatings] = useState<Record<string, { score: number; remark: string }>>({});
   const [fbSubmitted, setFbSubmitted] = useState(false);
+  // Prototype-only: lets a reviewer fast-forward past the interview start time so the
+  // time-gated feedback form can be walked through live, without waiting for the real clock.
+  const [demoTimePassed, setDemoTimePassed] = useState(false);
 
   // ── Invalid / unknown token ──
   if (!invite) {
@@ -117,7 +134,16 @@ function PanelistView({ token }: { token?: string }) {
     showToast('Feedback submitted. The recruiter has been notified via email.');
   };
 
-  const isReadOnly = invite.status === 'Feedback Submitted';
+  // Feedback is a single submission per interview round, shared across the whole panel:
+  // whoever submits first is the author, and every other panelist sees it read-only,
+  // attributed to that author (not as "your" feedback).
+  const feedbackInvite = externalInvites.find(
+    i => i.candidateId === invite.candidateId && i.roundId === invite.roundId && !!i.feedback
+  );
+  const roundFeedback = feedbackInvite?.feedback;
+  const feedbackAuthor = roundFeedback?.submittedBy || feedbackInvite?.name || feedbackInvite?.email || 'a panel member';
+  // Once feedback exists for the round, the page becomes a read-only record for everyone.
+  const isReadOnly = !!roundFeedback;
 
   // Availability state derives entirely from the committed decision.
   const declined = committed === false;
@@ -126,7 +152,9 @@ function PanelistView({ token }: { token?: string }) {
   // Feedback opens only once the interview has started — accepting a week early
   // must not let a panelist rate a candidate before the interview happens.
   const interviewStart = new Date(`${ctx.interviewDate.replace(/\//g, ' ')} ${ctx.interviewTime}`);
-  const interviewStarted = isNaN(interviewStart.getTime()) || Date.now() >= interviewStart.getTime();
+  const realInterviewStarted = isNaN(interviewStart.getTime()) || Date.now() >= interviewStart.getTime();
+  // The demo toggle only stands in for the passage of time — every other rule still applies.
+  const interviewStarted = realInterviewStarted || demoTimePassed;
   const feedbackUnlocked = confirmed && interviewStarted;
   // Has the panelist typed anything into the feedback form yet? (used to warn on discard)
   const hasDraftedFeedback =
@@ -423,6 +451,22 @@ function PanelistView({ token }: { token?: string }) {
                       </span>
                       {feedbackUnlocked && <ChevronDown className={`w-4 h-4 text-[#9CA3AF] transition-transform duration-200 ${fbOpen ? 'rotate-180' : ''}`} />}
                     </button>
+                    {/* Prototype-only fast-forward — appears only when the sole thing keeping feedback
+                        locked is that the real interview time hasn't passed yet. */}
+                    {confirmed && !realInterviewStarted && (
+                      <label className="mt-2 flex items-center gap-2.5 rounded-lg border border-dashed border-[#C7D2FE] bg-[#EEF2FF] px-3 py-2 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={demoTimePassed}
+                          onChange={e => setDemoTimePassed(e.target.checked)}
+                          className="w-3.5 h-3.5 rounded border-[#A5B4FC] text-[#3538CD] focus:ring-[#3538CD]"
+                        />
+                        <span className="flex items-center gap-1.5 text-[11px] font-medium text-[#4338CA]">
+                          <FlaskConical className="w-3.5 h-3.5 shrink-0" />
+                          Prototype control — simulate that the interview time has passed to unlock feedback
+                        </span>
+                      </label>
+                    )}
                     {feedbackUnlocked && fbOpen && (
                       <div className="border border-t-0 border-[#E5E7EB] rounded-b-lg p-4 space-y-6 bg-white">
                         {/* Suggestion */}
@@ -488,50 +532,58 @@ function PanelistView({ token }: { token?: string }) {
                 )}
               </div>
 
-              {/* Read-only feedback summary */}
-              {isReadOnly && invite.feedback && (
-                <div className="mt-4 border border-[#E5E7EB] rounded-lg p-4 space-y-5">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-600" />
-                    <span className="text-sm font-semibold text-[#111827]">Your Feedback (Submitted)</span>
-                  </div>
-                  <div>
-                    <RLabel>Interview Panel Suggestion</RLabel>
-                    <span className="text-sm font-bold px-3 py-1.5 rounded-full border inline-block mt-2"
-                      style={{
-                        backgroundColor: SUGGESTION_STYLE[invite.feedback.suggestion]?.bg,
-                        borderColor: SUGGESTION_STYLE[invite.feedback.suggestion]?.border,
-                        color: SUGGESTION_STYLE[invite.feedback.suggestion]?.text,
-                      }}>
-                      {invite.feedback.suggestion}
+              {/* Read-only feedback summary — one submission per interview, shown to the whole
+                  panel and attributed to whoever entered it (matches the internal header). */}
+              {isReadOnly && roundFeedback && (
+                <div className="mt-4 border border-[#E5E7EB] rounded-lg overflow-hidden">
+                  {/* Green attribution banner — single line, exactly like the internal screen */}
+                  <div className="flex items-center flex-wrap gap-x-1 bg-[#E7F6EC] px-4 py-3">
+                    <span className="text-sm font-semibold text-[#111827]">Interview Panel Feedback</span>
+                    <span className="text-sm text-[#374151]">
+                      (Provided by <span className="font-semibold text-[#3538CD]">{feedbackAuthor}</span>
+                      {roundFeedback.submittedAt && <> on {formatProvidedAt(roundFeedback.submittedAt)}</>})
                     </span>
+                    <Info className="w-3.5 h-3.5 text-[#6B7280] shrink-0 ml-0.5" />
                   </div>
-                  {invite.feedback.criteriaRatings && Object.keys(invite.feedback.criteriaRatings).length > 0 && (
-                    <div className="space-y-4">
-                      {Object.entries(invite.feedback.criteriaRatings).map(([k, v]) => (
-                        <div key={k} className="border-t border-[#F1F1F4] pt-4">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-sm font-semibold text-[#374151] truncate pr-4">{k}</span>
-                            <div className="flex items-center gap-2 shrink-0">
-                              <div className="flex gap-0.5">
-                                {Array.from({ length: 10 }, (_, i) => (
-                                  <span key={i} className="text-lg" style={{ color: i < v.score ? '#F4B400' : '#E5E7EB' }}>★</span>
-                                ))}
-                              </div>
-                              <span className="text-xs font-medium text-[#6B7280] w-16 text-right">{v.score} out of 10</span>
-                            </div>
-                          </div>
-                          {v.remark && <p className="text-xs text-[#6B7280] italic">{v.remark}</p>}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {invite.feedback.overallRemarks && (
+                  <div className="p-4 space-y-5">
                     <div>
-                      <RLabel>Overall Remarks</RLabel>
-                      <p className="text-sm text-[#374151] leading-relaxed p-4 bg-[#FAFAFA] rounded-lg border border-[#E5E7EB] mt-2">{invite.feedback.overallRemarks}</p>
+                      <RLabel>Interview Panel Suggestion</RLabel>
+                      <span className="text-sm font-bold px-3 py-1.5 rounded-full border inline-block mt-2"
+                        style={{
+                          backgroundColor: SUGGESTION_STYLE[roundFeedback.suggestion]?.bg,
+                          borderColor: SUGGESTION_STYLE[roundFeedback.suggestion]?.border,
+                          color: SUGGESTION_STYLE[roundFeedback.suggestion]?.text,
+                        }}>
+                        {roundFeedback.suggestion}
+                      </span>
                     </div>
-                  )}
+                    {roundFeedback.criteriaRatings && Object.keys(roundFeedback.criteriaRatings).length > 0 && (
+                      <div className="space-y-4">
+                        {Object.entries(roundFeedback.criteriaRatings).map(([k, v]) => (
+                          <div key={k} className="border-t border-[#F1F1F4] pt-4">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-sm font-semibold text-[#374151] truncate pr-4">{k}</span>
+                              <div className="flex items-center gap-2 shrink-0">
+                                <div className="flex gap-0.5">
+                                  {Array.from({ length: 10 }, (_, i) => (
+                                    <span key={i} className="text-lg" style={{ color: i < v.score ? '#F4B400' : '#E5E7EB' }}>★</span>
+                                  ))}
+                                </div>
+                                <span className="text-xs font-medium text-[#6B7280] w-16 text-right">{v.score} out of 10</span>
+                              </div>
+                            </div>
+                            {v.remark && <p className="text-xs text-[#6B7280] italic">{v.remark}</p>}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {roundFeedback.overallRemarks && (
+                      <div>
+                        <RLabel>Overall Remarks</RLabel>
+                        <p className="text-sm text-[#374151] leading-relaxed p-4 bg-[#FAFAFA] rounded-lg border border-[#E5E7EB] mt-2">{roundFeedback.overallRemarks}</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>

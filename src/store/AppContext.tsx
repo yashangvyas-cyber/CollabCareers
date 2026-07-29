@@ -29,7 +29,7 @@ interface AppContextType extends AppState {
   resendExternalInvite: (id: string) => void;
 }
 
-const STORAGE_KEY = 'collab_careers_state_v27';
+const STORAGE_KEY = 'collab_careers_state_v28';
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
@@ -390,7 +390,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
       ...prev,
       externalInvites: prev.externalInvites.map(inv =>
         inv.accessToken === token
-          ? { ...inv, status: 'Feedback Submitted' as ExternalInviteStatus, feedback }
+          ? {
+              ...inv,
+              status: 'Feedback Submitted' as ExternalInviteStatus,
+              // Stamp who entered it and when, so every other panelist on the round
+              // sees it attributed ("Provided by X on ...") rather than as "your" feedback.
+              feedback: {
+                ...feedback,
+                submittedBy: feedback.submittedBy ?? inv.name ?? inv.email,
+                submittedAt: feedback.submittedAt ?? new Date().toISOString(),
+              },
+            }
           : inv
       ),
     }));

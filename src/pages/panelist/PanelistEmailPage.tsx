@@ -1,4 +1,5 @@
 import { useParams, Link, useSearchParams } from 'react-router-dom';
+import { CalendarCheck, PenLine, Eye } from 'lucide-react';
 import { useApp } from '../../store/AppContext';
 import { resolveBranding } from '../../lib/businessUnits';
 import BuLogo from '../../components/panelist/BuLogo';
@@ -80,7 +81,7 @@ export default function PanelistEmailPage() {
               : isNudgeEmail
                 ? `How did it go? Share your feedback – ${ctx.candidateName}`
                 : isCancelledEmail
-                  ? `Interview Cancelled: ${ctx.candidateName} – ${ctx.jobTitle} · ${ctx.interviewDate}`
+                  ? `Interview Canceled | ${ctx.jobTitle} Role | ${ctx.candidateName}`
                   : isFeedbackEmail
                     ? `Feedback Received: ${ctx.candidateName} – ${ctx.jobTitle}`
                     : `Interview Invitation: ${ctx.candidateName} – ${ctx.jobTitle} · ${ctx.interviewDate}`}
@@ -94,7 +95,7 @@ export default function PanelistEmailPage() {
 
         {/* Body */}
         <div className="px-6 py-5">
-          <p className="text-sm text-[#374151]">Hi {firstName},</p>
+          <p className="text-sm text-[#374151]">{isCancelledEmail ? `Dear ${firstName},` : `Hi ${firstName},`}</p>
           {isResponseReminder ? (
             <>
               <p className="text-sm text-[#374151] leading-relaxed mt-3">
@@ -116,13 +117,10 @@ export default function PanelistEmailPage() {
           ) : isCancelledEmail ? (
             <>
               <p className="text-sm text-[#374151] leading-relaxed mt-3">
-                We're sorry for the change of plans — the interview below has been <span className="font-semibold text-[#111827]">cancelled</span>, so you won't need to join this one.
+                This is to inform you that the interview for the <span className="font-semibold text-[#111827]">{ctx.jobTitle}</span> role, scheduled for <span className="font-semibold text-[#111827]">{ctx.interviewDate}, {ctx.interviewTime} {tz}</span>, has been canceled.
               </p>
               <p className="text-sm text-[#374151] leading-relaxed mt-2">
-                {/* Only thank them for "making time" if they actually committed time */}
-                {invite.availability?.available === true || invite.feedback
-                  ? "We truly appreciate you making the time for us, and we'd love to have you on a future interview panel."
-                  : "Thank you for considering it — we'd love to have you on a future interview panel."}
+                Should there be any updates or a reschedule, we will inform you promptly. Thank you for your understanding.
               </p>
             </>
           ) : isFeedbackEmail ? (
@@ -152,23 +150,22 @@ export default function PanelistEmailPage() {
             </>
           )}
 
-          {/* Interview Details */}
-          <p className="text-xs font-bold text-[#111827] mt-4 mb-1.5">Interview Details:</p>
-          <div className="border border-[#E5E7EB] rounded-lg bg-[#FAFAFB] px-4 divide-y divide-[#F1F1F4]">
-            {detailRows.map(([label, value]) => (
-              <div key={label} className="py-2 flex items-baseline gap-3">
-                <span className="w-32 shrink-0 text-[11px] font-semibold text-[#9CA3AF]">{label}</span>
-                <span className="text-xs font-medium text-[#374151]">{value}</span>
+          {/* Interview Details — omitted on the cancellation notice (the schedule is in the sentence) */}
+          {!isCancelledEmail && (
+            <>
+              <p className="text-xs font-bold text-[#111827] mt-4 mb-1.5">Interview Details:</p>
+              <div className="border border-[#E5E7EB] rounded-lg bg-[#FAFAFB] px-4 divide-y divide-[#F1F1F4]">
+                {detailRows.map(([label, value]) => (
+                  <div key={label} className="py-2 flex items-baseline gap-3">
+                    <span className="w-32 shrink-0 text-[11px] font-semibold text-[#9CA3AF]">{label}</span>
+                    <span className="text-xs font-medium text-[#374151]">{value}</span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </>
+          )}
 
-          {isNudgeEmail ? null : isCancelledEmail ? (
-            /* Cancellation — nothing is asked of the panelist */
-            <p className="text-sm text-[#374151] leading-relaxed mt-4">
-              No action is needed on your side — your secure link has been deactivated.
-            </p>
-          ) : isFeedbackEmail ? (
+          {isNudgeEmail || isCancelledEmail ? null : isFeedbackEmail ? (
             <>
               {/* Feedback receipt — suggestion + remarks the panelist submitted */}
               <p className="text-xs font-bold text-[#111827] mt-4">Your Submission:</p>
@@ -198,28 +195,43 @@ export default function PanelistEmailPage() {
             </>
           )}
 
-          {/* Magic-link CTA — tokenised URL, no login required. Cancelled → no button at all. */}
+          {/* Magic-link CTA — one tokenised URL for the whole journey. Cancelled → no button. */}
           {!isCancelledEmail && (
             <div className="text-center mt-6">
               <Link to={`/panel/${token}`}
                 className="inline-block px-8 py-3 rounded-xl bg-[#3538CD] text-white text-sm font-bold shadow-sm hover:bg-[#2d30b0] transition-colors">
-                {isNudgeEmail
-                  ? 'Share Your Feedback'
-                  : isFeedbackEmail
-                    ? 'View Your Feedback'
-                    : isConfirmedState
-                      ? 'View Interview Details'
-                      : isDeclinedState
-                        ? 'Update Availability'
-                        : 'Confirm Availability'}
+                View Interview Details
               </Link>
+              {/* One-link explainer — a small 3-step journey instead of a wall of text */}
+              {!isNudgeEmail && !isFeedbackEmail && (
+                <div className="mt-5 rounded-xl border border-[#ECEDF3] bg-[#FAFBFF] overflow-hidden max-w-md mx-auto">
+                  <p className="text-center text-[11px] text-[#6B7280] font-medium px-4 pt-3">
+                    The same secure link takes you through every step
+                  </p>
+                  <div className="grid grid-cols-3 divide-x divide-[#ECEDF3] mt-2.5">
+                    {[
+                      { Icon: CalendarCheck, label: 'Confirm availability', when: 'Now' },
+                      { Icon: PenLine, label: 'Add your feedback', when: 'After the interview' },
+                      { Icon: Eye, label: 'View what you sent', when: 'Anytime after' },
+                    ].map(({ Icon, label, when }) => (
+                      <div key={label} className="px-2 py-3.5 flex flex-col items-center gap-1.5">
+                        <span className="w-8 h-8 rounded-full bg-white border border-[#E0E7FF] flex items-center justify-center shadow-sm">
+                          <Icon className="w-4 h-4 text-[#3538CD]" />
+                        </span>
+                        <span className="text-[11px] font-semibold text-[#374151] leading-tight text-center">{label}</span>
+                        <span className="text-[10px] text-[#9CA3AF] leading-tight text-center">{when}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               <p className="text-[11px] text-[#9CA3AF] mt-3">This secure link is personal to you — no login required.</p>
             </div>
           )}
 
           {/* Sign-off — the recruiter who scheduled the interview: name · designation · business unit */}
           <div className="text-sm text-[#374151] leading-relaxed mt-6">
-            <p>Thank you,</p>
+            <p>{isCancelledEmail ? 'Regards,' : 'Thank you,'}</p>
             <p className="font-semibold text-[#111827] mt-1">{ctx.scheduledByName ?? 'The Talent Acquisition Team'}</p>
             {ctx.scheduledByRole && <p className="text-[#6B7280]">{ctx.scheduledByRole}</p>}
             <p className="text-[#6B7280]">{brand.name}</p>

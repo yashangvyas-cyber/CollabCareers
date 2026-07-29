@@ -104,8 +104,9 @@ const mockInterviewMap: Record<string, MockInterviewDetails> = {
   '3': {
     offerStatus: 'Shortlisted', department: 'Mobile', joiningOn: '-', remarks: '-',
     rounds: [
-      { id: 'r3-online', no: 1, name: 'Technical Round', mode: 'Online', datetime: '25/Jul/2026, 10:00 AM', status: 'Scheduled', panelSuggestion: 'Should Hire', panel: ['Super User'], scheduledBy: 'Super User', scheduledAt: '22/Jul/2026, 06:00 PM', duration: '60 Minutes', additionalInfo: 'Google Meet link: https://meet.google.com/abc-defg-hij', feedbackScore: 0, feedbackBy: 'Super User' },
-      { id: 'r3-offline', no: 2, name: 'Onsite Culture Fit', mode: 'Offline', datetime: '28/Jul/2026, 02:30 PM', status: 'Scheduled', panelSuggestion: 'Should Hire', panel: ['Super User'], scheduledBy: 'Super User', scheduledAt: '22/Jul/2026, 06:00 PM', duration: '45 Minutes', additionalInfo: 'In-person at MindInventory office.', feedbackScore: 0, feedbackBy: 'Super User' },
+      { id: 'r3-online', no: 1, name: 'Technical Round', mode: 'Online', datetime: '03/Aug/2026, 10:00 AM', status: 'Scheduled', panelSuggestion: 'Should Hire', panel: ['Super User'], scheduledBy: 'Super User', scheduledAt: '22/Jul/2026, 06:00 PM', duration: '60 Minutes', additionalInfo: 'Google Meet link: https://meet.google.com/abc-defg-hij', feedbackScore: 0, feedbackBy: 'Super User' },
+      { id: 'r3-offline', no: 2, name: 'Onsite Culture Fit', mode: 'Offline', datetime: '04/Aug/2026, 02:30 PM', status: 'Scheduled', panelSuggestion: 'Should Hire', panel: ['Super User'], scheduledBy: 'Super User', scheduledAt: '22/Jul/2026, 06:00 PM', duration: '45 Minutes', additionalInfo: 'In-person at MindInventory office.', feedbackScore: 0, feedbackBy: 'Super User' },
+      { id: 'r3-final', no: 3, name: 'Final Discussion', mode: 'Online', datetime: '21/Jul/2026, 03:00 PM', status: 'Completed', panelSuggestion: 'Should Hire', panel: ['Super User'], scheduledBy: 'Super User', scheduledAt: '18/Jul/2026, 05:00 PM', duration: '45 Minutes', additionalInfo: 'Google Meet.', feedbackScore: 0, feedbackBy: 'Super User' },
     ],
   },
   // ── Copied from staging: Jason Doe — pending HR Round, no offer yet ──

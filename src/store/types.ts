@@ -230,6 +230,11 @@ export interface ExternalFeedback {
   suggestion: PanelSuggestion;
   overallRemarks: string;
   criteriaRatings: Record<string, { score: number; remark: string }>;
+  /** Who on the panel actually entered it — only one panelist submits per interview,
+   *  so every other panelist sees it attributed ("Provided by X"), not as their own. */
+  submittedBy?: string;
+  /** When it was submitted (ISO). */
+  submittedAt?: string;
 }
 
 /** Snapshot of interview context — denormalized so the token page is self-contained. */
