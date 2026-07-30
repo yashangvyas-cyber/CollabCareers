@@ -225,7 +225,6 @@ export default function PanelistEmailPage() {
                   </div>
                 </div>
               )}
-              <p className="text-[11px] text-[#9CA3AF] mt-3">This secure link is personal to you — no login required.</p>
             </div>
           )}
 
