@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { FileText, CheckCircle, AlertTriangle, ExternalLink, XCircle, Mail, Phone, Linkedin, Copy, MapPin, ChevronDown, Info, Lock, CalendarClock, Check, X, CalendarCheck, CalendarX, FlaskConical } from 'lucide-react';
+import { FileText, CheckCircle, AlertTriangle, ExternalLink, XCircle, Mail, Phone, Linkedin, Copy, MapPin, ChevronDown, Info, Lock, CalendarClock, Check, X, CalendarCheck, CalendarX, FlaskConical, PenLine } from 'lucide-react';
 import { useApp } from '../../store/AppContext';
 import { resolveBranding } from '../../lib/businessUnits';
 import BuLogo from '../../components/panelist/BuLogo';
@@ -70,6 +70,9 @@ function PanelistView({ token }: { token?: string }) {
   const [fbOverallRemarks, setFbOverallRemarks] = useState('');
   const [fbCriteriaRatings, setFbCriteriaRatings] = useState<Record<string, { score: number; remark: string }>>({});
   const [fbSubmitted, setFbSubmitted] = useState(false);
+  // Editing an already-submitted feedback (author only) + collapse state of the read-only card.
+  const [editing, setEditing] = useState(false);
+  const [roDetailOpen, setRoDetailOpen] = useState(true);
   // Prototype-only: lets a reviewer fast-forward past the interview start time so the
   // time-gated feedback form can be walked through live, without waiting for the real clock.
   const [demoTimePassed, setDemoTimePassed] = useState(false);
@@ -144,6 +147,29 @@ function PanelistView({ token }: { token?: string }) {
   const feedbackAuthor = roundFeedback?.submittedBy || feedbackInvite?.name || feedbackInvite?.email || 'a panel member';
   // Once feedback exists for the round, the page becomes a read-only record for everyone.
   const isReadOnly = !!roundFeedback;
+  // The current viewer authored the round's feedback → they may edit it; peers see it read-only.
+  const isAuthor = !!feedbackInvite && feedbackInvite.accessToken === invite.accessToken;
+
+  // Enter edit mode with the submitted values pre-loaded into the form.
+  const startEditing = () => {
+    if (!roundFeedback) return;
+    setFbSuggestion(roundFeedback.suggestion);
+    setFbOverallRemarks(roundFeedback.overallRemarks);
+    setFbCriteriaRatings({ ...roundFeedback.criteriaRatings });
+    setEditing(true);
+  };
+  // Save an edit — keep the original author, notify the recruiter, drop back to read-only.
+  const handleFbUpdate = () => {
+    if (!token) return;
+    submitExternalFeedback(token, {
+      suggestion: fbSuggestion,
+      overallRemarks: fbOverallRemarks.trim(),
+      criteriaRatings: Object.keys(fbCriteriaRatings).length > 0 ? fbCriteriaRatings : {},
+      submittedBy: roundFeedback?.submittedBy,
+    });
+    setEditing(false);
+    showToast('Feedback updated. The recruiter has been notified via email.');
+  };
 
   // Availability state derives entirely from the committed decision.
   const declined = committed === false;
@@ -166,6 +192,83 @@ function PanelistView({ token }: { token?: string }) {
     setFbCriteriaRatings(prev => ({ ...prev, [c]: { ...(prev[c] ?? { remark: '' }), score } }));
   const updateCriterionRemark = (c: string, remark: string) =>
     setFbCriteriaRatings(prev => ({ ...prev, [c]: { ...(prev[c] ?? { score: 0 }), remark } }));
+
+  // The feedback form and its read-only record share one renderer, so a submitted feedback
+  // looks exactly like the form: all five suggestion pills (chosen one dark-filled), a star
+  // rating + "N out of 10" readout per criterion, and remark boxes. These are plain functions
+  // (not <Components>) so the textareas keep focus across re-renders while typing.
+  const DARK_PILL = { backgroundColor: '#2E3444', borderColor: '#2E3444', color: '#FFFFFF' };
+  const suggestionPills = (selected: PanelSuggestion, editable: boolean) => (
+    <div className="flex flex-wrap gap-2">
+      {SUGGESTIONS.map(s => {
+        const sty = SUGGESTION_STYLE[s];
+        const style = selected === s ? DARK_PILL : { backgroundColor: sty.bg, borderColor: sty.border, color: sty.text };
+        return editable ? (
+          <button key={s} type="button" onClick={() => setFbSuggestion(s)}
+            className="px-4 py-2 rounded-lg text-xs font-bold border transition-all" style={style}>{s}</button>
+        ) : (
+          <span key={s} className="px-4 py-2 rounded-lg text-xs font-bold border" style={style}>{s}</span>
+        );
+      })}
+    </div>
+  );
+  const criterionBlock = (name: string, score: number, remark: string, editable: boolean) => (
+    <div key={name} className="border-t border-[#F1F1F4] pt-4 mt-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-semibold text-[#111827] mb-2">{name} <span className="text-red-500">*</span></p>
+          <div className="flex gap-0.5">
+            {Array.from({ length: 10 }, (_, i) =>
+              editable ? (
+                <button key={i} type="button" onClick={() => updateCriterionScore(name, i + 1)}
+                  className="text-xl leading-none transition-transform hover:scale-110"
+                  style={{ color: i < score ? '#F4B400' : '#E5E7EB' }}>★</button>
+              ) : (
+                <span key={i} className="text-xl leading-none" style={{ color: i < score ? '#F4B400' : '#E5E7EB' }}>★</span>
+              ),
+            )}
+          </div>
+        </div>
+        <div className="text-right shrink-0">
+          <p className="text-[11px] text-[#6B7280]">Rating</p>
+          <p className="text-sm font-bold text-[#111827] mt-0.5">{score} out of 10</p>
+        </div>
+      </div>
+      <p className="text-[11px] text-[#6B7280] mt-3 mb-1">Remark</p>
+      {editable ? (
+        <textarea value={remark} onChange={e => updateCriterionRemark(name, e.target.value)} rows={2}
+          placeholder={`Remark for ${name}...`}
+          className="w-full border border-[#D1D5DB] rounded-lg px-3 py-2 text-sm text-[#111827] placeholder:text-[#9CA3AF] resize-none focus:outline-none focus:ring-2 focus:ring-[#3538CD]/30 focus:border-[#3538CD] bg-white" />
+      ) : (
+        <div className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2.5 text-sm text-[#111827] bg-white whitespace-pre-wrap min-h-[42px]">{remark || '—'}</div>
+      )}
+    </div>
+  );
+  const feedbackBody = (
+    editable: boolean,
+    source: { suggestion: PanelSuggestion; criteriaRatings: Record<string, { score: number; remark: string }>; overallRemarks: string },
+  ) => (
+    <div className="border border-[#E5E7EB] rounded-lg p-5">
+      <div>
+        <p className="text-xs font-medium text-[#6B7280] mb-2">Interview Panel Suggestion <span className="text-red-500">*</span></p>
+        {suggestionPills(source.suggestion, editable)}
+      </div>
+      {ctx.evaluationCriteria.map(c => {
+        const crit = editable ? getCriterion(c) : (source.criteriaRatings[c] ?? { score: 0, remark: '' });
+        return criterionBlock(c, crit.score, crit.remark, editable);
+      })}
+      <div className="border-t border-[#F1F1F4] pt-4 mt-4">
+        <p className="text-xs font-medium text-[#6B7280] mb-1">Overall Remarks <span className="text-red-500">*</span></p>
+        {editable ? (
+          <textarea value={fbOverallRemarks} onChange={e => setFbOverallRemarks(e.target.value)} rows={4}
+            placeholder="Overall summary of the candidate's performance..."
+            className="w-full border border-[#D1D5DB] rounded-lg px-3 py-2.5 text-sm text-[#111827] placeholder:text-[#9CA3AF] resize-none focus:outline-none focus:ring-2 focus:ring-[#3538CD]/30 focus:border-[#3538CD] bg-white" />
+        ) : (
+          <div className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2.5 text-sm text-[#111827] bg-white whitespace-pre-wrap min-h-[64px]">{source.overallRemarks || '—'}</div>
+        )}
+      </div>
+    </div>
+  );
 
   const modeLabel = ctx.mode === 'Online'
     ? `Online${ctx.meetingType ? ` (${ctx.meetingType})` : ''}`
@@ -468,62 +571,10 @@ function PanelistView({ token }: { token?: string }) {
                       </label>
                     )}
                     {feedbackUnlocked && fbOpen && (
-                      <div className="border border-t-0 border-[#E5E7EB] rounded-b-lg p-4 space-y-6 bg-white">
-                        {/* Suggestion */}
-                        <div>
-                          <p className="text-xs font-medium text-[#374151] mb-2">Interview Panel Suggestion <span className="text-red-500">*</span></p>
-                          <div className="flex flex-wrap gap-2">
-                            {SUGGESTIONS.map(s => {
-                              const sty = SUGGESTION_STYLE[s];
-                              const isSelected = fbSuggestion === s;
-                              return (
-                                <button key={s} onClick={() => setFbSuggestion(s)}
-                                  className="px-4 py-2 rounded-lg text-xs font-bold border transition-all"
-                                  style={isSelected
-                                    ? { backgroundColor: sty.bg, borderColor: sty.text, color: sty.text }
-                                    : { backgroundColor: sty.bg, borderColor: sty.border, color: sty.text, opacity: 0.7 }}>
-                                  {s}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-
-                        {/* Per-criterion ratings */}
-                        {ctx.evaluationCriteria.map(c => {
-                          const crit = getCriterion(c);
-                          return (
-                            <div key={c} className="border-t border-[#F1F1F4] pt-4">
-                              <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
-                                <span className="text-sm font-semibold text-[#111827]">{c} <span className="text-red-500">*</span></span>
-                                <div className="flex items-center gap-3 shrink-0">
-                                  <div className="flex gap-0.5">
-                                    {Array.from({ length: 10 }, (_, i) => (
-                                      <button key={i} onClick={() => updateCriterionScore(c, i + 1)}
-                                        className="text-xl transition-transform hover:scale-110"
-                                        style={{ color: i < crit.score ? '#F4B400' : '#E5E7EB' }}>★</button>
-                                    ))}
-                                  </div>
-                                  <span className="text-xs font-medium text-[#6B7280] w-16 text-right">{crit.score} out of 10</span>
-                                </div>
-                              </div>
-                              <textarea value={crit.remark} onChange={e => updateCriterionRemark(c, e.target.value)} rows={2}
-                                placeholder={`Remark for ${c}...`}
-                                className="w-full border border-[#D1D5DB] rounded-lg px-3 py-2 text-sm text-[#111827] placeholder:text-[#9CA3AF] resize-none focus:outline-none focus:ring-2 focus:ring-[#3538CD]/30 focus:border-[#3538CD] bg-white" />
-                            </div>
-                          );
-                        })}
-
-                        {/* Overall Remarks */}
-                        <div className="border-t border-[#F1F1F4] pt-4">
-                          <p className="text-xs font-medium text-[#374151] mb-2">Overall Remarks <span className="text-red-500">*</span></p>
-                          <textarea value={fbOverallRemarks} onChange={e => setFbOverallRemarks(e.target.value)} rows={4}
-                            placeholder="Overall summary of the candidate's performance..."
-                            className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2.5 text-sm text-[#111827] placeholder:text-[#9CA3AF] resize-none focus:outline-none focus:ring-2 focus:ring-[#3538CD]/30 focus:border-[#3538CD]" />
-                        </div>
-
+                      <div className="border border-t-0 border-[#E5E7EB] rounded-b-lg p-4 bg-white">
+                        {feedbackBody(true, { suggestion: fbSuggestion, criteriaRatings: fbCriteriaRatings, overallRemarks: fbOverallRemarks })}
                         <button onClick={handleFbSubmit}
-                          className="px-6 py-2.5 bg-[#3538CD] text-white text-xs font-black uppercase tracking-widest rounded-lg hover:bg-[#2d30b0] transition-colors">
+                          className="mt-4 px-6 py-2.5 bg-[#3538CD] text-white text-xs font-black uppercase tracking-widest rounded-lg hover:bg-[#2d30b0] transition-colors">
                           {fbSubmitted ? '✓ Submitted' : 'Submit Feedback'}
                         </button>
                       </div>
@@ -535,55 +586,49 @@ function PanelistView({ token }: { token?: string }) {
               {/* Read-only feedback summary — one submission per interview, shown to the whole
                   panel and attributed to whoever entered it (matches the internal header). */}
               {isReadOnly && roundFeedback && (
-                <div className="mt-4 border border-[#E5E7EB] rounded-lg overflow-hidden">
-                  {/* Green attribution banner — single line, exactly like the internal screen */}
-                  <div className="flex items-center flex-wrap gap-x-1 bg-[#E7F6EC] px-4 py-3">
+                <div className="mt-4 border border-[#E5E7EB] rounded-xl overflow-hidden">
+                  {/* Green attribution banner — one line, with collapse + author-only Edit */}
+                  <div className="flex items-center gap-x-1 bg-[#E7F6EC] px-4 py-3 border-b border-[#CDEDD8]">
                     <span className="text-sm font-semibold text-[#111827]">Interview Panel Feedback</span>
                     <span className="text-sm text-[#374151]">
                       (Provided by <span className="font-semibold text-[#3538CD]">{feedbackAuthor}</span>
                       {roundFeedback.submittedAt && <> on {formatProvidedAt(roundFeedback.submittedAt)}</>})
                     </span>
                     <Info className="w-3.5 h-3.5 text-[#6B7280] shrink-0 ml-0.5" />
-                  </div>
-                  <div className="p-4 space-y-5">
-                    <div>
-                      <RLabel>Interview Panel Suggestion</RLabel>
-                      <span className="text-sm font-bold px-3 py-1.5 rounded-full border inline-block mt-2"
-                        style={{
-                          backgroundColor: SUGGESTION_STYLE[roundFeedback.suggestion]?.bg,
-                          borderColor: SUGGESTION_STYLE[roundFeedback.suggestion]?.border,
-                          color: SUGGESTION_STYLE[roundFeedback.suggestion]?.text,
-                        }}>
-                        {roundFeedback.suggestion}
-                      </span>
+                    <div className="ml-auto flex items-center gap-1 shrink-0">
+                      {isAuthor && !editing && (
+                        <button onClick={startEditing}
+                          className="flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold text-[#3538CD] hover:bg-white/70 transition-colors">
+                          <PenLine className="w-3.5 h-3.5" /> Edit
+                        </button>
+                      )}
+                      <button onClick={() => setRoDetailOpen(o => !o)} aria-label={roDetailOpen ? 'Collapse' : 'Expand'}
+                        className="p-1 rounded-md hover:bg-white/70 transition-colors">
+                        <ChevronDown className={`w-4 h-4 text-[#6B7280] transition-transform duration-200 ${roDetailOpen ? 'rotate-180' : ''}`} />
+                      </button>
                     </div>
-                    {roundFeedback.criteriaRatings && Object.keys(roundFeedback.criteriaRatings).length > 0 && (
-                      <div className="space-y-4">
-                        {Object.entries(roundFeedback.criteriaRatings).map(([k, v]) => (
-                          <div key={k} className="border-t border-[#F1F1F4] pt-4">
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="text-sm font-semibold text-[#374151] truncate pr-4">{k}</span>
-                              <div className="flex items-center gap-2 shrink-0">
-                                <div className="flex gap-0.5">
-                                  {Array.from({ length: 10 }, (_, i) => (
-                                    <span key={i} className="text-lg" style={{ color: i < v.score ? '#F4B400' : '#E5E7EB' }}>★</span>
-                                  ))}
-                                </div>
-                                <span className="text-xs font-medium text-[#6B7280] w-16 text-right">{v.score} out of 10</span>
-                              </div>
-                            </div>
-                            {v.remark && <p className="text-xs text-[#6B7280] italic">{v.remark}</p>}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {roundFeedback.overallRemarks && (
-                      <div>
-                        <RLabel>Overall Remarks</RLabel>
-                        <p className="text-sm text-[#374151] leading-relaxed p-4 bg-[#FAFAFA] rounded-lg border border-[#E5E7EB] mt-2">{roundFeedback.overallRemarks}</p>
-                      </div>
-                    )}
                   </div>
+                  {roDetailOpen && (
+                    <div className="p-4 bg-white">
+                      {editing && isAuthor ? (
+                        <>
+                          {feedbackBody(true, { suggestion: fbSuggestion, criteriaRatings: fbCriteriaRatings, overallRemarks: fbOverallRemarks })}
+                          <div className="mt-4 flex items-center gap-2">
+                            <button onClick={handleFbUpdate}
+                              className="px-6 py-2.5 bg-[#3538CD] text-white text-xs font-black uppercase tracking-widest rounded-lg hover:bg-[#2d30b0] transition-colors">
+                              Update Feedback
+                            </button>
+                            <button onClick={() => setEditing(false)}
+                              className="px-5 py-2.5 text-xs font-semibold text-[#6B7280] rounded-lg border border-[#E5E7EB] hover:bg-[#F9FAFB] transition-colors">
+                              Cancel
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        feedbackBody(false, roundFeedback)
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
