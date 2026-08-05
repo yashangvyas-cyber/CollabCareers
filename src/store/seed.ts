@@ -1617,6 +1617,7 @@ Design is a first-class citizen at MindInventory. You will work on products that
     { id: 'ps7-app', candidateId: 'ps7', jobId: 'd12', status: 'Cancelled',     appliedAt: new Date(Date.now() - 86400000 * 5).toISOString(), answers: {}, resumeUrl: 'Deepak_Singh_Resume.pdf' },
     { id: 'ps8-app', candidateId: 'ps8', jobId: 'd1',  status: 'Archived',      exitedAfterStage: 0, archiveRemark: 'Candidate went silent after 2 follow-ups. Archiving for now.', appliedAt: '2026-03-10T00:00:00.000Z', answers: {}, resumeUrl: 'Rekha_Sharma_Resume.pdf' },
   ],
+  discardedApplicationIds: [],
   invites: [
     // Riya Desai (c2) — invited for Node.js role, she said Interested
     {

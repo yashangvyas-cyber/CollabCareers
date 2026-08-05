@@ -329,9 +329,15 @@ export default function CandidateProfilePage() {
                                 Continue Application <ArrowRight className="w-4 h-4" />
                               </button>
                             )}
+                            {/* Discard: a comfortable full-width tap target on mobile
+                                (bordered, secondary to the solid primary), collapsing to
+                                a compact right-aligned text link on ≥sm where the card is
+                                a horizontal row. */}
                             <button
                               onClick={() => setDraftToDiscard(app)}
-                              className="flex items-center justify-center gap-1.5 text-[10px] font-black text-[#9CA3AF] hover:text-red-500 uppercase tracking-widest transition-colors whitespace-nowrap"
+                              className="flex items-center justify-center gap-1.5 font-black uppercase tracking-widest transition-all whitespace-nowrap
+                                         w-full py-3 rounded-xl border border-[#E5E7EB] text-[11px] text-[#6B7280] hover:text-red-500 hover:border-red-200 hover:bg-red-50 active:scale-[0.98]
+                                         sm:w-auto sm:py-0 sm:border-0 sm:rounded-none sm:text-[10px] sm:text-[#9CA3AF] sm:hover:bg-transparent sm:active:scale-100"
                             >
                               <Trash2 className="w-3.5 h-3.5" /> Discard draft
                             </button>
@@ -411,21 +417,23 @@ export default function CandidateProfilePage() {
         {/* Discard-draft confirmation — removing a draft is irreversible, so it's
             gated behind an explicit confirm, mirroring the withdraw-application modal. */}
         {draftToDiscard && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
             <div className="absolute inset-0 bg-[#111827]/60 backdrop-blur-sm" onClick={() => setDraftToDiscard(null)} />
-            <div className="relative bg-white rounded-[32px] shadow-2xl w-full max-w-md overflow-hidden border border-[#E5E7EB] animate-in fade-in zoom-in duration-200">
-              <div className="p-8">
-                <div className="w-14 h-14 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mb-6">
-                  <AlertTriangle className="w-7 h-7" />
+            <div className="relative bg-white rounded-[28px] sm:rounded-[32px] shadow-2xl w-full max-w-md overflow-hidden border border-[#E5E7EB] animate-in fade-in zoom-in-95 duration-200">
+              <div className="p-6 sm:p-8">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mb-5 sm:mb-6">
+                  <AlertTriangle className="w-6 h-6 sm:w-7 sm:h-7" />
                 </div>
-                <h3 className="text-2xl font-black text-[#111827] tracking-tight mb-2">Discard this draft?</h3>
-                <p className="text-[#6B7280] text-sm font-medium leading-relaxed mb-7">
+                <h3 className="text-xl sm:text-2xl font-black text-[#111827] tracking-tight mb-2">Discard this draft?</h3>
+                <p className="text-[#6B7280] text-[13px] sm:text-sm font-medium leading-relaxed mb-6 sm:mb-7">
                   Your saved draft for <span className="font-black text-[#111827]">{draftToDiscard.title}</span> will be permanently removed. This can&apos;t be undone — you'll need to start a new application if you change your mind.
                 </p>
-                <div className="flex gap-3">
+                {/* Stacks vertically on the narrowest phones so neither label is cramped,
+                    side-by-side once there's room. */}
+                <div className="flex flex-col-reverse sm:flex-row gap-3">
                   <button
                     onClick={() => setDraftToDiscard(null)}
-                    className="flex-1 px-6 py-3.5 bg-[#F9FAFB] text-[#111827] text-xs font-black rounded-2xl hover:bg-[#F3F4F6] transition-all uppercase tracking-widest border border-[#E5E7EB]"
+                    className="flex-1 px-4 sm:px-6 py-3.5 bg-[#F9FAFB] text-[#111827] text-[11px] sm:text-xs font-black rounded-2xl hover:bg-[#F3F4F6] transition-all uppercase tracking-widest border border-[#E5E7EB]"
                   >
                     Keep Draft
                   </button>
@@ -434,7 +442,7 @@ export default function CandidateProfilePage() {
                       discardDraft(draftToDiscard.id);
                       setDraftToDiscard(null);
                     }}
-                    className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-red-600 text-white text-xs font-black rounded-2xl hover:bg-red-700 transition-all uppercase tracking-widest shadow-lg"
+                    className="flex-1 flex items-center justify-center gap-2 px-4 sm:px-6 py-3.5 bg-red-600 text-white text-[11px] sm:text-xs font-black rounded-2xl hover:bg-red-700 transition-all uppercase tracking-widest shadow-lg"
                   >
                     <Trash2 className="w-4 h-4" /> Discard
                   </button>

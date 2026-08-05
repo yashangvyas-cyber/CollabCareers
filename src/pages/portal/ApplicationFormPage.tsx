@@ -86,7 +86,7 @@ const mergeFormData = (currentUser: any, source: any) => {
 
 export default function ApplicationFormPage() {
   const { jobId } = useParams();
-  const { jobs, currentUser, applications, submitApplication, saveDraft, alumniVerified, updateCurrentUser } = useApp();
+  const { jobs, currentUser, applications, submitApplication, saveDraft, discardDraft, alumniVerified, updateCurrentUser } = useApp();
   const navigate = useNavigate();
   const location = useLocation();
   const prefillFromId = location.state?.prefillFrom;
@@ -309,8 +309,18 @@ export default function ApplicationFormPage() {
       resumeUrl: resumeName || 'Manually Filled',
     });
     setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
+    // Saving a draft means "I'm done for now" — briefly confirm, then take the
+    // candidate out to My Applications, where the saved draft is listed and can be
+    // resumed or discarded. (Previously it just flashed a toast and stayed put.)
+    setTimeout(() => navigate('/portal/yopmails/profile'), 900);
   };
+
+  // A previously-saved draft for this job (if any). When present, leaving keeps it
+  // — so the exit dialog also offers to delete it outright, matching the "Discard
+  // draft" action on My Applications rather than making the candidate hunt for it.
+  const existingDraft = applications.find(
+    a => a.jobId === job?.id && a.candidateId === currentUser?.id && a.status === 'Draft'
+  );
 
   // Leave the application without saving. Returns to wherever the candidate came
   // from (a draft opens from My Applications, a fresh apply from the job/listing);
@@ -319,6 +329,12 @@ export default function ApplicationFormPage() {
     setShowLeaveConfirm(false);
     if (window.history.length > 1) navigate(-1);
     else navigate('/portal/yopmails/profile');
+  };
+
+  // Delete the saved draft entirely, then leave — the card drops back to "Apply".
+  const handleDiscardDraft = () => {
+    if (existingDraft) discardDraft(existingDraft.id);
+    leaveForm();
   };
 
   const validateStep1 = () => {
@@ -1246,33 +1262,52 @@ export default function ApplicationFormPage() {
         </div>
 
         {/* Leave-without-saving confirmation — the explicit exit the candidate was
-            missing. Discards only the current edits; a previously saved draft stays. */}
+            missing. Leaving keeps a previously saved draft; the red action removes it. */}
         {showLeaveConfirm && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-            <div className="absolute inset-0 bg-[#111827]/60 backdrop-blur-sm" onClick={() => setShowLeaveConfirm(false)} />
-            <div className="relative bg-white rounded-[32px] shadow-2xl w-full max-w-md overflow-hidden border border-[#E5E7EB] animate-in fade-in zoom-in duration-200">
-              <div className="p-8">
-                <div className="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-6">
-                  <AlertTriangle className="w-7 h-7" />
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+            <div className="absolute inset-0 bg-[#0B1120]/55 backdrop-blur-md animate-in fade-in duration-200" onClick={() => setShowLeaveConfirm(false)} />
+            <div className="relative bg-white rounded-[28px] shadow-[0_30px_80px_-20px_rgba(11,17,32,0.45)] w-full max-w-[430px] overflow-hidden border border-black/5 animate-in fade-in zoom-in-95 duration-200">
+              <button
+                onClick={() => setShowLeaveConfirm(false)}
+                aria-label="Close"
+                className="absolute top-5 right-5 w-8 h-8 rounded-full flex items-center justify-center text-[#9CA3AF] hover:text-[#111827] hover:bg-[#F3F4F6] transition-all"
+              >
+                <X className="w-4 h-4" />
+              </button>
+              <div className="p-7 sm:p-8">
+                <div className="w-14 h-14 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center mb-5 ring-8 ring-amber-50/50">
+                  <AlertTriangle className="w-7 h-7" strokeWidth={2.25} />
                 </div>
-                <h3 className="text-2xl font-black text-[#111827] tracking-tight mb-2">Leave without saving?</h3>
-                <p className="text-[#6B7280] text-sm font-medium leading-relaxed mb-7">
-                  Any changes you&apos;ve made here won&apos;t be saved. If you want to keep them, choose <span className="font-black text-[#111827]">Save Draft</span> instead — you can pick up right where you left off later.
+                <h3 className="text-[22px] sm:text-2xl font-black text-[#0B1120] tracking-tight mb-2 leading-tight">Leave without saving?</h3>
+                <p className="text-[#6B7280] text-[13px] sm:text-sm font-medium leading-relaxed mb-6">
+                  {existingDraft ? (
+                    <>Your saved draft is safe — only the edits you&apos;ve just made will be dropped. Want to keep them? Use <span className="font-bold text-[#111827]">Save Draft</span> instead.</>
+                  ) : (
+                    <>The details you&apos;ve entered won&apos;t be saved. To finish later, choose <span className="font-bold text-[#111827]">Save Draft</span> and pick up right where you left off.</>
+                  )}
                 </p>
                 <div className="flex gap-3">
                   <button
                     onClick={() => setShowLeaveConfirm(false)}
-                    className="flex-1 px-6 py-3.5 bg-[#F9FAFB] text-[#111827] text-xs font-black rounded-2xl hover:bg-[#F3F4F6] transition-all uppercase tracking-widest border border-[#E5E7EB]"
+                    className="flex-1 px-5 py-3.5 bg-white text-[#374151] text-[11px] font-black rounded-2xl border border-[#E5E7EB] hover:bg-[#F9FAFB] hover:border-[#D1D5DB] transition-all uppercase tracking-widest active:scale-[0.98]"
                   >
                     Keep Editing
                   </button>
                   <button
                     onClick={leaveForm}
-                    className="flex-1 px-6 py-3.5 bg-[#111827] text-white text-xs font-black rounded-2xl hover:bg-black transition-all uppercase tracking-widest shadow-lg"
+                    className="flex-1 px-5 py-3.5 bg-[#0B1120] text-white text-[11px] font-black rounded-2xl hover:bg-black transition-all uppercase tracking-widest shadow-lg shadow-[#0B1120]/20 active:scale-[0.98]"
                   >
                     Leave
                   </button>
                 </div>
+                {existingDraft && (
+                  <button
+                    onClick={handleDiscardDraft}
+                    className="mt-3 w-full flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-red-50 text-red-600 text-[11px] font-black uppercase tracking-widest border border-red-100 hover:bg-red-100 hover:border-red-200 transition-all active:scale-[0.98]"
+                  >
+                    <Trash2 className="w-4 h-4" /> Discard This Draft
+                  </button>
+                )}
               </div>
             </div>
           </div>

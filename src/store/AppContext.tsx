@@ -56,11 +56,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
       // Ensure mock applications are present — keep their original candidateIds (do NOT override to currentUser)
       const currentApps = parsed.applications || [];
       const mergedApps = [...currentApps];
+      // Applications the candidate discarded stay gone across reloads instead of
+      // being re-seeded from initialState below.
+      const discardedAppIds = new Set<string>(parsed.discardedApplicationIds || []);
 
       initialState.applications.forEach(defaultApp => {
         const existingIdx = mergedApps.findIndex(a => a.id === defaultApp.id);
         if (existingIdx === -1) {
-          mergedApps.push(defaultApp); // preserve original candidateId
+          if (!discardedAppIds.has(defaultApp.id)) mergedApps.push(defaultApp); // preserve original candidateId
         } else if (defaultApp.offer && !mergedApps[existingIdx].offer) {
           // Backfill newly-seeded offer details onto applications saved before
           // the offer feature existed. Status is left untouched so a decline
@@ -118,6 +121,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         ...parsed,
         jobs: mergedJobs,
         applications: mergedApps,
+        discardedApplicationIds: parsed.discardedApplicationIds || [],
         candidates: mergedCandidates,
         invites: mergedInvites,
         externalInvites: mergedExtInvites,
@@ -216,10 +220,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Discard a saved draft entirely — only Draft applications can be removed, so a
   // stray id (or a submitted application) is a no-op rather than a data loss.
   const discardDraft = (applicationId: string) => {
-    setState(prev => ({
-      ...prev,
-      applications: prev.applications.filter(a => !(a.id === applicationId && a.status === 'Draft')),
-    }));
+    setState(prev => {
+      const target = prev.applications.find(a => a.id === applicationId && a.status === 'Draft');
+      if (!target) return prev;
+      return {
+        ...prev,
+        applications: prev.applications.filter(a => a.id !== applicationId),
+        // Tombstone it so a seeded draft isn't re-added on the next reload.
+        discardedApplicationIds: prev.discardedApplicationIds.includes(applicationId)
+          ? prev.discardedApplicationIds
+          : [...prev.discardedApplicationIds, applicationId],
+      };
+    });
   };
 
   const setAlumniVerified = (verified: boolean, email: string | null) => {

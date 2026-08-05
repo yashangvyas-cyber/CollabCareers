@@ -292,6 +292,9 @@ export interface AppState {
   jobs: Job[];
   candidates: Candidate[];
   applications: Application[];
+  // Ids of applications the candidate explicitly discarded. Seeded fixtures are
+  // otherwise re-added on every reload, so a tombstone keeps a discard permanent.
+  discardedApplicationIds: string[];
   invites: TalentInvite[];
   externalInvites: ExternalInvite[];
   currentUser: Candidate | null;
