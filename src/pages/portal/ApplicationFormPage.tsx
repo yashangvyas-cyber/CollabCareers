@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import PortalLayout from '../../components/PortalLayout';
 import { 
-  ChevronDown, CheckCircle, Upload, Zap, Sparkles, 
-  Lock, ArrowRight, Download, X, FileText,
-  Plus, ExternalLink, ArrowUp, ArrowDown, Trash2, Info
+  ChevronDown, CheckCircle, Upload, Zap, Sparkles,
+  Lock, ArrowRight, ArrowLeft, Download, X, FileText,
+  Plus, ExternalLink, ArrowUp, ArrowDown, Trash2, Info, AlertTriangle
 } from 'lucide-react';
 import { useApp } from '../../store/AppContext';
 import { Job, CustomField } from '../../store/types';
@@ -108,6 +108,7 @@ export default function ApplicationFormPage() {
   const [showToast, setShowToast] = useState(false);
   const [jobClosed, setJobClosed] = useState(false);
   const [syncProfile, setSyncProfile] = useState(false); // "also update my profile with this data"
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false); // exit-without-saving guard
 
   const [formData, setFormData] = useState(() => getDefaultFormData(currentUser));
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -311,6 +312,15 @@ export default function ApplicationFormPage() {
     setTimeout(() => setShowToast(false), 3000);
   };
 
+  // Leave the application without saving. Returns to wherever the candidate came
+  // from (a draft opens from My Applications, a fresh apply from the job/listing);
+  // falls back to My Applications when there's no history entry to pop.
+  const leaveForm = () => {
+    setShowLeaveConfirm(false);
+    if (window.history.length > 1) navigate(-1);
+    else navigate('/portal/yopmails/profile');
+  };
+
   const validateStep1 = () => {
     const newErrors: Record<string, string> = {};
     let firstErrorSection: number | null = null;
@@ -420,7 +430,15 @@ export default function ApplicationFormPage() {
   return (
     <PortalLayout>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 min-h-[80vh] flex flex-col">
-        
+
+        {/* Back / exit — leave the application without being forced to save a draft. */}
+        <button
+          onClick={() => setShowLeaveConfirm(true)}
+          className="self-start -mt-2 mb-6 flex items-center gap-2 text-[11px] font-black text-[#6B7280] hover:text-primary uppercase tracking-[0.2em] transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back
+        </button>
+
         {/* Progress Stepper */}
         <div className="flex items-center justify-between mb-10 sm:mb-16 max-w-3xl mx-auto relative px-2 sm:px-10">
           {[
@@ -1175,7 +1193,13 @@ export default function ApplicationFormPage() {
                        <button onClick={() => setStep(0)} className="text-[#6B7280] hover:text-primary font-black text-[11px] transition-colors uppercase tracking-[0.2em] flex items-center gap-2">
                          <span className="text-lg">←</span> Change Resume
                        </button>
-                       <div className="flex gap-4">
+                       <div className="flex items-center gap-4">
+                          <button
+                            onClick={() => setShowLeaveConfirm(true)}
+                            className="px-4 py-3.5 text-[#6B7280] hover:text-red-500 text-xs font-black rounded-2xl transition-colors uppercase tracking-widest"
+                          >
+                            Cancel
+                          </button>
                           <button
                             onClick={handleSaveDraft}
                             className="px-8 py-3.5 border-2 border-[#E5E7EB] text-[#374151] text-xs font-black rounded-2xl hover:bg-white transition-all uppercase tracking-widest shadow-sm active:scale-95"
@@ -1220,6 +1244,39 @@ export default function ApplicationFormPage() {
               <span className="cursor-default">© {new Date().getFullYear()}</span>
            </div>
         </div>
+
+        {/* Leave-without-saving confirmation — the explicit exit the candidate was
+            missing. Discards only the current edits; a previously saved draft stays. */}
+        {showLeaveConfirm && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+            <div className="absolute inset-0 bg-[#111827]/60 backdrop-blur-sm" onClick={() => setShowLeaveConfirm(false)} />
+            <div className="relative bg-white rounded-[32px] shadow-2xl w-full max-w-md overflow-hidden border border-[#E5E7EB] animate-in fade-in zoom-in duration-200">
+              <div className="p-8">
+                <div className="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-6">
+                  <AlertTriangle className="w-7 h-7" />
+                </div>
+                <h3 className="text-2xl font-black text-[#111827] tracking-tight mb-2">Leave without saving?</h3>
+                <p className="text-[#6B7280] text-sm font-medium leading-relaxed mb-7">
+                  Any changes you&apos;ve made here won&apos;t be saved. If you want to keep them, choose <span className="font-black text-[#111827]">Save Draft</span> instead — you can pick up right where you left off later.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowLeaveConfirm(false)}
+                    className="flex-1 px-6 py-3.5 bg-[#F9FAFB] text-[#111827] text-xs font-black rounded-2xl hover:bg-[#F3F4F6] transition-all uppercase tracking-widest border border-[#E5E7EB]"
+                  >
+                    Keep Editing
+                  </button>
+                  <button
+                    onClick={leaveForm}
+                    className="flex-1 px-6 py-3.5 bg-[#111827] text-white text-xs font-black rounded-2xl hover:bg-black transition-all uppercase tracking-widest shadow-lg"
+                  >
+                    Leave
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Success Toast */}
         {showToast && (

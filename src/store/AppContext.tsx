@@ -11,6 +11,7 @@ interface AppContextType extends AppState {
   updateCurrentUser: (updates: Partial<Candidate>) => void;
   submitApplication: (application: Application) => void;
   saveDraft: (application: Application) => void;
+  discardDraft: (applicationId: string) => void;
   setAlumniVerified: (verified: boolean, email: string | null) => void;
   toggleSaveJob: (jobId: string) => void;
   withdrawApplication: (applicationId: string) => void;
@@ -209,6 +210,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setState(prev => ({
       ...prev,
       applications: [...prev.applications.filter(a => !(a.jobId === app.jobId && a.candidateId === app.candidateId && a.status === 'Draft')), app],
+    }));
+  };
+
+  // Discard a saved draft entirely — only Draft applications can be removed, so a
+  // stray id (or a submitted application) is a no-op rather than a data loss.
+  const discardDraft = (applicationId: string) => {
+    setState(prev => ({
+      ...prev,
+      applications: prev.applications.filter(a => !(a.id === applicationId && a.status === 'Draft')),
     }));
   };
 
@@ -440,6 +450,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         updateCurrentUser,
         submitApplication,
         saveDraft,
+        discardDraft,
         setAlumniVerified,
         toggleSaveJob,
         withdrawApplication,

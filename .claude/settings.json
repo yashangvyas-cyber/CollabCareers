@@ -61,7 +61,17 @@
       "Bash(curl -s localhost:5174/)",
       "Bash(echo \"started pid $!\")",
       "Bash(node /tmp/claude-1000/-home-yashang--gemini-antigravity-scratch-collab-careers-prototype/1a3e3372-c78f-414b-a94c-526a10ebab0e/scratchpad/shot.js)",
-      "Bash(node /tmp/claude-1000/-home-yashang--gemini-antigravity-scratch-collab-careers-prototype/1a3e3372-c78f-414b-a94c-526a10ebab0e/scratchpad/edit.js)"
+      "Bash(node /tmp/claude-1000/-home-yashang--gemini-antigravity-scratch-collab-careers-prototype/1a3e3372-c78f-414b-a94c-526a10ebab0e/scratchpad/edit.js)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5174/)",
+      "Bash(curl -s http://localhost:5174/)",
+      "Bash(node /tmp/claude-1000/-home-yashang--gemini-antigravity-scratch-collab-careers-prototype/1a3e3372-c78f-414b-a94c-526a10ebab0e/scratchpad/verify_discard.js)",
+      "Bash(node /tmp/claude-1000/-home-yashang--gemini-antigravity-scratch-collab-careers-prototype/1a3e3372-c78f-414b-a94c-526a10ebab0e/scratchpad/verify_leave.js)",
+      "Bash(node /tmp/claude-1000/-home-yashang--gemini-antigravity-scratch-collab-careers-prototype/1a3e3372-c78f-414b-a94c-526a10ebab0e/scratchpad/verify_leave2.js)",
+      "Bash(node /tmp/claude-1000/-home-yashang--gemini-antigravity-scratch-collab-careers-prototype/1a3e3372-c78f-414b-a94c-526a10ebab0e/scratchpad/verify_leave3.js)",
+      "Bash(node /tmp/claude-1000/-home-yashang--gemini-antigravity-scratch-collab-careers-prototype/1a3e3372-c78f-414b-a94c-526a10ebab0e/scratchpad/probe_hit.js)",
+      "Bash(node /tmp/claude-1000/-home-yashang--gemini-antigravity-scratch-collab-careers-prototype/1a3e3372-c78f-414b-a94c-526a10ebab0e/scratchpad/probe_mouse.js)",
+      "Bash(node /tmp/claude-1000/-home-yashang--gemini-antigravity-scratch-collab-careers-prototype/1a3e3372-c78f-414b-a94c-526a10ebab0e/scratchpad/probe_footer.js)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5174/portal/yopmails/apply/d3)"
     ],
     "additionalDirectories": [
       "/home/yashang/Downloads",

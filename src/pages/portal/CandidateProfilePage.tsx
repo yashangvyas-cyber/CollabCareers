@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import PortalLayout from '../../components/PortalLayout';
-import { Briefcase, Mail, Phone, MapPin, FileText, ExternalLink, Linkedin, ArrowRight, Clock, Pencil, Bookmark } from 'lucide-react';
+import { Briefcase, Mail, Phone, MapPin, FileText, ExternalLink, Linkedin, ArrowRight, Clock, Pencil, Bookmark, Trash2, AlertTriangle } from 'lucide-react';
 import { useApp } from '../../store/AppContext';
 import { portalStatus } from '../../lib/portalStatus';
 
@@ -11,8 +11,10 @@ const formatDate = (dateString: string) => {
 };
 
 export default function CandidateProfilePage() {
-  const { currentUser, updateCurrentUser, applications, jobs } = useApp();
+  const { currentUser, updateCurrentUser, applications, jobs, discardDraft } = useApp();
   const navigate = useNavigate();
+  // Draft the candidate has asked to discard — drives the confirm modal. Null = closed.
+  const [draftToDiscard, setDraftToDiscard] = useState<any | null>(null);
   // Deep-linkable tab: /profile?tab=saved opens the Saved tab directly (used by
   // the header account menu's "My Applications" / "Saved Jobs" entries).
   const [searchParams] = useSearchParams();
@@ -317,13 +319,23 @@ export default function CandidateProfilePage() {
                               On {formatDate(app.appliedAt)}
                             </p>
                           </div>
-                        ) : isDraft && !app.jobClosed ? (
-                          <button
-                            onClick={() => navigate(`/portal/yopmails/apply/${app.jobId}`, { state: { continueDraft: true, draftJobTitle: app.title, lastSaved: app.appliedAt } })}
-                            className="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 active:scale-95 whitespace-nowrap"
-                          >
-                            Continue Application <ArrowRight className="w-4 h-4" />
-                          </button>
+                        ) : isDraft ? (
+                          <div className="flex flex-col items-stretch sm:items-end gap-2.5">
+                            {!app.jobClosed && (
+                              <button
+                                onClick={() => navigate(`/portal/yopmails/apply/${app.jobId}`, { state: { continueDraft: true, draftJobTitle: app.title, lastSaved: app.appliedAt } })}
+                                className="flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 active:scale-95 whitespace-nowrap"
+                              >
+                                Continue Application <ArrowRight className="w-4 h-4" />
+                              </button>
+                            )}
+                            <button
+                              onClick={() => setDraftToDiscard(app)}
+                              className="flex items-center justify-center gap-1.5 text-[10px] font-black text-[#9CA3AF] hover:text-red-500 uppercase tracking-widest transition-colors whitespace-nowrap"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" /> Discard draft
+                            </button>
+                          </div>
                         ) : (
                           <Link
                             to={`/portal/yopmails/application/${app.id}`}
@@ -395,6 +407,42 @@ export default function CandidateProfilePage() {
             </div>
           </div>
         </div>
+
+        {/* Discard-draft confirmation — removing a draft is irreversible, so it's
+            gated behind an explicit confirm, mirroring the withdraw-application modal. */}
+        {draftToDiscard && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+            <div className="absolute inset-0 bg-[#111827]/60 backdrop-blur-sm" onClick={() => setDraftToDiscard(null)} />
+            <div className="relative bg-white rounded-[32px] shadow-2xl w-full max-w-md overflow-hidden border border-[#E5E7EB] animate-in fade-in zoom-in duration-200">
+              <div className="p-8">
+                <div className="w-14 h-14 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mb-6">
+                  <AlertTriangle className="w-7 h-7" />
+                </div>
+                <h3 className="text-2xl font-black text-[#111827] tracking-tight mb-2">Discard this draft?</h3>
+                <p className="text-[#6B7280] text-sm font-medium leading-relaxed mb-7">
+                  Your saved draft for <span className="font-black text-[#111827]">{draftToDiscard.title}</span> will be permanently removed. This can&apos;t be undone — you'll need to start a new application if you change your mind.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setDraftToDiscard(null)}
+                    className="flex-1 px-6 py-3.5 bg-[#F9FAFB] text-[#111827] text-xs font-black rounded-2xl hover:bg-[#F3F4F6] transition-all uppercase tracking-widest border border-[#E5E7EB]"
+                  >
+                    Keep Draft
+                  </button>
+                  <button
+                    onClick={() => {
+                      discardDraft(draftToDiscard.id);
+                      setDraftToDiscard(null);
+                    }}
+                    className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-red-600 text-white text-xs font-black rounded-2xl hover:bg-red-700 transition-all uppercase tracking-widest shadow-lg"
+                  >
+                    <Trash2 className="w-4 h-4" /> Discard
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </PortalLayout>
     </>
   );
