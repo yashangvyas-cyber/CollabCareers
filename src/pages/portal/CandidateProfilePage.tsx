@@ -426,7 +426,7 @@ export default function CandidateProfilePage() {
                 </div>
                 <h3 className="text-xl sm:text-2xl font-black text-[#111827] tracking-tight mb-2">Discard this draft?</h3>
                 <p className="text-[#6B7280] text-[13px] sm:text-sm font-medium leading-relaxed mb-6 sm:mb-7">
-                  Your saved draft for <span className="font-black text-[#111827]">{draftToDiscard.title}</span> will be permanently removed. This can&apos;t be undone — you'll need to start a new application if you change your mind.
+                  Your draft for <span className="font-black text-[#111827]">{draftToDiscard.title}</span> will be permanently deleted. This action can&apos;t be undone.
                 </p>
                 {/* Stacks vertically on the narrowest phones so neither label is cramped,
                     side-by-side once there's room. */}
