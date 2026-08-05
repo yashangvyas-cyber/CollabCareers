@@ -1278,13 +1278,9 @@ export default function ApplicationFormPage() {
                 <div className="w-14 h-14 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center mb-5 ring-8 ring-amber-50/50">
                   <AlertTriangle className="w-7 h-7" strokeWidth={2.25} />
                 </div>
-                <h3 className="text-[22px] sm:text-2xl font-black text-[#0B1120] tracking-tight mb-2 leading-tight">Leave without saving?</h3>
+                <h3 className="text-[22px] sm:text-2xl font-black text-[#0B1120] tracking-tight mb-2 leading-tight">Unsaved changes</h3>
                 <p className="text-[#6B7280] text-[13px] sm:text-sm font-medium leading-relaxed mb-6">
-                  {existingDraft ? (
-                    <>Your saved draft is safe — only the edits you&apos;ve just made will be dropped. Want to keep them? Use <span className="font-bold text-[#111827]">Save Draft</span> instead.</>
-                  ) : (
-                    <>The details you&apos;ve entered won&apos;t be saved. To finish later, choose <span className="font-bold text-[#111827]">Save Draft</span> and pick up right where you left off.</>
-                  )}
+                  Your recent edits haven&apos;t been saved. Are you sure you want to leave?
                 </p>
                 <div className="flex gap-3">
                   <button
@@ -1300,14 +1296,6 @@ export default function ApplicationFormPage() {
                     Leave
                   </button>
                 </div>
-                {existingDraft && (
-                  <button
-                    onClick={handleDiscardDraft}
-                    className="mt-3 w-full flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-red-50 text-red-600 text-[11px] font-black uppercase tracking-widest border border-red-100 hover:bg-red-100 hover:border-red-200 transition-all active:scale-[0.98]"
-                  >
-                    <Trash2 className="w-4 h-4" /> Discard This Draft
-                  </button>
-                )}
               </div>
             </div>
           </div>
