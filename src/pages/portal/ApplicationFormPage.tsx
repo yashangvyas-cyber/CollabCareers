@@ -86,7 +86,7 @@ const mergeFormData = (currentUser: any, source: any) => {
 
 export default function ApplicationFormPage() {
   const { jobId } = useParams();
-  const { jobs, currentUser, applications, submitApplication, saveDraft, discardDraft, alumniVerified, updateCurrentUser } = useApp();
+  const { jobs, currentUser, applications, submitApplication, saveDraft, alumniVerified, updateCurrentUser } = useApp();
   const navigate = useNavigate();
   const location = useLocation();
   const prefillFromId = location.state?.prefillFrom;
@@ -315,12 +315,7 @@ export default function ApplicationFormPage() {
     setTimeout(() => navigate('/portal/yopmails/profile'), 900);
   };
 
-  // A previously-saved draft for this job (if any). When present, leaving keeps it
-  // — so the exit dialog also offers to delete it outright, matching the "Discard
-  // draft" action on My Applications rather than making the candidate hunt for it.
-  const existingDraft = applications.find(
-    a => a.jobId === job?.id && a.candidateId === currentUser?.id && a.status === 'Draft'
-  );
+
 
   // Leave the application without saving. Returns to wherever the candidate came
   // from (a draft opens from My Applications, a fresh apply from the job/listing);
@@ -331,11 +326,6 @@ export default function ApplicationFormPage() {
     else navigate('/portal/yopmails/profile');
   };
 
-  // Delete the saved draft entirely, then leave — the card drops back to "Apply".
-  const handleDiscardDraft = () => {
-    if (existingDraft) discardDraft(existingDraft.id);
-    leaveForm();
-  };
 
   const validateStep1 = () => {
     const newErrors: Record<string, string> = {};
