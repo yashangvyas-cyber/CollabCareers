@@ -5,6 +5,7 @@ import JobsListingPage from './pages/crm/JobsListingPage';
 import CRMJobDetailPage from './pages/crm/CRMJobDetailPage';
 import CandidateDetailPage from './pages/crm/CandidateDetailPage';
 import JobApplicationsPage from './pages/crm/JobApplicationsPage';
+import EditApplicationPage from './pages/crm/EditApplicationPage';
 import OperationalConfigPage from './pages/crm/OperationalConfigPage';
 import CareerPortalPage from './pages/crm/CareerPortalPage';
 import TalentPoolPage from './pages/crm/TalentPoolPage';
@@ -49,6 +50,7 @@ function App() {
         <Route path="/crm/jobs" element={<JobsListingPage />} />
         <Route path="/crm/jobs/:jobId" element={<CRMJobDetailPage />} />
         <Route path="/crm/add-job" element={<AddJobPage />} />
+        <Route path="/crm/candidates/:candidateId/edit" element={<EditApplicationPage />} />
         <Route path="/crm/candidates/:candidateId" element={<CandidateDetailPage />} />
         <Route path="/crm/employees/:empId" element={<EmployeeDetailPage />} />
         <Route path="/crm/candidates" element={<JobApplicationsPage />} />

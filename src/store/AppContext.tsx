@@ -9,6 +9,7 @@ interface AppContextType extends AppState {
   loginCandidate: (email: string) => void;
   logoutCandidate: () => void;
   updateCurrentUser: (updates: Partial<Candidate>) => void;
+  updateCandidate: (candidateId: string, updates: Partial<Candidate>) => void;
   submitApplication: (application: Application) => void;
   saveDraft: (application: Application) => void;
   discardDraft: (applicationId: string) => void;
@@ -30,7 +31,7 @@ interface AppContextType extends AppState {
   resendExternalInvite: (id: string) => void;
 }
 
-const STORAGE_KEY = 'collab_careers_state_v28';
+const STORAGE_KEY = 'collab_careers_state_v29';
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
@@ -94,7 +95,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (existingIdx === -1) {
           mergedCandidates.push(defaultCandidate);
         } else {
-          mergedCandidates[existingIdx] = { ...mergedCandidates[existingIdx], ...defaultCandidate };
+          const stored = mergedCandidates[existingIdx];
+          // A record the recruiter edited on the Edit Job Application page keeps
+          // its saved values — only genuinely new seed fields are backfilled.
+          mergedCandidates[existingIdx] = stored.recruiterEdited
+            ? { ...defaultCandidate, ...stored }
+            : { ...stored, ...defaultCandidate };
         }
       });
 
@@ -335,6 +341,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  /** Recruiter-side edit of any candidate record (Edit Job Application page).
+   *  Mirrors updateCurrentUser but targets an arbitrary candidate and also keeps
+   *  currentUser in sync when the recruiter happens to be editing the logged-in
+   *  candidate. `recruiterEdited` marks the record so the seed merge on reload
+   *  stops overwriting it. */
+  const updateCandidate = (candidateId: string, updates: Partial<Candidate>) => {
+    setState(prev => ({
+      ...prev,
+      candidates: prev.candidates.map(c =>
+        c.id === candidateId ? { ...c, ...updates, recruiterEdited: true } : c
+      ),
+      currentUser:
+        prev.currentUser?.id === candidateId
+          ? { ...prev.currentUser, ...updates, recruiterEdited: true }
+          : prev.currentUser,
+    }));
+  };
+
   const updatePortalConfig = (updates: Partial<PortalConfig>) => {
     setState(prev => ({
       ...prev,
@@ -460,6 +484,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         loginCandidate,
         logoutCandidate,
         updateCurrentUser,
+        updateCandidate,
         submitApplication,
         saveDraft,
         discardDraft,

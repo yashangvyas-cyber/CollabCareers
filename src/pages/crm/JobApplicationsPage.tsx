@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import CRMLayout from '../../components/CRMLayout';
 import {
   ChevronDown, Plus, X, MoreHorizontal,
-  Eye, LayoutGrid, ArrowUpDown, ArrowUp, ArrowDown, UserPlus, Search, ChevronUp,
+  Eye, Pencil, LayoutGrid, ArrowUpDown, ArrowUp, ArrowDown, UserPlus, Search, ChevronUp,
 } from 'lucide-react';
 import { useApp } from '../../store/AppContext';
 import ScheduleInterviewDrawer from '../../components/ScheduleInterviewDrawer';
@@ -501,6 +501,9 @@ export default function JobApplicationsPage() {
                         <div className="flex items-center justify-center gap-2">
                           <Link to={`/crm/candidates/${c.candidateId}`} className="p-1.5 text-[#6B7280] hover:text-[#3538CD] hover:bg-white rounded-md shadow-sm border border-transparent hover:border-[#E5E7EB]">
                             <Eye className="w-4 h-4" />
+                          </Link>
+                          <Link to={`/crm/candidates/${c.candidateId}/edit`} title="Edit Application" className="p-1.5 text-[#6B7280] hover:text-[#3538CD] hover:bg-white rounded-md shadow-sm border border-transparent hover:border-[#E5E7EB]">
+                            <Pencil className="w-4 h-4" />
                           </Link>
                         </div>
                       </td>

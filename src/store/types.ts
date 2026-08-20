@@ -113,6 +113,9 @@ export interface Candidate {
   createdBy?: string;
   modifiedBy?: string;
   availabilityStatus?: TalentAvailabilityStatus;
+  /** Set when a recruiter saves the Edit Job Application page. Stops the seed
+   *  merge on reload from overwriting the edited values. */
+  recruiterEdited?: boolean;
 }
 
 /** How the recruiter released the offer — mirrors the three tabs of the
