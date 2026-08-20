@@ -26,3 +26,32 @@ body {
   display: none;
 }
 
+/* ── CollabCRM staging tokens ──────────────────────────────────────────────
+   The live app styles every control with the responsive triple
+   `2xl:… 2xl-to-xl:… <base>` plus a few custom colours. These are declared
+   here so class strings copied verbatim out of the staging DOM actually apply. */
+@custom-variant 2xl-to-xl (@media (min-width: 1280px) and (max-width: 1535px));
+
+@theme {
+  --color-error-500: #F04438;
+  --color-gray-450: #98A2B3;
+  --color-indigo-25: #FCFCFF;
+  --text-xxs: 0.625rem;
+  --text-xxs--line-height: 0.875rem;
+}
+
+/* Form label — staging applies this as a bare `class="label"` utility. */
+.label {
+  font-weight: 500;
+  color: var(--color-gray-700);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+@media (min-width: 1536px) {
+  .label { font-size: 0.875rem; line-height: 1.25rem; }
+}
+
+/* Focus ring used on every staging text input. */
+.focus\:shadow-outline-purple:focus {
+  box-shadow: 0 0 0 3px rgba(53, 56, 205, 0.1);
+}
