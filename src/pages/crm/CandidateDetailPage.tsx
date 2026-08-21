@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import CRMLayout from '../../components/CRMLayout';
-import { Mail, Phone, Copy, Eye, MoreVertical, ExternalLink, UserCheck, EyeOff, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, UserPlus, RefreshCw, Ban, X, Pencil, MessageSquarePlus, Info } from 'lucide-react';
+import { Mail, Phone, Copy, Eye, MoreVertical, ExternalLink, UserCheck, EyeOff, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, UserPlus, RefreshCw, Ban, X, Pencil, MessageSquarePlus, Info, Check, Loader2 } from 'lucide-react';
 import { useApp } from '../../store/AppContext';
 import ScheduleInterviewDrawer from '../../components/ScheduleInterviewDrawer';
 import EditSectionRSP from '../../components/EditSectionRSP';
@@ -52,11 +52,51 @@ function SectionHeader({ title, subtitle, onEdit }: { title: string; subtitle?: 
  * DetailField until clicked, then becomes a dropdown with Save / Cancel.
  * Used for Record Owner, the only editable field in the Applied Job section.
  */
+/**
+ * A single field edited in place rather than through an RSP. Reads as a normal
+ * DetailField with an edit pencil; clicking it swaps in a dropdown.
+ * Used for Record Owner, the only editable field in the Applied Job section.
+ *
+ * Save / Cancel stay hidden until the value actually differs from the stored
+ * one (dirty state), so the controls only appear when they can do something.
+ * Enter commits, Escape reverts and closes.
+ */
+/**
+ * A single field edited in place rather than through an RSP. Reads as a normal
+ * DetailField with an edit pencil; clicking it swaps in a dropdown.
+ * Used for Record Owner, the only editable field in the Applied Job section.
+ *
+ * Save / Cancel stay hidden until the value actually differs from the stored
+ * one (dirty state), so the controls only appear when they can do something.
+ * They are icon-only so the whole editor fits inside one grid cell.
+ * Enter commits, Escape reverts and closes.
+ */
 function InlineSelectField({
   label, value, options, onSave,
 }: { label: string; value?: string; options: string[]; onSave: (v: string) => void }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value ?? '');
+  const [status, setStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+
+  const dirty = editing && draft !== (value ?? '');
+
+  const commit = () => {
+    if (!dirty || status === 'saving') return;
+    setStatus('saving');
+    // Brief pause so the spinner is perceivable — a real API call would take
+    // at least this long, and the feedback stops double-clicks.
+    setTimeout(() => {
+      onSave(draft);
+      setStatus('saved');
+      setTimeout(() => { setStatus('idle'); setEditing(false); }, 900);
+    }, 450);
+  };
+
+  const cancel = () => {
+    setDraft(value ?? '');
+    setEditing(false);
+    setStatus('idle');
+  };
 
   if (!editing) {
     return (
@@ -77,36 +117,64 @@ function InlineSelectField({
     );
   }
 
+  const saved = status === 'saved';
+  const saving = status === 'saving';
+
   return (
     <div className="space-y-1">
       <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">{label}</p>
       <div className="flex items-center gap-1.5">
-        <div className="relative flex-1 min-w-0">
+        <div className="relative min-w-0 w-full max-w-[190px]">
           <select
             autoFocus
+            disabled={saving || saved}
             value={draft}
             onChange={e => setDraft(e.target.value)}
-            className="w-full border border-gray-300 bg-white rounded-lg pl-2.5 pr-7 h-8 text-xs font-semibold text-[#1A1A2E] appearance-none focus:outline-none focus:border-indigo-300"
+            onKeyDown={e => {
+              if (e.key === 'Enter') { e.preventDefault(); commit(); }
+              if (e.key === 'Escape') { e.preventDefault(); cancel(); }
+            }}
+            onBlur={() => { if (!dirty && status === 'idle') setEditing(false); }}
+            className={`w-full border bg-white rounded-lg pl-2.5 pr-7 h-8 text-xs font-semibold text-[#1A1A2E] appearance-none focus:outline-none transition-colors ${
+              saved ? 'border-green-500 ring-1 ring-green-500/30' : 'border-gray-300 focus:border-indigo-300'
+            } ${saving ? 'opacity-60 cursor-wait' : ''}`}
           >
             <option value="">Select</option>
             {options.map(o => <option key={o} value={o}>{o}</option>)}
           </select>
-          <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+          {saved
+            ? <Check className="w-3.5 h-3.5 text-green-600 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+            : <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />}
         </div>
-        <button
-          type="button"
-          onClick={() => { onSave(draft); setEditing(false); }}
-          className="px-2.5 h-8 rounded-lg bg-indigo-600 text-white text-xs font-semibold hover:opacity-90"
-        >
-          Save
-        </button>
-        <button
-          type="button"
-          onClick={() => setEditing(false)}
-          className="px-2.5 h-8 rounded-lg bg-white text-gray-700 text-xs font-semibold border border-gray-300 hover:opacity-90"
-        >
-          Cancel
-        </button>
+
+        {/* Dirty state — icon-only confirm/revert, sized to fit the grid cell. */}
+        {(dirty || saving || saved) && (
+          <>
+            <button
+              type="button"
+              onClick={commit}
+              disabled={saving || saved}
+              title="Save (Enter)"
+              className={`shrink-0 w-8 h-8 rounded-lg text-white inline-flex items-center justify-center transition-colors disabled:cursor-default ${
+                saved ? 'bg-green-600' : 'bg-indigo-600 hover:bg-indigo-700'
+              }`}
+            >
+              {saving
+                ? <Loader2 className="w-4 h-4 animate-spin" />
+                : <Check className="w-4 h-4" />}
+            </button>
+            {!saving && !saved && (
+              <button
+                type="button"
+                onClick={cancel}
+                title="Cancel (Esc)"
+                className="shrink-0 w-8 h-8 rounded-lg bg-white text-[#6B7280] border border-[#E5E7EB] inline-flex items-center justify-center hover:text-[#1A1A2E] hover:border-gray-300 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
@@ -762,7 +830,7 @@ export default function CandidateDetailPage() {
                 {appliedJob && (
                   <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden">
                     <SectionHeader title="Applied Job" />
-                    <div className="p-6 grid grid-cols-4 gap-8">
+                    <div className="p-6 grid grid-cols-4 gap-6">
                       <DetailField label="Job Title" value={appliedJob.title} />
                       <DetailField label="Business Unit" value={appliedJob.businessUnit} />
                       <div className="space-y-1">
@@ -800,7 +868,7 @@ export default function CandidateDetailPage() {
                 {/* Personal Information */}
                 <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden">
                   <SectionHeader title="Personal Information" onEdit={() => openSection('personal')} />
-                  <div className="p-6 grid grid-cols-3 gap-8">
+                  <div className="p-6 grid grid-cols-4 gap-6">
                     <DetailField label="Date of Birth" value={candidate?.dateOfBirth} />
                     <DetailField label="Gender" value={candidate?.gender} />
                     <DetailField label="Marital Status" value={candidate?.maritalStatus} />
@@ -811,12 +879,12 @@ export default function CandidateDetailPage() {
                 <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden">
                   <SectionHeader title="Professional Details" onEdit={() => openSection('professional')} />
                   <div className="p-6 space-y-8">
-                    <div className="grid grid-cols-3 gap-8">
+                    <div className="grid grid-cols-4 gap-6">
                       <DetailField label="Current Organisation" value={displayOrg} />
                       <DetailField label="Current Designation" value={displayDesignation} />
                       <DetailField label="Notice Period" value={noticePeriod} />
                     </div>
-                    <div className="grid grid-cols-3 gap-8">
+                    <div className="grid grid-cols-4 gap-6">
                       <DetailField label="Total Experience" value={totalExp} />
                       <DetailField label="Highest Qualification" value={candidate?.highestQualification} />
                       <DetailField label="LinkedIn" value={candidate?.linkedin} isLink />
@@ -858,7 +926,7 @@ export default function CandidateDetailPage() {
                 {/* Salary Information */}
                 <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden">
                   <SectionHeader title="Salary Information" onEdit={() => openSection('salary')} />
-                  <div className="p-6 grid grid-cols-4 gap-8">
+                  <div className="p-6 grid grid-cols-4 gap-6">
                     <DetailField label="CTC Type" value={candidate?.ctcType} />
                     <DetailField label="Currency" value={candidate?.ctcCurrency} />
                     <DetailField label="Current CTC" value={currentCtcDisplay} />
@@ -871,7 +939,7 @@ export default function CandidateDetailPage() {
                   <SectionHeader title="Address" onEdit={() => openSection('address')} />
                   <div className="p-6 space-y-8">
                     <DetailField label="Address" value={candidate?.address} />
-                    <div className="grid grid-cols-4 gap-8">
+                    <div className="grid grid-cols-4 gap-6">
                       <DetailField label="Country" value={candidate?.country} />
                       <DetailField label="State" value={candidate?.state} />
                       <DetailField label="Town/City" value={candidate?.city} />
@@ -883,7 +951,7 @@ export default function CandidateDetailPage() {
                 {/* Source Information */}
                 <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden">
                   <SectionHeader title="Source Information" />
-                  <div className="p-6 grid grid-cols-2 gap-8">
+                  <div className="p-6 grid grid-cols-4 gap-6">
                     <div className="space-y-1">
                       <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">Source</p>
                       {candidate?.source ? (
