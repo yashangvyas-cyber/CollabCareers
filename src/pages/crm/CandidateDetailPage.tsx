@@ -5,7 +5,7 @@ import { Mail, Phone, Copy, Eye, MoreVertical, ExternalLink, UserCheck, EyeOff, 
 import { useApp } from '../../store/AppContext';
 import ScheduleInterviewDrawer from '../../components/ScheduleInterviewDrawer';
 import EditSectionRSP from '../../components/EditSectionRSP';
-import { TextField, SelectField } from '../../components/CRMFormField';
+import { TextField, SelectField, DateField } from '../../components/CRMFormField';
 import ExperienceRepeater, { blankExperience, deriveCurrent, ExperienceEntry } from '../../components/ExperienceRepeater';
 import SkillsMultiSelect from '../../components/SkillsMultiSelect';
 
@@ -123,8 +123,8 @@ function InlineSelectField({
   return (
     <div className="space-y-1">
       <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">{label}</p>
-      <div className="flex items-center gap-1.5">
-        <div className="relative min-w-0 w-full max-w-[190px]">
+      <div className="flex items-center gap-1">
+        <div className="relative w-full min-w-[124px] max-w-[190px]">
           <select
             autoFocus
             disabled={saving || saved}
@@ -135,7 +135,7 @@ function InlineSelectField({
               if (e.key === 'Escape') { e.preventDefault(); cancel(); }
             }}
             onBlur={() => { if (!dirty && status === 'idle') setEditing(false); }}
-            className={`w-full border bg-white rounded-lg pl-2.5 pr-7 h-8 text-xs font-semibold text-[#1A1A2E] appearance-none focus:outline-none transition-colors ${
+            className={`w-full border bg-white rounded-lg pl-2.5 pr-6 h-8 text-xs font-semibold text-[#1A1A2E] appearance-none focus:outline-none transition-colors ${
               saved ? 'border-green-500 ring-1 ring-green-500/30' : 'border-gray-300 focus:border-indigo-300'
             } ${saving ? 'opacity-60 cursor-wait' : ''}`}
           >
@@ -155,22 +155,22 @@ function InlineSelectField({
               onClick={commit}
               disabled={saving || saved}
               title="Save (Enter)"
-              className={`shrink-0 w-8 h-8 rounded-lg text-white inline-flex items-center justify-center transition-colors disabled:cursor-default ${
+              className={`shrink-0 w-7 h-7 rounded-lg text-white inline-flex items-center justify-center transition-colors disabled:cursor-default ${
                 saved ? 'bg-green-600' : 'bg-indigo-600 hover:bg-indigo-700'
               }`}
             >
               {saving
-                ? <Loader2 className="w-4 h-4 animate-spin" />
-                : <Check className="w-4 h-4" />}
+                ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                : <Check className="w-3.5 h-3.5" />}
             </button>
             {!saving && !saved && (
               <button
                 type="button"
                 onClick={cancel}
                 title="Cancel (Esc)"
-                className="shrink-0 w-8 h-8 rounded-lg bg-white text-[#6B7280] border border-[#E5E7EB] inline-flex items-center justify-center hover:text-[#1A1A2E] hover:border-gray-300 transition-colors"
+                className="shrink-0 w-7 h-7 rounded-lg bg-white text-[#6B7280] border border-[#E5E7EB] inline-flex items-center justify-center hover:text-[#1A1A2E] hover:border-gray-300 transition-colors"
               >
-                <X className="w-4 h-4" />
+                <X className="w-3.5 h-3.5" />
               </button>
             )}
           </>
@@ -1183,11 +1183,11 @@ export default function CandidateDetailPage() {
                         </div>
                       </div>
                       <div className="px-5 py-2.5 bg-[#F9FAFB] border-t border-b border-[#E5E7EB] flex items-center justify-between">
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1">
                           <span className="text-xs text-[#6B7280] font-medium">Department:</span>
                           <span className="text-xs font-semibold text-[#374151]">{interviewData.department}</span>
                         </div>
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1">
                           <span className="text-xs text-[#6B7280] font-medium">Joining On:</span>
                           <span className="text-xs font-semibold text-[#374151]">{interviewData.joiningOn}</span>
                         </div>
@@ -1553,7 +1553,7 @@ export default function CandidateDetailPage() {
           onClose={() => setEditSection(null)}
           onSave={saveSection}
         >
-          <TextField label="Date of Birth" value={draft.dateOfBirth} onChange={v => setField('dateOfBirth', v)} placeholder="DD/Mon/YYYY" />
+          <DateField label="Date of Birth" value={draft.dateOfBirth} onChange={v => setField('dateOfBirth', v)} max={new Date().toISOString().slice(0, 10)} />
           <SelectField label="Gender" value={draft.gender} onChange={v => setField('gender', v)} options={GENDERS} />
           <SelectField label="Marital Status" value={draft.maritalStatus} onChange={v => setField('maritalStatus', v)} options={MARITAL_STATUSES} />
         </EditSectionRSP>

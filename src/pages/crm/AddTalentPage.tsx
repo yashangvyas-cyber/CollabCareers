@@ -4,6 +4,7 @@ import CRMLayout from '../../components/CRMLayout';
 import { Upload, X, Check, ChevronDown, Loader2, Wand2, Pencil } from 'lucide-react';
 import { useApp } from '../../store/AppContext';
 import ExperienceRepeater, { blankExperience } from '../../components/ExperienceRepeater';
+import { toISODate, fromISODate } from '../../components/CRMFormField';
 
 const SOURCES = ['LinkedIn', 'Referral', 'Job Fair', 'Direct Approach', 'Naukri', 'Internshala', 'Other'];
 const CTC_TYPES = ['Annual', 'Monthly'];
@@ -347,7 +348,13 @@ export default function AddTalentPage() {
                     <div className="mb-1.5 flex items-end min-h-6">
                       <label className={labelClass}>Date of Birth&nbsp;</label>
                     </div>
-                    <input type="date" value={form.dateOfBirth} onChange={e => set('dateOfBirth', e.target.value)} className={inputClass} />
+                    <input
+                      type="date"
+                      max={new Date().toISOString().slice(0, 10)}
+                      value={toISODate(form.dateOfBirth)}
+                      onChange={e => set('dateOfBirth', fromISODate(e.target.value))}
+                      className={`${inputClass} cursor-pointer`}
+                    />
                   </div>
                   <div className="lg:col-span-2">
                     <div className="mb-1.5 flex items-end min-h-6">

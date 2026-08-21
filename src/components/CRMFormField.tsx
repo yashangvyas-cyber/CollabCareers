@@ -221,3 +221,63 @@ export function FormSection({
     </div>
   );
 }
+
+/* ── Date handling ────────────────────────────────────────────────────────
+   Records store dates as "15/Aug/1998" (the display format used across the
+   detail pages), while <input type="date"> requires ISO "1998-08-15". These
+   convert between the two so the native picker can be used without changing
+   how dates are stored or shown. Some records were saved straight from a
+   native picker and are already ISO, so parsing accepts both. */
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/** "15/Aug/1998" or "1998-08-15" → "1998-08-15" (empty string if unparseable). */
+export function toISODate(v?: string): string {
+  if (!v) return '';
+  const trimmed = v.trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
+  const m = trimmed.match(/^(\d{1,2})[/\s-]([A-Za-z]{3,})[/\s-](\d{4})$/);
+  if (m) {
+    const idx = MONTHS.findIndex(x => x.toLowerCase() === m[2].slice(0, 3).toLowerCase());
+    if (idx >= 0) return `${m[3]}-${String(idx + 1).padStart(2, '0')}-${m[1].padStart(2, '0')}`;
+  }
+  return '';
+}
+
+/** "1998-08-15" → "15/Aug/1998" (the stored/display format). */
+export function fromISODate(v?: string): string {
+  if (!v) return '';
+  const m = v.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return v;
+  return `${m[3]}/${MONTHS[Number(m[2]) - 1]}/${m[1]}`;
+}
+
+/**
+ * Native date input — gives the browser's segmented typing (DD/MM/YYYY with
+ * auto-advance) plus its calendar picker, which is what staging's
+ * react-datepicker provides without pulling in the dependency.
+ * Value in/out is the stored "15/Aug/1998" format.
+ */
+export function DateField({
+  label, required, value, onChange, max, min,
+}: {
+  label: string;
+  required?: boolean;
+  value: string;
+  onChange: (v: string) => void;
+  max?: string;
+  min?: string;
+}) {
+  return (
+    <Field label={label} required={required}>
+      <input
+        type="date"
+        required={required}
+        max={max}
+        min={min}
+        value={toISODate(value)}
+        onChange={e => onChange(fromISODate(e.target.value))}
+        className={`${INPUT_CLASS} cursor-pointer [&::-webkit-calendar-picker-indicator]:cursor-pointer`}
+      />
+    </Field>
+  );
+}
