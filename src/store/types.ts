@@ -192,6 +192,10 @@ export interface Application {
   /** Superseded offers (declined/revoked), newest-first. The live offer lives in
    *  `offer`; these render as read-only cards under it in the Offer History. */
   offerHistory?: OfferDetail[];
+  /** Set when a recruiter fills or corrects the custom application-form answers
+   *  from the candidate detail page. Stops the seed merge on reload from
+   *  discarding them. */
+  answersEdited?: boolean;
 }
 
 export interface PortalAppearance {

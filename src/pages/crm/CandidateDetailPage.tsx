@@ -4,6 +4,10 @@ import CRMLayout from '../../components/CRMLayout';
 import { Mail, Phone, Copy, Eye, MoreVertical, ExternalLink, UserCheck, EyeOff, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, UserPlus, RefreshCw, Ban, X, Pencil, MessageSquarePlus, Info } from 'lucide-react';
 import { useApp } from '../../store/AppContext';
 import ScheduleInterviewDrawer from '../../components/ScheduleInterviewDrawer';
+import EditSectionRSP from '../../components/EditSectionRSP';
+import { TextField, SelectField } from '../../components/CRMFormField';
+import ExperienceRepeater, { blankExperience, deriveCurrent, ExperienceEntry } from '../../components/ExperienceRepeater';
+import SkillsMultiSelect from '../../components/SkillsMultiSelect';
 
 function DetailField({ label, value, isLink }: { label: string; value?: string | null; isLink?: boolean }) {
   return (
@@ -20,14 +24,102 @@ function DetailField({ label, value, isLink }: { label: string; value?: string |
   );
 }
 
-function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }) {
+function SectionHeader({ title, subtitle, onEdit }: { title: string; subtitle?: string; onEdit?: () => void }) {
   return (
-    <div className="px-6 py-4 bg-[#F9FAFB] border-b border-[#E5E7EB] flex flex-col gap-0.5">
-      <h3 className="text-sm font-black text-[#1A1A2E] uppercase tracking-wider">{title}</h3>
-      {subtitle && <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">{subtitle}</p>}
+    <div className="px-6 py-4 bg-[#F9FAFB] border-b border-[#E5E7EB] flex items-center justify-between gap-3">
+      <div className="flex flex-col gap-0.5">
+        <h3 className="text-sm font-black text-[#1A1A2E] uppercase tracking-wider">{title}</h3>
+        {subtitle && <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">{subtitle}</p>}
+      </div>
+      {/* Section-wise edit — opens the RSP for this section only. Staging uses
+          icon-edit-01 for the same affordance; lucide Pencil is its local twin. */}
+      {onEdit && (
+        <button
+          type="button"
+          onClick={onEdit}
+          title={`Edit ${title}`}
+          className="shrink-0 p-1.5 text-[#6B7280] hover:text-[#3538CD] bg-white rounded-md shadow-sm border border-[#E5E7EB] hover:border-[#3538CD]/30 transition-colors"
+        >
+          <Pencil className="w-4 h-4" />
+        </button>
+      )}
     </div>
   );
 }
+
+/**
+ * A single field edited in place rather than through an RSP. Reads as a normal
+ * DetailField until clicked, then becomes a dropdown with Save / Cancel.
+ * Used for Record Owner, the only editable field in the Applied Job section.
+ */
+function InlineSelectField({
+  label, value, options, onSave,
+}: { label: string; value?: string; options: string[]; onSave: (v: string) => void }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value ?? '');
+
+  if (!editing) {
+    return (
+      <div className="space-y-1">
+        <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">{label}</p>
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-bold text-[#1A1A2E]">{value || '–'}</p>
+          <button
+            type="button"
+            onClick={() => { setDraft(value ?? ''); setEditing(true); }}
+            title={`Edit ${label}`}
+            className="shrink-0 p-1.5 text-[#6B7280] hover:text-[#3538CD] bg-white rounded-md shadow-sm border border-[#E5E7EB] hover:border-[#3538CD]/30 transition-colors"
+          >
+            <Pencil className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-1">
+      <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">{label}</p>
+      <div className="flex items-center gap-1.5">
+        <div className="relative flex-1 min-w-0">
+          <select
+            autoFocus
+            value={draft}
+            onChange={e => setDraft(e.target.value)}
+            className="w-full border border-gray-300 bg-white rounded-lg pl-2.5 pr-7 h-8 text-xs font-semibold text-[#1A1A2E] appearance-none focus:outline-none focus:border-indigo-300"
+          >
+            <option value="">Select</option>
+            {options.map(o => <option key={o} value={o}>{o}</option>)}
+          </select>
+          <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+        </div>
+        <button
+          type="button"
+          onClick={() => { onSave(draft); setEditing(false); }}
+          className="px-2.5 h-8 rounded-lg bg-indigo-600 text-white text-xs font-semibold hover:opacity-90"
+        >
+          Save
+        </button>
+        <button
+          type="button"
+          onClick={() => setEditing(false)}
+          className="px-2.5 h-8 rounded-lg bg-white text-gray-700 text-xs font-semibold border border-gray-300 hover:opacity-90"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
+
+const RECORD_OWNERS = ['Sarah Chen', 'Michael Park', 'Lisa Ray', 'James Wilson', 'David Kim'];
+const GENDERS = ['Male', 'Female', 'Other'];
+const MARITAL_STATUSES = ['Single', 'Married', 'Divorced', 'Widowed'];
+const NOTICE_OPTIONS = ['Immediate', '15 days', '30 days', '45 days', '60 days', '90 days'];
+const CTC_TYPES = ['Annual', 'Monthly'];
+const CURRENCIES = ['INR (₹)', 'USD ($)', 'EUR (€)', 'GBP (£)', 'AED (د.إ)'];
+const COUNTRIES = ['India', 'United States', 'United Kingdom', 'United Arab Emirates', 'Australia', 'Canada'];
+const INDIA_STATES = ['Gujarat', 'Maharashtra', 'Karnataka', 'Tamil Nadu', 'Delhi', 'Rajasthan', 'Telangana', 'West Bengal', 'Uttar Pradesh', 'Punjab', 'Kerala'];
 
 type Note = { id: string; author: string; text: string; createdAt: string; tag?: string };
 
@@ -201,9 +293,98 @@ const STATUS_PIPELINE_MAP: Record<string, PipelineStateInfo> = {
 
 export default function CandidateDetailPage() {
   const { candidateId } = useParams();
-  const { candidates, applications, jobs, externalInvites, cancelExternalInvite, resendExternalInvite } = useApp();
+  const { candidates, applications, jobs, externalInvites, cancelExternalInvite, resendExternalInvite, updateCandidate, updateApplicationAnswers } = useApp();
 
   const candidate = candidates.find(c => c.id === candidateId);
+
+  /* ── Section-wise editing ────────────────────────────────────────────────
+     Each section opens its own RSP holding a local draft of just that
+     section's fields; Save commits only those fields via updateCandidate.
+     There is no page-level save — every panel is its own transaction. */
+  const [editSection, setEditSection] = useState<null | 'personal' | 'professional' | 'salary' | 'address'>(null);
+  const [draft, setDraft] = useState<Record<string, any>>({});
+
+  const openSection = (section: 'personal' | 'professional' | 'salary' | 'address') => {
+    const c = candidate;
+    const fields: Record<string, Record<string, any>> = {
+      personal: {
+        dateOfBirth: c?.dateOfBirth ?? '',
+        gender: c?.gender ?? '',
+        maritalStatus: c?.maritalStatus ?? '',
+      },
+      professional: {
+        // Career Journey is the source of truth; currentOrg / currentDesignation
+        // are derived from it on save rather than edited on their own.
+        experiences: (c?.experiences?.length ? c.experiences : [blankExperience()]).map((e: any) => ({ ...e })),
+        skills: [...(c?.skills ?? [])],
+        noticePeriod: c?.noticePeriod ?? '',
+        totalExperienceYears: c?.totalExperienceYears?.toString() ?? '',
+        totalExperienceMonths: c?.totalExperienceMonths?.toString() ?? '',
+        highestQualification: c?.highestQualification ?? '',
+        linkedin: c?.linkedin ?? '',
+      },
+      salary: {
+        ctcType: c?.ctcType ?? '',
+        ctcCurrency: c?.ctcCurrency ?? '',
+        currentCtc: c?.currentCtc ?? '',
+        expectedCtc: c?.expectedCtc ?? '',
+      },
+      address: {
+        address: c?.address ?? '',
+        country: c?.country ?? '',
+        state: c?.state ?? '',
+        city: c?.city ?? '',
+        zipCode: c?.zipCode ?? '',
+      },
+    };
+    setDraft(fields[section]);
+    setEditSection(section);
+  };
+
+  const setField = (k: string, v: any) => setDraft(d => ({ ...d, [k]: v }));
+
+  /* Custom application-form answers live on the Application, not the Candidate,
+     so they save through their own handler. A candidate added straight from the
+     Talent Pool never filled the portal form, and a job's custom fields can
+     change after people apply — both leave answers blank, and only the recruiter
+     can fill them in. */
+  const [editAnswers, setEditAnswers] = useState(false);
+  const [answerDraft, setAnswerDraft] = useState<Record<string, any>>({});
+
+  const openAnswers = () => {
+    const seed: Record<string, any> = {};
+    (appliedJob?.customFields ?? []).forEach(f => {
+      seed[f.id] = latestApp?.answers?.[f.id] ?? (f.type === 'Yes/No' ? '' : '');
+    });
+    setAnswerDraft(seed);
+    setEditAnswers(true);
+  };
+
+  const saveAnswers = () => {
+    if (!latestApp) return;
+    updateApplicationAnswers(latestApp.id, answerDraft);
+    setEditAnswers(false);
+  };
+
+  const saveSection = () => {
+    if (!candidateId) return;
+    const patch: Record<string, any> = { ...draft, modifiedBy: 'Sarah Chen' };
+    // Career Journey drives the Professional Details summary fields.
+    if ('experiences' in patch) {
+      const list = (patch.experiences as ExperienceEntry[]).filter(e => e.company || e.designation);
+      patch.experiences = list.length ? list : undefined;
+      const { currentOrg, currentDesignation } = deriveCurrent(list);
+      patch.currentOrg = currentOrg;
+      patch.currentDesignation = currentDesignation;
+    }
+    // Experience is stored numerically; the draft holds strings from the inputs.
+    if ('totalExperienceYears' in patch) {
+      patch.totalExperienceYears = patch.totalExperienceYears === '' ? undefined : Number(patch.totalExperienceYears);
+      patch.totalExperienceMonths = patch.totalExperienceMonths === '' ? undefined : Number(patch.totalExperienceMonths);
+    }
+    updateCandidate(candidateId, patch);
+    setEditSection(null);
+  };
 
   const firstName = candidate?.firstName ?? 'Unknown';
   const lastName = candidate?.lastName ?? 'Candidate';
@@ -606,14 +787,19 @@ export default function CandidateDetailPage() {
                           );
                         })() : <p className="text-sm font-bold text-[#1A1A2E]">–</p>}
                       </div>
-                      <DetailField label="Record Owner" value={candidate?.recordOwner} />
+                      <InlineSelectField
+                        label="Record Owner"
+                        value={candidate?.recordOwner}
+                        options={RECORD_OWNERS}
+                        onSave={v => candidateId && updateCandidate(candidateId, { recordOwner: v, modifiedBy: 'Sarah Chen' })}
+                      />
                     </div>
                   </div>
                 )}
 
                 {/* Personal Information */}
                 <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden">
-                  <SectionHeader title="Personal Information" />
+                  <SectionHeader title="Personal Information" onEdit={() => openSection('personal')} />
                   <div className="p-6 grid grid-cols-3 gap-8">
                     <DetailField label="Date of Birth" value={candidate?.dateOfBirth} />
                     <DetailField label="Gender" value={candidate?.gender} />
@@ -623,7 +809,7 @@ export default function CandidateDetailPage() {
 
                 {/* Professional Details */}
                 <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden">
-                  <SectionHeader title="Professional Details" />
+                  <SectionHeader title="Professional Details" onEdit={() => openSection('professional')} />
                   <div className="p-6 space-y-8">
                     <div className="grid grid-cols-3 gap-8">
                       <DetailField label="Current Organisation" value={displayOrg} />
@@ -658,7 +844,7 @@ export default function CandidateDetailPage() {
                                 <p className="text-xs font-bold text-[#3538CD]">{exp.company}</p>
                               </div>
                               <span className="text-[10px] font-black uppercase tracking-widest text-[#6B7280] bg-white border border-[#E5E7EB] px-2.5 py-1 rounded-md">
-                                {exp.from} - {exp.to}
+                                {exp.from || '–'} - {exp.isCurrent ? 'Present' : (exp.to || '–')}
                               </span>
                             </div>
                             {exp.description && <p className="text-xs font-medium text-[#4B5563] mt-3 leading-relaxed">{exp.description}</p>}
@@ -671,7 +857,7 @@ export default function CandidateDetailPage() {
 
                 {/* Salary Information */}
                 <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden">
-                  <SectionHeader title="Salary Information" />
+                  <SectionHeader title="Salary Information" onEdit={() => openSection('salary')} />
                   <div className="p-6 grid grid-cols-4 gap-8">
                     <DetailField label="CTC Type" value={candidate?.ctcType} />
                     <DetailField label="Currency" value={candidate?.ctcCurrency} />
@@ -682,7 +868,7 @@ export default function CandidateDetailPage() {
 
                 {/* Address */}
                 <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden">
-                  <SectionHeader title="Address" />
+                  <SectionHeader title="Address" onEdit={() => openSection('address')} />
                   <div className="p-6 space-y-8">
                     <DetailField label="Address" value={candidate?.address} />
                     <div className="grid grid-cols-4 gap-8">
@@ -715,7 +901,7 @@ export default function CandidateDetailPage() {
                 {/* Application Form Responses */}
                 {appliedJob && appliedJob.customFields?.length > 0 && (
                   <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden">
-                    <SectionHeader title="Application Form Responses" />
+                    <SectionHeader title="Application Form Responses" onEdit={() => openAnswers()} />
                     <div className="p-6 space-y-6">
                       {appliedJob.customFields.map((field, i) => {
                         const raw = latestApp?.answers?.[field.id];
@@ -1290,6 +1476,156 @@ export default function CandidateDetailPage() {
         onClose={() => setScheduleDrawerOpen(false)}
         onScheduled={handleScheduled}
       />
+
+      {/* ── Section edit RSPs — each saves only its own section ────────────── */}
+      {editSection === 'personal' && (
+        <EditSectionRSP
+          title="Edit Personal Information"
+          subject={`${firstName} ${lastName}`}
+          onClose={() => setEditSection(null)}
+          onSave={saveSection}
+        >
+          <TextField label="Date of Birth" value={draft.dateOfBirth} onChange={v => setField('dateOfBirth', v)} placeholder="DD/Mon/YYYY" />
+          <SelectField label="Gender" value={draft.gender} onChange={v => setField('gender', v)} options={GENDERS} />
+          <SelectField label="Marital Status" value={draft.maritalStatus} onChange={v => setField('maritalStatus', v)} options={MARITAL_STATUSES} />
+        </EditSectionRSP>
+      )}
+
+      {editSection === 'professional' && (
+        <EditSectionRSP
+          title="Edit Professional Details"
+          subject={`${firstName} ${lastName}`}
+          onClose={() => setEditSection(null)}
+          onSave={saveSection}
+        >
+          <SelectField label="Notice Period" value={draft.noticePeriod} onChange={v => setField('noticePeriod', v)} options={NOTICE_OPTIONS} />
+          <div className="grid grid-cols-2 gap-3">
+            <TextField label="Experience (Years)" type="number" value={draft.totalExperienceYears} onChange={v => setField('totalExperienceYears', v)} />
+            <TextField label="Experience (Months)" type="number" value={draft.totalExperienceMonths} onChange={v => setField('totalExperienceMonths', v)} />
+          </div>
+          <TextField label="Highest Qualification" value={draft.highestQualification} onChange={v => setField('highestQualification', v)} />
+          <TextField label="LinkedIn" value={draft.linkedin} onChange={v => setField('linkedin', v)} />
+
+          {/* Skills — same multi-select used on Add Talent and the portal. */}
+          <div>
+            <div className="flex items-end min-h-6">
+              <label className="label">Skills&nbsp;</label>
+            </div>
+            <div className="mt-1.5">
+              <SkillsMultiSelect
+                skills={draft.skills ?? []}
+                onChange={list => setField('skills', list)}
+              />
+            </div>
+          </div>
+
+          {/* Career Journey — same multi-entry repeater as Talent Pool.
+              Current Organisation / Designation are derived from this. */}
+          <ExperienceRepeater
+            experiences={draft.experiences ?? []}
+            onChange={list => setField('experiences', list)}
+          />
+        </EditSectionRSP>
+      )}
+
+      {editSection === 'salary' && (
+        <EditSectionRSP
+          title="Edit Salary Information"
+          subject={`${firstName} ${lastName}`}
+          onClose={() => setEditSection(null)}
+          onSave={saveSection}
+        >
+          <SelectField label="CTC Type" value={draft.ctcType} onChange={v => setField('ctcType', v)} options={CTC_TYPES} />
+          <SelectField label="Currency" value={draft.ctcCurrency} onChange={v => setField('ctcCurrency', v)} options={CURRENCIES} />
+          <TextField label="Current CTC" value={draft.currentCtc} onChange={v => setField('currentCtc', v)} />
+          <TextField label="Expected CTC" value={draft.expectedCtc} onChange={v => setField('expectedCtc', v)} />
+        </EditSectionRSP>
+      )}
+
+      {editSection === 'address' && (
+        <EditSectionRSP
+          title="Edit Address"
+          subject={`${firstName} ${lastName}`}
+          onClose={() => setEditSection(null)}
+          onSave={saveSection}
+        >
+          <TextField label="Address" value={draft.address} onChange={v => setField('address', v)} />
+          <SelectField label="Country" value={draft.country} onChange={v => setField('country', v)} options={COUNTRIES} />
+          <SelectField label="State" value={draft.state} onChange={v => setField('state', v)} options={INDIA_STATES} />
+          <TextField label="Town/City" value={draft.city} onChange={v => setField('city', v)} />
+          <TextField label="Zip/Postal Code" value={draft.zipCode} onChange={v => setField('zipCode', v)} />
+        </EditSectionRSP>
+      )}
+
+      {/* ── Application Form Responses RSP ─────────────────────────────────
+           Renders a control per custom-field type so the recruiter can fill in
+           answers the candidate never provided. */}
+      {editAnswers && appliedJob && (
+        <EditSectionRSP
+          title="Edit Application Form Responses"
+          subject={`${firstName} ${lastName}`}
+          onClose={() => setEditAnswers(false)}
+          onSave={saveAnswers}
+        >
+          {(appliedJob.customFields ?? []).map((field, i) => {
+            const val = answerDraft[field.id] ?? '';
+            const setVal = (v: any) => setAnswerDraft(d => ({ ...d, [field.id]: v }));
+            const label = `${i + 1}. ${field.label}`;
+
+            if (field.type === 'Dropdown') {
+              return (
+                <SelectField
+                  key={field.id}
+                  label={label}
+                  required={field.required}
+                  value={String(val)}
+                  onChange={setVal}
+                  options={(field.options ?? []).map(o => o.value)}
+                />
+              );
+            }
+            if (field.type === 'Yes/No') {
+              return (
+                <SelectField
+                  key={field.id}
+                  label={label}
+                  required={field.required}
+                  value={val === true || val === 'true' || val === 'Yes' ? 'Yes' : val === false || val === 'false' || val === 'No' ? 'No' : ''}
+                  onChange={v => setVal(v === 'Yes')}
+                  options={['Yes', 'No']}
+                />
+              );
+            }
+            if (field.type === 'File Upload') {
+              // The prototype stores a file name rather than a real upload.
+              return (
+                <TextField
+                  key={field.id}
+                  label={`${label} (file name)`}
+                  required={field.required}
+                  value={String(val)}
+                  onChange={setVal}
+                  placeholder="e.g. portfolio.pdf"
+                />
+              );
+            }
+            return (
+              <TextField
+                key={field.id}
+                label={label}
+                required={field.required}
+                value={String(val)}
+                onChange={setVal}
+                type={field.type === 'Number' ? 'number' : field.type === 'Date' ? 'date' : 'text'}
+              />
+            );
+          })}
+
+          {(appliedJob.customFields ?? []).length === 0 && (
+            <p className="text-xs text-gray-500">This job has no application form fields.</p>
+          )}
+        </EditSectionRSP>
+      )}
 
       {/* Toast */}
       {schedToast && (

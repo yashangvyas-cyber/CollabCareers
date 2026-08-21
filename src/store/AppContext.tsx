@@ -10,6 +10,7 @@ interface AppContextType extends AppState {
   logoutCandidate: () => void;
   updateCurrentUser: (updates: Partial<Candidate>) => void;
   updateCandidate: (candidateId: string, updates: Partial<Candidate>) => void;
+  updateApplicationAnswers: (applicationId: string, answers: Record<string, any>) => void;
   submitApplication: (application: Application) => void;
   saveDraft: (application: Application) => void;
   discardDraft: (applicationId: string) => void;
@@ -65,6 +66,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const existingIdx = mergedApps.findIndex(a => a.id === defaultApp.id);
         if (existingIdx === -1) {
           if (!discardedAppIds.has(defaultApp.id)) mergedApps.push(defaultApp); // preserve original candidateId
+        } else if (mergedApps[existingIdx].answersEdited) {
+          // The recruiter filled in the custom-form answers for this application
+          // (e.g. a talent-pool candidate added straight to a job, who never saw
+          // the portal form). Keep the stored record as-is.
+          // Intentionally left untouched.
         } else if (defaultApp.offer && !mergedApps[existingIdx].offer) {
           // Backfill newly-seeded offer details onto applications saved before
           // the offer feature existed. Status is left untouched so a decline
@@ -359,6 +365,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  /** Recruiter-side edit of the custom application-form answers.
+   *  Needed because a candidate added straight from the Talent Pool never filled
+   *  the portal form, and because a job's custom fields can change after people
+   *  have already applied — in both cases the answers are missing and only the
+   *  recruiter can supply them. `answersEdited` marks the record so the seed
+   *  merge on reload does not overwrite it. */
+  const updateApplicationAnswers = (applicationId: string, answers: Record<string, any>) => {
+    setState(prev => ({
+      ...prev,
+      applications: prev.applications.map(a =>
+        a.id === applicationId
+          ? { ...a, answers: { ...a.answers, ...answers }, answersEdited: true }
+          : a
+      ),
+    }));
+  };
+
   const updatePortalConfig = (updates: Partial<PortalConfig>) => {
     setState(prev => ({
       ...prev,
@@ -485,6 +508,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         logoutCandidate,
         updateCurrentUser,
         updateCandidate,
+        updateApplicationAnswers,
         submitApplication,
         saveDraft,
         discardDraft,
